@@ -6,7 +6,7 @@ Author: Carsten Ehbrecht (ehbrecht@dkrz.de)
 
 import types
 
-from climdaps.process import WorkflowProcess
+from malleefowl.process import WorkflowProcess
 
 
 class CDOInfo(WorkflowProcess):

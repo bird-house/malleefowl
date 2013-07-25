@@ -7,7 +7,7 @@ Author: Carsten Ehbrecht (ehbrecht@dkrz.de)
 # TODO: fix python sys path
 
 
-from climdaps.process import WPSProcess
+from malleefowl.process import WPSProcess
 from datetime import datetime, date
 
 class OpenDAP(WPSProcess):

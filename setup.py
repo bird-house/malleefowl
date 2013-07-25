@@ -26,7 +26,7 @@ classifiers=[
         'Topic :: Scientific/Engineering :: Atmospheric Science',
         ]
 
-setup(name='ClimDaPs_WPS',
+setup(name='Malleefowl',
       version='0.1',
       description='Climate Data Processing with PyWPS',
       long_description=README + '\n\n' + CHANGES,
