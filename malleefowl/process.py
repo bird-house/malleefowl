@@ -33,12 +33,13 @@ class WorkflowProcess(WPSProcess):
     """This is the base class for all workflow processes."""
 
     def __init__(self, identifier, title, version, metadata=[], abstract=""):
+        wf_identifier = identifier + '_workflow'
         metadata.append(
             {"title":"workflow", "href":"http://www.c3grid.de"}
             )
         WPSProcess.__init__(
             self,
-            identifier = identifier,
+            identifier = wf_identifier,
             title = title,
             version = version,
             metadata = metadata,

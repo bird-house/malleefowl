@@ -15,7 +15,7 @@ class CDOInfo(WorkflowProcess):
     def __init__(self):
         WorkflowProcess.__init__(
             self,
-            identifier = "de.dkrz.workflow.cdo.sinfo",
+            identifier = "de.dkrz.cdo.sinfo",
             title = "cdo sinfo",
             version = "0.1",
             metadata=[
