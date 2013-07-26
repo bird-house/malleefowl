@@ -94,7 +94,7 @@ class OpenDAP(WPSProcess):
         lm.logon_with_openid(
             openid=self.username_in.getValue(),
             password=self.password_in.getValue(),
-            bootstrap=True, update_trustroots=True, interactive=True)
+            bootstrap=True, update_trustroots=True, interactive=False)
 
         opendap_url = self.opendap_url_in.getValue()
         self.message(msg='OPeNDAP URL is %s' % opendap_url, force=True)
