@@ -1,4 +1,4 @@
-__all__ = ["cdo", "esgf"]
+__all__ = ["cdo", "esgf","rel_hum"]
 
 import sys
 sys.path[0:0] = [

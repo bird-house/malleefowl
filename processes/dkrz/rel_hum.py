@@ -109,8 +109,11 @@ class RelHumProcess(WPSProcess):
             )         
             
     def execute(self):
+        # from os import curdir, path
+        # nc_filename = path.abspath(self.netcdf_in.getValue(asFile=False))
+        result = self.cmd(cmd=["/home/main/sandbox/climdaps/src/Malleefowl/processes/dkrz/rel_hum.sh", self.path_in.getValue(), self.stringIn.getValue(), self.individualBBoxIn.getValue(), self.start_date_in.getValue(),   self.end_date_in.getValue()], stdout=True)
         # literals
-        subprocess.check_output(["/home/main/sandbox/climdaps/src/ClimDaPs_WPS/processes/csc/rel_hum.sh", self.path_in.getValue(), self.stringIn.getValue(), self.individualBBoxIn.getValue(), self.start_date_in.getValue(),   self.end_date_in.getValue()])
+        # subprocess.check_output(["/home/main/sandbox/climdaps/src/ClimDaPs_WPS/processes/dkrz/rel_hum.sh", self.path_in.getValue(), self.stringIn.getValue(), self.individualBBoxIn.getValue(), self.start_date_in.getValue(),   self.end_date_in.getValue()])
         self.file_out.setValue("/home/main/wps_data/hurs_AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_20060101_20101231.nc")
         
         
