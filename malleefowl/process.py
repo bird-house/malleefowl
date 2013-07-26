@@ -57,6 +57,7 @@ class WorkflowProcess(WPSProcess):
             metadata=[],
             minOccurs=1,
             maxOccurs=1,
+            maxmegabites=500,
             formats=[{"mimeType":"application/x-netcdf"}],
             )
 
