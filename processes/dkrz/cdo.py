@@ -6,6 +6,7 @@ Author: Carsten Ehbrecht (ehbrecht@dkrz.de)
 
 import types
 import tempfile
+import time
 
 from malleefowl.process import WorkflowProcess
 
@@ -43,7 +44,9 @@ class CDOInfo(WorkflowProcess):
             )
 
     def execute(self):
-        self.status.set(msg="starting cdo sinfo", percentDone=0, propagate=True)
+        self.status.set(msg="starting cdo sinfo", percentDone=10, propagate=True)
+
+        time.sleep(10)
 
         from os import curdir, path
         nc_filename = path.abspath(self.netcdf_in.getValue(asFile=False))
@@ -52,6 +55,8 @@ class CDOInfo(WorkflowProcess):
         result = self.cmd(cmd=["cdo", "sinfo", nc_filename], stdout=True)
 
         self.status.set(msg="cdo sinfo done", percentDone=90, propagate=True)
+
+        time.sleep(30)
 
         (_, out_filename) = tempfile.mkstemp(suffix='.txt')
         with open(out_filename, 'w') as fp:
