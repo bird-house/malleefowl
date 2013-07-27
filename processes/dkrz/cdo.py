@@ -50,7 +50,8 @@ class CDOInfo(WorkflowProcess):
         
         from os import curdir, path
         nc_filename = path.abspath(self.netcdf_in.getValue(asFile=False))
-        result = self.cmd(cmd=["cdo", "sinfo", nc_filename], stdout=True)
+        #result = self.cmd(cmd=["cdo", "sinfo", nc_filename], stdout=False)
+        result = 'we got something ...'
 
         with open('/tmp/cdo-result.txt', 'w') as fp:
             fp.write(result)
