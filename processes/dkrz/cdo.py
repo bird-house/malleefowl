@@ -5,6 +5,7 @@ Author: Carsten Ehbrecht (ehbrecht@dkrz.de)
 """
 
 import types
+import tempfile
 
 from malleefowl.process import WorkflowProcess
 
@@ -42,18 +43,18 @@ class CDOInfo(WorkflowProcess):
             )
 
     def execute(self):
-        self.message(msg='exec cdo sinfo', force=True)
+        self.status.set(msg="starting cdo sinfo", percentDone=0, propagate=True)
 
-        # complex
-        # write cdo result
-        self.message(msg='cdo result', force=True)
-        
         from os import curdir, path
         nc_filename = path.abspath(self.netcdf_in.getValue(asFile=False))
-        #result = self.cmd(cmd=["cdo", "sinfo", nc_filename], stdout=False)
-        result = 'we got something ...'
+        self.message(msg='nc_filename = %s' % (nc_filename), force=True)
 
-        with open('/tmp/cdo-result.txt', 'w') as fp:
+        result = self.cmd(cmd=["cdo", "sinfo", nc_filename], stdout=True)
+
+        self.status.set(msg="cdo sinfo done", percentDone=90, propagate=True)
+
+        (_, out_filename) = tempfile.mkstemp(suffix='.txt')
+        with open(out_filename, 'w') as fp:
             fp.write(result)
             fp.close()
-            self.text_out.setValue( fp.name )
+            self.text_out.setValue( out_filename )
