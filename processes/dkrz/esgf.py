@@ -4,11 +4,14 @@ Processes for ESGF access
 Author: Carsten Ehbrecht (ehbrecht@dkrz.de)
 """
 
-# TODO: fix python sys path
+import os
+from datetime import datetime, date
+import tempfile
 
+import netCDF4
+from pyesgf.logon import LogonManager
 
 from malleefowl.process import WPSProcess
-from datetime import datetime, date
 
 class OpenDAP(WPSProcess):
     """This process downloads files form esgf data node via opendap"""
@@ -26,8 +29,8 @@ class OpenDAP(WPSProcess):
         # opendap url
         # -----------
 
-        self.username_in = self.addLiteralInput(
-            identifier = "username",
+        self.openid_in = self.addLiteralInput(
+            identifier = "openid",
             title = "ESGF OpenID",
             abstract = "Enter ESGF OpenID",
             minOccurs = 1,
@@ -85,30 +88,55 @@ class OpenDAP(WPSProcess):
             )
 
     def execute(self):
-        self.message(msg='exec download form opendap', force=True)
+        self.status.set(msg="stating esgf download", percentDone=5, propagate=True)
 
-        from pyesgf.logon import LogonManager
-        lm = LogonManager()
-        lm.logoff()
-        #lm.is_logged_on()
-        lm.logon_with_openid(
-            openid=self.username_in.getValue(),
-            password=self.password_in.getValue(),
-            bootstrap=True, update_trustroots=True, interactive=False)
+        self._logon(
+            openid=self.openid_in.getValue(), 
+            password=self.password_in.getValue())
+
+        self.status.set(msg="logon successful", percentDone=20, propagate=True)
 
         opendap_url = self.opendap_url_in.getValue()
         self.message(msg='OPeNDAP URL is %s' % opendap_url, force=True)
 
-        import netCDF4
         ds = netCDF4.Dataset(opendap_url)
         print ds.variables.keys()
 
+        self.status.set(msg="retrieved netcdf metadata", percentDone=40, propagate=True)
+
         # opendap with contraints
         dap_access = "%s?time[0:1:1]" % (opendap_url)
- 
-        import tempfile
-        from os import curdir, path
-        (fp, nc_filename) = tempfile.mkstemp(suffix='.nc')
+
+        (_, out_filename) = tempfile.mkstemp(suffix='.txt')
+        (_, nc_filename) = tempfile.mkstemp(suffix='.nc')
         result = self.cmd(cmd=["ncks", "-O", dap_access, nc_filename], stdout=True)
 
-        self.netcdf_out.setValue(nc_filename)
+        with open(out_filename, 'w') as fp:
+            fp.write(result)
+            fp.close()
+            self.netcdf_out.setValue(out_filename)
+            
+        self.status.set(msg="retrieved netcdf file", percentDone=90, propagate=True)
+
+    def _logon(self, openid, password):
+        # TODO: unset x509 env
+        #del os.environ['X509_CERT_DIR']
+        #del os.environ['X509_USER_PROXY']
+
+        esgf_dir = os.path.abspath(os.curdir)
+        # NetCDF DAP support looks in CWD for configuration
+        dap_config = os.path.join(esgf_dir, '.dodsrc')
+        esgf_credentials = os.path.join(esgf_dir, 'credentials.pem')
+
+        self.message(msg='openid=%s, esgf_dir=%s, dap_config=%s' % (openid, esgf_dir, dap_config), force=True)
+        
+        lm = LogonManager(esgf_dir, dap_config=dap_config)
+        #lm.logoff()
+        #lm.is_logged_on()
+        lm.logon_with_openid(
+            openid=openid,
+            password=password,
+            bootstrap=True, 
+            update_trustroots=True, 
+            interactive=False)
+        
