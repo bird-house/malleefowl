@@ -100,7 +100,7 @@ class OpenDAP(WPSProcess):
         self.message(msg='OPeNDAP URL is %s' % opendap_url, force=True)
 
         ds = netCDF4.Dataset(opendap_url)
-        print ds.variables.keys()
+        result = ';'.join(ds.variables.keys())
 
         self.status.set(msg="retrieved netcdf metadata", percentDone=40, propagate=True)
 
@@ -109,7 +109,7 @@ class OpenDAP(WPSProcess):
 
         (_, out_filename) = tempfile.mkstemp(suffix='.txt')
         (_, nc_filename) = tempfile.mkstemp(suffix='.nc')
-        result = self.cmd(cmd=["ncks", "-O", dap_access, nc_filename], stdout=True)
+        #result = self.cmd(cmd=["ncks", "-O", dap_access, nc_filename], stdout=True)
 
         with open(out_filename, 'w') as fp:
             fp.write(result)
