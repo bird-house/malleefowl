@@ -13,6 +13,118 @@ from pyesgf.logon import LogonManager
 
 from malleefowl.process import WPSProcess
 
+def logon(openid, password):
+    # TODO: unset x509 env
+    #del os.environ['X509_CERT_DIR']
+    #del os.environ['X509_USER_PROXY']
+    
+    esgf_dir = os.path.abspath(os.curdir)
+    # NetCDF DAP support looks in CWD for configuration
+    dap_config = os.path.join(esgf_dir, '.dodsrc')
+    esgf_credentials = os.path.join(esgf_dir, 'credentials.pem')
+        
+    lm = LogonManager(esgf_dir, dap_config=dap_config)
+    #lm.logoff()
+    #lm.is_logged_on()
+    lm.logon_with_openid(
+        openid=openid,
+        password=password,
+        bootstrap=True, 
+        update_trustroots=True, 
+        interactive=False)
+
+    return esgf_credentials
+
+
+class Wget(WPSProcess):
+    """This process downloads files form esgf data node via wget and http"""
+
+    def __init__(self):
+        WPSProcess.__init__(self,
+            identifier = "de.dkrz.esgf.wget",
+            title = "Download files from esgf data node via wget",
+            version = "0.1",
+            metadata=[
+                {"title":"ESGF","href":"http://esgf.org"},
+                ],
+            abstract="Download files from esgf data node via wget")
+
+        # openid
+        # -----------
+
+        self.openid_in = self.addLiteralInput(
+            identifier = "openid",
+            title = "ESGF OpenID",
+            abstract = "Enter ESGF OpenID",
+            minOccurs = 1,
+            maxOccurs = 1,
+            type = type('')
+            )
+
+        self.password_in = self.addLiteralInput(
+            identifier = "password",
+            title = "OpenID Password",
+            abstract = "Enter your Password",
+            minOccurs = 1,
+            maxOccurs = 1,
+            type = type('')
+            )
+
+        self.netcdf_url_in = self.addLiteralInput(
+            identifier="netcdf_url",
+            title="NetCDF URL",
+            abstract="NetCDF URL",
+            metadata=[],
+            minOccurs=1,
+            maxOccurs=1,
+            type=type('')
+            )
+
+
+        # complex output
+        # -------------
+
+        self.netcdf_out = self.addComplexOutput(
+            identifier="output",
+            title="NetCDF Output",
+            abstract="NetCDF Output",
+            metadata=[],
+            formats=[{"mimeType":"application/x-netcdf"}],
+            asReference=True,
+            )
+
+    def execute(self):
+        self.status.set(msg="starting esgf download", percentDone=5, propagate=True)
+
+        esgf_credentials = logon(
+            openid=self.openid_in.getValue(), 
+            password=self.password_in.getValue())
+
+        self.status.set(msg="logon successful", percentDone=10, propagate=True)
+
+        netcdf_url = self.netcdf_url_in.getValue()
+
+        cache_dir = "/tmp/cache/wget"
+        
+        try:
+            self.cmd(cmd=["wget", 
+                          "--certificate", esgf_credentials, 
+                          "--private-key", esgf_credentials, 
+                          "--no-check-certificate", 
+                          "-N",
+                          "-P", cache_dir,
+                          "--progress", "dot:mega",
+                          netcdf_url], stdout=True)
+        except:
+            self.message('got an error')
+            pass
+
+        out = os.path.join(cache_dir, os.path.basename(netcdf_url))
+        self.status.set(msg="retrieved netcdf file", percentDone=90, propagate=True)
+        
+        self.netcdf_out.setValue(out)
+
+
 class OpenDAP(WPSProcess):
     """This process downloads files form esgf data node via opendap"""
 
@@ -90,7 +202,7 @@ class OpenDAP(WPSProcess):
     def execute(self):
         self.status.set(msg="stating esgf download", percentDone=5, propagate=True)
 
-        self._logon(
+        logon(
             openid=self.openid_in.getValue(), 
             password=self.password_in.getValue())
 
@@ -125,25 +237,4 @@ class OpenDAP(WPSProcess):
             
         self.status.set(msg="retrieved netcdf file", percentDone=90, propagate=True)
 
-    def _logon(self, openid, password):
-        # TODO: unset x509 env
-        #del os.environ['X509_CERT_DIR']
-        #del os.environ['X509_USER_PROXY']
-
-        esgf_dir = os.path.abspath(os.curdir)
-        # NetCDF DAP support looks in CWD for configuration
-        dap_config = os.path.join(esgf_dir, '.dodsrc')
-        esgf_credentials = os.path.join(esgf_dir, 'credentials.pem')
-
-        self.message(msg='openid=%s, esgf_dir=%s, dap_config=%s' % (openid, esgf_dir, dap_config), force=True)
-        
-        lm = LogonManager(esgf_dir, dap_config=dap_config)
-        #lm.logoff()
-        #lm.is_logged_on()
-        lm.logon_with_openid(
-            openid=openid,
-            password=password,
-            bootstrap=True, 
-            update_trustroots=True, 
-            interactive=False)
         
