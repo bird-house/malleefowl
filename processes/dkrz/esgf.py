@@ -100,21 +100,28 @@ class OpenDAP(WPSProcess):
         self.message(msg='OPeNDAP URL is %s' % opendap_url, force=True)
 
         ds = netCDF4.Dataset(opendap_url)
-        result = ';'.join(ds.variables.keys())
+        variables = []
+        dimensions = []
+        for var in ds.variables.keys():
+            if not var in ds.dimensions.keys():
+                variables.append(var)
+            else:
+                dimensions.append(var)
+        var_str = ','.join(variables)
 
+        #dim_str = ''
+        #for dim in dimensions:
+        #    dim_str = dim_str + ' -d ' + dim + ',1,1'
+                
         self.status.set(msg="retrieved netcdf metadata", percentDone=40, propagate=True)
-
-        # opendap with contraints
-        dap_access = "%s?time[0:1:1]" % (opendap_url)
 
         (_, out_filename) = tempfile.mkstemp(suffix='.txt')
         (_, nc_filename) = tempfile.mkstemp(suffix='.nc')
-        #result = self.cmd(cmd=["ncks", "-O", dap_access, nc_filename], stdout=True)
+        self.cmd(cmd=["ncks", "-O", "-v", var_str, "-d time,1,1", "-o", nc_filename, opendap_url], stdout=True)
 
-        with open(out_filename, 'w') as fp:
-            fp.write(result)
-            fp.close()
-            self.netcdf_out.setValue(out_filename)
+        self.message('cmd=%s' % (cmd), force=True)
+
+        self.netcdf_out.setValue(nc_filename)
             
         self.status.set(msg="retrieved netcdf file", percentDone=90, propagate=True)
 
