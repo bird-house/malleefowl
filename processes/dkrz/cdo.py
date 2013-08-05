@@ -52,7 +52,11 @@ class CDOInfo(WorkflowProcess):
         nc_filename = path.abspath(self.netcdf_in.getValue(asFile=False))
         self.message(msg='nc_filename = %s' % (nc_filename), force=True)
 
-        result = self.cmd(cmd=["cdo", "sinfo", nc_filename], stdout=True)
+        result = ''
+        try:
+            result = self.cmd(cmd=["cdo", "sinfo", nc_filename], stdout=True)
+        except:
+            pass
 
         self.status.set(msg="cdo sinfo done", percentDone=90, propagate=True)
 
