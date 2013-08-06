@@ -48,7 +48,7 @@ class Run(WPSProcess):
 
         wf_filename = path.abspath(self.workflow_in.getValue(asFile=False))
 
-        result = self.cmd(cmd=["restflow", "-f", wf_filename], stdout=True)
+        result = self.cmd(cmd=["restflow", "-t", "-f", wf_filename], stdout=True)
        
         self.status.set(msg="workflow done", percentDone=90, propagate=True)
 
