@@ -24,7 +24,7 @@ def logon(openid, password):
     esgf_credentials = os.path.join(esgf_dir, 'credentials.pem')
         
     lm = LogonManager(esgf_dir, dap_config=dap_config)
-    #lm.logoff()
+    lm.logoff()
     #lm.is_logged_on()
     lm.logon_with_openid(
         openid=openid,
@@ -106,20 +106,17 @@ class Wget(WPSProcess):
 
         cache_dir = "/tmp/cache/wget"
         
-        try:
-            self.cmd(cmd=["wget", 
-                          "--certificate", esgf_credentials, 
-                          "--private-key", esgf_credentials, 
-                          "--no-check-certificate", 
-                          "-N",
-                          "-P", cache_dir,
-                          "--progress", "dot:mega",
-                          netcdf_url], stdout=True)
-        except:
-            self.message('got an error')
-            pass
-
+        self.cmd(cmd=["wget", 
+                      "--certificate", esgf_credentials, 
+                      "--private-key", esgf_credentials, 
+                      "--no-check-certificate", 
+                      "-N",
+                      "-P", cache_dir,
+                      "--progress", "dot:mega",
+                      netcdf_url], stdout=True)
+        
         out = os.path.join(cache_dir, os.path.basename(netcdf_url))
+        self.message('out path=%s' % (out), force=True)
         self.status.set(msg="retrieved netcdf file", percentDone=90, propagate=True)
         
         self.netcdf_out.setValue(out)
