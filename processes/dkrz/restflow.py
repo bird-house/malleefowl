@@ -23,8 +23,8 @@ class Run(WPSProcess):
             abstract="Runs given workflow with yaml description")
 
 
-        self.workflow_in = self.addComplexInput(
-            identifier="workflow",
+        self.workflow_description_in = self.addComplexInput(
+            identifier="workflow_description",
             title="Workflow description",
             abstract="Workflow description in yaml",
             metadata=[],
@@ -46,7 +46,7 @@ class Run(WPSProcess):
     def execute(self):
         self.status.set(msg="starting restflow workflow", percentDone=5, propagate=True)
 
-        wf_filename = path.abspath(self.workflow_in.getValue(asFile=False))
+        wf_filename = path.abspath(self.workflow_description_in.getValue(asFile=False))
 
         result = self.cmd(cmd=["restflow", "-t", "-f", wf_filename], stdout=True)
        
