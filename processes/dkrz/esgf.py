@@ -24,13 +24,16 @@ def logon(openid, password):
         
     lm = LogonManager(esgf_dir, dap_config=dap_config)
     lm.logoff()
-    #lm.is_logged_on()
+    
     lm.logon_with_openid(
         openid=openid,
         password=password,
         bootstrap=True, 
         update_trustroots=True, 
         interactive=False)
+
+    if not lm.is_logged_on():
+        raise Exception("Logon failed")
 
     return esgf_credentials
 
@@ -98,7 +101,7 @@ class Wget(WPSProcess):
         esgf_credentials = logon(
             openid=self.openid_in.getValue(), 
             password=self.password_in.getValue())
-
+        
         self.status.set(msg="logon successful", percentDone=10, propagate=True)
 
         netcdf_url = self.netcdf_url_in.getValue()
@@ -196,7 +199,7 @@ class OpenDAP(WPSProcess):
             )
 
     def execute(self):
-        import netCDF4
+        from Scientific.IO.NetCDF import NetCDFFile
         
         self.status.set(msg="stating esgf download", percentDone=5, propagate=True)
 
@@ -209,30 +212,29 @@ class OpenDAP(WPSProcess):
         opendap_url = self.opendap_url_in.getValue()
         self.message(msg='OPeNDAP URL is %s' % opendap_url, force=True)
 
-        ds = netCDF4.Dataset(opendap_url)
-        variables = []
-        dimensions = []
-        for var in ds.variables.keys():
-            if not var in ds.dimensions.keys():
-                variables.append(var)
-            else:
-                dimensions.append(var)
-        var_str = ','.join(variables)
+        ds = NetCDFFile(opendap_url)
+        #variables = []
+        #dimensions = []
+        #for var in ds.variables.keys():
+        #    if not var in ds.dimensions.keys():
+        #        variables.append(var)
+        #    else:
+        #        dimensions.append(var)
+        var_str = ','.join(ds.variables.keys())
 
         #dim_str = ''
         #for dim in dimensions:
         #    dim_str = dim_str + ' -d ' + dim + ',1,1'
-                
+
         self.status.set(msg="retrieved netcdf metadata", percentDone=40, propagate=True)
 
         (_, out_filename) = tempfile.mkstemp(suffix='.txt')
         (_, nc_filename) = tempfile.mkstemp(suffix='.nc')
-        self.cmd(cmd=["ncks", "-O", "-v", var_str, "-d time,1,1", "-o", nc_filename, opendap_url], stdout=True)
-
-        self.message('cmd=%s' % (cmd), force=True)
+        self.cmd(cmd=["ncks", "-O", "-v", var_str, "-d", "time,1,1", "-o", nc_filename, opendap_url], stdout=True)
 
         self.netcdf_out.setValue(nc_filename)
             
         self.status.set(msg="retrieved netcdf file", percentDone=90, propagate=True)
+
 
         
