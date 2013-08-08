@@ -8,7 +8,6 @@ import os
 from datetime import datetime, date
 import tempfile
 
-import netCDF4
 from pyesgf.logon import LogonManager
 
 from malleefowl.process import WPSProcess
@@ -197,6 +196,8 @@ class OpenDAP(WPSProcess):
             )
 
     def execute(self):
+        import netCDF4
+        
         self.status.set(msg="stating esgf download", percentDone=5, propagate=True)
 
         logon(
