@@ -38,6 +38,60 @@ def logon(openid, password):
     return esgf_credentials
 
 
+
+class Search(WPSProcess):
+    """
+    This process is a WPS wrapper for ESGF metadata search.
+    """
+
+    def __init__(self):
+        WPSProcess.__init__(
+            self,
+            identifier = "de.dkrz.esgf.search",
+            title = "Search ESGF Metadata",
+            version = "0.1",
+            metadata = [
+                {"title": "ESGF", "href": "http://esgf.org"},
+                {"title": "ESGF Search API", "href": "www.esgf.org/wiki/ESGF_Search_REST_API"}
+            ],
+            abstract = "Search ESGF Metadata")
+
+        self.constraints_in = self.addLiteralInput(
+            identifier = "constraints",
+            title = "Search Constraints",
+            abstract = "Enter Search Constraints (e.a: institute=MPI-M experiment=decadal1960)",
+            minOccurs = 0,
+            maxOccurs = 1,
+            type = type('')
+            )
+
+        self.json_out = self.addComplexOutput(
+            identifier="output",
+            title="JSON Output",
+            abstract="JSON Output",
+            metadata=[],
+            formats=[{"mimeType":"text/json"}],
+            asReference=True,
+            )
+            
+    def execute(self):
+        from pyesgf.search import SearchConnection
+        import json
+
+        self.status.set(msg="starting esgf search", percentDone=5, propagate=True)
+
+        conn = SearchConnection('http://localhost:8090/esg-search', distrib=False)
+        ctx = conn.new_context(
+            project='CMIP5', product='output1',
+            replica=False, latest=True)
+       
+        all_facets = ctx.facet_counts.keys()
+        (_, out_filename) = tempfile.mkstemp(suffix='.txt')
+        with open(out_filename, 'w') as fp:
+            json.dump(obj=all_facets, fp=fp)
+            fp.close()
+            self.json_out.setValue( out_filename )
+
 class Wget(WPSProcess):
     """This process downloads files form esgf data node via wget and http"""
 
