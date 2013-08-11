@@ -37,8 +37,6 @@ def logon(openid, password):
 
     return esgf_credentials
 
-
-
 class Search(WPSProcess):
     """
     This process is a WPS wrapper for ESGF metadata search.
@@ -65,14 +63,15 @@ class Search(WPSProcess):
             type = type('')
             )
 
-        self.json_out = self.addLiteralOutput(
+        self.json_out = self.addComplexOutput(
             identifier="output",
             title="JSON Output",
             abstract="JSON Output",
-            default=None,
-            type=type(''),
+            metadata=[],
+            formats=[{"mimeType":"application/json"}],
+            asReference=True,
             )
-            
+
     def execute(self):
         from pyesgf.search import SearchConnection
         import json
@@ -84,9 +83,11 @@ class Search(WPSProcess):
             project='CMIP5', product='output1',
             replica=False, latest=True)
        
-        all_facets = ctx.facet_counts.keys()
-        value = json.JSONEncoder().encode(all_facets)
-        self.json_out.setValue( value )
+        (_, out_filename) = tempfile.mkstemp(suffix='.json')
+        with open(out_filename, 'w') as fp:
+            json.dump(obj=ctx.facet_counts, fp=fp)
+            fp.close()
+            self.json_out.setValue( out_filename )
 
 class Wget(WPSProcess):
     """This process downloads files form esgf data node via wget and http"""
@@ -131,7 +132,6 @@ class Wget(WPSProcess):
             maxOccurs=1,
             type=type('')
             )
-
 
         # complex output
         # -------------
