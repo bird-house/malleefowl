@@ -70,7 +70,7 @@ class Search(WPSProcess):
             title="JSON Output",
             abstract="JSON Output",
             metadata=[],
-            formats=[{"mimeType":"text/json"}],
+            formats=[{"mimeType":"application/json"}],
             asReference=True,
             )
             
