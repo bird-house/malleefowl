@@ -65,13 +65,12 @@ class Search(WPSProcess):
             type = type('')
             )
 
-        self.json_out = self.addComplexOutput(
+        self.json_out = self.addLiteralOutput(
             identifier="output",
             title="JSON Output",
             abstract="JSON Output",
-            metadata=[],
-            formats=[{"mimeType":"application/json"}],
-            asReference=True,
+            default=None,
+            type=type(''),
             )
             
     def execute(self):
@@ -86,11 +85,8 @@ class Search(WPSProcess):
             replica=False, latest=True)
        
         all_facets = ctx.facet_counts.keys()
-        (_, out_filename) = tempfile.mkstemp(suffix='.txt')
-        with open(out_filename, 'w') as fp:
-            json.dump(obj=all_facets, fp=fp)
-            fp.close()
-            self.json_out.setValue( out_filename )
+        value = json.JSONEncoder().encode(all_facets)
+        self.json_out.setValue( value )
 
 class Wget(WPSProcess):
     """This process downloads files form esgf data node via wget and http"""
