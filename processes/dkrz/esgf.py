@@ -208,8 +208,8 @@ class OpenDAP(WPSProcess):
             type = type('')
             )
 
-        self.opendap_url_in = self.addLiteralInput(
-            identifier="opendap_url",
+        self.input = self.addLiteralInput(
+            identifier="input",
             title="OpenDAP URL",
             abstract="OpenDAP URL",
             metadata=[],
@@ -239,7 +239,7 @@ class OpenDAP(WPSProcess):
         # complex output
         # -------------
 
-        self.netcdf_out = self.addComplexOutput(
+        self.output = self.addComplexOutput(
             identifier="output",
             title="NetCDF Output",
             abstract="NetCDF Output",
@@ -259,7 +259,7 @@ class OpenDAP(WPSProcess):
 
         self.status.set(msg="logon successful", percentDone=20, propagate=True)
 
-        opendap_url = self.opendap_url_in.getValue()
+        opendap_url = self.input.getValue()
         self.message(msg='OPeNDAP URL is %s' % opendap_url, force=True)
 
         ds = NetCDFFile(opendap_url)
@@ -282,7 +282,7 @@ class OpenDAP(WPSProcess):
         (_, nc_filename) = tempfile.mkstemp(suffix='.nc')
         self.cmd(cmd=["ncks", "-O", "-v", var_str, "-d", "time,1,1", "-o", nc_filename, opendap_url], stdout=True)
 
-        self.netcdf_out.setValue(nc_filename)
+        self.output.setValue(nc_filename)
             
         self.status.set(msg="retrieved netcdf file", percentDone=90, propagate=True)
 
