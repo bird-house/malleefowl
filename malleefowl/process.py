@@ -50,10 +50,10 @@ class WorkflowProcess(WPSProcess):
         # -------------
 
         # TODO: needs some work ...
-        self.input = self.addComplexInput(
-            identifier="input",
-            title="Input NetCDF File",
-            abstract="NetCDF File from ESGF data node",
+        self.netcdf_in = self.addComplexInput(
+            identifier="netcdf",
+            title="NetCDF File",
+            abstract="NetCDF File",
             metadata=[],
             minOccurs=1,
             maxOccurs=1,

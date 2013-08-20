@@ -208,8 +208,8 @@ class OpenDAP(WPSProcess):
             type = type('')
             )
 
-        self.input = self.addLiteralInput(
-            identifier="input",
+        self.opendap_url_in = self.addLiteralInput(
+            identifier="opendap_url",
             title="OpenDAP URL",
             abstract="OpenDAP URL",
             metadata=[],
@@ -259,7 +259,7 @@ class OpenDAP(WPSProcess):
 
         self.status.set(msg="logon successful", percentDone=20, propagate=True)
 
-        opendap_url = self.input.getValue()
+        opendap_url = self.opendap_url_in.getValue()
         self.message(msg='OPeNDAP URL is %s' % opendap_url, force=True)
 
         ds = NetCDFFile(opendap_url)
