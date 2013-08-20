@@ -9,9 +9,71 @@ import tempfile
 
 from malleefowl.process import WorkflowProcess
 
+class CDOOperation(WorkflowProcess):
+    """This process calls cdo with operation on netcdf file"""
+    def __init__(self):
+        WorkflowProcess.__init__(
+            self,
+            identifier = "de.dkrz.cdo.operation",
+            title = "cdo operation",
+            version = "0.1",
+            metadata=[
+                {"title":"CDO","href":"https://code.zmaw.de/projects/cdo"},
+                ],
+            abstract="calling cdo operation ...",
+            )
+
+
+        # operators
+        self.operator_in = self.addLiteralInput(
+            identifier="operator",
+            title="CDO Operator",
+            abstract="Choose a CDO Operator",
+            default="monmax",
+            type=type(''),
+            minOccurs=1,
+            maxOccurs=1,
+            allowedValues=['monmax', 'monmin', 'monmean', 'monavg']
+            )
+
+        # netcdf input
+        # -------------
+
+        # defined in WorkflowProcess ...
+
+        # complex output
+        # -------------
+
+        self.output = self.addComplexOutput(
+            identifier="output",
+            title="NetCDF Output",
+            abstract="NetCDF Output",
+            metadata=[],
+            formats=[{"mimeType":"application/x-netcdf"}],
+            asReference=True,
+            )
+
+    def execute(self):
+        self.status.set(msg="starting cdo operator", percentDone=10, propagate=True)
+
+        from os import curdir, path
+        nc_filename = path.abspath(self.input.getValue(asFile=False))
+        operator = self.operator_in.getValue()
+        self.message(msg='input netcdf = %s' % (nc_filename), force=True)
+        self.message(msg='cdo operator = %s' % (operator), force=True)
+
+        (_, out_filename) = tempfile.mkstemp(suffix='.nc')
+        try:
+            self.cmd(cmd=["cdo", operator, nc_filename, out_filename], stdout=True)
+        except:
+            self.message(msg='cdo failed', force=True)
+
+        self.status.set(msg="cdo operator done", percentDone=90, propagate=True)
+        self.output.setValue( out_filename )
+
 
 class CDOInfo(WorkflowProcess):
-    """This process calls cdo sinfo for given netcdf file"""
+    """This process calls cdo sinfo on netcdf file"""
 
     def __init__(self):
         WorkflowProcess.__init__(
@@ -46,7 +108,7 @@ class CDOInfo(WorkflowProcess):
         self.status.set(msg="starting cdo sinfo", percentDone=10, propagate=True)
 
         from os import curdir, path
-        nc_filename = path.abspath(self.netcdf_in.getValue(asFile=False))
+        nc_filename = path.abspath(self.input.getValue(asFile=False))
         self.message(msg='nc_filename = %s' % (nc_filename), force=True)
 
         result = ''
