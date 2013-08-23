@@ -51,7 +51,7 @@ class WorkflowProcess(WPSProcess):
 
         # TODO: needs some work ...
         self.netcdf_url_in = self.addComplexInput(
-            identifier="netcdf_url",
+            identifier="file_url",
             title="NetCDF File",
             abstract="NetCDF File",
             metadata=[],

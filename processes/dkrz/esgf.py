@@ -124,7 +124,7 @@ class Wget(WPSProcess):
             )
 
         self.netcdf_url_in = self.addLiteralInput(
-            identifier="netcdf_url",
+            identifier="file_url",
             title="NetCDF URL",
             abstract="NetCDF URL",
             metadata=[],
@@ -209,7 +209,7 @@ class OpenDAP(WPSProcess):
             )
 
         self.opendap_url_in = self.addLiteralInput(
-            identifier="opendap_url",
+            identifier="file_url",
             title="OpenDAP URL",
             abstract="OpenDAP URL",
             metadata=[],
