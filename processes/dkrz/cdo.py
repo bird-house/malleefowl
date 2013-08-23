@@ -57,7 +57,7 @@ class CDOOperation(WorkflowProcess):
         self.status.set(msg="starting cdo operator", percentDone=10, propagate=True)
 
         from os import curdir, path
-        nc_filename = path.abspath(self.netcdf_in.getValue(asFile=False))
+        nc_filename = path.abspath(self.netcdf_url_in.getValue(asFile=False))
         operator = self.operator_in.getValue()
         self.message(msg='input netcdf = %s' % (nc_filename), force=True)
         self.message(msg='cdo operator = %s' % (operator), force=True)
@@ -108,7 +108,7 @@ class CDOInfo(WorkflowProcess):
         self.status.set(msg="starting cdo sinfo", percentDone=10, propagate=True)
 
         from os import curdir, path
-        nc_filename = path.abspath(self.netcdf_in.getValue(asFile=False))
+        nc_filename = path.abspath(self.netcdf_url_in.getValue(asFile=False))
         self.message(msg='nc_filename = %s' % (nc_filename), force=True)
 
         result = ''
