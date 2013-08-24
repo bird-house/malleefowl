@@ -10,16 +10,16 @@ components:
   type: PythonActor
   properties:
     step: |
-      message = 'hello %s' % (len(params))
-      inputs = [('juhu', 3)]
+      message = "hello %s" % (str(params[0][0]))
+      inputs = []
       inputs.extend(params)
       things = 'inputs = %s' % (inputs)
     inputs:
       params:
         type: Collection
     outputs:
-     message:
-     things:
+      message:
+      things:
 
 - id: HelloWorld
   type: Workflow
@@ -34,7 +34,7 @@ components:
   properties:  
     actor: !ref DoSomethingActor
     constants:
-      params: [('hello', 1)]
+      params: [('operator', 5), ('dubidu', u'hello'), 8, 9, 10, ('huhu', 7)]
     outflows:
       message: /messages/greeting/
       things: /messages/things/

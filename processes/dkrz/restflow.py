@@ -10,7 +10,7 @@ import tempfile
 from malleefowl.process import WPSProcess
 
 class Run(WPSProcess):
-    """This process downloads files form esgf data node via wget and http"""
+    """This process runs a restflow workflow description"""
 
     def __init__(self):
         WPSProcess.__init__(self,
