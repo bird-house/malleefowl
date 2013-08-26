@@ -16,7 +16,7 @@ class InOutProcess(WPSProcess):
     def __init__(self):
         # definition of this process
         WPSProcess.__init__(self, 
-            identifier = "de.dkrz.test.inout",
+            identifier = "org.malleefowl.test.inout",
             title="Testing all Data Types",
             version = "0.1",
             storeSupported = "true",   # async

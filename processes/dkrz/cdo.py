@@ -14,7 +14,7 @@ class CDOOperation(WorkflowProcess):
     def __init__(self):
         WorkflowProcess.__init__(
             self,
-            identifier = "de.dkrz.cdo.operation",
+            identifier = "org.malleefowl.cdo.operation",
             title = "cdo operation",
             version = "0.1",
             metadata=[
@@ -33,7 +33,7 @@ class CDOOperation(WorkflowProcess):
             type=type(''),
             minOccurs=1,
             maxOccurs=1,
-            allowedValues=['monmax', 'monmin', 'monmean', 'monavg']
+            allowedValues=['dayavg', 'daymax', 'daymean', 'daymin', 'monmax', 'monmin', 'monmean', 'monavg']
             )
 
         # netcdf input
@@ -78,7 +78,7 @@ class CDOInfo(WorkflowProcess):
     def __init__(self):
         WorkflowProcess.__init__(
             self,
-            identifier = "de.dkrz.cdo.sinfo",
+            identifier = "org.malleefowl.cdo.sinfo",
             title = "cdo sinfo",
             version = "0.1",
             metadata=[
