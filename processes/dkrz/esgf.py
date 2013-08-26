@@ -346,9 +346,18 @@ class Metadata(WPSProcess):
         self.message(msg='NetCDF URL is %s' % netcdf_url, force=True)
 
         ds = NetCDFFile(netcdf_url)
-        #metadata = ds.variables.keys()
         metadata = {}
-        metadata['variables'] = ds.variables.keys()
+        metadata['global_attributes'] = {}
+        for att_name in ["contact", "experiment", "institute_id", "title"]:
+            if hasattr(ds, att_name):
+                metadata['global_attributes'][att_name] = getattr(ds, att_name)
+        metadata['dimensions'] = ds.dimensions.keys()
+        metadata['variables'] = {}
+        for var_name in ds.variables.keys():
+            metadata['variables'][var_name] = {}
+            for att_name in ["axis", "bounds", "calendar", "long_name", "standard_name", "units", "shape"]:
+                if hasattr(ds.variables[var_name], att_name):
+                    metadata['variables'][var_name][att_name] = getattr(ds.variables[var_name], att_name)
         
         self.status.set(msg="retrieved netcdf metadata", percentDone=80, propagate=True)
 
