@@ -218,22 +218,22 @@ class OpenDAP(WPSProcess):
             type=type('')
             )
 
-        self.starttime_in = self.addLiteralInput(
-            identifier = "starttime",
-            title = "Start time",
+        self.startindex_in = self.addLiteralInput(
+            identifier = "startindex",
+            title = "Start Index",
             minOccurs = 1,
             maxOccurs = 1,
-            default="2010-01-01",
-            type=type(date(2010,1,1))
+            default="1",
+            type=type(1)
             )
 
-        self.endtime_in = self.addLiteralInput(
-            identifier = "endtime",
-            title = "End time",
+        self.endindex_in = self.addLiteralInput(
+            identifier = "endindex",
+            title = "End Index",
             minOccurs = 1,
             maxOccurs = 1,
-            default="2010-12-31",
-            type=type(date(2010,12,31))
+            default="1",
+            type=type(1)
             )
 
         # complex output
@@ -263,24 +263,15 @@ class OpenDAP(WPSProcess):
         self.message(msg='OPeNDAP URL is %s' % opendap_url, force=True)
 
         ds = NetCDFFile(opendap_url)
-        #variables = []
-        #dimensions = []
-        #for var in ds.variables.keys():
-        #    if not var in ds.dimensions.keys():
-        #        variables.append(var)
-        #    else:
-        #        dimensions.append(var)
         var_str = ','.join(ds.variables.keys())
 
-        #dim_str = ''
-        #for dim in dimensions:
-        #    dim_str = dim_str + ' -d ' + dim + ',1,1'
-
+        time_dim = 'time,%d,%d' % (int(self.startindex_in.getValue()), int(self.endindex_in.getValue()))
+        
         self.status.set(msg="retrieved netcdf metadata", percentDone=40, propagate=True)
 
         (_, out_filename) = tempfile.mkstemp(suffix='.txt')
         (_, nc_filename) = tempfile.mkstemp(suffix='.nc')
-        self.cmd(cmd=["ncks", "-O", "-v", var_str, "-d", "time,1,1", "-o", nc_filename, opendap_url], stdout=True)
+        self.cmd(cmd=["ncks", "-O", "-v", var_str, "-d", time_dim, "-o", nc_filename, opendap_url], stdout=True)
 
         self.output.setValue(nc_filename)
             
