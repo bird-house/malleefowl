@@ -23,6 +23,17 @@ class Run(WPSProcess):
             abstract="Runs given workflow with yaml description")
 
 
+        self.restflow_command_in = self.addLiteralInput(
+            identifier="command",
+            title="Restflow Command",
+            abstract="Choose Restflow Command",
+            default="execute",
+            type=type(''),
+            minOccurs=1,
+            maxOccurs=1,
+            allowedValues=['execute', 'validate', 'visualize']
+            )
+
         self.workflow_description_in = self.addComplexInput(
             identifier="workflow_description",
             title="Workflow description",
@@ -48,7 +59,14 @@ class Run(WPSProcess):
 
         wf_filename = path.abspath(self.workflow_description_in.getValue(asFile=False))
 
-        result = self.cmd(cmd=["restflow", "-t", "-f", wf_filename], stdout=True)
+        options = ''
+        
+        if self.restflow_command_in.getValue() == "validate":
+            options = '--validate'
+        elif self.restflow_command_in.getValue() == "visualize":
+            options = '--to-dot'
+        
+        result = self.cmd(cmd=["restflow", options, "--enable-trace", "-f", wf_filename], stdout=True)
        
         self.status.set(msg="workflow done", percentDone=90, propagate=True)
 
