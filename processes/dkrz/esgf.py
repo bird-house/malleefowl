@@ -7,6 +7,7 @@ Author: Carsten Ehbrecht (ehbrecht@dkrz.de)
 import os
 from datetime import datetime, date
 import tempfile
+import json
 
 from pyesgf.logon import LogonManager
 
@@ -74,7 +75,6 @@ class Search(WPSProcess):
 
     def execute(self):
         from pyesgf.search import SearchConnection
-        import json
 
         self.status.set(msg="starting esgf search", percentDone=5, propagate=True)
 
@@ -276,6 +276,89 @@ class OpenDAP(WPSProcess):
         self.output.setValue(nc_filename)
             
         self.status.set(msg="retrieved netcdf file", percentDone=90, propagate=True)
+
+
+class Metadata(WPSProcess):
+    """This process downloads files form esgf data node via opendap"""
+
+    def __init__(self):
+        WPSProcess.__init__(self,
+            identifier = "org.malleefowl.esgf.metadata",
+            title = "Retrieve Metadata of NetCDF File",
+            version = "0.1",
+            metadata=[
+                {"title":"ESGF","href":"http://esgf.org"},
+                ],
+            abstract="Retrieve Metadata of NetCDF File")
+
+        self.openid_in = self.addLiteralInput(
+            identifier = "openid",
+            title = "ESGF OpenID",
+            abstract = "Enter ESGF OpenID",
+            minOccurs = 1,
+            maxOccurs = 1,
+            type = type('')
+            )
+
+        self.password_in = self.addLiteralInput(
+            identifier = "password",
+            title = "OpenID Password",
+            abstract = "Enter your Password",
+            minOccurs = 1,
+            maxOccurs = 1,
+            type = type('')
+            )
+
+        self.netcdf_url_in = self.addLiteralInput(
+            identifier="file_url",
+            title="NetCDF URL",
+            abstract="NetCDF URL",
+            metadata=[],
+            minOccurs=1,
+            maxOccurs=1,
+            type=type('')
+            )
+
+        # complex output
+        # -------------
+
+        self.output = self.addComplexOutput(
+            identifier="output",
+            title="NetCDF Metadata Output",
+            abstract="NetCDF Metadata Output",
+            metadata=[],
+            formats=[{"mimeType":"application/json"}],
+            asReference=True,
+            )
+
+    def execute(self):
+        from Scientific.IO.NetCDF import NetCDFFile
+        
+        self.status.set(msg="starting netcdf metadata retrieval", percentDone=5, propagate=True)
+
+        logon(
+            openid=self.openid_in.getValue(), 
+            password=self.password_in.getValue())
+
+        self.status.set(msg="logon successful", percentDone=20, propagate=True)
+
+        netcdf_url = self.netcdf_url_in.getValue()
+        self.message(msg='NetCDF URL is %s' % netcdf_url, force=True)
+
+        ds = NetCDFFile(netcdf_url)
+        #metadata = ds.variables.keys()
+        metadata = {}
+        metadata['variables'] = ds.variables.keys()
+        
+        self.status.set(msg="retrieved netcdf metadata", percentDone=80, propagate=True)
+
+        (_, out_filename) = tempfile.mkstemp(suffix='.json')
+        with open(out_filename, 'w') as fp:
+            json.dump(obj=metadata, fp=fp)
+            fp.close()
+            self.output.setValue( out_filename )
+        
+        self.status.set(msg="netcdf metadata written", percentDone=90, propagate=True)
 
 
         
