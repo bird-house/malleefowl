@@ -1,3 +1,3 @@
-__all__ = ["restflow", "cdo", "esgf", "testing"]
+__all__ = ["restflow", "cdo", "esgf", "testing", "rel_hum", "gam"]
 
 
