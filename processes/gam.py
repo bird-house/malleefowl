@@ -4,15 +4,15 @@ Author: Nils Hempelmann (nils.hempelmann@hzg)
 """
 
 from datetime import datetime, date
-from pywps.Process import WPSProcess
+from malleefowl.process import WorkflowProcess
 import subprocess
 
-class GamProcess(WPSProcess):
+class GamProcess(WorkflowProcess):
     """This process calculates the relative humidity"""
 
     def __init__(self):
         # definition of this process
-        WPSProcess.__init__(self, 
+        WorkflowProcess.__init__(self, 
             identifier = "de.csc.gam",
             title="Gerneralized Additive Model",
             version = "0.1",
@@ -121,13 +121,25 @@ class GamProcess(WPSProcess):
             maxOccurs=1,
             )
             
+         #self.stringChoiceIn = self.addLiteralInput(
+            #identifier="stringChoice",
+            #title="String Choice",
+            #abstract="Choose a string",
+            #default="one",
+            #type=type(''),
+            #minOccurs=0,
+            #maxOccurs=1,
+            #allowedValues=['one', 'two', 'three']
+            #)
+            
         self.climin1 = self.addLiteralInput(
             identifier="climin1",
             title="temperature in vegetation period",
             abstract="temperture in vegetaion period",
-            type=type(False),
+            type=type(''),
             minOccurs=1,
             maxOccurs=1,
+            allowedValues=[0,1,2,3,4,5,6,7,8,9,10,11,12]
             )
             
         self.climin2 = self.addLiteralInput(
