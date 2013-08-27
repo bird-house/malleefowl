@@ -164,7 +164,7 @@ class OpenDAP(WPSProcess):
             abstract="OpenDAP URL",
             metadata=[],
             minOccurs=1,
-            maxOccurs=4,
+            maxOccurs=10,
             type=type('')
             )
 
@@ -189,10 +189,10 @@ class OpenDAP(WPSProcess):
         # output
         # ------
 
-        self.num_files_out = self.addLiteralOutput(
-            identifier="num_files",
-            title="Number of Files",
-            abstract="Number of Files",
+        self.num_merged_files_out = self.addLiteralOutput(
+            identifier="num_merged_files",
+            title="Number of merged Files",
+            abstract="Number of merged Files",
             default="1",
             type=type(1),
             )
@@ -200,42 +200,15 @@ class OpenDAP(WPSProcess):
         # complex output
         # -------------
 
-        self.output1 = self.addComplexOutput(
-            identifier="output1",
-            title="NetCDF Output 1",
-            abstract="NetCDF Output 1",
+        self.output = self.addComplexOutput(
+            identifier="output",
+            title="NetCDF Output",
+            abstract="NetCDF Output",
             metadata=[],
             formats=[{"mimeType":"application/x-netcdf"}],
             asReference=True,
             )
         
-        self.output2 = self.addComplexOutput(
-            identifier="output2",
-            title="NetCDF Output 2",
-            abstract="NetCDF Output 2",
-            metadata=[],
-            formats=[{"mimeType":"application/x-netcdf"}],
-            asReference=True,
-            )
-
-        self.output3 = self.addComplexOutput(
-            identifier="output3",
-            title="NetCDF Output 3",
-            abstract="NetCDF Output 3",
-            metadata=[],
-            formats=[{"mimeType":"application/x-netcdf"}],
-            asReference=True,
-            )
-
-        self.output4 = self.addComplexOutput(
-            identifier="output4",
-            title="NetCDF Output 4",
-            abstract="NetCDF Output 4",
-            metadata=[],
-            formats=[{"mimeType":"application/x-netcdf"}],
-            asReference=True,
-            )
-
     def execute(self):
         from Scientific.IO.NetCDF import NetCDFFile
         
@@ -258,6 +231,7 @@ class OpenDAP(WPSProcess):
         percent_done = 10
         percent_per_step = 40.0 / len(opendap_urls)
         step = 0
+        nc_files = []
         for opendap_url in opendap_urls:
             ds = NetCDFFile(opendap_url)
             var_str = ','.join(ds.variables.keys())
@@ -267,38 +241,24 @@ class OpenDAP(WPSProcess):
             percent_done += percent_per_step
             self.status.set(msg="retrieved netcdf metadata", percentDone=percent_done, propagate=True)
 
-            (_, out_filename) = tempfile.mkstemp(suffix='.txt')
             (_, nc_filename) = tempfile.mkstemp(suffix='.nc')
-            self.cmd(cmd=["ncks", "-O", "-v", var_str, "-d", time_dim, "-o", nc_filename, opendap_url], stdout=True)
-
-            if step == 0:
-                self.output1.setValue(nc_filename)
-            elif step == 1:
-                self.output2.setValue(nc_filename)
-            elif step == 2:
-                self.output3.setValue(nc_filename)
-            elif step == 3:
-                self.output4.setValue(nc_filename)
-            
+            cmd = ["ncks", "-O", "-v", var_str, "-d", time_dim, "-o", nc_filename, opendap_url]
+            self.cmd(cmd=cmd, stdout=True)
+            nc_files.append(nc_filename)
+          
             percent_done += percent_per_step
             self.status.set(msg="retrieved netcdf file", percentDone=percent_done, propagate=True)
 
             step += 1
 
-        nooutput = StringIO.StringIO()
-        nooutput.write('no output')
-        for step in range(len(opendap_urls), 4):
-            if step == 0:
-                self.output1.setValue(nooutput)
-            elif step == 1:
-                self.output2.setValue(nooutput)
-            elif step == 2:
-                self.output3.setValue(nooutput)
-            elif step == 3:
-                self.output4.setValue(nooutput)
-        nooutput.close()
-
-        self.num_files_out.setValue(len(opendap_urls))
+        # merge output files
+        cmd = ['cdo', 'merge']
+        cmd.extend(nc_files)
+        (_, nc_filename) = tempfile.mkstemp(suffix='.nc')
+        cmd.append(nc_filename)
+        self.cmd(cmd=cmd, stdout=True)
+        self.output.setValue(nc_filename)    
+        self.num_merged_files_out.setValue(len(opendap_urls))
 
 class Metadata(WPSProcess):
     """This process downloads files form esgf data node via opendap"""
