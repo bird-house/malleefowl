@@ -14,12 +14,15 @@ components:
       inputs = []
       inputs.extend(params)
       things = 'inputs = %s' % (inputs)
+      more = 'more = %s' % (files)
     inputs:
+      files:
       params:
         type: Collection
     outputs:
       message:
       things:
+      more:
 
 - id: HelloWorld
   type: Workflow
@@ -34,10 +37,12 @@ components:
   properties:  
     actor: !ref DoSomethingActor
     constants:
+      files: ['one', 'two', 'three', 'http://blabla.nc']
       params: [('operator', 5), ('dubidu', u'hello'), 8, 9, 10, ('huhu', 7)]
     outflows:
       message: /messages/greeting/
       things: /messages/things/
+      more: /messages/more
  
 - id: RenderGreeting
   type: Node
