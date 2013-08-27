@@ -8,6 +8,8 @@ import os
 from datetime import datetime, date
 import tempfile
 import json
+import types
+import StringIO
 
 from pyesgf.logon import LogonManager
 
@@ -77,8 +79,7 @@ class Wget(WPSProcess):
             title="NetCDF URL",
             abstract="NetCDF URL",
             metadata=[],
-            minOccurs=1,
-            maxOccurs=1,
+            minOccurs=0,
             type=type('')
             )
 
@@ -163,7 +164,7 @@ class OpenDAP(WPSProcess):
             abstract="OpenDAP URL",
             metadata=[],
             minOccurs=1,
-            maxOccurs=1,
+            maxOccurs=4,
             type=type('')
             )
 
@@ -185,13 +186,51 @@ class OpenDAP(WPSProcess):
             type=type(1)
             )
 
+        # output
+        # ------
+
+        self.num_files_out = self.addLiteralOutput(
+            identifier="num_files",
+            title="Number of Files",
+            abstract="Number of Files",
+            default="1",
+            type=type(1),
+            )
+
         # complex output
         # -------------
 
-        self.output = self.addComplexOutput(
-            identifier="output",
-            title="NetCDF Output",
-            abstract="NetCDF Output",
+        self.output1 = self.addComplexOutput(
+            identifier="output1",
+            title="NetCDF Output 1",
+            abstract="NetCDF Output 1",
+            metadata=[],
+            formats=[{"mimeType":"application/x-netcdf"}],
+            asReference=True,
+            )
+        
+        self.output2 = self.addComplexOutput(
+            identifier="output2",
+            title="NetCDF Output 2",
+            abstract="NetCDF Output 2",
+            metadata=[],
+            formats=[{"mimeType":"application/x-netcdf"}],
+            asReference=True,
+            )
+
+        self.output3 = self.addComplexOutput(
+            identifier="output3",
+            title="NetCDF Output 3",
+            abstract="NetCDF Output 3",
+            metadata=[],
+            formats=[{"mimeType":"application/x-netcdf"}],
+            asReference=True,
+            )
+
+        self.output4 = self.addComplexOutput(
+            identifier="output4",
+            title="NetCDF Output 4",
+            abstract="NetCDF Output 4",
             metadata=[],
             formats=[{"mimeType":"application/x-netcdf"}],
             asReference=True,
@@ -206,26 +245,60 @@ class OpenDAP(WPSProcess):
             openid=self.openid_in.getValue(), 
             password=self.password_in.getValue())
 
-        self.status.set(msg="logon successful", percentDone=20, propagate=True)
+        self.status.set(msg="logon successful", percentDone=10, propagate=True)
 
-        opendap_url = self.opendap_url_in.getValue()
-        self.message(msg='OPeNDAP URL is %s' % opendap_url, force=True)
+        opendap_urls = []
+        value = self.opendap_url_in.getValue()
+        if value != None:
+            if type(value) == types.ListType:
+                opendap_urls = value
+            else:
+                opendap_urls = [value]
 
-        ds = NetCDFFile(opendap_url)
-        var_str = ','.join(ds.variables.keys())
+        percent_done = 10
+        percent_per_step = 40.0 / len(opendap_urls)
+        step = 0
+        for opendap_url in opendap_urls:
+            ds = NetCDFFile(opendap_url)
+            var_str = ','.join(ds.variables.keys())
 
-        time_dim = 'time,%d,%d' % (int(self.startindex_in.getValue()), int(self.endindex_in.getValue()))
+            time_dim = 'time,%d,%d' % (int(self.startindex_in.getValue()), int(self.endindex_in.getValue()))
         
-        self.status.set(msg="retrieved netcdf metadata", percentDone=40, propagate=True)
+            percent_done += percent_per_step
+            self.status.set(msg="retrieved netcdf metadata", percentDone=percent_done, propagate=True)
 
-        (_, out_filename) = tempfile.mkstemp(suffix='.txt')
-        (_, nc_filename) = tempfile.mkstemp(suffix='.nc')
-        self.cmd(cmd=["ncks", "-O", "-v", var_str, "-d", time_dim, "-o", nc_filename, opendap_url], stdout=True)
+            (_, out_filename) = tempfile.mkstemp(suffix='.txt')
+            (_, nc_filename) = tempfile.mkstemp(suffix='.nc')
+            self.cmd(cmd=["ncks", "-O", "-v", var_str, "-d", time_dim, "-o", nc_filename, opendap_url], stdout=True)
 
-        self.output.setValue(nc_filename)
+            if step == 0:
+                self.output1.setValue(nc_filename)
+            elif step == 1:
+                self.output2.setValue(nc_filename)
+            elif step == 2:
+                self.output3.setValue(nc_filename)
+            elif step == 3:
+                self.output4.setValue(nc_filename)
             
-        self.status.set(msg="retrieved netcdf file", percentDone=90, propagate=True)
+            percent_done += percent_per_step
+            self.status.set(msg="retrieved netcdf file", percentDone=percent_done, propagate=True)
 
+            step += 1
+
+        nooutput = StringIO.StringIO()
+        nooutput.write('no output')
+        for step in range(len(opendap_urls), 4):
+            if step == 0:
+                self.output1.setValue(nooutput)
+            elif step == 1:
+                self.output2.setValue(nooutput)
+            elif step == 2:
+                self.output3.setValue(nooutput)
+            elif step == 3:
+                self.output4.setValue(nooutput)
+        nooutput.close()
+
+        self.num_files_out.setValue(len(opendap_urls))
 
 class Metadata(WPSProcess):
     """This process downloads files form esgf data node via opendap"""

@@ -55,8 +55,7 @@ class WorkflowProcess(WPSProcess):
             title="NetCDF File",
             abstract="NetCDF File",
             metadata=[],
-            minOccurs=1,
-            maxOccurs=1,
+            minOccurs=0,
             maxmegabites=5000,
             formats=[{"mimeType":"application/x-netcdf"}],
             )
