@@ -30,15 +30,15 @@ class ClimInProcess(WorkflowProcess):
         # Literal Input Data
         # ------------------
         
-        #self.floatIn = self.addLiteralInput(
-            #identifier="float",
-            #title="Base temperature",
-            #abstract="Threshold for termal vegetation period",
-            #default="5.6",
-            #type=type(0.1),
-            #minOccurs=0,
-            #maxOccurs=1,
-            #)
+        self.floatIn = self.addLiteralInput(
+            identifier="float",
+            title="Base temperature",
+            abstract="Threshold for termal vegetation period",
+            default="5.6",
+            type=type(0.1),
+            minOccurs=1,
+            maxOccurs=1,
+            )
         
         self.climin1 = self.addLiteralInput(
             identifier="climin1",
@@ -94,15 +94,15 @@ class ClimInProcess(WorkflowProcess):
             maxOccurs=1,
             )
         
-         #self.dummyBBoxIn = self.addLiteralInput(
-            #identifier="dummybbox",
-            #title="Dummy BBox",
-            #abstract="This is a BBox: (minx,miny,maxx,maxy)",
-            #default="0,-90,180,90",
-            #type=type(''),
-            #minOccurs=0,
-            #maxOccurs=1,
-            #)
+        self.dummyBBoxIn = self.addLiteralInput(
+           identifier="dummybbox",
+           title="Dummy BBox",
+           abstract="This is a BBox: (minx,miny,maxx,maxy)",
+           default="0,-90,180,90",
+           type=type(''),
+           minOccurs=0,
+           maxOccurs=1,
+           )
 
         self.file_out = self.addComplexOutput(
             identifier="file_out",

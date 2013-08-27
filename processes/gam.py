@@ -16,16 +16,16 @@ class GamProcess(WorkflowProcess):
             identifier = "de.csc.gam",
             title="Gerneralized Additive Model",
             version = "0.1",
-            storeSupported = "true",   # async
-            statusSupported = "true",  # retrieve status, needs to be true for async 
-            # TODO: what can i do with this?
+            #storeSupported = "true",   # async
+            #statusSupported = "true",  # retrieve status, needs to be true for async 
+            ## TODO: what can i do with this?
             metadata=[
                 {"title":"Foobar","href":"http://foo/bar"},
                 {"title":"Barfoo","href":"http://bar/foo"},
                 {"title":"Literal process"},
                 {"href":"http://foobar/"}],
             abstract="Calculation of species distribution",
-            grassLocation = False)
+           )
 
         # Literal Input Data
         # ------------------
@@ -41,39 +41,39 @@ class GamProcess(WorkflowProcess):
             formats=[{"mimeType":"text/csv"}],
             )
        
-        self.ref_in = self.addLiteralInput(
-            identifier="ref_data",
-            title="reference data experiment",
-            abstract="Data Experiment Name of the reference data experiment",
-            default="AFR-44_MPI-ESM-LR_historical_r1i1p1_MPI-RCSM-v2012_v1_day_.nc",
-            type=type(''),
-            minOccurs=1,
-            maxOccurs=1,
-            )
+        #self.ref_in = self.addLiteralInput(
+            #identifier="ref_data",
+            #title="reference data experiment",
+            #abstract="Data Experiment Name of the reference data experiment",
+            #default="AFR-44_MPI-ESM-LR_historical_r1i1p1_MPI-RCSM-v2012_v1_day_.nc",
+            #type=type(''),
+            #minOccurs=1,
+            #maxOccurs=1,
+            #)
 
-        self.pred_in = self.addLiteralInput(
-            identifier="pred_data",
-            title="prediction data experiment",
-            abstract="Data Experiment Name of the prediction data experiment",
-            default="AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_.nc",
-            type=type(''),
-            minOccurs=1,
-            maxOccurs=1,
-            )
+        #self.pred_in = self.addLiteralInput(
+            #identifier="pred_data",
+            #title="prediction data experiment",
+            #abstract="Data Experiment Name of the prediction data experiment",
+            #default="AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_.nc",
+            #type=type(''),
+            #minOccurs=1,
+            #maxOccurs=1,
+            #)
      
-        self.path_in = self.addLiteralInput(
-            identifier="path_in",
-            title="Path to Folder",
-            abstract="Path to Folder containing input data",
-            default="/home/main/data/",
-            type=type(''),
-            minOccurs=1,
-            maxOccurs=1,
-            )            
+        #self.path_in = self.addLiteralInput(
+            #identifier="path_in",
+            #title="Path to Folder",
+            #abstract="Path to Folder containing input data",
+            #default="/home/main/data/",
+            #type=type(''),
+            #minOccurs=1,
+            #maxOccurs=1,
+            #)            
             
-        self.individualBBoxIn = self.addLiteralInput(
-            identifier="individualbbox",
-            title="Individual BBox",
+        self.individualBBoxInRef = self.addLiteralInput(
+            identifier="individualbbox_ref",
+            title="BBox for reference files ",
             abstract="This is a BBox: (minx,miny,maxx,maxy)",
             default="0,-90,180,90",
             type=type(''),
@@ -101,9 +101,19 @@ class GamProcess(WorkflowProcess):
             maxOccurs=1,
             )
 
+        self.individualBBoxInPro = self.addLiteralInput(
+            identifier="individualbbox_pro",
+            title="BBox for projection files ",
+            abstract="This is a BBox: (minx,miny,maxx,maxy)",
+            default="0,-90,180,90",
+            type=type(''),
+            minOccurs=0,
+            maxOccurs=1,
+            )
+            
         self.start_date_pred = self.addLiteralInput(
-            identifier="start_date_pred",
-            title="Start prediction",
+            identifier="start_date_pro",
+            title="Start projection",
             abstract="This is a start Date",
             default="2006-01-01",
             type=type(date(2071,01,01)),
@@ -112,79 +122,89 @@ class GamProcess(WorkflowProcess):
             )
 
         self.end_date_pred = self.addLiteralInput(
-            identifier="end_date_pred",
-            title="End prediction",
+            identifier="end_date_pro",
+            title="End projection",
             abstract="This is a end Date",
             default="2010-12-31",
             type=type(date(2100,12,31)),
             minOccurs=1,
             maxOccurs=1,
             )
-            
-         #self.stringChoiceIn = self.addLiteralInput(
-            #identifier="stringChoice",
-            #title="String Choice",
-            #abstract="Choose a string",
-            #default="one",
-            #type=type(''),
-            #minOccurs=0,
-            #maxOccurs=1,
-            #allowedValues=['one', 'two', 'three']
-            #)
+           
+        self.floatIn = self.addLiteralInput(
+            identifier="float",
+            title="Base temperature",
+            abstract="Threshold for termal vegetation period",
+            default="5.6",
+            type=type(0.1),
+            minOccurs=1,
+            maxOccurs=1,
+            )
             
         self.climin1 = self.addLiteralInput(
             identifier="climin1",
             title="temperature in vegetation period",
-            abstract="temperture in vegetaion period",
+            abstract="Kappa Value (choose 0 if Indicator should not be used)",
+            default="0",
             type=type(''),
             minOccurs=1,
             maxOccurs=1,
-            allowedValues=[0,1,2,3,4,5,6,7,8,9,10,11,12]
+            allowedValues=['0','1','2','3','4','5','6','7','8','9','10','11','12']
             )
             
         self.climin2 = self.addLiteralInput(
             identifier="climin2",
             title="precipitation in vegetation period",
-            abstract="precipitation in vegetaion period",
-            type=type(False),
+            abstract="Kappa Value (choose 0 if Indicator should not be used)",
+            default="0",
+            type=type(''),
             minOccurs=1,
             maxOccurs=1,
+            allowedValues=['0','1','2','3','4','5','6','7','8','9','10','11','12']
             )
             
         self.climin3 = self.addLiteralInput(
             identifier="climin3",
             title="temperture in dormancy",
-            abstract="precipitation in dormancy",
-            type=type(False),
+            abstract="Kappa Value (choose 0 if Indicator should not be used)",
+            default="0",
+            type=type(''),
             minOccurs=1,
             maxOccurs=1,
+            allowedValues=['0','1','2','3','4','5','6','7','8','9','10','11','12']
             )
 
         self.climin4 = self.addLiteralInput(
             identifier="climin4",
             title="Dummy",
-            abstract="temperture in vegetaion period",
-            type=type(False),
+            abstract="Kappa Value (choose 0 if Indicator should not be used)",
+            default="0",
+            type=type(''),
             minOccurs=1,
             maxOccurs=1,
+            allowedValues=['0','1','2','3','4','5','6','7','8','9','10','11','12']
             )
             
         self.climin5 = self.addLiteralInput(
             identifier="climin5",
             title="precipitation in spruting time",
-            abstract="precipitation in spruting time",
-            type=type(False),
+            abstract="Kappa Value (choose 0 if Indicator should not be used)",
+            default="0",
+            type=type(''),
             minOccurs=1,
             maxOccurs=1,
+            allowedValues=['0','1','2','3','4','5','6','7','8','9','10','11','12']
             )
             
         self.climin6 = self.addLiteralInput(
             identifier="climin6",
             title="temperture in spruting time",
-            abstract="temperture in spruting time",
-            type=type(False),
+            abstract="Kappa Value (choose 0 if Indicator should not be used)",
+            default="0",
+            type=type(''),
             minOccurs=1,
             maxOccurs=1,
+            allowedValues=['0','1','2','3','4','5','6','7','8','9','10','11','12']
             )
             
         self.dummy_out = self.addLiteralOutput(
