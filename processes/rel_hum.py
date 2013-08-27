@@ -4,28 +4,28 @@ Author: Nils Hempelmann (nils.hempelmann@hzg)
 """
 
 from datetime import datetime, date
-from pywps.Process import WPSProcess
+from malleefowl.process import WorkflowProcess
 import subprocess
 
-class RelHumProcess(WPSProcess):
+class RelHumProcess(WorkflowProcess):
     """This process calculates the relative humidity"""
 
     def __init__(self):
         # definition of this process
-        WPSProcess.__init__(self, 
+        WorkflowProcess.__init__(self, 
             identifier = "de.csc.relhum",
-            title="Relative Humidity",
+            title="Specific to relative humidity",
             version = "0.1",
-            storeSupported = "true",   # async
-            statusSupported = "true",  # retrieve status, needs to be true for async 
-            # TODO: what can i do with this?
+            #storeSupported = "true",   # async
+            #statusSupported = "true",  # retrieve status, needs to be true for async 
+            ## TODO: what can i do with this?
             metadata=[
                 {"title":"Foobar","href":"http://foo/bar"},
                 {"title":"Barfoo","href":"http://bar/foo"},
                 {"title":"Literal process"},
                 {"href":"http://foobar/"}],
             abstract="Just testing a nice script to calculate the relative humidity ...",
-            grassLocation = False)
+            )
 
         # Literal Input Data
         # ------------------
