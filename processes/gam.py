@@ -104,8 +104,8 @@ class GamProcess(WorkflowProcess):
         self.individualBBoxInPro = self.addLiteralInput(
             identifier="individualbbox_pro",
             title="BBox for projection files ",
-            abstract="This is a BBox: (minx,miny,maxx,maxy)",
-            default="0,-90,180,90",
+            abstract="This is a BBox: (minx,miny,maxx,maxy (0,-90,180,90))",
+            default="",
             type=type(''),
             minOccurs=0,
             maxOccurs=1,
