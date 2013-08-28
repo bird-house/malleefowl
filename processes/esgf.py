@@ -252,13 +252,16 @@ class OpenDAP(WPSProcess):
             step += 1
 
         # merge output files
-        cmd = ['cdo', 'merge']
-        cmd.extend(nc_files)
-        (_, nc_filename) = tempfile.mkstemp(suffix='.nc')
-        cmd.append(nc_filename)
-        self.cmd(cmd=cmd, stdout=True)
-        self.output.setValue(nc_filename)    
-        self.num_merged_files_out.setValue(len(opendap_urls))
+        if len(nc_files) > 1:
+            cmd = ['cdo', 'merge']
+            cmd.extend(nc_files)
+            (_, nc_filename) = tempfile.mkstemp(suffix='.nc')
+            cmd.append(nc_filename)
+            self.cmd(cmd=cmd, stdout=True)
+            self.output.setValue(nc_filename)
+        else:
+            self.output.setValue(nc_files[0])
+        self.num_merged_files_out.setValue(len(nc_files))
 
 class Metadata(WPSProcess):
     """This process downloads files form esgf data node via opendap"""
