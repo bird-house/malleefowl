@@ -4,7 +4,6 @@ Processes with cdo commands
 Author: Carsten Ehbrecht (ehbrecht@dkrz.de)
 """
 
-import types
 import tempfile
 
 from malleefowl.process import WorkflowProcess
@@ -33,7 +32,7 @@ class CDOOperation(WorkflowProcess):
             type=type(''),
             minOccurs=1,
             maxOccurs=1,
-            allowedValues=['dayavg', 'daymax', 'daymean', 'daymin', 'monmax', 'monmin', 'monmean', 'monavg']
+            allowedValues=['merge', 'dayavg', 'daymax', 'daymean', 'daymin', 'monmax', 'monmin', 'monmean', 'monavg']
             )
 
         # netcdf input
@@ -56,15 +55,18 @@ class CDOOperation(WorkflowProcess):
     def execute(self):
         self.status.set(msg="starting cdo operator", percentDone=10, propagate=True)
 
-        from os import curdir, path
-        nc_filename = path.abspath(self.netcdf_url_in.getValue(asFile=False))
+        nc_files = self.get_nc_files()
         operator = self.operator_in.getValue()
-        self.message(msg='input netcdf = %s' % (nc_filename), force=True)
-        self.message(msg='cdo operator = %s' % (operator), force=True)
 
         (_, out_filename) = tempfile.mkstemp(suffix='.nc')
         try:
-            self.cmd(cmd=["cdo", operator, nc_filename, out_filename], stdout=True)
+            cmd = ["cdo", operator]
+            if operator == 'merge':
+                cmd.extend(nc_files)
+            else:
+                cmd.append(nc_files[0])
+            cmd.append(out_filename)
+            self.cmd(cmd=cmd, stdout=True)
         except:
             self.message(msg='cdo failed', force=True)
 
@@ -108,14 +110,14 @@ class CDOInfo(WorkflowProcess):
         self.status.set(msg="starting cdo sinfo", percentDone=10, propagate=True)
 
         from os import curdir, path
-        nc_filename = path.abspath(self.netcdf_url_in.getValue(asFile=False))
-        self.message(msg='nc_filename = %s' % (nc_filename), force=True)
+        nc_files = self.get_nc_files()
 
         result = ''
-        try:
-            result = self.cmd(cmd=["cdo", "sinfo", nc_filename], stdout=True)
-        except:
-            pass
+        for nc_file in nc_files:
+            try:
+                result += self.cmd(cmd=["cdo", "sinfo", nc_file], stdout=True)
+            except:
+                pass
 
         self.status.set(msg="cdo sinfo done", percentDone=90, propagate=True)
 

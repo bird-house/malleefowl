@@ -79,7 +79,8 @@ class Wget(WPSProcess):
             title="NetCDF URL",
             abstract="NetCDF URL",
             metadata=[],
-            minOccurs=0,
+            minOccurs=1,
+            maxOccurs=1,
             type=type('')
             )
 

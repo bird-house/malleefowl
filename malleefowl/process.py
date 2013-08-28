@@ -4,6 +4,8 @@ Processes for ClimDaPs WPS
 Author: Carsten Ehbrecht (ehbrecht@dkrz.de)
 """
 
+import os
+import types
 
 from pywps.Process import WPSProcess as PyWPSProcess
 
@@ -56,9 +58,24 @@ class WorkflowProcess(WPSProcess):
             abstract="NetCDF File",
             metadata=[],
             minOccurs=0,
+            maxOccurs=10,
             maxmegabites=5000,
             formats=[{"mimeType":"application/x-netcdf"}],
             )
+
+    def get_nc_files(self):
+        nc_files = []
+        value = self.netcdf_url_in.getValue()
+        if value != None:
+            if type(value) == types.ListType:
+                nc_files = value
+            else:
+                nc_files = [value]
+
+        nc_files = map(os.path.abspath, nc_files)
+        return nc_files
+
+
 
 
     
