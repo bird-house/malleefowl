@@ -4,61 +4,75 @@ imports:
 - classpath:/common/groovy/actors.yaml
 - classpath:/common/python/actors.yaml
 
-#- classpath:/org/restflow/groovy/types.yaml  
-#- classpath:/org/restflow/directors.yaml
 
 components:
 
-- id: Count
+- id: Sources
   type: Workflow
   properties:
     director: !ref MTDataDrivenDirector
     nodes:
-    - !ref CountToTen
-    - !ref PrintNumber
+    - !ref Source1
+    - !ref Source2
+    - !ref SourceCollector
+    - !ref PrintSource
 
+- id: Source1
+  type: GroovyActorNode
+  properties:
+    actor.step: source = "1"
+    outflows:
+      source: /source/
 
-- id: CountToTen
+- id: Source2
+  type: GroovyActorNode
+  properties:
+    actor.step: source = "2"
+    outflows:
+      source: /source/
+
+- id: SourceCollector
   type: Node
   properties:
-    actor: !ref Ramp
+    actor: !ref CollectorActor
     constants:
-      min: 1
-      max: 10
+      max: 2
+    inflows:
+      source: /source/
     outflows:
-      number: /number/
-    endFlowOnNoOutput: true
+      allSources: /allSources/
     
-- id: PrintNumber
+- id: PrintSource
   type: GroovyActorNode
   properties:
     actor.step: |
-      println number
+      println allSources
     inflows:
-      number: /number/
+      allSources: /allSources/
     
-- id: Ramp
+- id: CollectorActor
   type: GroovyActor
   properties:
     initialize: |
-      nextNumber = min
+      count = 0
+      currentSources = '0'
     step: |
-      if (nextNumber <= max) {
-        number = nextNumber
-        nextNumber = nextNumber + inc
-      } else {
-      	_status.setOutputEnable('number', false);
+      count = count + 1
+      currentSources = currentSources + ',' + source
+      allSources = currentSources
 
+      if (count <  max) {
+        _status.setOutputEnable('allSources', false);
       }
+     
     inputs:
-      min: 
+      max:
         default: 1
-      max: 
-        default: 1
-      inc: 
+      source: 
         default: 1
     outputs:
-      number:
+      allSources:
     state:
-      nextNumber:
+      currentSources:
+      count:
     
