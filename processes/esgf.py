@@ -106,19 +106,18 @@ class Wget(WPSProcess):
         self.status.set(msg="logon successful", percentDone=10, propagate=True)
 
         netcdf_url = self.netcdf_url_in.getValue()
-
-        cache_dir = "/tmp/cache/wget"
+        cache_path = self.get_cache_path()
         
         self.cmd(cmd=["wget", 
                       "--certificate", esgf_credentials, 
                       "--private-key", esgf_credentials, 
                       "--no-check-certificate", 
                       "-N",
-                      "-P", cache_dir,
+                      "-P", cache_path,
                       "--progress", "dot:mega",
                       netcdf_url], stdout=True)
         
-        out = os.path.join(cache_dir, os.path.basename(netcdf_url))
+        out = os.path.join(cache_path, os.path.basename(netcdf_url))
         self.message('out path=%s' % (out), force=True)
         self.status.set(msg="retrieved netcdf file", percentDone=90, propagate=True)
         

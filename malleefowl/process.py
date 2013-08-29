@@ -8,6 +8,7 @@ import os
 import types
 
 from pywps.Process import WPSProcess as PyWPSProcess
+from pywps import config
 
 class WPSProcess(PyWPSProcess):
     """This is the base class for all climdaps wps processes."""
@@ -30,6 +31,9 @@ class WPSProcess(PyWPSProcess):
             metadata = metadata,
             abstract=abstract,
             grassLocation = False)
+
+    def get_cache_path(self):
+        return config.getConfigValue("server","cachePath")
 
 class WorkflowProcess(WPSProcess):
     """This is the base class for all workflow processes."""
