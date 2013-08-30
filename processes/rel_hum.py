@@ -109,6 +109,7 @@ class RelHumProcess(WorkflowProcess):
             )         
             
     def execute(self):
+        
         # from os import curdir, path
         # nc_filename = path.abspath(self.netcdf_in.getValue(asFile=False))
         result = self.cmd(cmd=["/home/main/sandbox/climdaps/src/Malleefowl/processes/dkrz/rel_hum.sh", self.path_in.getValue(), self.stringIn.getValue(), self.individualBBoxIn.getValue(), self.start_date_in.getValue(),   self.end_date_in.getValue()], stdout=True)
