@@ -50,10 +50,14 @@ class RelHumProcessEsgf(WorkflowProcess):
                 nc_tas = nc_file
             elif "huss" in ds.variables.keys():
                 nc_huss = nc_file
+            elif "hus" in ds.variables.keys():
+                nc_huss = nc_file
             elif "ps" in ds.variables.keys():
                 nc_ps = nc_file
+            elif "psl" in ds.variables.keys():
+                nc_ps = nc_file
             else:
-                raise Exeption("missing something")
+                raise Exception("missing something")
                 
         nc_hurs = path.join(path.abspath(curdir), "hurs_test.nc")
         rel_hum_command = path.join(path.dirname(__file__),"rel_hum_esgf.sh")
