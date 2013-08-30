@@ -14,7 +14,7 @@ class RelHumProcessEsgf(WorkflowProcess):
         # definition of this process
         WorkflowProcess.__init__(self, 
             identifier = "de.csc.relhum_esgf",
-            title="Specific to relative humidity",
+            title="Specific to relative humidity (incl file selection)",
             version = "0.1",
             #storeSupported = "true",   # async
             #statusSupported = "true",  # retrieve status, needs to be true for async 
