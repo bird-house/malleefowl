@@ -9,10 +9,13 @@ CHANGES = open(os.path.join(here, 'CHANGES.rst')).read()
 requires = [
     'PyWPS',
     'lxml',
-    'htmltmpl',
+    #'htmltmpl',
     'python-magic',
     'esgf-pyclient',
-    'MyProxyClient'
+    'MyProxyClient',
+    'netCDF4',
+    'nose',
+    'rednose'
     ]
 
 classifiers=[
@@ -35,11 +38,11 @@ setup(name='Malleefowl',
       author_email='ehbrecht@dkrz.de',
       url='http://www.dkrz.de',
       license = "http://www.gnu.org/licenses/gpl.html",
-      keywords='wps PyWPS Python',
+      keywords='wps PyWPS Python Malleefowl netcdf esgf',
       packages=find_packages(),
       include_package_data=True,
       zip_safe=False,
-      #test_suite='phoenix',
+      test_suite='nose.collector',
       install_requires=requires,
       #entry_points="""\
       #""",
