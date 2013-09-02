@@ -14,6 +14,7 @@ import StringIO
 from pyesgf.logon import LogonManager
 
 from malleefowl.process import WPSProcess
+from malleefowl import utils
 
 def logon(openid, password):
     # TODO: unset x509 env
@@ -173,7 +174,7 @@ class OpenDAP(WPSProcess):
             title = "Start Index",
             minOccurs = 1,
             maxOccurs = 1,
-            default="1",
+            default="0",
             type=type(1)
             )
 
@@ -182,7 +183,7 @@ class OpenDAP(WPSProcess):
             title = "End Index",
             minOccurs = 1,
             maxOccurs = 1,
-            default="1",
+            default="10",
             type=type(1)
             )
 
@@ -210,9 +211,7 @@ class OpenDAP(WPSProcess):
             )
         
     def execute(self):
-        from Scientific.IO.NetCDF import NetCDFFile
-        
-        self.status.set(msg="stating esgf download", percentDone=5, propagate=True)
+        self.status.set(msg="starting esgf download", percentDone=5, propagate=True)
 
         logon(
             openid=self.openid_in.getValue(), 
@@ -229,21 +228,15 @@ class OpenDAP(WPSProcess):
                 opendap_urls = [value]
 
         percent_done = 10
-        percent_per_step = 40.0 / len(opendap_urls)
+        percent_per_step = 80.0 / len(opendap_urls)
         step = 0
         nc_files = []
         for opendap_url in opendap_urls:
-            ds = NetCDFFile(opendap_url)
-            var_str = ','.join(ds.variables.keys())
-
-            time_dim = 'time,%d,%d' % (int(self.startindex_in.getValue()), int(self.endindex_in.getValue()))
-        
-            percent_done += percent_per_step
-            self.status.set(msg="retrieved netcdf metadata", percentDone=percent_done, propagate=True)
-
             (_, nc_filename) = tempfile.mkstemp(suffix='.nc')
-            cmd = ["ncks", "-O", "-v", var_str, "-d", time_dim, "-o", nc_filename, opendap_url]
-            self.cmd(cmd=cmd, stdout=True)
+
+            istart = self.startindex_in.getValue()
+            istop = self.endindex_in.getValue()
+            utils.nc_copy(source=opendap_url, target=nc_filename, istart=istart, istop=istop)
             nc_files.append(nc_filename)
           
             percent_done += percent_per_step

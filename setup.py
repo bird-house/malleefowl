@@ -15,7 +15,7 @@ requires = [
     'MyProxyClient',
     'netCDF4',
     'nose',
-    'rednose'
+#    'rednose'
     ]
 
 classifiers=[
