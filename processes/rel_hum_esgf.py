@@ -18,11 +18,9 @@ class RelHumProcessEsgf(WorkflowProcess):
             identifier = "de.csc.relhum_esgf",
             title="Specific to relative humidity (incl file selection)",
             version = "0.1",
-            metadata=[
-                {"title":"Foobar","href":"http://foo/bar"},
-                {"title":"Barfoo","href":"http://bar/foo"},
-                {"title":"Literal process"},
-                {"href":"http://foobar/"}],
+            metadata= [
+                       {"title": "Climate Service Center", "href": "http://www.climate-service-center.de/"}
+                      ],
             abstract="Just testing a nice script to calculate the relative humidity ...",
             )
 

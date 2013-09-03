@@ -41,7 +41,7 @@ class WorkflowProcess(WPSProcess):
     def __init__(self, identifier, title, version, metadata=[], abstract=""):
         wf_identifier = identifier + '_workflow'
         metadata.append(
-            {"title":"workflow", "href":"http://www.c3grid.de"}
+            {"title":"C3Grid", "href":"http://www.c3grid.de"},
             )
         WPSProcess.__init__(
             self,
