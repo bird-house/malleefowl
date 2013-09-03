@@ -9,13 +9,13 @@ import subprocess
 
 from malleefowl.process import WorkflowProcess
 
-class RelHumProcessEsgf(WorkflowProcess):
+class EsgfRelHumProcess(WorkflowProcess):
     """This process calculates the relative humidity"""
 
     def __init__(self):
         # definition of this process
         WorkflowProcess.__init__(self, 
-            identifier = "de.csc.relhum_esgf",
+            identifier = "de.csc.esgf.relhum",
             title="Specific to relative humidity (with ESGF data source)",
             version = "0.1",
             metadata= [

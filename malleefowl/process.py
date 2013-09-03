@@ -14,7 +14,6 @@ class WPSProcess(PyWPSProcess):
     """This is the base class for all climdaps wps processes."""
 
     def __init__(self, identifier, title, version, metadata=[], abstract=""):
-        # TODO: what can i do with this?
         metadata.append(
             {"title":"ClimDaPs", "href":"http://www.dkrz.de"}
             )
