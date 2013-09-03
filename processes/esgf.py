@@ -111,7 +111,7 @@ class Wget(SourceProcess):
         self.message('out path=%s' % (out), force=True)
         self.status.set(msg="retrieved netcdf file", percentDone=90, propagate=True)
         
-        self.netcdf_out.setValue(out)
+        self.output.setValue(out)
 
 
 class OpenDAP(SourceProcess):
@@ -154,7 +154,7 @@ class OpenDAP(SourceProcess):
             abstract="OpenDAP URL",
             metadata=[],
             minOccurs=1,
-            maxOccurs=10,
+            maxOccurs=1,
             type=type('')
             )
 
@@ -163,7 +163,7 @@ class OpenDAP(SourceProcess):
             title = "Start Index",
             minOccurs = 1,
             maxOccurs = 1,
-            default="0",
+            default="1",
             type=type(1)
             )
 
@@ -172,19 +172,8 @@ class OpenDAP(SourceProcess):
             title = "End Index",
             minOccurs = 1,
             maxOccurs = 1,
-            default="10",
-            type=type(1)
-            )
-
-        # output
-        # ------
-
-        self.num_merged_files_out = self.addLiteralOutput(
-            identifier="num_merged_files",
-            title="Number of merged Files",
-            abstract="Number of merged Files",
             default="1",
-            type=type(1),
+            type=type(1)
             )
 
     def execute(self):
@@ -196,43 +185,18 @@ class OpenDAP(SourceProcess):
 
         self.status.set(msg="logon successful", percentDone=10, propagate=True)
 
-        opendap_urls = []
-        value = self.opendap_url_in.getValue()
-        if value != None:
-            if type(value) == types.ListType:
-                opendap_urls = value
-            else:
-                opendap_urls = [value]
+        opendap_url = self.opendap_url_in.getValue()
+        
+        (_, nc_filename) = tempfile.mkstemp(suffix='.nc')
 
-        percent_done = 10
-        percent_per_step = 80.0 / len(opendap_urls)
-        step = 0
-        nc_files = []
-        for opendap_url in opendap_urls:
-            (_, nc_filename) = tempfile.mkstemp(suffix='.nc')
+        istart = self.startindex_in.getValue() - 1
+        istop = self.endindex_in.getValue()
+        utils.nc_copy(source=opendap_url, target=nc_filename, istart=istart, istop=istop)
+        
+        self.status.set(msg="retrieved netcdf file", percentDone=90, propagate=True)
 
-            istart = self.startindex_in.getValue()
-            istop = self.endindex_in.getValue()
-            utils.nc_copy(source=opendap_url, target=nc_filename, istart=istart, istop=istop)
-            nc_files.append(nc_filename)
-          
-            percent_done += percent_per_step
-            self.status.set(msg="retrieved netcdf file", percentDone=percent_done, propagate=True)
-
-            step += 1
-
-        # merge output files
-        if len(nc_files) > 1:
-            cmd = ['cdo', 'merge']
-            cmd.extend(nc_files)
-            (_, nc_filename) = tempfile.mkstemp(suffix='.nc')
-            cmd.append(nc_filename)
-            self.cmd(cmd=cmd, stdout=True)
-            self.output.setValue(nc_filename)
-        else:
-            self.output.setValue(nc_files[0])
-        self.num_merged_files_out.setValue(len(nc_files))
-
+        self.output.setValue(nc_filename)
+        
 class Metadata(WPSProcess):
     """This process downloads files form esgf data node via opendap"""
 

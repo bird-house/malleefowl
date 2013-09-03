@@ -56,7 +56,7 @@ class SourceProcess(WPSProcess):
         # complex output
         # -------------
 
-        self.netcdf_out = self.addComplexOutput(
+        self.output = self.addComplexOutput(
             identifier="output",
             title="NetCDF Output",
             abstract="NetCDF Output",

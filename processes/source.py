@@ -39,6 +39,6 @@ class Filesystem(SourceProcess):
 
         self.status.set(msg="retrieved file", percentDone=90, propagate=True)
         
-        self.netcdf_out.setValue(path)
+        self.output.setValue(path)
 
 
