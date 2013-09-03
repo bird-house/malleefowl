@@ -13,7 +13,7 @@ import StringIO
 
 from pyesgf.logon import LogonManager
 
-from malleefowl.process import WPSProcess
+from malleefowl.process import WPSProcess, SourceProcess
 from malleefowl import utils
 
 def logon(openid, password):
@@ -41,11 +41,11 @@ def logon(openid, password):
 
     return esgf_credentials
 
-class Wget(WPSProcess):
+class Wget(SourceProcess):
     """This process downloads files form esgf data node via wget and http"""
 
     def __init__(self):
-        WPSProcess.__init__(self,
+        SourceProcess.__init__(self,
             identifier = "org.malleefowl.esgf.wget",
             title = "Download files from esgf data node via wget",
             version = "0.1",
@@ -85,18 +85,7 @@ class Wget(WPSProcess):
             type=type('')
             )
 
-        # complex output
-        # -------------
-
-        self.netcdf_out = self.addComplexOutput(
-            identifier="output",
-            title="NetCDF Output",
-            abstract="NetCDF Output",
-            metadata=[],
-            formats=[{"mimeType":"application/x-netcdf"}],
-            asReference=True,
-            )
-
+      
     def execute(self):
         self.status.set(msg="starting esgf download", percentDone=5, propagate=True)
 
@@ -125,11 +114,11 @@ class Wget(WPSProcess):
         self.netcdf_out.setValue(out)
 
 
-class OpenDAP(WPSProcess):
+class OpenDAP(SourceProcess):
     """This process downloads files form esgf data node via opendap"""
 
     def __init__(self):
-        WPSProcess.__init__(self,
+        SourceProcess.__init__(self,
             identifier = "org.malleefowl.esgf.opendap",
             title = "Download files from esgf data node via OpenDAP",
             version = "0.1",
@@ -198,18 +187,6 @@ class OpenDAP(WPSProcess):
             type=type(1),
             )
 
-        # complex output
-        # -------------
-
-        self.output = self.addComplexOutput(
-            identifier="output",
-            title="NetCDF Output",
-            abstract="NetCDF Output",
-            metadata=[],
-            formats=[{"mimeType":"application/x-netcdf"}],
-            asReference=True,
-            )
-        
     def execute(self):
         self.status.set(msg="starting esgf download", percentDone=5, propagate=True)
 

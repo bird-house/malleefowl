@@ -7,14 +7,14 @@ from datetime import datetime, date
 import tempfile
 import subprocess
 
-from malleefowl.process import WorkflowProcess
+from malleefowl.process import WorkerProcess
 
-class EsgfRelHumProcess(WorkflowProcess):
+class EsgfRelHumProcess(WorkerProcess):
     """This process calculates the relative humidity"""
 
     def __init__(self):
         # definition of this process
-        WorkflowProcess.__init__(self, 
+        WorkerProcess.__init__(self, 
             identifier = "de.csc.esgf.relhum",
             title="Specific to relative humidity (with ESGF data source)",
             version = "0.1",

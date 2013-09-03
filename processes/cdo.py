@@ -6,15 +6,15 @@ Author: Carsten Ehbrecht (ehbrecht@dkrz.de)
 
 import tempfile
 
-from malleefowl.process import WorkflowProcess
+from malleefowl.process import WorkerProcess
 
-class CDOOperation(WorkflowProcess):
+class CDOOperation(WorkerProcess):
     """This process calls cdo with operation on netcdf file"""
     def __init__(self):
-        WorkflowProcess.__init__(
+        WorkerProcess.__init__(
             self,
             identifier = "org.malleefowl.cdo.operation",
-            title = "cdo operation",
+            title = "CDO Operation",
             version = "0.1",
             metadata=[
                 {"title":"CDO","href":"https://code.zmaw.de/projects/cdo"},
@@ -74,14 +74,14 @@ class CDOOperation(WorkflowProcess):
         self.output.setValue( out_filename )
 
 
-class CDOInfo(WorkflowProcess):
+class CDOInfo(WorkerProcess):
     """This process calls cdo sinfo on netcdf file"""
 
     def __init__(self):
-        WorkflowProcess.__init__(
+        WorkerProcess.__init__(
             self,
             identifier = "org.malleefowl.cdo.sinfo",
-            title = "cdo sinfo",
+            title = "CDO sinfo",
             version = "0.1",
             metadata=[
                 {"title":"CDO","href":"https://code.zmaw.de/projects/cdo"},
