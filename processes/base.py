@@ -30,8 +30,8 @@ class ProcessMetadata(PyWPSProcess):
         # input data
         # ----------
 
-        self.process_identifier = self.addLiteralInput(
-            identifier="process_identifier",
+        self.processid = self.addLiteralInput(
+            identifier="processid",
             title="Process Identifier",
             abstract="Process Identifier",
             type=type(''),
@@ -42,33 +42,18 @@ class ProcessMetadata(PyWPSProcess):
         # output data
         # -----------
 
-        self.esgfilter = self.addLiteralOutput(
-            identifier="esgfilter",
-            title="ESGF Query Filter",
-            abstract="ESGF Query Filter",
-            default=None,
-            type=type(''),
-            )
-
-        self.output = self.addComplexOutput(
+        self.output = self.addLiteralOutput(
             identifier="output",
             title="Process Metadata",
             abstract="Process Metadata as JSON",
-            metadata=[],
-            formats=[{"mimeType":"application/json"}],
-            asReference=True ,
+            default=None,
+            type=type(''),
             )
-
 
     def execute(self):
         metadata = {'esgfilter': 'variable:tas,variable:huss,variable:psl'}
 
         self.status.set(msg="metadata retrieved", percentDone=90, propagate=True)
 
-        self.esgfilter.setValue( metadata.get('esgfilter') )
+        self.output.setValue( json.dumps(metadata) )
 
-        (_, out_filename) = tempfile.mkstemp(suffix='.json')
-        with open(out_filename, 'w') as fp:
-            fp.write( json.dumps(metadata) )
-            fp.close()
-            self.output.setValue( out_filename )
