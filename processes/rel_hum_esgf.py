@@ -16,7 +16,7 @@ class RelHumProcessEsgf(WorkflowProcess):
         # definition of this process
         WorkflowProcess.__init__(self, 
             identifier = "de.csc.relhum_esgf",
-            title="Specific to relative humidity (incl file selection)",
+            title="Specific to relative humidity (with ESGF data source)",
             version = "0.1",
             metadata= [
                        {"title": "Climate Service Center", "href": "http://www.climate-service-center.de/"}
