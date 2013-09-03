@@ -10,6 +10,8 @@ import types
 from pywps.Process import WPSProcess as PyWPSProcess
 from pywps import config
 
+import utils
+
 class WPSProcess(PyWPSProcess):
     """This is the base class for all climdaps wps processes."""
 
@@ -37,11 +39,15 @@ class WPSProcess(PyWPSProcess):
 class WorkflowProcess(WPSProcess):
     """This is the base class for all workflow processes."""
 
-    def __init__(self, identifier, title, version, metadata=[], abstract=""):
+    def __init__(self, identifier, title, version, metadata=[], abstract="",
+                 extra_metadata={'esgfilter': 'institute:MPI-M,variable:tas,experiment:esmHistorical,ensemble:r1i1p1,time_frequency:day'}):
         wf_identifier = identifier + '_workflow'
         metadata.append(
             {"title":"C3Grid", "href":"http://www.c3grid.de"},
             )
+
+        utils.register_process_metadata(wf_identifier, extra_metadata)
+        
         WPSProcess.__init__(
             self,
             identifier = wf_identifier,

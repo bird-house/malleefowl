@@ -14,6 +14,7 @@ requires = [
     'esgf-pyclient',
     'MyProxyClient',
     'netCDF4',
+    'pymongo',
     'nose',
 #    'rednose'
     ]

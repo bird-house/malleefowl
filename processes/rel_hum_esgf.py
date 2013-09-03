@@ -22,6 +22,7 @@ class EsgfRelHumProcess(WorkflowProcess):
                        {"title": "Climate Service Center", "href": "http://www.climate-service-center.de/"}
                       ],
             abstract="Just testing a nice script to calculate the relative humidity ...",
+            extra_metadata={'esgfilter': 'institute:MPI-M,variable:tas,variable:hus,variable:psl'},
             )
 
         # Literal Input Data

@@ -2,11 +2,37 @@
 Utility functions for WPS processes.
 """
 
+import json
+import pymongo
 from netCDF4 import Dataset
+
+from pywps import config
 
 import logging
 
 log = logging.getLogger(__file__)
+
+def database():
+    dburi = config.getConfigValue("server", "mongodbUrl")
+    conn = pymongo.Connection(dburi)
+    return conn.malleefowl_db
+
+def register_process_metadata(identifier, metadata):
+    if identifier != None and metadata != None:
+        db = database()
+        process_metadata = { 'identifier': identifier, 'metadata': json.dumps(metadata) }
+        db.metadata.update(
+            {'identifier': process_metadata['identifier']},
+            process_metadata,
+            True)
+
+def retrieve_process_metadata(identifier):
+    db = database()
+    process_metadata = db.metadata.find_one({'identifier': identifier})
+    metadata = {}
+    if process_metadata != None:
+        metadata = json.loads(process_metadata.get('metadata'))
+    return metadata
 
 def nc_copy(source, target, overwrite=True, time_dimname='time', nchunk=10, istart=0, istop=-1, format='NETCDF3_64BIT'):
     """copy netcdf file from opendap to netcdf3 file
