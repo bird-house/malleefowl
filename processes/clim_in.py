@@ -4,10 +4,10 @@ Author: Nils Hempelmann (nils.hempelmann@hzg)
 """
 
 from datetime import datetime, date
-from malleefowl.process import WorkflowProcess
+from malleefowl.process import WorkerProcess
 import subprocess
 
-class ClimInProcess(WorkflowProcess):
+class ClimInProcess(WorkerProcess):
     """This process calculates the relative humidity"""
 
     def __init__(self):
