@@ -32,9 +32,17 @@ class WPSProcess(PyWPSProcess):
             metadata = metadata,
             abstract=abstract,
             grassLocation = False)
-
+        
     def get_cache_path(self):
         return config.getConfigValue("server","cachePath")
+
+    @property
+    def files_path(self):
+        return config.getConfigValue("server","filesPath")
+
+    @property
+    def files_url(self):
+        return config.getConfigValue("server","filesUrl")
 
 class SourceProcess(WPSProcess):
      """This is the base class for all source processes."""
