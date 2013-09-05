@@ -12,7 +12,7 @@ class ClimInProcess(WorkerProcess):
 
     def __init__(self):
         # definition of this process
-        WorkflowProcess.__init__(self, 
+        WorkerProcess.__init__(self, 
             identifier = "de.csc.clim_in",
             title="Calculation of climate indices",
             version = "0.1",
@@ -25,6 +25,10 @@ class ClimInProcess(WorkerProcess):
                 {"title":"Literal process"},
                 {"href":"http://foobar/"}],
             abstract="Just testing a nice script to calculate the relative humidity ...",
+            extra_metadata={
+                  'esgfilter': 'variable:tas,variable:pr,time_frequency:day',  #institute:MPI-M,
+                  'esgquery': 'variable:tas AND variable:pr AND time_frequency:day' # institute:MPI-M 
+                  },
             )
 
         # Literal Input Data

@@ -1,5 +1,5 @@
 """
-Processes for rel_hum 
+Processes for Penman Monteith relation 
 Author: Nils Hempelmann (nils.hempelmann@hzg)
 """
 
@@ -9,33 +9,46 @@ import subprocess
 
 from malleefowl.process import WorkerProcess
 
-class EsgfRelHumProcess(WorkerProcess):
-    """This process calculates the relative humidity"""
+class PenmanProcess(WorkerProcess):
+    """This process calculates the evapotranspiration following the Pennan Monteith equation"""
 
     def __init__(self):
         # definition of this process
         WorkerProcess.__init__(self, 
-            identifier = "de.csc.esgf.relhum",
-            title="Specific to relative humidity (with ESGF data source)",
+            identifier = "de.csc.esgf.penman",
+            title="evapotranspiration following the Penman Monteith equation",
             version = "0.1",
             metadata= [
                        {"title": "Climate Service Center", "href": "http://www.climate-service-center.de/"}
                       ],
-            abstract="Just testing a nice script to calculate the relative humidity ...",
+            abstract="Just testing a nice script to calculate the Penman Monteith equation...",
             extra_metadata={
-                  'esgfilter': 'variable:tas,variable:huss,variable:ps',  #institute:MPI-M,
-                  'esgquery': 'variable:tas AND variable:huss AND variable:ps' # institute:MPI-M 
+                  'esgfilter': 'variable:sfcwind,variable:rlds,variable:rsds,
+                           variable:rlus,variable:rsus,variable:ps,variable:huss,
+                           variable:pr,variable:tas,time_frequency:day',  #institute:MPI-M,
+                  'esgquery': 'variable:sfcwind 
+                           AND variable:rlds
+                           AND variable:rsds
+                           AND variable:rlus
+                           AND variable:rsus
+                           AND variable:ps
+                           AND variable:huss
+                           AND variable:pr
+                           AND variable:tas
+                           AND time_frequency:day'
+                           # institute:MPI-M 
                   },
             )
 
+            
         # Literal Input Data
         # ------------------
 
        
         self.output = self.addComplexOutput(
             identifier="output",
-            title="Relative Humidity",
-            abstract="Calculated Relative Humidity",
+            title="Evapotranspiration",
+            abstract="Calculated Evapotranspiration following Penman Monteith relation ",
             formats=[{"mimeType":"application/netcdf"}],
             asReference=True,
             )         
@@ -47,6 +60,7 @@ class EsgfRelHumProcess(WorkerProcess):
         # default var names
         huss = 'huss'
         ps = 'ps'
+    
 
         # guess var names of files
         nc_files = self.get_nc_files()
@@ -54,16 +68,22 @@ class EsgfRelHumProcess(WorkerProcess):
             ds = NetCDFFile(nc_file)
             if "tas" in ds.variables.keys():
                 nc_tas = nc_file
-            elif "huss" in ds.variables.keys():
-                nc_huss = nc_file
-            elif "hus" in ds.variables.keys():
-                nc_huss = nc_file
-                huss = 'hus'
+            elif "sfcwind" in ds.variables.keys():
+                nc_sfcwind = nc_file
+            elif "rlds" in ds.variables.keys():
+                nc_rlds = nc_file
+            elif "rsds" in ds.variables.keys():
+                nc_rsds = nc_file
+            elif "rlus" in ds.variables.keys():
+                nc_rlus = nc_file
+            elif "rsus" in ds.variables.keys():
+                nc_rsus = nc_file
             elif "ps" in ds.variables.keys():
                 nc_ps = nc_file
-            elif "psl" in ds.variables.keys():
-                nc_ps = nc_file
-                ps = 'psl'
+            elif "huss" in ds.variables.keys():
+                nc_huss = nc_file
+            elif "pr" in ds.variables.keys():
+                nc_pr = nc_file
             else:
                 raise Exception("input netcdf file has not variable tas|huss|ps")
                 
