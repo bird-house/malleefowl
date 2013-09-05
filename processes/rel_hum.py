@@ -4,15 +4,15 @@ Author: Nils Hempelmann (nils.hempelmann@hzg)
 """
 
 from datetime import datetime, date
-from malleefowl.process import WorkflowProcess
+from malleefowl.process import WPSProcess
 import subprocess
 
-class RelHumProcess(WorkflowProcess):
+class RelHumProcess(WPSProcess):
     """This process calculates the relative humidity"""
 
     def __init__(self):
         # definition of this process
-        WorkflowProcess.__init__(self, 
+        WPSProcess.__init__(self, 
             identifier = "de.csc.relhum",
             title="Specific to relative humidity",
             version = "0.1",

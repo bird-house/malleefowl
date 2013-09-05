@@ -13,7 +13,8 @@ import StringIO
 
 from pyesgf.logon import LogonManager
 
-from malleefowl.process import WPSProcess
+from malleefowl.process import WPSProcess, SourceProcess
+from malleefowl import utils
 
 def logon(openid, password):
     # TODO: unset x509 env
@@ -40,11 +41,11 @@ def logon(openid, password):
 
     return esgf_credentials
 
-class Wget(WPSProcess):
+class Wget(SourceProcess):
     """This process downloads files form esgf data node via wget and http"""
 
     def __init__(self):
-        WPSProcess.__init__(self,
+        SourceProcess.__init__(self,
             identifier = "org.malleefowl.esgf.wget",
             title = "Download files from esgf data node via wget",
             version = "0.1",
@@ -84,18 +85,7 @@ class Wget(WPSProcess):
             type=type('')
             )
 
-        # complex output
-        # -------------
-
-        self.netcdf_out = self.addComplexOutput(
-            identifier="output",
-            title="NetCDF Output",
-            abstract="NetCDF Output",
-            metadata=[],
-            formats=[{"mimeType":"application/x-netcdf"}],
-            asReference=True,
-            )
-
+      
     def execute(self):
         self.status.set(msg="starting esgf download", percentDone=5, propagate=True)
 
@@ -121,14 +111,14 @@ class Wget(WPSProcess):
         self.message('out path=%s' % (out), force=True)
         self.status.set(msg="retrieved netcdf file", percentDone=90, propagate=True)
         
-        self.netcdf_out.setValue(out)
+        self.output.setValue(out)
 
 
-class OpenDAP(WPSProcess):
+class OpenDAP(SourceProcess):
     """This process downloads files form esgf data node via opendap"""
 
     def __init__(self):
-        WPSProcess.__init__(self,
+        SourceProcess.__init__(self,
             identifier = "org.malleefowl.esgf.opendap",
             title = "Download files from esgf data node via OpenDAP",
             version = "0.1",
@@ -164,7 +154,7 @@ class OpenDAP(WPSProcess):
             abstract="OpenDAP URL",
             metadata=[],
             minOccurs=1,
-            maxOccurs=10,
+            maxOccurs=1,
             type=type('')
             )
 
@@ -186,33 +176,8 @@ class OpenDAP(WPSProcess):
             type=type(1)
             )
 
-        # output
-        # ------
-
-        self.num_merged_files_out = self.addLiteralOutput(
-            identifier="num_merged_files",
-            title="Number of merged Files",
-            abstract="Number of merged Files",
-            default="1",
-            type=type(1),
-            )
-
-        # complex output
-        # -------------
-
-        self.output = self.addComplexOutput(
-            identifier="output",
-            title="NetCDF Output",
-            abstract="NetCDF Output",
-            metadata=[],
-            formats=[{"mimeType":"application/x-netcdf"}],
-            asReference=True,
-            )
-        
     def execute(self):
-        from Scientific.IO.NetCDF import NetCDFFile
-        
-        self.status.set(msg="stating esgf download", percentDone=5, propagate=True)
+        self.status.set(msg="starting esgf download", percentDone=5, propagate=True)
 
         logon(
             openid=self.openid_in.getValue(), 
@@ -220,49 +185,18 @@ class OpenDAP(WPSProcess):
 
         self.status.set(msg="logon successful", percentDone=10, propagate=True)
 
-        opendap_urls = []
-        value = self.opendap_url_in.getValue()
-        if value != None:
-            if type(value) == types.ListType:
-                opendap_urls = value
-            else:
-                opendap_urls = [value]
-
-        percent_done = 10
-        percent_per_step = 40.0 / len(opendap_urls)
-        step = 0
-        nc_files = []
-        for opendap_url in opendap_urls:
-            ds = NetCDFFile(opendap_url)
-            var_str = ','.join(ds.variables.keys())
-
-            time_dim = 'time,%d,%d' % (int(self.startindex_in.getValue()), int(self.endindex_in.getValue()))
+        opendap_url = self.opendap_url_in.getValue()
         
-            percent_done += percent_per_step
-            self.status.set(msg="retrieved netcdf metadata", percentDone=percent_done, propagate=True)
+        (_, nc_filename) = tempfile.mkstemp(suffix='.nc')
 
-            (_, nc_filename) = tempfile.mkstemp(suffix='.nc')
-            cmd = ["ncks", "-O", "-v", var_str, "-d", time_dim, "-o", nc_filename, opendap_url]
-            self.cmd(cmd=cmd, stdout=True)
-            nc_files.append(nc_filename)
-          
-            percent_done += percent_per_step
-            self.status.set(msg="retrieved netcdf file", percentDone=percent_done, propagate=True)
+        istart = self.startindex_in.getValue() - 1
+        istop = self.endindex_in.getValue()
+        utils.nc_copy(source=opendap_url, target=nc_filename, istart=istart, istop=istop)
+        
+        self.status.set(msg="retrieved netcdf file", percentDone=90, propagate=True)
 
-            step += 1
-
-        # merge output files
-        if len(nc_files) > 1:
-            cmd = ['cdo', 'merge']
-            cmd.extend(nc_files)
-            (_, nc_filename) = tempfile.mkstemp(suffix='.nc')
-            cmd.append(nc_filename)
-            self.cmd(cmd=cmd, stdout=True)
-            self.output.setValue(nc_filename)
-        else:
-            self.output.setValue(nc_files[0])
-        self.num_merged_files_out.setValue(len(nc_files))
-
+        self.output.setValue(nc_filename)
+        
 class Metadata(WPSProcess):
     """This process downloads files form esgf data node via opendap"""
 

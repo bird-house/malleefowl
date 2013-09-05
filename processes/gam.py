@@ -4,15 +4,15 @@ Author: Nils Hempelmann (nils.hempelmann@hzg)
 """
 
 from datetime import datetime, date
-from malleefowl.process import WorkflowProcess
+from malleefowl.process import WorkerProcess
 import subprocess
 
-class GamProcess(WorkflowProcess):
+class GamProcess(WorkerProcess):
     """This process calculates the relative humidity"""
 
     def __init__(self):
         # definition of this process
-        WorkflowProcess.__init__(self, 
+        WorkerProcess.__init__(self, 
             identifier = "de.csc.gam",
             title="Gerneralized Additive Model",
             version = "0.1",

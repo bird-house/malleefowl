@@ -10,11 +10,12 @@ import types
 from pywps.Process import WPSProcess as PyWPSProcess
 from pywps import config
 
+import utils
+
 class WPSProcess(PyWPSProcess):
     """This is the base class for all climdaps wps processes."""
 
     def __init__(self, identifier, title, version, metadata=[], abstract=""):
-        # TODO: what can i do with this?
         metadata.append(
             {"title":"ClimDaPs", "href":"http://www.dkrz.de"}
             )
@@ -35,14 +36,47 @@ class WPSProcess(PyWPSProcess):
     def get_cache_path(self):
         return config.getConfigValue("server","cachePath")
 
-class WorkflowProcess(WPSProcess):
-    """This is the base class for all workflow processes."""
+class SourceProcess(WPSProcess):
+     """This is the base class for all source processes."""
 
-    def __init__(self, identifier, title, version, metadata=[], abstract=""):
-        wf_identifier = identifier + '_workflow'
+     def __init__(self, identifier, title, version, metadata=[], abstract=""):
+        wf_identifier = identifier + ".source"
         metadata.append(
-            {"title":"workflow", "href":"http://www.c3grid.de"}
+            {"title":"C3Grid", "href":"http://www.c3grid.de"},
             )
+
+        WPSProcess.__init__(
+            self,
+            identifier = wf_identifier,
+            title = title,
+            version = version,
+            metadata = metadata,
+            abstract=abstract)
+
+        # complex output
+        # -------------
+
+        self.output = self.addComplexOutput(
+            identifier="output",
+            title="NetCDF Output",
+            abstract="NetCDF Output",
+            metadata=[],
+            formats=[{"mimeType":"application/x-netcdf"}],
+            asReference=True,
+            )
+
+class WorkerProcess(WPSProcess):
+    """This is the base class for all worker processes."""
+
+    def __init__(self, identifier, title, version, metadata=[], abstract="",
+                 extra_metadata={'esgfilter': 'institute:MPI-M,variable:tas,experiment:esmHistorical,ensemble:r1i1p1,time_frequency:day'}):
+        wf_identifier = identifier + '.worker'
+        metadata.append(
+            {"title":"C3Grid", "href":"http://www.c3grid.de"},
+            )
+
+        utils.register_process_metadata(wf_identifier, extra_metadata)
+        
         WPSProcess.__init__(
             self,
             identifier = wf_identifier,

@@ -4,15 +4,15 @@ Processes for data source access
 Author: Carsten Ehbrecht (ehbrecht@dkrz.de)
 """
 
-from malleefowl.process import WPSProcess
+from malleefowl.process import SourceProcess
 
 
-class Filesystem(WPSProcess):
+class Filesystem(SourceProcess):
     """This process downloads files form esgf data node via wget and http"""
 
     def __init__(self):
-        WPSProcess.__init__(self,
-            identifier = "org.malleefowl.source.filesystem",
+        SourceProcess.__init__(self,
+            identifier = "org.malleefowl.filesystem",
             title = "Choose files from filesystem",
             version = "0.1",
             metadata=[
@@ -32,18 +32,6 @@ class Filesystem(WPSProcess):
             type = type('')
             )
 
-        # complex output
-        # -------------
-
-        self.netcdf_out = self.addComplexOutput(
-            identifier="output",
-            title="NetCDF Output",
-            abstract="NetCDF Output",
-            metadata=[],
-            formats=[{"mimeType":"application/x-netcdf"}],
-            asReference=True,
-            )
-
     def execute(self):
         self.status.set(msg="starting ...", percentDone=5, propagate=True)
 
@@ -51,6 +39,6 @@ class Filesystem(WPSProcess):
 
         self.status.set(msg="retrieved file", percentDone=90, propagate=True)
         
-        self.netcdf_out.setValue(path)
+        self.output.setValue(path)
 
 
