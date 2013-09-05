@@ -60,8 +60,7 @@ class PenmanProcess(WorkerProcess):
         # default var names
         huss = 'huss'
         ps = 'ps'
-    
-
+   
         # guess var names of files
         nc_files = self.get_nc_files()
         for nc_file in nc_files: 
@@ -87,36 +86,14 @@ class PenmanProcess(WorkerProcess):
             else:
                 raise Exception("input netcdf file has not variable tas|huss|ps")
                 
-        # merge ps and huss
-        (_, merged_ps_huss) = tempfile.mkstemp(suffix='.nc')
-        cmd = ['cdo', '-O', 'merge', nc_ps, nc_huss, merged_ps_huss]
-        self.cmd(cmd=cmd, stdout=True)
-
-        self.status.set(msg="relhum merged", percentDone=20, propagate=True)
+                
+                
+        def execute(self):
         
-        # ps * huss
-        (_, nc_e) = tempfile.mkstemp(suffix='.nc')
-        expr = "expr,\'e=((%s*%s)/62.2)\'" % (ps, huss)
-        cmd = ['cdo', expr, merged_ps_huss, nc_e]
-        self.cmd(cmd=cmd, stdout=True)
-
-        self.status.set(msg="relhum ps*hus", percentDone=40, propagate=True)
+        result = self.cmd(cmd=["/home/main/sandbox/climdaps/src/Malleefowl/processes/penman.sh")
         
-        # partial vapour pressure using Magnus-Formula over water
-        # cdo expr,'es=6.1078*10^(7.5*(tas-273.16)/(237.3+(tas-273.16)))' ../in/tas_$filename  ../out/es_$filename
-        (_, nc_es) = tempfile.mkstemp(suffix='.nc')
-        cmd = ['cdo', "expr,\'es=6.1078*exp(17.08085*(tas-273.16)/(234.175+(tas-273.16)))\'", nc_tas, nc_es]
-        self.cmd(cmd=cmd, stdout=True)
-
-        self.status.set(msg="relhum ps*hus", percentDone=60, propagate=True)
+        # literals
+        # subprocess.check_output(["/home/main/sandbox/climdaps/src/ClimDaPs_WPS/processes/dkrz/rel_hum.sh", self.path_in.getValue(), self.stringIn.getValue(), self.individualBBoxIn.getValue(), self.start_date_in.getValue(),   self.end_date_in.getValue()])
         
-        # calculate relative humidity
-        nc_hurs = path.join(path.abspath(curdir), "hurs_test.nc")
-        cmd = ['cdo', '-div', nc_e, nc_es, nc_hurs]
-        self.cmd(cmd=cmd, stdout=True)
-        
-        self.status.set(msg="relhum done", percentDone=90, propagate=True)
-        self.output.setValue( nc_hurs )
-        
-        
-        
+        self.file_out.setValue("/home/main/wps_data/hurs_AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_20060101_20101231.nc")
+   
