@@ -109,7 +109,11 @@ def nc_copy(source, target, overwrite=True, time_dimname='time', nchunk=10, ista
                     nmax = n+nchunk
                     if nmax > istop: nmax=istop
                     log.debug('copy chunk [%d:%d]', n, nmax)
-                    var[n-istart:nmax-istart] = ncvar[n:nmax]
+                    try:
+                        var[n-istart:nmax-istart] = ncvar[n:nmax]
+                    except:
+                        msg = "n=%d nmax=%d istart=%d istop=%d" % (n, nmax, istart, istop)
+                        raise Exception(msg)
             else:
                 var[0:istop-istart] = ncvar[:]
         else: # no unlim dim or 1-d variable, just copy all data at once.
