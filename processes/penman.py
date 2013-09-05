@@ -15,28 +15,16 @@ class PenmanProcess(WorkerProcess):
     def __init__(self):
         # definition of this process
         WorkerProcess.__init__(self, 
-            identifier = "de.csc.esgf.penman",
-            title="evapotranspiration following the Penman Monteith equation",
+            identifier = "de.csc.esgf.penman.worker",
+            title="evapotranspiration (Penman-Monteith)",
             version = "0.1",
             metadata= [
                        {"title": "Climate Service Center", "href": "http://www.climate-service-center.de/"}
                       ],
             abstract="Just testing a nice script to calculate the Penman Monteith equation...",
             extra_metadata={
-                  'esgfilter': 'variable:sfcwind,variable:rlds,variable:rsds,
-                           variable:rlus,variable:rsus,variable:ps,variable:huss,
-                           variable:pr,variable:tas,time_frequency:day',  #institute:MPI-M,
-                  'esgquery': 'variable:sfcwind 
-                           AND variable:rlds
-                           AND variable:rsds
-                           AND variable:rlus
-                           AND variable:rsus
-                           AND variable:ps
-                           AND variable:huss
-                           AND variable:pr
-                           AND variable:tas
-                           AND time_frequency:day'
-                           # institute:MPI-M 
+                  'esgfilter': 'variable:tas,variable:sfcwind,variable:ps,variable:rlds,variable:rsds,variable:rlus,variable:rsus,variable:huss,variable:pr ',  #institute:MPI-M,time_frequency:day
+                  'esgquery': 'variable:tas AND variable:sfcwind AND variable:ps AND variable:rlds AND variable:rsds AND variable:rlus AND variable:rsus AND variable:huss AND variable:pr' # institute:MPI-M 
                   },
             )
 
@@ -85,15 +73,13 @@ class PenmanProcess(WorkerProcess):
                 nc_pr = nc_file
             else:
                 raise Exception("input netcdf file has not variable tas|huss|ps")
-                
-                
-                
-        def execute(self):
+                     
+               
+        nc_evspsblpot = path.join(path.abspath(curdir), "nc_evspsblpot")
+        self.cmd(cmd=cmd, stdout=True)
+       
+        result = self.cmd(cmd=["/home/main/sandbox/climdaps/src/Malleefowl/processes/penman.sh", nc_tas, nc_sfcwind, nc_rlds, nc_rlus , nc_rsds, nc_rsus, nc_ps, nc_huss, nc_pr, nc_evspsblpot], stdout=True)
         
-        result = self.cmd(cmd=["/home/main/sandbox/climdaps/src/Malleefowl/processes/penman.sh")
+        self.status.set(msg="penman done", percentDone=90, propagate=True)
+        self.output.setValue( nc_evspsblpot )
         
-        # literals
-        # subprocess.check_output(["/home/main/sandbox/climdaps/src/ClimDaPs_WPS/processes/dkrz/rel_hum.sh", self.path_in.getValue(), self.stringIn.getValue(), self.individualBBoxIn.getValue(), self.start_date_in.getValue(),   self.end_date_in.getValue()])
-        
-        self.file_out.setValue("/home/main/wps_data/hurs_AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_20060101_20101231.nc")
-   

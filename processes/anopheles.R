@@ -8,19 +8,29 @@ library(RNetCDF)
 rm(list = ls())
 
 # get the argumets 
-setwd("/home/main/nils/anopheles/")
+# setwd("/home/main/nils/anopheles/")
 
-args <- "AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_20060101_20101231.nc"
+# args <- commandArgs(trailingOnly = TRUE)
 
+# args[1] <- "/home/main/data/tas_AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_20060101_20101231.nc"
+# args[2] <- "/home/main/data/hurs_AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_20060101_20101231.nc"
+# args[3] <- "/home/main/data/pr_AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_20060101_20101231.nc"
+# args[4] <- "/home/main/data/evspsbl_AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_20060101_20101231.nc"
+
+args <- unlist(strsplit(commandArgs(trailingOnly = TRUE), " "))
+
+print(args)
 
 # open appropriate files 
 
-nc_evspsbl <- open.nc((paste("./data/evspsbl_",args,sep = "")), write=FALSE)
-nc_pr <- open.nc((paste("./data/pr_",args,sep = "")), write=FALSE)
-nc_tas <- open.nc((paste("./data/tas_",args,sep = "")), write=FALSE)
-nc_hurs <- open.nc((paste("./data/hurs_",args,sep = "")), write=FALSE)
+nc_tas    <- open.nc(paste(args[1]), write=FALSE)
+nc_hurs   <- open.nc(paste(args[2]), write=FALSE)
+nc_pr     <- open.nc(paste(args[3]), write=FALSE)
+nc_evspsbl<- open.nc(paste(args[4]), write=FALSE)
 
-# get the shape of the domain 
+
+
+# get the shape of the domain
 
 dim_time <- dim.inq.nc(nc_tas, "time")$length
 dim_lat <- dim.inq.nc(nc_tas, "rlat")$length
@@ -28,7 +38,7 @@ dim_lon <- dim.inq.nc(nc_tas, "rlon")$length
 
 # generate the N4 output file
 # 
-nc_n4 <- create.nc((paste("./out/n4_",args,sep = "")), clobber=TRUE, large=FALSE, share=FALSE)
+nc_n4 <- create.nc(paste(args[5]), clobber=TRUE, large=FALSE, share=FALSE)
 
 dim.def.nc(nc_n4, "lon", dim_lon)
 dim.def.nc(nc_n4, "lat", dim_lat)
