@@ -69,7 +69,9 @@ class WorkerProcess(WPSProcess):
     """This is the base class for all worker processes."""
 
     def __init__(self, identifier, title, version, metadata=[], abstract="",
-                 extra_metadata={'esgfilter': 'institute:MPI-M,variable:tas,experiment:esmHistorical,ensemble:r1i1p1,time_frequency:day'}):
+                 extra_metadata={
+                     'esgfilter': 'institute:MPI-M,variable:tas,experiment:esmHistorical,ensemble:r1i1p1,time_frequency:day',
+                     'esgquery': '*'}):
         wf_identifier = identifier + '.worker'
         metadata.append(
             {"title":"C3Grid", "href":"http://www.c3grid.de"},
