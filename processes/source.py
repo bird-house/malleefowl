@@ -58,8 +58,8 @@ class GetLocalFile(SourceProcess):
 
     def __init__(self):
         SourceProcess.__init__(self,
-            identifier = "org.malleefowl.getfile",
-            title = "Get local file",
+            identifier = "org.malleefowl.storage.filesystem.getfile",
+            title = "Get files from filesystem storage",
             version = "0.1",
             metadata=[
                 {"title":"ESGF","href":"http://esgf.org"},

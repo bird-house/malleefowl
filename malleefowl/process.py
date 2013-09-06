@@ -32,8 +32,9 @@ class WPSProcess(PyWPSProcess):
             metadata = metadata,
             abstract=abstract,
             grassLocation = False)
-        
-    def get_cache_path(self):
+
+    @property
+    def cache_path(self):
         return config.getConfigValue("server","cachePath")
 
     @property
