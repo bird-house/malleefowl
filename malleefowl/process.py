@@ -62,7 +62,20 @@ class SourceProcess(WPSProcess):
             metadata = metadata,
             abstract=abstract)
 
-        # complex output
+        # input: source filter
+        # --------------------
+        
+        self.file_identifier = self.addLiteralInput(
+            identifier="file_identifier",
+            title="File Identifier",
+            abstract="URL, keyword, ...",
+            metadata=[],
+            minOccurs=1,
+            maxOccurs=1,
+            type=type('')
+            )
+
+        # netcdf output
         # -------------
 
         self.output = self.addComplexOutput(
@@ -102,7 +115,7 @@ class WorkerProcess(WPSProcess):
 
         # TODO: needs some work ...
         self.netcdf_url_in = self.addComplexInput(
-            identifier="file_url",
+            identifier="file_identifier",
             title="NetCDF File",
             abstract="NetCDF File",
             metadata=[],

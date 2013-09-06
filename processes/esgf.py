@@ -75,17 +75,6 @@ class Wget(SourceProcess):
             type = type('')
             )
 
-        self.netcdf_url_in = self.addLiteralInput(
-            identifier="file_url",
-            title="NetCDF URL",
-            abstract="NetCDF URL",
-            metadata=[],
-            minOccurs=1,
-            maxOccurs=1,
-            type=type('')
-            )
-
-      
     def execute(self):
         self.status.set(msg="starting esgf download", percentDone=5, propagate=True)
 
@@ -95,7 +84,7 @@ class Wget(SourceProcess):
         
         self.status.set(msg="logon successful", percentDone=10, propagate=True)
 
-        netcdf_url = self.netcdf_url_in.getValue()
+        netcdf_url = self.file_identifier.getValue()
         
         self.cmd(cmd=["wget", 
                       "--certificate", esgf_credentials, 
@@ -126,9 +115,6 @@ class OpenDAP(SourceProcess):
                 ],
             abstract="Download files from esgf data node via OpenDAP")
 
-        # opendap url
-        # -----------
-
         self.openid_in = self.addLiteralInput(
             identifier = "openid",
             title = "ESGF OpenID",
@@ -145,16 +131,6 @@ class OpenDAP(SourceProcess):
             minOccurs = 1,
             maxOccurs = 1,
             type = type('')
-            )
-
-        self.opendap_url_in = self.addLiteralInput(
-            identifier="file_url",
-            title="OpenDAP URL",
-            abstract="OpenDAP URL",
-            metadata=[],
-            minOccurs=1,
-            maxOccurs=1,
-            type=type('')
             )
 
         self.startindex_in = self.addLiteralInput(
@@ -184,7 +160,7 @@ class OpenDAP(SourceProcess):
 
         self.status.set(msg="logon successful", percentDone=10, propagate=True)
 
-        opendap_url = self.opendap_url_in.getValue()
+        opendap_url = self.file_identifier.getValue()
         
         (_, nc_filename) = tempfile.mkstemp(suffix='.nc')
 
@@ -228,7 +204,7 @@ class Metadata(WPSProcess):
             )
 
         self.netcdf_url_in = self.addLiteralInput(
-            identifier="file_url",
+            identifier="file_identifier",
             title="NetCDF URL",
             abstract="NetCDF URL",
             metadata=[],
