@@ -7,6 +7,8 @@ Author: Carsten Ehbrecht (ehbrecht@dkrz.de)
 from os import path
 import tempfile
 
+import yaml
+
 from malleefowl.process import WPSProcess
 
 class Run(WPSProcess):
@@ -45,13 +47,27 @@ class Run(WPSProcess):
             formats=[{"mimeType":"text/yaml"}],
             )
 
-        self.text_out = self.addComplexOutput(
+        self.output = self.addComplexOutput(
             identifier="output",
-            title="Workflow result",
-            abstract="Workflow result",
+            title="Workflow Report",
+            abstract="Workflow Report",
             metadata=[],
             formats=[{"mimeType":"text/plain"}],
             asReference=True,
+            )
+
+        self.work_output = self.addLiteralOutput(
+            identifier="work_output",
+            title="Process Result",
+            abstract="Process Result",
+            type=type(''),
+            )
+
+        self.work_status = self.addLiteralOutput(
+            identifier="work_status",
+            title="Process Status",
+            abstract="Process Status",
+            type=type(''),
             )
 
     def execute(self):
@@ -66,7 +82,13 @@ class Run(WPSProcess):
         elif self.restflow_command_in.getValue() == "visualize":
             options = '--to-dot'
         
-        result = self.cmd(cmd=["restflow", options, "--enable-trace", "-f", wf_filename], stdout=True)
+        result = self.cmd(
+            cmd=["restflow", options, "--enable-trace", "-f", wf_filename, "--run", "restflow"],
+            stdout=True)
+
+        products = yaml.load( open(path.join(self.working_dir, "restflow", "_metadata", "products.yaml")) )
+        self.work_output.setValue(products.get('/wps/work/output/1'))
+        self.work_status.setValue(products.get('/wps/work/status/1'))
        
         self.status.set(msg="workflow done", percentDone=90, propagate=True)
 
@@ -74,4 +96,4 @@ class Run(WPSProcess):
         with open(out_filename, 'w') as fp:
             fp.write(result)
             fp.close()
-            self.text_out.setValue( out_filename )
+            self.output.setValue( out_filename )

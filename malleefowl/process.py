@@ -45,6 +45,10 @@ class WPSProcess(PyWPSProcess):
     def files_url(self):
         return config.getConfigValue("server","filesUrl")
 
+    @property
+    def working_dir(self):
+        return os.path.abspath(os.curdir)
+
 class SourceProcess(WPSProcess):
      """This is the base class for all source processes."""
 
