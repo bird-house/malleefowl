@@ -5,6 +5,7 @@ Author: Carsten Ehbrecht (ehbrecht@dkrz.de)
 """
 
 from os import path
+import time
 
 import yaml
 
@@ -81,18 +82,31 @@ class Run(WPSProcess):
         elif self.restflow_command_in.getValue() == "visualize":
             options = '--to-dot'
         
-        result = self.cmd(
-            cmd=["restflow", options, "--enable-trace", "-f", wf_filename, "--run", "restflow"],
+        self.cmd(
+            cmd=["restflow", options, "-f", wf_filename, "--run", "restflow", "--daemon"],
             stdout=True)
 
-        products = yaml.load( open(path.join(self.working_dir, "restflow", "_metadata", "products.yaml")) )
+        products_path = path.join(self.working_dir, "restflow", "_metadata", "products.yaml")
+        endstate_path = path.join(self.working_dir, "restflow", "_metadata", "endstate.yaml")
+        while True:
+            products = yaml.load( open(products_path) )
+
+            self.status.set(msg="starting download", percentDone=10, propagate=True)
+
+            if products.has_key('/wps/download/file_identifier/1'):
+                self.status.set(msg="first file downloaded", percentDone=20, propagate=True)
+
+            if products.has_key('/wps/download/file_identifiers/1'):
+                self.status.set(msg="all files downloaded", percentDone=55, propagate=True)
+
+            if path.exists(endstate_path):
+                break
+
+            time.sleep(2)
+            
         self.work_output.setValue(products.get('/wps/work/output/1'))
         self.work_status.setValue(products.get('/wps/work/status/1'))
        
         self.status.set(msg="workflow done", percentDone=90, propagate=True)
 
-        out_filename = self.mktempfile(suffix='.txt')
-        with open(out_filename, 'w') as fp:
-            fp.write(result)
-            fp.close()
-            self.output.setValue( out_filename )
+        self.output.setValue( path.join(self.working_dir, "restflow", "_metadata", "stdout.txt") )
