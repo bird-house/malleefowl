@@ -81,29 +81,42 @@ class Run(WPSProcess):
             options = '--validate'
         elif self.restflow_command_in.getValue() == "visualize":
             options = '--to-dot'
-        
-        self.cmd(
-            cmd=["restflow", options, "-f", wf_filename, "--run", "restflow", "--daemon"],
-            stdout=True)
 
+        # run async command
+        import subprocess
+        cmd = ["restflow", options, "-f", wf_filename, "--run", "restflow", "--daemon"]
+        try:
+            p = subprocess.Popen(cmd)
+        except Exception,e :
+            raise Exception("Could not perform command [%s]: %s" % (cmd,e))
+        
         products_path = path.join(self.working_dir, "restflow", "_metadata", "products.yaml")
         endstate_path = path.join(self.working_dir, "restflow", "_metadata", "endstate.yaml")
-        while True:
+
+        self.status.set(msg="starting download", percentDone=10, propagate=True)
+
+        while p.poll() == None:   
+            time.sleep(2)
+
+            if path.isfile(endstate_path):
+                break
+            
+            if not path.isfile(products_path):
+                continue
             products = yaml.load( open(products_path) )
-
-            self.status.set(msg="starting download", percentDone=10, propagate=True)
-
+            if products == None:
+                continue
+            
             if products.has_key('/wps/download/file_identifier/1'):
                 self.status.set(msg="first file downloaded", percentDone=20, propagate=True)
 
             if products.has_key('/wps/download/file_identifiers/1'):
                 self.status.set(msg="all files downloaded", percentDone=55, propagate=True)
 
-            if path.exists(endstate_path):
-                break
+        # wait till finished
+        p.wait()
 
-            time.sleep(2)
-            
+        products = yaml.load( open(products_path) )
         self.work_output.setValue(products.get('/wps/work/output/1'))
         self.work_status.setValue(products.get('/wps/work/status/1'))
        
