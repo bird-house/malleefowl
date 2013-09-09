@@ -6,7 +6,6 @@ Author: Carsten Ehbrecht (ehbrecht@dkrz.de)
 
 import os
 from datetime import datetime, date
-import tempfile
 import json
 import types
 import StringIO
@@ -162,7 +161,7 @@ class OpenDAP(SourceProcess):
 
         opendap_url = self.file_identifier.getValue()
         
-        (_, nc_filename) = tempfile.mkstemp(suffix='.nc')
+        nc_filename = self.mktempfile(suffix='.nc')
 
         istart = self.startindex_in.getValue() - 1
         istop = self.endindex_in.getValue()
@@ -255,7 +254,7 @@ class Metadata(WPSProcess):
         
         self.status.set(msg="retrieved netcdf metadata", percentDone=80, propagate=True)
 
-        (_, out_filename) = tempfile.mkstemp(suffix='.json')
+        out_filename = self.mktempfile(suffix='.json')
         with open(out_filename, 'w') as fp:
             json.dump(obj=metadata, fp=fp)
             fp.close()

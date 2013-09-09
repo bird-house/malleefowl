@@ -6,6 +6,7 @@ Author: Carsten Ehbrecht (ehbrecht@dkrz.de)
 
 import os
 import types
+import tempfile
 
 from pywps.Process import WPSProcess as PyWPSProcess
 from pywps import config
@@ -48,6 +49,10 @@ class WPSProcess(PyWPSProcess):
     @property
     def working_dir(self):
         return os.path.abspath(os.curdir)
+
+    def mktempfile(self, suffix='.txt'):
+        (_, filename) = tempfile.mkstemp(dir=self.working_dir, suffix=suffix)
+        return filename
 
 class SourceProcess(WPSProcess):
      """This is the base class for all source processes."""

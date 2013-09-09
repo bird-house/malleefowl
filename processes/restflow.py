@@ -5,7 +5,6 @@ Author: Carsten Ehbrecht (ehbrecht@dkrz.de)
 """
 
 from os import path
-import tempfile
 
 import yaml
 
@@ -92,7 +91,7 @@ class Run(WPSProcess):
        
         self.status.set(msg="workflow done", percentDone=90, propagate=True)
 
-        (_, out_filename) = tempfile.mkstemp(suffix='.txt')
+        out_filename = self.mktempfile(suffix='.txt')
         with open(out_filename, 'w') as fp:
             fp.write(result)
             fp.close()
