@@ -11,16 +11,16 @@ from c3meta import tools
 
 from malleefowl.process import WPSProcess
 
-class ListOAIIdentifier(WPSProcess):
+class BaseOAIMetadata(WPSProcess):
     """This process lists all available oai identifiers for iso metadata."""
-    def __init__(self):
+    def __init__(self, identifier, title, version, metadata=[], abstract=None ):
         WPSProcess.__init__(
             self,
-            identifier = "de.c3grid.iso19139.oai.list",
-            title = "List OAI Identifier of ISO Metadata",
-            version = "0.1",
-            metadata = [],
-            abstract = "This process lists all available oai identifiers for iso metadata."
+            identifier = identifier,
+            title = title,
+            version = version,
+            metadata = metadata,
+            abstract = abstract,
             )
 
         self.oai_service = self.addLiteralInput(
@@ -41,6 +41,18 @@ class ListOAIIdentifier(WPSProcess):
             minOccurs=1,
             maxOccurs=1,
             allowedValues=['iso']
+            )
+
+class ListOAIIdentifier(BaseOAIMetadata):
+    """This process lists all available oai identifiers for iso metadata."""
+    def __init__(self):
+        BaseOAIMetadata.__init__(
+            self,
+            identifier = "de.c3grid.iso19139.oai.list",
+            title = "List OAI Identifier of ISO Metadata",
+            version = "0.1",
+            metadata = [],
+            abstract = "This process lists all available oai identifiers for iso metadata."
             )
 
         self.output = self.addComplexOutput(
