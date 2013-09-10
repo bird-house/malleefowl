@@ -52,7 +52,7 @@ class ConvertISOMetadata(WPSProcess):
             type=type(''),
             minOccurs=1,
             maxOccurs=1,
-            allowedValues=['oai', 'json', 'iso']
+            allowedValues=['oai', 'json', 'isoxml']
             )
 
         self.output_format = self.addLiteralInput(
