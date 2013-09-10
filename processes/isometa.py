@@ -4,7 +4,9 @@ Processes for c3grid iso metadata
 Author: Carsten Ehbrecht (ehbrecht@dkrz.de)
 """
 
+import os
 import json
+
 from c3meta import tools
 
 from malleefowl.process import WPSProcess
@@ -69,7 +71,7 @@ class BaseISOMetadata(WPSProcess):
             minOccurs=0,
             maxOccurs=1,
             formats=[{"mimeType": "text/xml"}, {"mimeType": "application/json"}],
-            maxmegabites=10
+            maxmegabites=100,
             )
 
         self.oai_identifier =  self.addLiteralInput(
@@ -176,8 +178,10 @@ class ConvertISOMetadata(BaseISOMetadata):
         source = None
         if input_format == 'oai':
             source = self.oai_identifier.getValue()
+            self.message(msg='input oai identifier = %s' % (source), force=True)
         else:
-            source = self.input.getValue()
+            source = os.path.abspath(self.input.getValue())
+            self.message(msg='input source = %s' % (source), force=True)
 
         output_format = self.output_format.getValue()
         ouput_ext = None
@@ -185,7 +189,8 @@ class ConvertISOMetadata(BaseISOMetadata):
             output_ext = '.txt'
         else:
             output_ext = '.xml'
-        
+            
+        self.status.set(msg="start reading", percentDone=20, propagate=True)
         exp = tools.read(format=input_format, source=source)
         self.status.set(msg="file read", percentDone=50, propagate=True)
 
