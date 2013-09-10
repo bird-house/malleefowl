@@ -23,6 +23,26 @@ class ListOAIIdentifier(WPSProcess):
             abstract = "This process lists all available oai identifiers for iso metadata."
             )
 
+        self.oai_service = self.addLiteralInput(
+            identifier="oai_service",
+            title="OAI Service",
+            abstract="Choose OAI Service",
+            type=type(''),
+            minOccurs=1,
+            maxOccurs=1,
+            allowedValues=['http://c3grid1.dkrz.de:8080/oai/provider']
+            )
+
+        self.metadata_prefix = self.addLiteralInput(
+            identifier="metadata_prefix",
+            title="Metadata Prefix",
+            abstract="Choose Metadata Prefix",
+            type=type(''),
+            minOccurs=1,
+            maxOccurs=1,
+            allowedValues=['iso']
+            )
+
         self.output = self.addComplexOutput(
             identifier="output",
             title="Output",
