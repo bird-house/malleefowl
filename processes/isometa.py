@@ -48,7 +48,7 @@ class ListOAIIdentifier(BaseOAIMetadata):
     def __init__(self):
         BaseOAIMetadata.__init__(
             self,
-            identifier = "de.c3grid.iso19139.oai.list",
+            identifier = "de.c3grid.oai.iso19139.list",
             title = "List OAI Identifier of ISO Metadata",
             version = "0.1",
             metadata = [],
@@ -83,7 +83,7 @@ class SummaryOAIMetadata(BaseOAIMetadata):
     def __init__(self):
         BaseOAIMetadata.__init__(
             self,
-            identifier = "de.c3grid.iso19139.oai.summary",
+            identifier = "de.c3grid.oai.iso19139.summary",
             title = "Show Summary of C3Grid ISO Metadata",
             version = "0.1",
             abstract="Convert C3Grid ISO Metadata to JSON and YAML",
@@ -131,7 +131,7 @@ class ConvertOAIMetadata(BaseOAIMetadata):
     def __init__(self):
         BaseOAIMetadata.__init__(
             self,
-            identifier = "de.c3grid.iso19139.oai.convert",
+            identifier = "de.c3grid.oai.iso19139.convert",
             title = "Convert C3Grid ISO Metadata",
             version = "0.1",
             abstract="Convert C3Grid ISO Metadata to JSON and YAML",
