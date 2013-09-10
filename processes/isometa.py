@@ -4,6 +4,7 @@ Processes for c3grid iso metadata
 Author: Carsten Ehbrecht (ehbrecht@dkrz.de)
 """
 
+import json
 from c3meta import tools
 
 from malleefowl.process import WPSProcess
@@ -57,6 +58,50 @@ class BaseISOMetadata(WPSProcess):
             allowedValues=['oai', 'json', 'isoxml']
             )
 
+class SummaryISOMetadata(BaseISOMetadata):
+    """This process shows a summary c3 iso metadata."""
+
+    def __init__(self):
+        BaseISOMetadata.__init__(
+            self,
+            identifier = "de.c3grid.iso19139.summary",
+            title = "Show Summary of C3Grid ISO Metadata",
+            version = "0.1",
+            abstract="Convert C3Grid ISO Metadata to JSON and YAML",
+            )
+
+        self.output = self.addComplexOutput(
+            identifier="output",
+            title="Output",
+            abstract="Metadata Summary Document",
+            metadata=[],
+            formats=[ {"mimeType": "application/json"} ],
+            asReference=True,
+            )
+
+    def execute(self):
+        self.status.set(msg="starting isometa summary", percentDone=10, propagate=True)
+
+        input_format = self.input_format.getValue()
+        source = None
+        if input_format == 'oai':
+            source = self.oai_identifier.getValue()
+        else:
+            source = self.input.getValue()
+
+        exp = tools.read(format=input_format, source=source)
+        self.status.set(msg="file read", percentDone=50, propagate=True)
+
+        out_filename = self.mktempfile(suffix='.txt')
+        with open(out_filename, 'w') as fp:
+            fp.write(json.dumps(tools.summary(exp), indent=4))
+            fp.close()
+            self.output.setValue( out_filename )
+        self.status.set(msg="file written", percentDone=80, propagate=True)
+        
+        self.output.setValue( out_filename )
+        self.status.set(msg="summary finished", percentDone=90, propagate=True)
+
         
 class ConvertISOMetadata(BaseISOMetadata):
     """This process converts c3 iso metadata to json and yaml."""
@@ -66,10 +111,6 @@ class ConvertISOMetadata(BaseISOMetadata):
             identifier = "de.c3grid.iso19139.convert",
             title = "Convert C3Grid ISO Metadata",
             version = "0.1",
-            metadata=[
-                {"title": "C3Grid", "href": "http://www.c3grid.de"},
-                {"title": "ISO 19139 Metadata", "href": "https://geo-ide.noaa.gov/wiki/index.php?title=ISO_19139_Identifiers"}
-                ],
             abstract="Convert C3Grid ISO Metadata to JSON and YAML",
             )
 
@@ -111,7 +152,7 @@ class ConvertISOMetadata(BaseISOMetadata):
             output_ext = '.xml'
         
         exp = tools.read(format=input_format, source=source)
-        self.status.set(msg="file converted", percentDone=50, propagate=True)
+        self.status.set(msg="file read", percentDone=50, propagate=True)
 
         out_filename = self.mktempfile(suffix='.' + output_ext)
         tools.write(exp, target=out_filename, format=output_format)
