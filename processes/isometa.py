@@ -9,6 +9,41 @@ from c3meta import tools
 
 from malleefowl.process import WPSProcess
 
+class ListOAIIdentifier(WPSProcess):
+    """This process lists all available oai identifiers for iso metadata."""
+    def __init__(self):
+        WPSProcess.__init__(
+            self,
+            identifier = "de.c3grid.iso19139.oai.list",
+            title = "List OAI Identifier of ISO Metadata",
+            version = "0.1",
+            metadata = [],
+            abstract = "This process lists all available oai identifiers for iso metadata."
+            )
+
+        self.output = self.addComplexOutput(
+            identifier="output",
+            title="Output",
+            abstract="List of OAI Identifier",
+            metadata=[],
+            formats=[ {"mimeType": "application/json"} ],
+            asReference=True,
+            )
+
+    def execute(self):
+        self.status.set(msg="starting listing of oai identifier", percentDone=10, propagate=True)
+
+        out_filename = self.mktempfile(suffix='.txt')
+        with open(out_filename, 'w') as fp:
+            fp.write(json.dumps(tools.list_sources(format='oai'), indent=4))
+            fp.close()
+            self.output.setValue( out_filename )
+        self.status.set(msg="file written", percentDone=80, propagate=True)
+        
+        self.output.setValue( out_filename )
+        self.status.set(msg="listing finished", percentDone=90, propagate=True)
+        
+
 class BaseISOMetadata(WPSProcess):
     """Base class for iso metadata processes."""
     def __init__(self, identifier, title, version, metadata=[], abstract=None):
