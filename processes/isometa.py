@@ -8,19 +8,21 @@ from c3meta import tools
 
 from malleefowl.process import WPSProcess
 
-class ConvertISOMetadata(WPSProcess):
-    """This process converts c3 iso metadata to json and yaml"""
-    def __init__(self):
+class BaseISOMetadata(WPSProcess):
+    """Base class for iso metadata processes."""
+    def __init__(self, identifier, title, version, metadata=[], abstract=None):
+        metadata.extend([
+            {"title": "C3Grid", "href": "http://www.c3grid.de"},
+            {"title": "ISO 19139 Metadata", "href": "https://geo-ide.noaa.gov/wiki/index.php?title=ISO_19139_Identifiers"}
+            ])
+        
         WPSProcess.__init__(
             self,
-            identifier = "de.c3grid.iso19139.convert",
-            title = "Convert C3Grid ISO Metadata",
-            version = "0.1",
-            metadata=[
-                {"title": "C3Grid", "href": "http://www.c3grid.de"},
-                {"title": "ISO 19139 Metadata", "href": "https://geo-ide.noaa.gov/wiki/index.php?title=ISO_19139_Identifiers"}
-                ],
-            abstract="Convert C3Grid ISO Metadata to JSON and YAML",
+            identifier = identifier,
+            title = title,
+            version = version,
+            metadata= metadata,
+            abstract=abstract,
             )
 
         self.input = self.addComplexInput(
@@ -53,6 +55,22 @@ class ConvertISOMetadata(WPSProcess):
             minOccurs=1,
             maxOccurs=1,
             allowedValues=['oai', 'json', 'isoxml']
+            )
+
+        
+class ConvertISOMetadata(BaseISOMetadata):
+    """This process converts c3 iso metadata to json and yaml."""
+    def __init__(self):
+        BaseISOMetadata.__init__(
+            self,
+            identifier = "de.c3grid.iso19139.convert",
+            title = "Convert C3Grid ISO Metadata",
+            version = "0.1",
+            metadata=[
+                {"title": "C3Grid", "href": "http://www.c3grid.de"},
+                {"title": "ISO 19139 Metadata", "href": "https://geo-ide.noaa.gov/wiki/index.php?title=ISO_19139_Identifiers"}
+                ],
+            abstract="Convert C3Grid ISO Metadata to JSON and YAML",
             )
 
         self.output_format = self.addLiteralInput(
