@@ -28,6 +28,7 @@ class BaseOAIMetadata(WPSProcess):
             title="OAI Service",
             abstract="Choose OAI Service",
             type=type(''),
+            default='http://c3grid1.dkrz.de:8080/oai/provider',
             minOccurs=1,
             maxOccurs=1,
             allowedValues=['http://c3grid1.dkrz.de:8080/oai/provider']
@@ -38,6 +39,7 @@ class BaseOAIMetadata(WPSProcess):
             title="Metadata Prefix",
             abstract="Choose Metadata Prefix",
             type=type(''),
+            default='iso',
             minOccurs=1,
             maxOccurs=1,
             allowedValues=['iso']
