@@ -86,7 +86,7 @@ class SummaryOAIMetadata(BaseOAIMetadata):
         BaseOAIMetadata.__init__(
             self,
             identifier = "de.c3grid.oai.iso19139.summary",
-            title = "Show Summary of C3Grid ISO Metadata",
+            title = "Show Summary of C3Grid ISO Metadata (OAI)",
             version = "0.1",
             abstract="Convert C3Grid ISO Metadata to JSON and YAML",
             )
@@ -134,7 +134,7 @@ class ConvertOAIMetadata(BaseOAIMetadata):
         BaseOAIMetadata.__init__(
             self,
             identifier = "de.c3grid.oai.iso19139.convert",
-            title = "Convert C3Grid ISO Metadata",
+            title = "Convert C3Grid ISO Metadata (OAI)",
             version = "0.1",
             abstract="Convert C3Grid ISO Metadata to JSON and YAML",
             )
