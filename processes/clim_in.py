@@ -117,11 +117,26 @@ class ClimInProcess(WorkerProcess):
             )         
             
     def execute(self):
+        
+        from Scientific.IO.NetCDF import NetCDFFile
+        from os import curdir, path
+
+        # guess var names of files
+        nc_files = self.get_nc_files()
+        for nc_file in nc_files: 
+            ds = NetCDFFile(nc_file)
+            if "tas" in ds.variables.keys():
+                nc_tas = nc_file
+            elif "pr" in ds.variables.keys():
+                nc_pr = nc_file
+            else:
+                raise Exception("input netcdf file has not variable tas|pr")
+               
         # from os import curdir, path
         # nc_filename = path.abspath(self.netcdf_in.getValue(asFile=False))
         result = self.cmd(cmd=["/home/main/sandbox/climdaps/src/Malleefowl/processes/clim_in", self.path_in.getValue(), self.stringIn.getValue(), self.individualBBoxIn.getValue(), self.start_date_in.getValue(),   self.end_date_in.getValue()], stdout=True)
         # literals
         # subprocess.check_output(["/home/main/sandbox/climdaps/src/ClimDaPs_WPS/processes/dkrz/rel_hum.sh", self.path_in.getValue(), self.stringIn.getValue(), self.individualBBoxIn.getValue(), self.start_date_in.getValue(),   self.end_date_in.getValue()])
-        self.file_out.setValue("/home/main/wps_data/hurs_AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_20060101_20101231.nc")
         
-        
+        nc_hurs = path.join(path.abspath(curdir), "clim_in.nc")
+        self.output.setValue( nc_hurs )

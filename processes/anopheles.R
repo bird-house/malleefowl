@@ -12,12 +12,12 @@ rm(list = ls())
 
 # args <- commandArgs(trailingOnly = TRUE)
 
-# args[1] <- "/home/main/data/tas_AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_20060101_20101231.nc"
-# args[2] <- "/home/main/data/hurs_AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_20060101_20101231.nc"
-# args[3] <- "/home/main/data/pr_AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_20060101_20101231.nc"
-# args[4] <- "/home/main/data/evspsbl_AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_20060101_20101231.nc"
+
 
 args <- unlist(strsplit(commandArgs(trailingOnly = TRUE), " "))
+
+arguments <- "/home/main/data/tas_AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_20060101_20101231.nc /home/main/data/hurs_AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_20060101_20101231.nc /home/main/data/pr_AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_20060101_20101231.nc /home/main/data/evspsbl_AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_20060101_20101231.nc /home/main/wps_data/n4_AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_20060101_20101231.nc"
+args <- unlist(strsplit(arguments, " "))
 
 print(args)
 
@@ -35,6 +35,9 @@ nc_evspsbl<- open.nc(paste(args[4]), write=FALSE)
 dim_time <- dim.inq.nc(nc_tas, "time")$length
 dim_lat <- dim.inq.nc(nc_tas, "rlat")$length
 dim_lon <- dim.inq.nc(nc_tas, "rlon")$length
+
+dim_lat <- 50
+dim_lon <- 50
 
 # generate the N4 output file
 # 
@@ -54,9 +57,8 @@ att.put.nc(nc_n4, "n4", "missing_value", "NC_FLOAT", -9e+33)
 
 # read in values 
 
-
-for(x in 100:dim_lat){
-  for(y in 100:dim_lon){
+for(x in 1:dim_lat){
+  for(y in 1:dim_lon){
     
 Et <- var.get.nc(nc_evspsbl, variable='evspsbl', start=c(x,y,1), count=c(1,1,dim_time), na.mode=0, collapse=TRUE, unpack=FALSE)
 Rt <- var.get.nc(nc_pr, variable='pr', start=c(x,y,1), count=c(1,1,dim_time), na.mode=0, collapse=TRUE, unpack=FALSE)
@@ -152,6 +154,9 @@ for(i in 1:(dim_time-1)){
 p[dim_time,] <- c(p_Tw[dim_time,1]*p_Rt[dim_time,1]*p_D[dim_time,1],p_Tw[dim_time,2]*p_Rt[dim_time,2]*p_D[dim_time,2]*p_DD[dim_time],p_Tw[dim_time,3]*p_Rt[dim_time,3]*p_D[dim_time,3]*p_DD[dim_time],p4[dim_time])
 
 var.put.nc(nc_n4, "n4" , N[,4], start=c(x,y,1), count=c(1,1,dim_time), na.mode=0, pack=FALSE) # , na.mode=0, pack=FALSE
+
+cat("processed coordinate x: ",x," y: " ,y,"\n")   
+
 
 }} # end of lat lon loop
 

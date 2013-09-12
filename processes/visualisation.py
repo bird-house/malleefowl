@@ -35,15 +35,15 @@ class VisualisationProcess(WorkerProcess):
         # Literal Input Data
         # ------------------
 
-       self.stringIn = self.addLiteralInput(
-            identifier="variable",
-            title="Variable",
-            abstract="This is the name of the variable",
-            default="tas",
-            type=type(''),
-            minOccurs=0,
-            maxOccurs=1,
-            )
+        self.variableIn = self.addLiteralInput(
+             identifier="variable",
+             title="Variable",
+             abstract="This is the name of the variable",
+             default="tas",
+             type=type(''),
+             minOccurs=0,
+             maxOccurs=1,
+             )
        
         self.output = self.addComplexOutput(
             identifier="output",
@@ -54,20 +54,17 @@ class VisualisationProcess(WorkerProcess):
             )         
             
     def execute(self):
+        
         from Scientific.IO.NetCDF import NetCDFFile
         from os import curdir, path
-        import Nio
         import datetime
         from mpl_toolkits.basemap import Basemap , cm 
         import numpy as np
         import matplotlib.pyplot as plt
         from pylab import * # also for the cmap colors
-
                      
         result_pic = path.join(path.abspath(curdir), "result.png")
         
-        
-
         #print 'type the name of the ncFile'
         #ncFile = raw_input()
         #print 'type the variable name to be read'
@@ -75,10 +72,10 @@ class VisualisationProcess(WorkerProcess):
         ncFile = self.get_nc_files()
         var = self.variableIn.getValue()
 
-        dataFile=Nio.open_file(ncFile,'r')
+        dataFile=NetCDFFile(ncFile)
 
-        lat = dataFile.variables['lat'][:]
-        lon = dataFile.variables['lon'][:]
+        lat = dataFile.variables.get('rlat')
+        lon = dataFile.variables('rlon')
         lons, lats = np.meshgrid(lon, lat)
         #rawTime = dataFile.variables['time'][:]
         data = np.squeeze(dataFile.variables[var][:])
@@ -95,11 +92,11 @@ class VisualisationProcess(WorkerProcess):
         #m = Basemap(llcrnrlon=lon[0],llcrnrlat=lat[0],urcrnrlon=lon[-1],urcrnrlat=lat[-1],\
                     #resolution='l',projection='cyl')
                     
-        clevs = (range(0,20,1))
+        #clevs = (range(0,20,1))
                     
-        im = m.contourf(lons,lats, meanData,latlon=True, cmap=cm.RdYlGn_r, levels=clevs, extend='max')
-        cb = m.colorbar(im,location='right',pad='10%', ticks=(range(0,20,10))) # , 
-        cb.set_label('Distribution of Anopheles gambiae',fontsize=16, fontstyle='oblique')
+        im = m.contourf(lons,lats, meanData,latlon=True) #, cmap=cm.RdYlGn_r, levels=clevs, extend='max'
+        cb = m.colorbar(im,location='right',pad='10%') # ,, ticks=(range(0,20,10)) 
+        cb.set_label('Nice legende',fontsize=16, fontstyle='oblique')
 
         #m.drawlsmask(land_color='0.8', ocean_color='b', lsmask=None, lsmask_lons=None, lsmask_lats=None, lakes=True, resolution='l', grid=1.25)
         m.bluemarble( alpha=0.8 )

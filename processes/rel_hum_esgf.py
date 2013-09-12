@@ -6,7 +6,6 @@ Author: Nils Hempelmann (nils.hempelmann@hzg)
 from datetime import datetime, date
 import tempfile
 import subprocess
-
 from malleefowl.process import WorkerProcess
 
 class EsgfRelHumProcess(WorkerProcess):
