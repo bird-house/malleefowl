@@ -16,7 +16,7 @@ requires = [
     'netCDF4',
     'pymongo',
     'nose',
-#    'rednose'
+    'c3meta',
     ]
 
 classifiers=[

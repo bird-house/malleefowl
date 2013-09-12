@@ -5,7 +5,9 @@ Author: Carsten Ehbrecht (ehbrecht@dkrz.de)
 """
 
 from os import path
-import tempfile
+import time
+
+import yaml
 
 from malleefowl.process import WPSProcess
 
@@ -45,13 +47,27 @@ class Run(WPSProcess):
             formats=[{"mimeType":"text/yaml"}],
             )
 
-        self.text_out = self.addComplexOutput(
+        self.output = self.addComplexOutput(
             identifier="output",
-            title="Workflow result",
-            abstract="Workflow result",
+            title="Workflow Report",
+            abstract="Workflow Report",
             metadata=[],
             formats=[{"mimeType":"text/plain"}],
             asReference=True,
+            )
+
+        self.work_output = self.addLiteralOutput(
+            identifier="work_output",
+            title="Process Result",
+            abstract="Process Result",
+            type=type(''),
+            )
+
+        self.work_status = self.addLiteralOutput(
+            identifier="work_status",
+            title="Process Status",
+            abstract="Process Status",
+            type=type(''),
             )
 
     def execute(self):
@@ -65,13 +81,45 @@ class Run(WPSProcess):
             options = '--validate'
         elif self.restflow_command_in.getValue() == "visualize":
             options = '--to-dot'
+
+        # run async command
+        import subprocess
+        cmd = ["restflow", options, "-f", wf_filename, "--run", "restflow", "--daemon"]
+        try:
+            p = subprocess.Popen(cmd)
+        except Exception,e :
+            raise Exception("Could not perform command [%s]: %s" % (cmd,e))
         
-        result = self.cmd(cmd=["restflow", options, "--enable-trace", "-f", wf_filename], stdout=True)
+        products_path = path.join(self.working_dir, "restflow", "_metadata", "products.yaml")
+        endstate_path = path.join(self.working_dir, "restflow", "_metadata", "endstate.yaml")
+
+        self.status.set(msg="starting download", percentDone=10, propagate=True)
+
+        while p.poll() == None:   
+            time.sleep(2)
+
+            if path.isfile(endstate_path):
+                break
+            
+            if not path.isfile(products_path):
+                continue
+            products = yaml.load( open(products_path) )
+            if products == None:
+                continue
+            
+            if products.has_key('/wps/download/file_identifier/1'):
+                self.status.set(msg="first file downloaded", percentDone=20, propagate=True)
+
+            if products.has_key('/wps/download/file_identifiers/1'):
+                self.status.set(msg="all files downloaded", percentDone=55, propagate=True)
+
+        # wait till finished
+        p.wait()
+
+        products = yaml.load( open(products_path) )
+        self.work_output.setValue(products.get('/wps/work/output/1'))
+        self.work_status.setValue(products.get('/wps/work/status/1'))
        
         self.status.set(msg="workflow done", percentDone=90, propagate=True)
 
-        (_, out_filename) = tempfile.mkstemp(suffix='.txt')
-        with open(out_filename, 'w') as fp:
-            fp.write(result)
-            fp.close()
-            self.text_out.setValue( out_filename )
+        self.output.setValue( path.join(self.working_dir, "restflow", "_metadata", "stdout.txt") )

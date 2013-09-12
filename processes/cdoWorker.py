@@ -4,8 +4,6 @@ Processes with cdo commands
 Author: Carsten Ehbrecht (ehbrecht@dkrz.de)
 """
 
-import tempfile
-
 from malleefowl.process import WorkerProcess
 
 class CDOOperation(WorkerProcess):
@@ -13,7 +11,7 @@ class CDOOperation(WorkerProcess):
     def __init__(self):
         WorkerProcess.__init__(
             self,
-            identifier = "org.malleefowl.cdo.operation",
+            identifier = "de.dkrz.cdo.operation",
             title = "CDO Operation",
             version = "0.1",
             metadata=[
@@ -58,7 +56,7 @@ class CDOOperation(WorkerProcess):
         nc_files = self.get_nc_files()
         operator = self.operator_in.getValue()
 
-        (_, out_filename) = tempfile.mkstemp(suffix='.nc')
+        out_filename = self.mktempfile(suffix='.nc')
         try:
             cmd = ["cdo", operator]
             if operator == 'merge':
@@ -80,7 +78,7 @@ class CDOInfo(WorkerProcess):
     def __init__(self):
         WorkerProcess.__init__(
             self,
-            identifier = "org.malleefowl.cdo.sinfo",
+            identifier = "de.dkrz.cdo.sinfo",
             title = "CDO sinfo",
             version = "0.1",
             metadata=[
@@ -121,7 +119,7 @@ class CDOInfo(WorkerProcess):
 
         self.status.set(msg="cdo sinfo done", percentDone=90, propagate=True)
 
-        (_, out_filename) = tempfile.mkstemp(suffix='.txt')
+        out_filename = self.mktempfile(suffix='.txt')
         with open(out_filename, 'w') as fp:
             fp.write(result)
             fp.close()

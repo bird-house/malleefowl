@@ -6,7 +6,6 @@ Author: Carsten Ehbrecht (ehbrecht@dkrz.de)
 
 import os
 from datetime import datetime, date
-import tempfile
 import json
 import types
 import StringIO
@@ -75,17 +74,6 @@ class Wget(SourceProcess):
             type = type('')
             )
 
-        self.netcdf_url_in = self.addLiteralInput(
-            identifier="file_url",
-            title="NetCDF URL",
-            abstract="NetCDF URL",
-            metadata=[],
-            minOccurs=1,
-            maxOccurs=1,
-            type=type('')
-            )
-
-      
     def execute(self):
         self.status.set(msg="starting esgf download", percentDone=5, propagate=True)
 
@@ -95,19 +83,18 @@ class Wget(SourceProcess):
         
         self.status.set(msg="logon successful", percentDone=10, propagate=True)
 
-        netcdf_url = self.netcdf_url_in.getValue()
-        cache_path = self.get_cache_path()
+        netcdf_url = self.file_identifier.getValue()
         
         self.cmd(cmd=["wget", 
                       "--certificate", esgf_credentials, 
                       "--private-key", esgf_credentials, 
                       "--no-check-certificate", 
                       "-N",
-                      "-P", cache_path,
+                      "-P", self.cache_path,
                       "--progress", "dot:mega",
                       netcdf_url], stdout=True)
         
-        out = os.path.join(cache_path, os.path.basename(netcdf_url))
+        out = os.path.join(self.cache_path, os.path.basename(netcdf_url))
         self.message('out path=%s' % (out), force=True)
         self.status.set(msg="retrieved netcdf file", percentDone=90, propagate=True)
         
@@ -127,9 +114,6 @@ class OpenDAP(SourceProcess):
                 ],
             abstract="Download files from esgf data node via OpenDAP")
 
-        # opendap url
-        # -----------
-
         self.openid_in = self.addLiteralInput(
             identifier = "openid",
             title = "ESGF OpenID",
@@ -146,16 +130,6 @@ class OpenDAP(SourceProcess):
             minOccurs = 1,
             maxOccurs = 1,
             type = type('')
-            )
-
-        self.opendap_url_in = self.addLiteralInput(
-            identifier="file_url",
-            title="OpenDAP URL",
-            abstract="OpenDAP URL",
-            metadata=[],
-            minOccurs=1,
-            maxOccurs=1,
-            type=type('')
             )
 
         self.startindex_in = self.addLiteralInput(
@@ -185,9 +159,9 @@ class OpenDAP(SourceProcess):
 
         self.status.set(msg="logon successful", percentDone=10, propagate=True)
 
-        opendap_url = self.opendap_url_in.getValue()
+        opendap_url = self.file_identifier.getValue()
         
-        (_, nc_filename) = tempfile.mkstemp(suffix='.nc')
+        nc_filename = self.mktempfile(suffix='.nc')
 
         istart = self.startindex_in.getValue() - 1
         istop = self.endindex_in.getValue()
@@ -229,7 +203,7 @@ class Metadata(WPSProcess):
             )
 
         self.netcdf_url_in = self.addLiteralInput(
-            identifier="file_url",
+            identifier="file_identifier",
             title="NetCDF URL",
             abstract="NetCDF URL",
             metadata=[],
@@ -280,7 +254,7 @@ class Metadata(WPSProcess):
         
         self.status.set(msg="retrieved netcdf metadata", percentDone=80, propagate=True)
 
-        (_, out_filename) = tempfile.mkstemp(suffix='.json')
+        out_filename = self.mktempfile(suffix='.json')
         with open(out_filename, 'w') as fp:
             json.dump(obj=metadata, fp=fp)
             fp.close()
