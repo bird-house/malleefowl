@@ -10,9 +10,10 @@ import json
 import types
 import StringIO
 
+from netCDF4 import Dataset
 from pyesgf.logon import LogonManager
 
-from malleefowl.process import WPSProcess, SourceProcess
+from malleefowl.process import WPSProcess, SourceProcess, WorkerProcess
 from malleefowl import utils
 
 def logon(openid, password):
@@ -171,11 +172,11 @@ class OpenDAP(SourceProcess):
 
         self.output.setValue(nc_filename)
         
-class Metadata(WPSProcess):
+class Metadata(WorkerProcess):
     """This process downloads files form esgf data node via opendap"""
 
     def __init__(self):
-        WPSProcess.__init__(self,
+        WorkerProcess.__init__(self,
             identifier = "org.malleefowl.esgf.metadata",
             title = "Retrieve Metadata of NetCDF File",
             version = "0.1",
@@ -183,34 +184,6 @@ class Metadata(WPSProcess):
                 {"title":"ESGF","href":"http://esgf.org"},
                 ],
             abstract="Retrieve Metadata of NetCDF File")
-
-        self.openid_in = self.addLiteralInput(
-            identifier = "openid",
-            title = "ESGF OpenID",
-            abstract = "Enter ESGF OpenID",
-            minOccurs = 1,
-            maxOccurs = 1,
-            type = type('')
-            )
-
-        self.password_in = self.addLiteralInput(
-            identifier = "password",
-            title = "OpenID Password",
-            abstract = "Enter your Password",
-            minOccurs = 1,
-            maxOccurs = 1,
-            type = type('')
-            )
-
-        self.netcdf_url_in = self.addLiteralInput(
-            identifier="file_identifier",
-            title="NetCDF URL",
-            abstract="NetCDF URL",
-            metadata=[],
-            minOccurs=1,
-            maxOccurs=1,
-            type=type('')
-            )
 
         # complex output
         # -------------
@@ -225,20 +198,11 @@ class Metadata(WPSProcess):
             )
 
     def execute(self):
-        from Scientific.IO.NetCDF import NetCDFFile
-        
         self.status.set(msg="starting netcdf metadata retrieval", percentDone=5, propagate=True)
 
-        logon(
-            openid=self.openid_in.getValue(), 
-            password=self.password_in.getValue())
+        nc_file = self.get_nc_files()[0]
 
-        self.status.set(msg="logon successful", percentDone=20, propagate=True)
-
-        netcdf_url = self.netcdf_url_in.getValue()
-        self.message(msg='NetCDF URL is %s' % netcdf_url, force=True)
-
-        ds = NetCDFFile(netcdf_url)
+        ds = Dataset(nc_file)
         metadata = {}
         metadata['global_attributes'] = {}
         for att_name in ["contact", "experiment", "institute_id", "title"]:
@@ -256,7 +220,7 @@ class Metadata(WPSProcess):
 
         out_filename = self.mktempfile(suffix='.json')
         with open(out_filename, 'w') as fp:
-            json.dump(obj=metadata, fp=fp)
+            json.dump(obj=metadata, fp=fp, indent=4, sort_keys=True)
             fp.close()
             self.output.setValue( out_filename )
         
