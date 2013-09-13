@@ -69,13 +69,13 @@ class VisualisationProcess(WorkerProcess):
         #ncFile = raw_input()
         #print 'type the variable name to be read'
         #var = raw_input()
-        ncFile = self.get_nc_files()
+        ncFile = self.get_nc_files()[0]
         var = self.variableIn.getValue()
 
         dataFile=NetCDFFile(ncFile)
 
         lat = dataFile.variables.get('rlat')
-        lon = dataFile.variables('rlon')
+        lon = dataFile.variables.get('rlon')
         lons, lats = np.meshgrid(lon, lat)
         #rawTime = dataFile.variables['time'][:]
         data = np.squeeze(dataFile.variables[var][:])
