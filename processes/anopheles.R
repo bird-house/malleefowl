@@ -36,9 +36,6 @@ dim_time <- dim.inq.nc(nc_tas, "time")$length
 dim_lat <- dim.inq.nc(nc_tas, "rlat")$length
 dim_lon <- dim.inq.nc(nc_tas, "rlon")$length
 
-dim_lat <- 50
-dim_lon <- 50
-
 # generate the N4 output file
 # 
 nc_n4 <- create.nc(paste(args[5]), clobber=TRUE, large=FALSE, share=FALSE)
