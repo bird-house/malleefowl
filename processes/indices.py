@@ -135,7 +135,7 @@ class IndicesProcess(WorkerProcess):
 
         tasFile = NetCDFFile(tasFilePath , 'r')        
         prFile = NetCDFFile(prFilePath ,'r')
-        output_files =  list()
+        output_files = list()
         
         # get the dimensions
         # dimNames = tasFile.dimensions.keys()
@@ -166,12 +166,12 @@ class IndicesProcess(WorkerProcess):
         if self.pr_5to9sum.getValue() == True :
             pr_5to9sum_filename = self.mktempfile(suffix='_pr_5to9sum.nc')
             output_files.append(pr_5to9sum_filename)
-            cdo.setname('pr_5to9sum',input = "-yearsum -selmon,5,6,7,8,9 "+ tasFilePath , output = pr_5to9sum_filename, options =  '-f nc')  #python
+            cdo.setname('pr_5to9sum',input = "-yearsum -selmon,5,6,7,8,9 "+ prFilePath , output = pr_5to9sum_filename, options =  '-f nc')  #python
             
         if self.pr_6to8sum.getValue() == True :
             pr_6to8sum_filename = self.mktempfile(suffix='_pr_6to8sum.nc')
             output_files.append(pr_6to8sum_filename)
-            cdo.setname('pr_6to8sum',input = "-yearsum -selmon,6,7,8 "+ tasFilePath , output = pr_6to8sum_filename, options =  '-f nc')  #python
+            cdo.setname('pr_6to8sum',input = "-yearsum -selmon,6,7,8 "+ prFilePath , output = pr_6to8sum_filename, options =  '-f nc')  #python
            
             #pr_6to8sum = np.squeeze(cdo.yearsum(input  =  " ".join([cdo.selmon('6,7,8',input  =  prFilePath)] ), options='-f nc', returnMaArray='pr'))  #python
             #pr_6to8sum = pr_6to8sum * 60 * 60 * 24 # convert flux to amount            
@@ -208,7 +208,7 @@ class IndicesProcess(WorkerProcess):
         tar_archive = self.mktempfile(suffix='.tar')
         tar = tarfile.open(tar_archive, "w")
         for name in output_files:
-            tar.add(name, recursive=False , arcname = name.replace("/home/main/sandbox/climdaps/parts/pywps/temp", ""))
+            tar.add(name, arcname = name.replace(self.working_dir, ""))
         tar.close()
         
         #mystring.replace('\r\n', '')

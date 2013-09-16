@@ -20,7 +20,7 @@ class VisualisationProcess(WorkerProcess):
         # definition of this process
         WorkerProcess.__init__(self, 
             identifier = "de.csc.esgf.visualisation",
-            title="Simple visulisation tool",
+            title="Simple visualisation tool",
             version = "0.1",
             metadata= [
                        {"title": "Climate Service Center", "href": "http://www.climate-service-center.de/"}
