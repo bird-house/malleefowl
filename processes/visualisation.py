@@ -106,7 +106,7 @@ class VisualisationProcess(WorkerProcess):
         m.drawparallels(np.arange(-80.,81.,20.), labels = [1, 0, 0, 0],fontsize=16)
         m.drawmeridians(np.arange(-180.,181.,20.), labels = [0, 0, 0, 1],fontsize=16)
         m.drawmapboundary(fill_color='aqua')
-        plt.title("Time slice 1990-2000")
+        plt.title("Title")
         plt.savefig(result_pic)
         # plt.show()
 
