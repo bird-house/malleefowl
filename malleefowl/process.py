@@ -101,7 +101,7 @@ class WorkerProcess(WPSProcess):
 
     def __init__(self, identifier, title, version, metadata=[], abstract="",
                  extra_metadata={
-                     'esgfilter': 'institute:MPI-M,variable:tas,experiment:esmHistorical,ensemble:r1i1p1,time_frequency:day',
+                     'esgfilter': '',
                      'esgquery': '*'}):
         wf_identifier = identifier + '.worker'
         #metadata.append(
@@ -128,8 +128,8 @@ class WorkerProcess(WPSProcess):
             title="NetCDF File",
             abstract="NetCDF File",
             metadata=[],
-            minOccurs=0,
-            maxOccurs=10,
+            minOccurs=1,
+            maxOccurs=100,
             maxmegabites=5000,
             formats=[{"mimeType":"application/x-netcdf"}],
             )
