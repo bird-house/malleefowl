@@ -15,7 +15,7 @@ class EsgfRelHumProcess(WorkerProcess):
         # definition of this process
         WorkerProcess.__init__(self, 
             identifier = "de.csc.esgf.relhum",
-            title="Specific to relative humidity (with ESGF data source)",
+            title="specific to relative humidity (ESGF)",
             version = "0.1",
             metadata= [
                        {"title": "Climate Service Center", "href": "http://www.climate-service-center.de/"}
@@ -75,7 +75,7 @@ class EsgfRelHumProcess(WorkerProcess):
         
         # ps * huss
         (_, nc_e) = tempfile.mkstemp(suffix='.nc')
-        expr = "expr,\'e=((%s*%s)/62.2)\'" % (ps, huss)
+        expr = "expr,\'e=((%s*%s)/62.2)\'" % ('ps', 'huss')
         cmd = ['cdo', expr, merged_ps_huss, nc_e]
         self.cmd(cmd=cmd, stdout=True)
 
@@ -90,12 +90,17 @@ class EsgfRelHumProcess(WorkerProcess):
         self.status.set(msg="relhum ps*hus", percentDone=60, propagate=True)
         
         # calculate relative humidity
-        nc_hurs = path.join(path.abspath(curdir), "hurs_test.nc")
+        (_, nc_hurs) = tempfile.mkstemp(suffix='.nc')
         cmd = ['cdo', '-div', nc_e, nc_es, nc_hurs]
         self.cmd(cmd=cmd, stdout=True)
         
+        # rename variable 
+        nc_hurs_name = path.join(path.abspath(curdir), "hurs.nc")
+        cmd = ['cdo', '-setname,hurs', nc_hurs, nc_hurs_name ]
+        self.cmd(cmd=cmd, stdout=True)
+        
         self.status.set(msg="relhum done", percentDone=90, propagate=True)
-        self.output.setValue( nc_hurs )
+        self.output.setValue( nc_hurs_name )
         
         
         

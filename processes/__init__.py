@@ -1,4 +1,4 @@
-__all__ = ["base", "restflow", "cdoWorker", "esgf", "testing", "source", "isometa", "rel_hum", "rel_hum_esgf", "indices", "gam", "penman", "anopheles", "visualisation"]
+__all__ = ["base", "restflow", "cdoWorker", "esgf", "testing", "source", "isometa", "rel_hum_esgf", "indices", "gam", "penman", "anopheles", "visualisation"]
 
 
 
