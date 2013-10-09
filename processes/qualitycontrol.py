@@ -15,7 +15,7 @@ class Process(WPSProcess):
          
 
          WPSProcess.__init__(self,
-              identifier = "org.malleefowl.Test", 
+              identifier = "Quality Control", 
               title="TestTitle",
               version = "0.1",
               storeSupported = "true",
