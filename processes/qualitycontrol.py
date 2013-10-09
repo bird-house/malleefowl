@@ -15,7 +15,7 @@ class Process(WPSProcess):
          
 
          WPSProcess.__init__(self,
-              identifier = "Quality Control", 
+              identifier = "QualityControl", 
               title="TestTitle",
               version = "0.1",
               storeSupported = "true",
@@ -27,14 +27,18 @@ class Process(WPSProcess):
                                             title = "Input1 number", 
                                             default=100,
                                             type=type(1),
+                                            minOccurs = 1,#required
+                                            maxOccurs = 1,
                                             )
-         self.Input2= self.addLiteralInput(identifier="string", 
-                                           title="Input2 number", 
-                                           default="A B C 350",
-                                           type=types.StringType,
-                                           )
-         self.Output=self.addLiteralOutput(identifier="output", 
-                                            title="Output is a integer-string product.",
+         self.Input2 = self.addLiteralInput(identifier="string", 
+                                            title="Some text", 
+                                            #tefault="A B C 350",
+                                            type=types.StringType,
+                                            minOccurs = 1,#required
+                                            maxOccurs = 1,
+                                            )
+         self.Output= self.addLiteralOutput(identifier="output", 
+                                            title="Output is an integer-string product.",
                                             default = None,
                                             )
      def execute(self):
