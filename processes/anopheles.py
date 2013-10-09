@@ -23,8 +23,8 @@ class AnophelesProcess(WorkerProcess):
                       ],
             abstract="Just testing a nice script to calculate the Population dynamics of Anopheles Gambiae",
             extra_metadata={
-                  'esgfilter': 'variable:tas,variable:evspsbl,variable:hurs,variable:pr',  #institute:MPI-M, ,time_frequency:day
-                  'esgquery': 'variable:tas AND variable:evspsbl AND variable:hurs AND variable:pr' # institute:MPI-M AND time_frequency:day 
+                  'esgfilter': 'variable:tas,variable:evspsblpot,variable:huss,variable:pr,time_frequency:day,domain:AFR-44', 
+                  'esgquery': 'variable:tas AND variable:evspsblpot AND variable:huss AND variable:pr time_frequency:day AND domain:AFR-44' 
                   },
             )
             
@@ -55,53 +55,75 @@ class AnophelesProcess(WorkerProcess):
         for nc_file in nc_files: 
             ds = NetCDFFile(nc_file)
             if "tas" in ds.variables.keys():
-                nc_tas = NetCDFFile(nc_file , 'r')
-            elif "hurs" in ds.variables.keys():
-                nc_hurs = NetCDFFile(nc_file , 'r')
+                file_tas = nc_file
+            elif "huss" in ds.variables.keys():
+                file_huss = nc_file
+            elif "ps" in ds.variables.keys():
+                file_ps = nc_file
             elif "pr" in ds.variables.keys():
-                nc_pr = NetCDFFile(nc_file , 'r')
-            elif "evspsbl" in ds.variables.keys():
-                nc_evspsbl = NetCDFFile(nc_file , 'r')    
+                file_pr = nc_file
+            elif "evspsblpot" in ds.variables.keys():
+                file_evspsblpot = nc_file                          # NetCDFFile(nc_file , 'r')   
             else:
                 raise Exception("input netcdf file has not variable tas|hurs|pr|evspsbl")
-                        
-        nc_n4 = path.join(path.abspath(curdir), "nc_n4.nc")
-        script_anophels =  path.join(path.dirname(__file__),"anopheles.R")
 
-        nc_output_file = self.mktempfile(suffix='_n4.nc')
+        # calculate the relative humidity 
+        # merge ps and huss
+        (_, file_ps_huss) = tempfile.mkstemp(suffix='.nc')
+        cmd = ['cdo', '-O', 'merge', file_ps, file_huss, file_ps_huss]
+        self.cmd(cmd=cmd, stdout=True)
 
+        self.status.set(msg="relhum merged", percentDone=20, propagate=True)
+        
+        # ps * huss
+        (_, file_e) = tempfile.mkstemp(suffix='_e.nc')
+        expr = "expr,\'e=((%s*%s)/62.2)\'" % ('ps', 'huss')
+        cmd = ['cdo', expr, file_ps_huss, file_e]
+        self.cmd(cmd=cmd, stdout=True)
 
-        cdo.selname('pr', input=nc_pr, output=nc_output_file)
-        cdo.selname('pr', input='/home/main/data/pr_AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_20060101_20101231.nc', output='/home/main/data/n4_AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_20060101_20101231.nc')
+        self.status.set(msg="relhum ps*hus", percentDone=30, propagate=True)
+        
+        # partial vapour pressure using Magnus-Formula over water
+        # cdo expr,'es=6.1078*10^(7.5*(tas-273.16)/(237.3+(tas-273.16)))' ../in/tas_$filename  ../out/es_$filename
+        (_, file_es) = tempfile.mkstemp(suffix='_es.nc')
+        cmd = ['cdo', "expr,\'es=6.1078*exp(17.08085*(tas-273.16)/(234.175+(tas-273.16)))\'", file_tas, file_es]
+        self.cmd(cmd=cmd, stdout=True)
+        self.status.set(msg="relhum ps*hus", percentDone=40, propagate=True)
+        
+        # calculate relative humidity
+        (_, file_hurs_temp) = tempfile.mkstemp(suffix='.nc')
+        cmd = ['cdo', '-div', file_e, file_es, file_hurs_temp]
+        self.cmd(cmd=cmd, stdout=True)
+        
+        # rename variable 
+        (_, file_hurs) = tempfile.mkstemp(suffix='.nc')
+        cmd = ['cdo', '-setname,hurs', file_hurs_temp, file_hurs ]
+        self.cmd(cmd=cmd, stdout=True)
+        self.status.set(msg="relhum done", percentDone=50, propagate=True)
+        
+        # build the n4 out variable based on pr
+        file_n4 = path.join(path.abspath(curdir), "n4.nc")       
+        cdo.setname('n4', input=file_pr, output=file_n4)
+        
+        #cdo.selname('pr', input='/home/main/data/pr_AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_20060101_20101231.nc', output='/home/main/data/n4_AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_20060101_20101231.nc')
 
-
-
-
-        nc_tas = NetCDFFile('/home/main/data/tas_test_20060101_20101231.nc','r')
-        nc_pr = NetCDFFile('/home/main/data/pr_test_20060101_20101231.nc','r')
-        nc_hurs = NetCDFFile('/home/main/data/hurs_test_20060101_20101231.nc','r')
-        nc_evspsbl = NetCDFFile('/home/main/data/evspsbl_test_20060101_20101231.nc','r')
-        #nc_n4 = NetCDFFile('/home/main/data/n4_AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_20060101_20101231.nc' , 'w')
-
+        nc_tas = NetCDFFile(file_tas,'r')
+        nc_pr = NetCDFFile(file_pr,'r')
+        nc_hurs = NetCDFFile(file_hurs,'r')
+        nc_evspsblpot = NetCDFFile(file_evspsblpot,'r')
+        nc_n4 = NetCDFFile(file_n4,'a')
+        
         #change attributes und variable name here 
-        #dim.def.nc(nc_n4, "lon", dim_lon)
-        #dim.def.nc(nc_n4, "lat", dim_lat)
-        #dim.def.nc(nc_n4, "time", unlim=TRUE)
-        ###  Create two variables, one as coordinate variable
-        #var.def.nc(nc_n4, "time", "NC_INT", "time")
-        ## var.def.nc(nc_n4, "lat", "NC_INT", "time")
-        ## var.def.nc(nc_n4, "lon", "NC_INT", "time")
-        #var.def.nc(nc_n4, "n4", "NC_FLOAT", c(0,1,2))
-        #att.put.nc(nc_n4, "n4", "missing_value", "NC_FLOAT", -9e+33)
-
+        # att.put.nc(nc_n4, "n4", "units", "NC_FLOAT", -9e+33)
         ## read in values 
 
         tas = np.squeeze(nc_tas.variables["tas"])
         pr = np.squeeze(nc_pr.variables["pr"])
         hurs = np.squeeze(nc_hurs.variables["hurs"])
-        evspsbl = np.squeeze(nc_evspsbl.variables["evspsbl"])
-        n4 = np.zeros([tas.shape[0],tas.shape[1],tas.shape[2]])
-
+        evspsblpot = np.squeeze(nc_evspsblpot.variables["evspsblpot"])
+        var_n4 = nc_n4.variables["n4"]
+        n4 = np.zeros(pr.shape, dtype='f')
+        
         # define some constatnts:
         Increase_Ta = 0
         #Evaporation (> -8)
@@ -134,7 +156,7 @@ class AnophelesProcess(WorkerProcess):
                 RH = hurs[:,x,y] * 100
                 Ta = tas[:,x,y] -273.15
                 Rt = pr[:,x,y] * 86400     
-                Et = evspsbl[:,x,y] * -86400  
+                Et = evspsblpot[:,x,y] * -86400  
                 Tw = Ta + deltaT
 
                 # create appropriate variabels 
@@ -262,26 +284,17 @@ class AnophelesProcess(WorkerProcess):
                     F4[t] = ft[t]*Nep/Gc_Ta[t]
 
                     N[t+1,:] = [(P[t,0] * N[t,0] + F4[t] * N[t,3]),(P[t,1] * N[t,1] + G[t,0] * N[t,0]),(P[t,2] * N[t,2] + G[t,1] * N[t,1]),(P[t,3] * N[t,3] + G[t,2] * N[t,2])]
-                    #N[t+1,1] = (P[t,1] * N[t,1] + G[t,0] * N[t,0])
-                    #N[t+1,2] = (P[t,2] * N[t,2] + G[t,1] * N[t,1])
-                    #N[t+1,3] = (P[t,3] * N[t,3] + G[t,2] * N[t,2])
-                    #N[t+1] = ([P[t,0],G[t,0],0,0],[0,P[t,1],G[t,1],0],[0,0,P[t,2],G[t,2],alpha1*F4[t],0,0,P[t,3]), nrow = 4, ncol = 4) %*% N[i,]
                     
                     #p[dim_time,] = c(p_Tw[dim_time,1]*p_Rt[dim_time,1]*p_D[dim_time,1],p_Tw[dim_time,2]*p_Rt[dim_time,2]*p_D[dim_time,2]*p_DD[dim_time],p_Tw[dim_time,3]*p_Rt[dim_time,3]*p_D[dim_time,3]*p_DD[dim_time],p4[dim_time])
 
-                    n4[t,x,y] = p4[t] # p_D[t,2] #N[t,3]
+                    n4[t,x,y] =  N[t,3] #p4[t] # p_D[t,2] #N[t,3]
 
                     #var.put.nc(nc_n4, "n4" , N[,4], start=c(x,y,1), count=c(1,1,dim_time), na.mode=0, pack=FALSE) # , na.mode=0, pack=FALSE
                     #cat("processed coordinate x: ",x," y: " ,y,"\n")   
-                    
 
+        # write values into file
+        var_n4.assignValue(n4)
 
-
-        # nc_n4.append(Rt)        
-        
-        
-        
-        self.cmd(cmd=["R", "--vanilla", "--args", nc_tas, nc_hurs, nc_pr, nc_evspsbl, nc_anopheles, "<", script_anophels ], stdout=True)
         self.status.set(msg="anopheles done", percentDone=90, propagate=True)
-        self.output.setValue( nc_anopheles )
+        self.output.setValue( file_n4 )
         
