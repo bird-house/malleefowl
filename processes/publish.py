@@ -15,6 +15,15 @@ class Publish(WorkerProcess):
                 ],
             abstract="Publish netcdf files to Thredds server...",
             )
+        
+        self.basename = self.addLiteralInput(
+            identifier="basename",
+            title="Basename",
+            abstract="Basename of files",
+            type=type(''),
+            minOccurs=1,
+            maxOccurs=1,
+            )
 
         self.output = self.addComplexOutput(
             identifier="output",
@@ -30,10 +39,20 @@ class Publish(WorkerProcess):
 
         nc_files = self.get_nc_files()
 
+        result = "Published files to thredds server\n"
+        
         count = 0
         for nc_file in nc_files:
-            outfile = os.path.join(self.files_path, os.path.basename(nc_file) + ".nc")
-            os.link(os.path.abspath(nc_file), outfile)
+            outfile = os.path.join(self.files_path,
+                                   self.basename.getValue() + "-" +
+                                   os.path.basename(nc_file) + ".nc")
+            result = result + outfile + "\n"
+            try:
+                os.link(os.path.abspath(nc_file), outfile)
+                result = result + "success\n"
+            except:
+                self.message(msg="publish failed", force=True)
+                result = result + "failed\n"
             count = count + 1
             percent_done = int(10 + 80.0 / len(nc_files) * count)
             self.status.set(msg="%d file(s) published" % count,
@@ -41,7 +60,7 @@ class Publish(WorkerProcess):
 
         out_filename = self.mktempfile(suffix='.txt')
         with open(out_filename, 'w') as fp:
-            fp.write('all files written ...')
+            fp.write(result)
             fp.close()
             self.output.setValue( out_filename )
 
