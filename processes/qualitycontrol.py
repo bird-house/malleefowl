@@ -6,11 +6,10 @@ Author: Tobias Kipp (kipp@dkrz.de)
 """
 import types
 import datetime
-from pywps.Process import WPSProcess                                
-#from malleefowl.process import WPSProcess
+from malleefowl.process import WPSProcess
 class Process(WPSProcess):
     def __init__(self):
-         # init process
+        # init process
         abstractML =("The process takes in configuration files and a link"
                      +" to a to check file. The output is the log file for now.")
 
@@ -18,10 +17,8 @@ class Process(WPSProcess):
             identifier = "QualityControl", 
             title="Quality Control",
             version = "0.1",
-            storeSupported = "true",
-            statusSupported = "true",
-            abstract=abstractML,
-            grassLocation=False)
+	    metadata=[],
+	    abstract=abstractML)
              
         self.configs = self.addLiteralInput(identifier = "config",
                                            title = "Configuration files", 
@@ -43,7 +40,6 @@ class Process(WPSProcess):
             abstract="Quality check result log.",
             metadata=[],
             formats=[{"mimeType":"text/plain"}],
-# {"miMeTy pe": "text/xml"}, {"mimeType": "application/json"}],
             asReference=True,
             )
         self.allOk = self.addLiteralOutput(identifier="allOk",
@@ -55,16 +51,18 @@ class Process(WPSProcess):
     def execute(self):
         
         self.status.set(msg="Creating new file", percentDone=50, propagate=True)
-        filename=str(datetime.datetime.now()).replace(":","-").replace(" ","_").replace(".","_")
+        #filename=str(datetime.datetime.now()).replace(":","-").replace(" ","_").replace(".","_")
         output_ext = "log"
-        filename+=output_ext
-        #file1 = self.mktempfile(suffix='.' + output_ext)
+        #filename+=output_ext
+        filename = self.mktempfile(suffix='.' + output_ext)
         file1 = file(filename,"w")
         self.status.set(msg="Writing to file", percentDone=80, propagate=True)
         file1.write("The file name is:"+filename)
+        file1.write("Some random text")
         self.output.setValue(file1)
         self.allOk.setValue(self.evaluateResults())
         return #If execute() returns anything but null, it is considered as error and exception is called
+
     """ Return true if the Quality Check finds no errors.
         TODO: Implement it
     """
