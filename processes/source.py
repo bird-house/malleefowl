@@ -7,14 +7,15 @@ Author: Carsten Ehbrecht (ehbrecht@dkrz.de)
 import os
 import json
 
-from malleefowl.process import SourceProcess, WPSProcess
+#from malleefowl.process import SourceProcess, WPSProcess
+import malleefowl.process
 
 
-class ListLocalFiles(WPSProcess):
+class ListLocalFiles(malleefowl.process.WPSProcess):
     """This process lists files from local filesystem."""
 
     def __init__(self):
-        WPSProcess.__init__(self,
+        malleefowl.process.WPSProcess.__init__(self,
             identifier = "org.malleefowl.listfiles",
             title = "List local files",
             version = "0.1",
@@ -50,11 +51,11 @@ class ListLocalFiles(WPSProcess):
         
         self.filelist_out.setValue(json.dumps(files))
 
-class GetFileFromFilesystem(SourceProcess):
+class GetFileFromFilesystem(malleefowl.process.SourceProcess):
     """This process retrieves files from local filesystem."""
 
     def __init__(self):
-        SourceProcess.__init__(self,
+        malleefowl.process.SourceProcess.__init__(self,
             identifier = "org.malleefowl.storage.filesystem",
             title = "Get files from filesystem storage",
             version = "0.1",

@@ -7,14 +7,15 @@ from datetime import datetime, date
 import tempfile
 import subprocess
 
-from malleefowl.process import WorkerProcess
+#from malleefowl.process import WorkerProcess
+import malleefowl.process 
 
-class PenmanProcess(WorkerProcess):
+class PenmanProcess(malleefowl.process.WorkerProcess):
     """This process calculates the evapotranspiration following the Pennan Monteith equation"""
 
     def __init__(self):
         # definition of this process
-        WorkerProcess.__init__(self, 
+        malleefowl.process.WorkerProcess.__init__(self, 
             identifier = "de.csc.esgf.penman.worker",
             title="evapotranspiration (Penman-Monteith)",
             version = "0.1",

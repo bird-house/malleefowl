@@ -7,14 +7,14 @@ Author: Tobias Kipp (kipp@dkrz.de)
 import types
 import datetime
 #from malleefowl.process import WPSProcess
-import malleefowl.process as process
-class Process(process.WPSProcess):
+import malleefowl.process 
+class Process(malleefowl.process.WPSProcess):
     def __init__(self):
         # init process
         abstractML =("The process takes in configuration files and a link"
                      +" to a to check file. The output is the log file for now.")
 
-        process.WPSProcess.__init__(self,
+        malleefowl.process.WPSProcess.__init__(self,
             identifier = "QualityControl", 
             title="Quality Control",
             version = "0.1",

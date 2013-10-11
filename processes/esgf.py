@@ -13,7 +13,8 @@ import StringIO
 from netCDF4 import Dataset
 from pyesgf.logon import LogonManager
 
-from malleefowl.process import WPSProcess, SourceProcess, WorkerProcess
+#from malleefowl.process import WPSProcess, SourceProcess, WorkerProcess
+import malleefowl.process 
 from malleefowl import utils
 
 def logon(openid, password):
@@ -41,11 +42,11 @@ def logon(openid, password):
 
     return esgf_credentials
 
-class Wget(SourceProcess):
+class Wget(malleefowl.process.SourceProcess):
     """This process downloads files form esgf data node via wget and http"""
 
     def __init__(self):
-        SourceProcess.__init__(self,
+        malleefowl.process.SourceProcess.__init__(self,
             identifier = "org.malleefowl.esgf.wget",
             title = "Download files from esgf data node via wget",
             version = "0.1",
@@ -102,11 +103,11 @@ class Wget(SourceProcess):
         self.output.setValue(out)
 
 
-class OpenDAP(SourceProcess):
+class OpenDAP(malleefowl.process.SourceProcess):
     """This process downloads files form esgf data node via opendap"""
 
     def __init__(self):
-        SourceProcess.__init__(self,
+        malleefowl.process.SourceProcess.__init__(self,
             identifier = "org.malleefowl.esgf.opendap",
             title = "Download files from esgf data node via OpenDAP",
             version = "0.1",
@@ -172,11 +173,11 @@ class OpenDAP(SourceProcess):
 
         self.output.setValue(nc_filename)
         
-class Metadata(WorkerProcess):
+class Metadata(malleefowl.process.WorkerProcess):
     """This process downloads files form esgf data node via opendap"""
 
     def __init__(self):
-        WorkerProcess.__init__(self,
+        malleefowl.process.WorkerProcess.__init__(self,
             identifier = "org.malleefowl.esgf.metadata",
             title = "Retrieve Metadata of NetCDF File",
             version = "0.1",

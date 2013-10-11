@@ -1,11 +1,12 @@
-from malleefowl.process import WorkerProcess
+#from malleefowl.process import WorkerProcess
+import malleefowl.process
 
 import os
 
-class Publish(WorkerProcess):
+class Publish(malleefowl.process.WorkerProcess):
     """Publish netcdf files to thredds server"""
     def __init__(self):
-        WorkerProcess.__init__(
+        malleefowl.process.WorkerProcess.__init__(
             self,
             identifier = "org.malleefowl.publish",
             title = "Publish NetCDF Files to Thredds Server",

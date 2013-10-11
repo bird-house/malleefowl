@@ -11,14 +11,14 @@ import tempfile
 import subprocess
 
 
-from malleefowl.process import WorkerProcess
-
-class VisualisationProcess(WorkerProcess):
+#from malleefowl.process import WorkerProcess
+import malleefowl.process
+class VisualisationProcess(malleefowl.process.WorkerProcess):
     """This process calculates the evapotranspiration following the Pennan Monteith equation"""
 
     def __init__(self):
         # definition of this process
-        WorkerProcess.__init__(self, 
+        malleefowl.process.WorkerProcess.__init__(self, 
             identifier = "de.csc.esgf.visualisation",
             title="Simple visualisation tool",
             version = "0.1",
