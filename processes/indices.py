@@ -20,9 +20,13 @@ class IndicesProcess(WorkerProcess):
                 {"title":"Literal process"},
                 {"href":"http://foobar/"}],
             abstract="Just testing a python script to  ...",
+            #extra_metadata={
+                  #'esgfilter': 'variable:tas, variable:evspsblpot, variable:huss, variable:ps, variable:pr, variable:sftlf, time_frequency:day', 
+                  #'esgquery': 'data_node:esg-dn1.nsc.liu.se' 
+                  #},
             extra_metadata={
-                  'esgfilter': 'variable:tas,variable:pr,time_frequency:day',  #institute:MPI-M,
-                  'esgquery': 'variable:tas AND variable:pr AND time_frequency:day' # institute:MPI-M 
+                  'esgfilter': 'variable:tas,variable:pr',  #institute:MPI-M,
+                  'esgquery': 'time_frequency:day AND project:CORDEX' # institute:MPI-M 
                   },
             )
 

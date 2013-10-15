@@ -22,9 +22,10 @@ class PenmanProcess(WorkerProcess):
                        {"title": "Climate Service Center", "href": "http://www.climate-service-center.de/"}
                       ],
             abstract="Just testing a nice script to calculate the Penman Monteith equation...",
+            
             extra_metadata={
-                  'esgfilter': 'variable:tas,variable:sfcWind,variable:ps,variable:rlds,variable:rsds,variable:rlus,variable:rsus,variable:huss,variable:pr,time_frequency:day ',  #institute:MPI-M,time_frequency:day
-                  'esgquery': 'variable:tas AND variable:sfcWind AND variable:ps AND variable:rlds AND variable:rsds AND variable:rlus AND variable:rsus AND variable:huss AND variable:pr AND time_frequency:day' # institute:MPI-M 
+                  'esgfilter': 'variable:tas,variable:sfcWind,variable:ps,variable:rlds,variable:rsds,variable:rlus,variable:rsus,variable:huss,variable:pr,time_frequency:day,variable:sftlf',  #institute:MPI-M,time_frequency:day
+                  'esgquery': 'time_frequency:day OR time_frequency:fix' # institute:MPI-M 
                   },
             )
 

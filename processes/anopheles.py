@@ -23,11 +23,15 @@ class AnophelesProcess(WorkerProcess):
                       ],
             abstract="Just testing a nice script to calculate the Population dynamics of Anopheles Gambiae",
             extra_metadata={
-                  'esgfilter': 'variable:tas,variable:evspsblpot,variable:huss,variable:pr,time_frequency:day,domain:AFR-44', 
-                  'esgquery': 'variable:tas AND variable:evspsblpot AND variable:huss AND variable:pr time_frequency:day AND domain:AFR-44' 
+                  'esgfilter': 'variable:tas, variable:evspsblpot, variable:huss, variable:ps, variable:pr, variable:sftlf, time_frequency:day, time_frequency:fix', 
+                  'esgquery': 'data_node:esg-dn1.nsc.liu.se' 
                   },
-            )
             
+            #extra_metadata={
+                  #'esgfilter':'time_frequency:day,domain:AFR-44', 
+                  #'esgquery': 'time_frequency:day AND domain:AFR-44' 
+                  #},
+            )
             
         # Literal Input Data
         # ------------------
