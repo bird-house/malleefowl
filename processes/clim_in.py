@@ -4,15 +4,16 @@ Author: Nils Hempelmann (nils.hempelmann@hzg)
 """
 
 from datetime import datetime, date
-from malleefowl.process import WorkerProcess
+#from malleefowl.process import WorkerProcess
+import malleefowl.process
 import subprocess
 
-class ClimInProcess(WorkerProcess):
+class ClimInProcess(malleefowl.process.WorkerProcess):
     """This process calculates the relative humidity"""
 
     def __init__(self):
         # definition of this process
-        WorkerProcess.__init__(self, 
+        malleefowl.process.WorkerProcess.__init__(self, 
             identifier = "de.csc.clim_in",
             title="Calculation of climate indices",
             version = "0.1",

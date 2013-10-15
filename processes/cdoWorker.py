@@ -4,12 +4,13 @@ Processes with cdo commands
 Author: Carsten Ehbrecht (ehbrecht@dkrz.de)
 """
 
-from malleefowl.process import WorkerProcess
+#from malleefowl.process import WorkerProcess
+import malleefowl.process
 
-class CDOOperation(WorkerProcess):
+class CDOOperation(malleefowl.process.WorkerProcess):
     """This process calls cdo with operation on netcdf file"""
     def __init__(self):
-        WorkerProcess.__init__(
+        malleefowl.process.WorkerProcess.__init__(
             self,
             identifier = "de.dkrz.cdo.operation",
             title = "CDO Operation",
@@ -72,11 +73,11 @@ class CDOOperation(WorkerProcess):
         self.output.setValue( out_filename )
 
 
-class CDOInfo(WorkerProcess):
+class CDOInfo(malleefowl.process.WorkerProcess):
     """This process calls cdo sinfo on netcdf file"""
 
     def __init__(self):
-        WorkerProcess.__init__(
+        malleefowl.process.WorkerProcess.__init__(
             self,
             identifier = "de.dkrz.cdo.sinfo",
             title = "CDO sinfo",

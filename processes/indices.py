@@ -1,13 +1,14 @@
-from malleefowl.process import WorkerProcess
+#from malleefowl.process import WorkerProcess
+import malleefowl.process 
 import subprocess
 
 
-class IndicesProcess(WorkerProcess):
+class IndicesProcess(malleefowl.process.WorkerProcess):
     """This process calculates the relative humidity"""
 
     def __init__(self):
         # definition of this process
-        WorkerProcess.__init__(self, 
+        malleefowl.process.WorkerProcess.__init__(self, 
             identifier = "de.csc.indices",
             title="Calculation of climate indices",
             version = "0.1",

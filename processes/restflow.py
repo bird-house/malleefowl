@@ -9,13 +9,14 @@ import time
 
 import yaml
 
-from malleefowl.process import WPSProcess
+#from malleefowl.process import WPSProcess
+import malleefowl.process
 
-class Run(WPSProcess):
+class Run(malleefowl.process.WPSProcess):
     """This process runs a restflow workflow description"""
 
     def __init__(self):
-        WPSProcess.__init__(self,
+        malleefowl.process.WPSProcess.__init__(self,
             identifier = "org.malleefowl.restflow",
             title = "Run restflow workflow",
             version = "0.1",
