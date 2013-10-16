@@ -121,7 +121,7 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
         tas = np.squeeze(nc_tas.variables["tas"])
         pr = np.squeeze(nc_pr.variables["pr"])
         ps = np.squeeze(nc_ps.variables["ps"])
-        huss = np.squeeze(nc_hurs.variables["huss"])
+        huss = np.squeeze(nc_huss.variables["huss"])
         evspsblpot = np.squeeze(nc_evspsblpot.variables["evspsblpot"])
         var_n4 = nc_n4.variables["n4"]
         n4 = np.zeros(pr.shape, dtype='f')
@@ -154,28 +154,25 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
         for x in range(0,tas.shape[1],1): #tas.shape[1]
             for y in range(0,tas.shape[2],1): #tas.shape[2]
 
-            
                 ## get the appropriate values 
                 #RH = hurs[:,x,y] * 100
                 Ta = tas[:,x,y] -273.15
-                Rt = pr[:,x,y] * 86400     
-                Et = np.fabs(evspsblpot[:,x,y] * 86400) # some times evspsblpot ist stored as negaitve value  
+                Rt = pr[:,x,y] * 86400.     
+                Et = np.fabs(evspsblpot[:,x,y] * 86400.) # some times evspsblpot ist stored as negaitve value  
                 
                 # calculation of rel. humidity 
-                e_ = ((ps[:,x,y]*huss[:,x,y])/62.2)
-                es = 6.1078*10**(7.5*(tas[:,x,y]-273.16)/(237.3+(tas[:,x,y]-273.16)))
-                RH = (e_ / es) * 100
+                e_ = ((ps[:,x,y] * huss[:,x,y])/62.2)
+                es = 6.1078*10.**(7.5*(tas[:,x,y]-273.16)/(237.3+(tas[:,x,y]-273.16)))
+                RH = (e_ / es) * 100.
                 
                 #calulation of water temperature
                 Tw = Ta + deltaT
-
                 
                 ## Check for Values out of range
                 Rt[Rt + Increase_Rt < 0] = 0 
                 Et[Rt + Increase_Rt < 0] = 0
                 RH[RH + Increase_RH < 0] = 0
                 RH[RH + Increase_RH > 100] = 100
-
                 
                 # create appropriate variabels 
                 D = np.zeros(Ta.size)
