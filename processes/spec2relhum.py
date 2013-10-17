@@ -9,21 +9,21 @@ import subprocess
 #from malleefowl.process import WorkerProcess
 import malleefowl.process
 
-class EsgfRelHumProcess(malleefowl.process.WorkerProcess):
+class spec2relhumProcess(malleefowl.process.WorkerProcess):
     """This process calculates the relative humidity"""
 
     def __init__(self):
         # definition of this process
         malleefowl.process.WorkerProcess.__init__(self, 
-            identifier = "de.csc.esgf.relhum",
-            title="specific to relative humidity (ESGF)",
+            identifier = "de.csc.esgf.spec2relhum",
+            title="specific (kg/kg) to relative (1) humidity",
             version = "0.1",
             metadata= [
                        {"title": "Climate Service Center", "href": "http://www.climate-service-center.de/"}
                       ],
             abstract="Just testing a nice script to calculate the relative humidity ...",
             extra_metadata={
-                  'esgfilter': 'variable:tas,variable:huss,variable:ps',  #institute:MPI-M,
+                  'esgfilter': '',  #institute:MPI-M,
                   'esgquery': 'variable:tas AND variable:huss AND variable:ps' # institute:MPI-M 
                   },
             )

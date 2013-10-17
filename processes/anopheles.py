@@ -23,16 +23,15 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
                        {"title": "Climate Service Center", "href": "http://www.climate-service-center.de/"}
                       ],
             abstract="Just testing a nice script to calculate the Population dynamics of Anopheles Gambiae",
-            extra_metadata={
-                  'esgfilter': 'variable:tas, variable:evspsblpot, variable:huss, variable:ps, variable:pr, variable:sftlf, time_frequency:day, time_frequency:fix, domain:AFR-44', 
-                  'esgquery': 'data_node:esg-dn1.nsc.liu.se' 
+            extra_metadata={ 
+                  'esgfilter': 'variable:tas, variable:evspsblpot, variable:huss, variable:ps, variable:pr, variable:sftlf, time_frequency:day, time_frequency:fx', 
+                  'esgquery': 'project:CORDEX AND domain:AFR-44 '  # data_node:esg-dn1.nsc.liu.se
                   },
             )
             
         # Literal Input Data
         # ------------------
 
-       
         self.output = self.addComplexOutput(
             identifier="output",
             title="anopheles",
@@ -67,46 +66,10 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
             else:
                 raise Exception("input netcdf file has not variable tas|hurs|pr|evspsbl")
 
-        # calculate the relative humidity 
-        # merge ps and huss
-        #(_, file_ps_huss) = tempfile.mkstemp(suffix='.nc')
-        #cmd = ['cdo', '-O', 'merge', file_ps, file_huss, file_ps_huss]
-        #self.cmd(cmd=cmd, stdout=True)
-
-        #self.status.set(msg="relhum merged", percentDone=20, propagate=True)
-        
-        ## ps * huss
-        #(_, file_e) = tempfile.mkstemp(suffix='_e.nc')
-        #expr = "expr,\'e=((%s*%s)/62.2)\'" % ('ps', 'huss')
-        #cmd = ['cdo', expr, file_ps_huss, file_e]
-        #self.cmd(cmd=cmd, stdout=True)
-
-        #self.status.set(msg="relhum ps*hus", percentDone=30, propagate=True)
-        
-        ## partial vapour pressure using Magnus-Formula over water
-        ## cdo expr,'es=6.1078*10^(7.5*(tas-273.16)/(237.3+(tas-273.16)))' ../in/tas_$filename  ../out/es_$filename
-        #(_, file_es) = tempfile.mkstemp(suffix='_es.nc')
-        #cmd = ['cdo', "expr,\'es=6.1078*exp(17.08085*(tas-273.16)/(234.175+(tas-273.16)))\'", file_tas, file_es]
-        #self.cmd(cmd=cmd, stdout=True)
-        #self.status.set(msg="relhum ps*hus", percentDone=40, propagate=True)
-        
-        ## calculate relative humidity
-        #(_, file_hurs_temp) = tempfile.mkstemp(suffix='.nc')
-        #cmd = ['cdo', '-div', file_e, file_es, file_hurs_temp]
-        #self.cmd(cmd=cmd, stdout=True)
-        
-        ## rename variable 
-        #(_, file_hurs) = tempfile.mkstemp(suffix='.nc')
-        #cmd = ['cdo', '-setname,hurs', file_hurs_temp, file_hurs ]
-        #self.cmd(cmd=cmd, stdout=True)
-        #self.status.set(msg="relhum done", percentDone=50, propagate=True)
-        
         # build the n4 out variable based on pr
         file_n4 = path.join(path.abspath(curdir), "n4.nc")       
         cdo.setname('n4', input=file_pr, output=file_n4)
         
-        #cdo.selname('pr', input='/home/main/data/pr_AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_20060101_20101231.nc', output='/home/main/data/n4_AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_20060101_20101231.nc')
-
         nc_tas = NetCDFFile(file_tas,'r')
         nc_pr = NetCDFFile(file_pr,'r')
         nc_ps = NetCDFFile(file_ps,'r')
