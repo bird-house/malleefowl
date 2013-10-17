@@ -24,8 +24,8 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
                       ],
             abstract="Just testing a nice script to calculate the Population dynamics of Anopheles Gambiae",
             extra_metadata={ 
-                  'esgfilter': 'variable:tas, variable:evspsblpot, variable:huss, variable:ps, variable:pr, variable:sftlf, time_frequency:day, time_frequency:fx', 
-                  'esgquery': 'project:CORDEX AND domain:AFR-44 '  # data_node:esg-dn1.nsc.liu.se
+                  'esgquery': 'variable:tas OR variable:huss OR variable:ps OR variable:pr OR variable:evspsblpot', 
+                  'esgfilter': 'project:CORDEX,domain:AFR-44,time_frequency:day'  # data_node:esg-dn1.nsc.liu.se
                   },
             )
             
