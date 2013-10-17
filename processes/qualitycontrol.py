@@ -10,15 +10,15 @@ import os
 import shutil
 #from malleefowl.process import WPSProcess
 import malleefowl.process 
-class Process(malleefowl.process.WPSProcess):
+class NoFileProcess(malleefowl.process.WPSProcess):
     def __init__(self):
         # init process
         abstractML =("The process takes in configuration files and a link"
                      +" to a to check file. The output is the log file for now.")
 
         malleefowl.process.WPSProcess.__init__(self,
-            identifier = "QualityControl", 
-            title="Quality Control",
+            identifier = "QualityControlNTF", 
+            title="Quality Control without taskfile",
             version = "0.1",
             metadata=[],
             abstract=abstractML)
@@ -79,14 +79,6 @@ class Process(malleefowl.process.WPSProcess):
             maxOccurs=1,
             )
  
-        #self.select = self.addLiteralInput(
-        #    identifier="SELECT",
-        #    title="SELECT",
-        #    default=".*",
-        #    type=types.StringType,
-        #    minOccurs=1,
-        #    maxOccurs=1,
-        #    )
 
         self.boolOptionalParameters = self.addLiteralInput(
             identifier="OPTIONAL_PARAMETERS_NOARGS",
@@ -110,7 +102,7 @@ class Process(malleefowl.process.WPSProcess):
             )
         self.optionalParameters = self.addLiteralInput(
             identifier="ARGS_OPTIONAL_PARAMETERS",
-            title="Available optional parameters",
+            title="Optional parameters with arguments",
             default="",
             abstract="A list of useable parameters in the following fields.",
             type=types.StringType,
@@ -210,3 +202,136 @@ class Process(malleefowl.process.WPSProcess):
         return True
             
                  
+class TaskFileProcess(malleefowl.process.WPSProcess):
+    def __init__(self):
+        # init process
+        abstractML =("The process takes in configuration files and a link"
+                     +" to a to check file. The output is the log file for now.")
+
+        malleefowl.process.WPSProcess.__init__(self,
+            identifier = "QualityControlTF", 
+            title="Quality Control with taskfile",
+            version = "0.1",
+            metadata=[],
+            abstract=abstractML)
+             
+
+        self.qcScriptPath= self.addLiteralInput(
+            identifier="QCScriptPath",
+            title="Quality Control Script path",
+            abstract="The path must be on the processing server.",
+            default="/home/tk/sandbox/qc/QC-0.4/scripts",
+            type=types.StringType,
+            minOccurs=1,
+            maxOccurs=1,
+            )
+ 
+
+        self.taskFile = self.addLiteralInput(
+            identifier="TASK_FILE",
+            title="Task file on the server",
+            default="/home/tk/sandbox/exampleqc/qc-test.task",
+            type=types.StringType,
+            minOccurs=1,
+            maxOccurs=1,
+            )
+
+        self.project = self.addLiteralInput(
+            identifier="PROJECT",
+            title="Project",
+            default="CORDEX",
+            allowedValues=["CORDEX","NONE"],
+            type=types.StringType,
+            minOccurs=1,
+            maxOccurs=1,
+            )
+
+        self.args = self.addLiteralInput(
+            identifier="OPTIONAL_ARGUMENTS",
+            title="optional arguments",
+            abstract="e.g. -E_SHOW_CONF -E_CLEAR",
+            default="",
+            type=types.StringType,
+            minOccurs=0,
+            maxOccurs=1,
+            )
+             
+
+        self.allOk = self.addLiteralOutput(identifier="allOk",
+                                           title ="Everything is ok",
+                                           abstract ="True if the Quality Check did not find errors.",
+                                           default=False,
+                                           type = types.BooleanType,
+                                          )
+        self.qcInfo = self.addLiteralOutput(identifier="QualityControlOutput",
+                                           title ="Quality Control Output",
+                                           abstract ="Console output of the Quality Check.",
+                                           default="No output found",
+                                           type = types.StringType,
+                                          )
+
+        self.qcCall = self.addLiteralOutput(
+            identifier="qcCall",
+            title="qcCall",
+            default="No call",
+            type=types.StringType,
+            )
+        self.logfilesOut = self.addComplexOutput(
+            identifier="ProcessLog",
+            title="Log of the Quality Control web process.",
+            metadata=[],
+            formats=[{"mimeType":"text/plain"}],
+            asReference=True,
+            )
+
+                              
+                              
+    def execute(self):
+        
+        self.status.set(msg="Initiate process", percentDone=5, propagate=True)
+        output_ext = "log"
+
+        qcManager = self.qcScriptPath.getValue()+"/qcManager"
+        taskfile = self.taskFile.getValue()
+        optionsString = " -f "+taskfile
+        #an empty field in the web app returns <colander.null> in the Version from 17.10.2013
+        if(self.args.getValue() != "<colander.null>"):
+            optionsString += " "+self.args.getValue()
+        optionsString+=" -P "+self.project.getValue()
+        self.qcCall.setValue(qcManager+optionsString)    
+        self.status.set(msg="Running Quality Control", percentDone=20, propagate=True)
+        qcManagerOutput = os.system(qcManager+optionsString)
+        self.qcInfo.setValue(qcManagerOutput)      
+
+        #After the processing search for the log files
+        if(qcManagerOutput == 0):
+            qcresults =""
+            #search for the first QC_RESULTS line that is not a comment and store it in qcresults
+            tf = open(taskfile)
+            filedata = tf.readlines()
+            tf.close()
+            qcres = [row for row in filedata if "QC_RESULTS" in row and row.lstrip()[0]!='#']
+            if(len(qcres) >0):#just to be sure that a QC_RESULTS variable exists in the file.
+                qcresults=qcres[0].strip(' ').rstrip('\n')
+                #Search for logfiles in qcresults directory
+                qcrsplit = qcresults.split('=')
+                path = qcrsplit[1]
+                dirList=os.listdir(path+"/check_logs")
+                fullPathList = [path+"/check_logs/"+k for k in dirList if '.log' in k]
+                lfname = self.mktempfile(suffix=".txt")
+                logfile = open(lfname,'w')
+                for log in fullPathList:
+                    logfile.write("----FILE "+log+" CONTAINS:----\n")
+                    tempf = file(log,'r')
+                    lines = tempf.readlines()
+                    for line in lines:
+                        logfile.write(line)
+                    tempf.close()
+                logfile.close()
+                self.logfilesOut.setValue(logfile)
+ 
+        self.allOk.setValue(self.evaluateResults())
+        return
+
+    def evaluateResults(self):
+        return True
