@@ -276,6 +276,24 @@ class TaskFileProcess(malleefowl.process.WPSProcess):
             default="No call",
             type=types.StringType,
             )
+        self.failCount = self.addLiteralOutput(
+            identifier="failCount",
+            title="Fail count",
+            default=0,
+            type=types.IntType,
+            )
+        self.omitCount = self.addLiteralOutput(
+            identifier="omitCount",
+            title="Omit count",
+            default=0,
+            type=types.IntType,
+            )
+        self.passCount = self.addLiteralOutput(
+            identifier="passCount",
+            title="Pass count",
+            default=0,
+            type=types.IntType,
+            )
         self.logfilesOut = self.addComplexOutput(
             identifier="ProcessLog",
             title="Log of the Quality Control web process.",
@@ -292,8 +310,8 @@ class TaskFileProcess(malleefowl.process.WPSProcess):
         output_ext = "log"
 
         qcManager = self.qcScriptPath.getValue()+"/qcManager"
-        taskfile = self.taskFile.getValue()
-        optionsString = " -f "+taskfile
+        taskfileName = self.taskFile.getValue()
+        optionsString = " -f "+taskfileName
         #an empty field in the web app returns <colander.null> in the Version from 17.10.2013
         if(self.args.getValue() != "<colander.null>"):
             optionsString += " "+self.args.getValue()
@@ -302,36 +320,64 @@ class TaskFileProcess(malleefowl.process.WPSProcess):
         self.status.set(msg="Running Quality Control", percentDone=20, propagate=True)
         qcManagerOutput = os.system(qcManager+optionsString)
         self.qcInfo.setValue(qcManagerOutput)      
-
+         
         #After the processing search for the log files
         if(qcManagerOutput == 0):
-            qcresults =""
-            #search for the first QC_RESULTS line that is not a comment and store it in qcresults
-            tf = open(taskfile)
-            filedata = tf.readlines()
-            tf.close()
-            qcres = [row for row in filedata if "QC_RESULTS" in row and row.lstrip()[0]!='#']
-            if(len(qcres) >0):#just to be sure that a QC_RESULTS variable exists in the file.
-                qcresults=qcres[0].strip(' ').rstrip('\n')
-                #Search for logfiles in qcresults directory
-                qcrsplit = qcresults.split('=')
-                path = qcrsplit[1]
-                dirList=os.listdir(path+"/check_logs")
-                fullPathList = [path+"/check_logs/"+k for k in dirList if '.log' in k]
-                lfname = self.mktempfile(suffix=".txt")
-                logfile = open(lfname,'w')
-                for log in fullPathList:
-                    logfile.write("----FILE "+log+" CONTAINS:----\n")
-                    tempf = file(log,'r')
-                    lines = tempf.readlines()
-                    for line in lines:
-                        logfile.write(line)
-                    tempf.close()
-                logfile.close()
+            path = self.get_QC_RESULTS(taskfileName)
+            if(path!=""):
+                logfile = self.mktempfile(suffix=".txt")
+                (failCount,omitCount,passCount) = self.mergeAndCountLogs(path,logfile)
                 self.logfilesOut.setValue(logfile)
+                self.failCount.setValue(failCount)
+                self.omitCount.setValue(omitCount)
+                self.passCount.setValue(passCount)
  
-        self.allOk.setValue(self.evaluateResults())
         return
 
-    def evaluateResults(self):
-        return True
+    """ search for the first QC_RESULTS line that is not a comment and return its value"""
+    def get_QC_RESULTS(self,taskfileName):
+        path = ""
+        taskfile = open(taskfileName)
+        filedata = taskfile.readlines()
+        taskfile.close()
+        qcres = [row for row in filedata if "QC_RESULTS" in row and row.lstrip()[0]!='#']
+        if(len(qcres) >0):#just to be sure that a QC_RESULTS variable exists in the file.
+            qcresults=qcres[0].strip(' ').rstrip('\n')
+            qcrsplit = qcresults.split('=')
+            path = qcrsplit[1]
+        return path
+
+
+    def mergeAndCountLogs(self,path,targetfileName):
+        logFile = open(targetfileName,'w')
+        (fails,omits,passes) = (0,0,0) 
+        check_logs_Path= path+"/check_logs/"
+        dirList=os.listdir(check_logs_Path)
+        fullPath_LogList = [check_logs_Path+k for k in dirList if '.log' in k]
+        for log in fullPath_LogList:
+            logFile.write("----FILE "+log+" CONTAINS:----\n")
+            tempFile= file(log,'r')
+            lines = tempFile.readlines()
+            
+            for line in lines:
+                """ Search for the lines with CHECK:: e.g.
+                    CHECK:: meta data: FAIL,    time: PASS,     data: PASS
+                    0       1    2     3        4     5         6     7
+                    And count the FAIL, PASS and OMIT.
+                    They always have the same formating, which allows for a simple parsing."""
+                if(line[:7]=="CHECK::"):
+                    lrs = line.replace('\t',' ').split(' ')
+                    resList=[lrs[3].rstrip(','),lrs[5].rstrip(','),lrs[7].rstrip('\n')]
+                    for word in resList:
+                        if(word=="PASS"):
+                            passes+=1
+                        elif(word=="OMIT"):
+                            omits+=1
+                        elif(word=="FAIL"):
+                            fails+=1
+                        #else:
+                        #    logFile.write("***MISS***:"+str(word)+" "+str(type(word)))
+                logFile.write(line)
+            tempFile.close()
+        logFile.close()
+        return (fails,omits,passes)
