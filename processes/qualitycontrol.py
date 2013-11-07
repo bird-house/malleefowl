@@ -270,6 +270,13 @@ class TaskFileProcess(malleefowl.process.WPSProcess):
             asReference=True,
             )
 
+        self.createdFilesLog = self.addComplexOutput(
+            identifier="CreatedFilesLog",
+            title="Log of the created files with PID.",
+            metadata=[],
+            formats=[{"mimeType":"text/plain"}],
+            asReference=True,
+            )
                               
                               
     def execute(self):
@@ -296,19 +303,22 @@ class TaskFileProcess(malleefowl.process.WPSProcess):
                 logfilenames = getLogfileNames(path)
                 log = self.mktempfile(suffix=".txt")
                 logfile = open(log,'w')
-
+                logcr = self.mktempfile(suffix=".txt")
+                logcreated = open(logcr,'w')
                 for log in logfilenames:
                     self.yamltoxml.clear()
                     self.yamltoxml.loadFile(log)
                     self.yamltoxml.toXML()
-                    f = open("/home/tk/sandbox/log","a")
-                    f.write(self.yamltoxml.showAllErrors())
-                    f.close()
+                    logcreated.write(self.yamltoxml.getCreatedFilenames())
+
                     logfile.write(self.yamltoxml.showAllErrors())
                     
                 
                 #(failCount,omitCount,passCount) = mergeAndCountLogs(path,logfile)
+                logfile.close()
+                logcreated.close()
                 self.logfilesOut.setValue(logfile)
+                self.createdFilesLog.setValue(logcreated)
                 #self.failCount.setValue(failCount)
                 #self.omitCount.setValue(omitCount)
                 #self.passCount.setValue(passCount)

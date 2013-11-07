@@ -1,6 +1,4 @@
 import yaml
-#import time
-#import datetime
 import os
 
 from pyesgf.search import SearchConnection
@@ -8,10 +6,7 @@ from pyesgf.search import SearchConnection
 import lapis
 import lapis.infra.infrastructure
 import lapis.infra.handleinfrastructure
-import logging
-#TODO: Currently it is avoided to create too many pids. DOHandler.createDO with identifier set 
-# will lead to overwriting the settings once setResourceLocation is called, even if another
-# file was referenced with it
+
 addpath = "/home/tk/sandbox/climdaps/src/Malleefowl/processes/qc/"
 class DOHandler():
     def __init__(self):
@@ -50,7 +45,7 @@ class DOHandler():
 
 class Yaml2Xml():
     def __init__(self,data_node="ipcc-ar5.dkrz.de",index_node="esgf-data.dkrz.de",
-                 xmlOutputPath ="/home/tk/sandbox/xmlresults"):
+                 xmlOutputPath ="/home/tk/sandbox/xmlresults/"):
         self.doHandler = DOHandler()
         #self.handlePrefix="handleoracle.dkrz.de:8090/handle/"
         self.pathListNames=["domain","institute","driving_model","experiment","ensemble","model",
@@ -75,6 +70,7 @@ class Yaml2Xml():
         self.filetypes = ["QC-File","QC-Dataset","File","Dataset"]
         self.allow_esg_search = False #Significantly increases the processing time if True
         self.clear()
+        self.createdLinks = []
 
     def clear(self):
         self.ErrorLog = []
@@ -99,7 +95,7 @@ class Yaml2Xml():
         length=len(self.getDicEntry(['items']))
 
         """ Collect the information for each file described in the YAML file"""
-        for i in range(1,length):
+        for i in range(0,length):
             META=self.createFileMeta(i)
             if(META is not None):
                 identifier = META["title"]
@@ -171,7 +167,7 @@ class Yaml2Xml():
                     fs = furl.split("/")
                     url = fs[0]+"/"+"/".join(fs[1:-1])+"/"
                     self.ESGS[master_id]["serverDir"]=url
-                    break
+                    break#just look at the first file
 
     def loadFile(self, filename):
         self.store = yaml.safe_load(file(filename, 'r'))
@@ -272,6 +268,7 @@ class Yaml2Xml():
         filename = self.xmlOutputPath+filetype+"-"+identifier+".xml"
         self.FILENAMES[filetype][identifier]= filename
         self.XMLURLS[filetype][identifier] =self.link(None,filename)
+        self.createdLinks.append((self.XMLURLS[filetype][identifier],filename))
          
     def createMetaFileNames(self,identifier):
         self.createNamesShared("File",identifier)
@@ -364,9 +361,6 @@ class Yaml2Xml():
         for fileid in files:
             FILES["file_"+str(k)] = fileid
             checkmap = self.TIM["QC-File-Checks"][fileid]
-            f = open("/home/tk/sandbox/log","a")
-            f.write(str(checkmap))
-            f.close()
             for check in checkmap:
                 result = checkmap[check]
                 CHECKSSUMMARY[result.lower()]+=1
@@ -666,6 +660,13 @@ class Yaml2Xml():
                 self.makeDatasetMetaXml(identifier)
                 self.makeDatasetQualityXml(identifier)
 
+
+    def getCreatedFilenames(self):
+        out=""
+        for tupl in self.createdLinks:
+            out+=tupl[0]+" => "+tupl[1]+"\n"
+        return out
+        
 
 #if __name__ == "__main__":
 #    try:
