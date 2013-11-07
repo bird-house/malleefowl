@@ -8,9 +8,11 @@ import types
 #import datetime
 import os
 import subprocess 
-import time
 #from malleefowl.process import WPSProcess
 import malleefowl.process 
+import processes.qc.Yaml2Xml as y2x
+import logging
+
 class NoFileProcess(malleefowl.process.WPSProcess):
     def __init__(self):
         # init process
@@ -177,6 +179,7 @@ class NoFileProcess(malleefowl.process.WPSProcess):
                  
 class TaskFileProcess(malleefowl.process.WPSProcess):
     def __init__(self):
+        self.yamltoxml = y2x.Yaml2Xml()
         abstractML =("The process takes in configuration files and a link"
                      +" to a to check file. The output is the log file for now.")
         malleefowl.process.WPSProcess.__init__(self,
@@ -201,7 +204,7 @@ class TaskFileProcess(malleefowl.process.WPSProcess):
             identifier="TASK_FILE",
             title="Task file on the server",
             #default="/home/tk/sandbox/exampleqc/qc-test.task",
-            default="/home/tk/sandbox/qc/QC-0.4/2exampleqc/qc-test.task", 
+            default="/home/tk/sandbox/qc-yaml/test3/qc_CORDEX.task", 
             type=types.StringType,
             minOccurs=1,
             maxOccurs=1,
@@ -270,9 +273,7 @@ class TaskFileProcess(malleefowl.process.WPSProcess):
                               
                               
     def execute(self):
-
         self.status.set(msg="Initiate process", percentDone=0, propagate=True)
-        output_ext = "log"
 
         qcManager = self.qcScriptPath.getValue()+"/qcManager"
         taskfileName = self.taskFile.getValue()
@@ -281,22 +282,36 @@ class TaskFileProcess(malleefowl.process.WPSProcess):
         if(self.args.getValue() != "<colander.null>"):
             optionsString += " "+self.args.getValue()
         optionsString+=" -P "+self.project.getValue()
-        optionsString+=" --pb"
+        optionsString+=" --pb --yaml"
         self.qcCall.setValue(qcManager+optionsString)    
         self.status.set(msg="Running Quality Control", percentDone=0, propagate=True)
         qcManagerProcess=subprocess.Popen([qcManager,optionsString], stdout=subprocess.PIPE,bufsize=0)
+        logging.debug("***qcManager "+optionsString)
         qcManagerExitCode = barupdate(qcManagerProcess,self.status)
         self.qcInfo.setValue(qcManagerExitCode)      
         #If the quality check finished correctly sarch for the log files an merge them. 
         if(qcManagerExitCode == 0):
             path = get_QC_RESULTS(taskfileName)
             if(path!=""):
-                logfile = self.mktempfile(suffix=".txt")
-                (failCount,omitCount,passCount) = mergeAndCountLogs(path,logfile)
+                logfilenames = getLogfileNames(path)
+                log = self.mktempfile(suffix=".txt")
+                logfile = open(log,'w')
+
+                for log in logfilenames:
+                    self.yamltoxml.clear()
+                    self.yamltoxml.loadFile(log)
+                    self.yamltoxml.toXML()
+                    f = open("/home/tk/sandbox/log","a")
+                    f.write(self.yamltoxml.showAllErrors())
+                    f.close()
+                    logfile.write(self.yamltoxml.showAllErrors())
+                    
+                
+                #(failCount,omitCount,passCount) = mergeAndCountLogs(path,logfile)
                 self.logfilesOut.setValue(logfile)
-                self.failCount.setValue(failCount)
-                self.omitCount.setValue(omitCount)
-                self.passCount.setValue(passCount)
+                #self.failCount.setValue(failCount)
+                #self.omitCount.setValue(omitCount)
+                #self.passCount.setValue(passCount)
  
         return
 
@@ -315,6 +330,11 @@ def get_QC_RESULTS(taskfileName):
         path = qcrsplit[1]
     return path
 
+def getLogfileNames(path):
+    check_logs_Path = path+"/check_logs/"
+    dirList=os.listdir(check_logs_Path)
+    fullPath_LogList = [check_logs_Path+k for k in dirList if '.log' in k]
+    return fullPath_LogList
 
 def mergeAndCountLogs(path,targetfileName):
     logFile = open(targetfileName,'w')
@@ -362,8 +382,14 @@ def barupdate(qcManagerProcess,status):
         if not line:
            break
         splitLine=line.rstrip('n').split(' ')
-        current = float(splitLine[0])
-        end = float(splitLine[1])
-        perc = int(current*100.0/end)
-        status.set(msg="Checking Files", percentDone=perc, propagate=True)
+        #There might be empty lines or lines that are not pb lines. The try simplifies the
+        #checking if the entries exist and if they are numbers. It is assumed that it only
+        #throws an exception rarely. 
+        try:
+            current = float(splitLine[0])
+            end = float(splitLine[1])
+            perc = int(current*100.0/end)
+            status.set(msg="Checking Files", percentDone=perc, propagate=True)
+        except:
+            pass
     return poll
