@@ -11,175 +11,11 @@ import subprocess
 #from malleefowl.process import WPSProcess
 import malleefowl.process 
 import processes.qc.Yaml2Xml as y2x
-import logging
-
-class NoFileProcess(malleefowl.process.WPSProcess):
-    def __init__(self):
-        # init process
-        abstractML=("The process takes in a single file and optional parameters"
-                   +" to run a quality check. The summary shows how many FAIL, OMIT and PASS occured.")
-
-        malleefowl.process.WPSProcess.__init__(self,
-            identifier = "QualityControlNTF", 
-            title="Quality Control for single files",
-            version = "0.1",
-            metadata=[],
-            abstract=abstractML)
-               
-        self.argOptionalParameters=["APPLY_MAXIMUM_DATE_RANGE",]
-                
-        self.projectName = self.addLiteralInput(
-            identifier="PROJECT",
-            title="PROJECT",
-            default="CORDEX",
-            type=types.StringType,
-            minOccurs=1,
-            maxOccurs=1,
-            )
-
-        self.qcScriptPath= self.addLiteralInput(
-            identifier="QCScriptPath",
-            title="Quality Control Script path",
-            abstract="Path where the Quality Control scripts are located.",
-            default="/home/tk/sandbox/qc/QC-0.4/scripts",
-            type=types.StringType,
-            minOccurs=1,
-            maxOccurs=1,
-            )
- 
-        self.fileurl= self.addLiteralInput(
-            identifier="fileurl",
-            title="NetCDF file to analyse",
-            default="http://www.unidata.ucar.edu/software/netcdf/examples/sresa1b_ncar_ccsm3_0_run1_200001.nc",
-            type=types.StringType,
-            minOccurs=1,
-            maxOccurs=1,
-            )
-
-        self.optionalParameters = self.addLiteralInput(
-            identifier="OPTIONAL_PARAMETERS",
-            title="optional parameters",
-            default="",
-            type=types.StringType,
-            minOccurs=0,
-            maxOccurs=1,
-            )
-             
-        self.availableOptionalParameters = self.addLiteralInput(
-            identifier="AVAILABLE_OPTIONAL_PARAMETERS",
-            title="Available optional parameters",
-            default="",
-            abstract="A list of useable parameters.",
-            allowedValues= self.argOptionalParameters,
-            type=types.StringType,
-            minOccurs=1,
-            maxOccurs=1,
-            )
-        self.tempPath = self.addLiteralInput(
-            identifier="Path_for_temporary_storage",
-            title="Path for temporary storage",
-            default = "/home/tk/sandbox/temp",
-            type=types.StringType,
-            minOccurs=1,
-            maxOccurs=1,
-            )
-
-
-        self.qcInfo = self.addLiteralOutput(
-            identifier="QualityControlOutput",
-            title ="Quality Control Output",
-            abstract ="Console output of the Quality Check.",
-            default="No output found",
-            type = types.StringType,
-            )
-        #self.CORDEX_qcconf = ["APPLY_MAXIMUM_DATE_RANGE","PROJECT_TABLE_PREFIX=pt"]
-
-        self.qcCall = self.addLiteralOutput(
-            identifier="qcCall",
-            title="qcCall",
-            default="No call",
-            type=types.StringType,
-            )
-        self.failCount = self.addLiteralOutput(
-            identifier="failCount",
-            title="Fail count",
-            default=0,
-            type=types.IntType,
-            )
-        self.omitCount = self.addLiteralOutput(
-            identifier="omitCount",
-            title="Omit count",
-            default=0,
-            type=types.IntType,
-            )
-        self.passCount = self.addLiteralOutput(
-            identifier="passCount",
-            title="Pass count",
-            default=0,
-            type=types.IntType,
-            )
-        self.logfilesOut = self.addComplexOutput(
-            identifier="ProcessLog",
-            title="Log of the Quality Control web process.",
-            metadata=[],
-            formats=[{"mimeType":"text/plain"}],
-            asReference=True,
-            )
-                              
-                              
-    def execute(self):
-        
-        self.status.set(msg="Initiate process", percentDone=5, propagate=True)
-        output_ext = "log"
-        filename = self.mktempfile(suffix='.' + output_ext)
-        tempPath = self.tempPath.getValue()
-        resultsdir=tempPath+"/results"
-        if not os.path.isdir(resultsdir):
-            os.makedirs(resultsdir)
-        datadir = tempPath+"/data"
-        if not os.path.isdir(datadir):
-            os.makedirs(datadir)
-        ncfileurl = self.fileurl.getValue()
-        wgetStatus=os.system("wget "+ncfileurl+" -P "+datadir)
-        qcManager = self.qcScriptPath.getValue()+"/qcManager"
-        optionsString = " -E_PROJECT_DATA="+datadir#+self.projectData.getValue()
-        optionsString +=" -E_QC_RESULTS="+resultsdir#self.QCResults.getValue()
-        optionsString +=" -P "+self.projectName.getValue()
-        optionsString +=" -E_CHECK_MODE=data"
-        options = self.optionalParameters.getValue()
-        if(options != "<colander.null>"):
-            optionsSplit=options.split(" ")
-            for option in optionsSplit:
-                valid = False
-                #if the the option parameter starts with a valid option add the parameter
-                for val in self.argOptionalParameters:
-                    if(option[0:len(val)]==val):
-                        valid=True
-                        break
-                if valid:
-                    optionsString += " -E_"+str(option)
-        self.qcCall.setValue(qcManager+optionsString)    
-        self.status.set(msg="Running Quality Control", percentDone=20, propagate=True)
-        qcManagerOutput = os.system(qcManager+optionsString)
-        self.qcInfo.setValue(qcManagerOutput)      
-        if(qcManagerOutput == 0):
-            path = resultsdir 
-            if(path!=""):
-                logfile = self.mktempfile(suffix=".txt")
-                (failCount,omitCount,passCount) = mergeAndCountLogs(path,logfile)
-                self.logfilesOut.setValue(logfile)
-                self.failCount.setValue(failCount)
-                self.omitCount.setValue(omitCount)
-                self.passCount.setValue(passCount)
-
- 
-        return #If execute() returns anything but null, it is considered as error and exception is called
 
             
                  
 class TaskFileProcess(malleefowl.process.WPSProcess):
     def __init__(self):
-        self.yamltoxml = y2x.Yaml2Xml()
         abstractML =("The process takes in configuration files and a link"
                      +" to a to check file. The output is the log file for now.")
         malleefowl.process.WPSProcess.__init__(self,
@@ -199,6 +35,32 @@ class TaskFileProcess(malleefowl.process.WPSProcess):
             maxOccurs=1,
             )
  
+        self.data_node= self.addLiteralInput(
+            identifier="data_node",
+            title="Data node",
+            default="ipcc-ar5.dkrz.de",
+            type=types.StringType,
+            minOccurs=1,
+            maxOccurs=1,
+            )
+
+        self.index_node= self.addLiteralInput(
+            identifier="index_node",
+            title="index node",
+            default="esgf-data.dkrz.de",
+            type=types.StringType,
+            minOccurs=1,
+            maxOccurs=1,
+            )
+        self.xmlOutputPath= self.addLiteralInput(
+            identifier="xmlOutputPath",
+            title="Output path for the generated xml files.",
+            abstract = "For now only one path for all result files is used",
+            default="/home/tk/sandbox/xmlresults/",
+            type=types.StringType,
+            minOccurs=1,
+            maxOccurs=1,
+            )
 
         self.taskFile = self.addLiteralInput(
             identifier="TASK_FILE",
@@ -262,6 +124,12 @@ class TaskFileProcess(malleefowl.process.WPSProcess):
             default=0,
             type=types.IntType,
             )
+        self.fixedCount = self.addLiteralOutput(
+            identifier="fixedCount",
+            title="Fixed count",
+            default=0,
+            type=types.IntType,
+            )
         self.logfilesOut = self.addComplexOutput(
             identifier="ProcessLog",
             title="Log of the Quality Control web process.",
@@ -274,13 +142,21 @@ class TaskFileProcess(malleefowl.process.WPSProcess):
             identifier="CreatedFilesLog",
             title="Log of the created files with PID.",
             metadata=[],
-            formats=[{"mimeType":"text/plain"}],
+            formats=[{"mimeType":"text/html"}],
             asReference=True,
+            )
+        self.hasIssues = self.addLiteralOutput(
+            identifier="hasIssues",
+            title="There is something wrong with the checked files.",
+            default = False,
+            type=types.BooleanType,
             )
                               
                               
     def execute(self):
         self.status.set(msg="Initiate process", percentDone=0, propagate=True)
+        self.yamltoxml = y2x.Yaml2Xml(self.data_node.getValue(),self.index_node.getValue(),
+                         self.xmlOutputPath.getValue())
 
         qcManager = self.qcScriptPath.getValue()+"/qcManager"
         taskfileName = self.taskFile.getValue()
@@ -293,35 +169,42 @@ class TaskFileProcess(malleefowl.process.WPSProcess):
         self.qcCall.setValue(qcManager+optionsString)    
         self.status.set(msg="Running Quality Control", percentDone=0, propagate=True)
         qcManagerProcess=subprocess.Popen([qcManager,optionsString], stdout=subprocess.PIPE,bufsize=0)
-        logging.debug("***qcManager "+optionsString)
         qcManagerExitCode = barupdate(qcManagerProcess,self.status)
         self.qcInfo.setValue(qcManagerExitCode)      
         #If the quality check finished correctly sarch for the log files an merge them. 
         if(qcManagerExitCode == 0):
+            hasIssues = False
             path = get_QC_RESULTS(taskfileName)
             if(path!=""):
                 logfilenames = getLogfileNames(path)
                 log = self.mktempfile(suffix=".txt")
                 logfile = open(log,'w')
-                logcr = self.mktempfile(suffix=".txt")
-                logcreated = open(logcr,'w')
                 for log in logfilenames:
                     self.yamltoxml.clear()
                     self.yamltoxml.loadFile(log)
                     self.yamltoxml.toXML()
-                    logcreated.write(self.yamltoxml.getCreatedFilenames())
-
-                    logfile.write(self.yamltoxml.showAllErrors())
                     
-                
+                    errors = self.yamltoxml.showAllErrors()
+                    if(len(errors) > 0):
+                        logfile.write(errors)
+                        hasIssues = True
+                    
+                             
                 #(failCount,omitCount,passCount) = mergeAndCountLogs(path,logfile)
                 logfile.close()
+                
+                logcr = self.mktempfile(suffix=".html")
+                logcreated = open(logcr,'w')
+                logcreated.write(self.yamltoxml.getCreatedFilenames())
                 logcreated.close()
                 self.logfilesOut.setValue(logfile)
                 self.createdFilesLog.setValue(logcreated)
-                #self.failCount.setValue(failCount)
-                #self.omitCount.setValue(omitCount)
-                #self.passCount.setValue(passCount)
+                gcdict = self.yamltoxml.GLOBALCHECKSUMMARY
+                self.failCount.setValue(gcdict["fail"])
+                self.omitCount.setValue(gcdict["omit"])
+                self.passCount.setValue(gcdict["pass"])
+                self.fixedCount.setValue(gcdict["fixed"])
+                self.hasIssues.setValue(hasIssues)
  
         return
 

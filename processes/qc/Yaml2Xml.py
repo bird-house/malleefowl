@@ -71,6 +71,7 @@ class Yaml2Xml():
         self.allow_esg_search = False #Significantly increases the processing time if True
         self.clear()
         self.createdLinks = []
+        self.GLOBALCHECKSUMMARY = {"fail":0,"omit":0,"pass":0,"fixed":0}
 
     def clear(self):
         self.ErrorLog = []
@@ -287,7 +288,7 @@ class Yaml2Xml():
         f.write(self.makeMetaXmlString(Dict))
         f.close()
 
-    def makeFileMetaXml(self,identifier):
+    def makeMetaFile(self,identifier):
         filename = self.FILENAMES["File"][identifier] 
         fieldlines=self.makeFieldnameValueStrings(self.TIM["File"][identifier])
         fieldlines.append(self.fieldnameline("experiment_family","All"))
@@ -305,7 +306,7 @@ class Yaml2Xml():
             f.write(line+"\n")
         f.close()
 
-    def makeDatasetMetaXml(self,identifier):
+    def makeMetaDataset(self,identifier):
         filename = self.FILENAMES["Dataset"][identifier]
         fieldlines = self.makeFieldnameValueStrings(self.TIM["Dataset"][identifier])
         qualityurl = self.XMLURLS["QC-Dataset"][identifier]
@@ -327,7 +328,7 @@ class Yaml2Xml():
             map2[Prefix+key+Suffix]=Map[key]
         return map2
 
-    def makeFileQualityXml(self,identifier):
+    def makeQCFile(self,identifier):
         filename = self.FILENAMES["QC-File"][identifier]
         QC = dict()
         META = self.TIM["File"][identifier]
@@ -351,7 +352,7 @@ class Yaml2Xml():
             f.write(line+"\n")
         f.close()
 
-    def makeDatasetQualityXml(self,identifier):
+    def makeQCDataset(self,identifier):
         filename = self.FILENAMES["QC-Dataset"][identifier]
         files = self.DATASET[identifier]
         k=0
@@ -364,6 +365,7 @@ class Yaml2Xml():
             for check in checkmap:
                 result = checkmap[check]
                 CHECKSSUMMARY[result.lower()]+=1
+                self.GLOBALCHECKSUMMARY[result.lower()]+=1
             eventmap = self.TIM["QC-File-Events"][fileid]
             for key in eventmap:
                 EVENTS["file_"+str(k)+"_"+key]=eventmap[key]
@@ -635,48 +637,24 @@ class Yaml2Xml():
     def createNames(self):
         self.createShared(self.createMetaFileNames,self.createQCFileNames,
                           self.createDatasetFileNames,self.createQCDatasetNames)
-        #for identifier in self.TIM["file"]:
-        #    if(identifier in self.writeAllowed):
-        #        dsid= self.TIM["File"][identifier]["dataset_id"]
-        #        if(dsid not in self.writeNotAllowed):
-        #            self.createMetaFileNames(identifier)
-        #            self.createQCFileNames(identifier)
-        #for identifier in self.TIM["Dataset"]:
-        #    if(identifier in self.writeAllowed):
-        #        self.createDatasetFileNames(identifier)
-        #        self.createQCDatasetNames(identifier)
 
     def createFiles(self):
-        #create FileMetadata
-        for identifier in self.TIM["File"]:
-            #if both file and dataset are allowed for writing, create the file meta and qc.
-            if(identifier in self.writeAllowed):
-                dsid= self.TIM["File"][identifier]["dataset_id"]
-                if(dsid not in self.writeNotAllowed):
-                    self.makeFileMetaXml(identifier)#,self.TIM["File"][identifier])
-                    self.makeFileQualityXml(identifier)
-        for identifier in self.TIM["Dataset"]:
-            if(identifier in self.writeAllowed):
-                self.makeDatasetMetaXml(identifier)
-                self.makeDatasetQualityXml(identifier)
-
+        self.createShared(self.makeMetaFile,self.makeQCFile,self.makeMetaDataset,self.makeQCDataset)
 
     def getCreatedFilenames(self):
-        out=""
+        out="<html>\n<body>"
+        out+="Created "+str(len(self.createdLinks))+" handles:\n"
+        
         for tupl in self.createdLinks:
-            out+=tupl[0]+" => "+tupl[1]+"\n"
+            x="file://"
+            y="file://"
+            if(tupl[0][0]!="/"):
+                x="http://"
+            if(tupl[1][0]!="/"):
+                y ="http://"
+            out+="<a href=\""+x+tupl[0]+"\">"+tupl[0]+"</a>  =>"
+            out+="<a href=\""+y+tupl[1]+"\">"+tupl[1]+"</a><br>"
+        out+="</body>\n</html>"
         return out
         
 
-#if __name__ == "__main__":
-#    try:
-#        mY2 = MyYaml()
-#        #mY2.loadFile("event.log")
-#        #mY2.loadFile("data3-2.log")
-#        #mY2.loadFile("data3-3.log")
-#        mY2.loadFile("dlerror.log")
-#        #mY2.loadFile("2file.log")
-#        mY2.toXML()
-#    except yaml.YAMLError, exc:
-#        print "Error in configuration file:", exc
-#
