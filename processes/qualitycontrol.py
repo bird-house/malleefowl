@@ -46,12 +46,49 @@ class TaskFileProcess(malleefowl.process.WPSProcess):
 
         self.index_node= self.addLiteralInput(
             identifier="index_node",
-            title="index node",
+            title="Index node",
             default="esgf-data.dkrz.de",
             type=types.StringType,
             minOccurs=1,
             maxOccurs=1,
             )
+
+        self.replica= self.addLiteralInput(
+            identifier="replica",
+            title="Replica",
+            default="false",
+            type=types.StringType,
+            minOccurs=1,
+            maxOccurs=1,
+            )
+            
+        self.latest= self.addLiteralInput(
+            identifier="latest",
+            title="Latest",
+            default="true",
+            type=types.StringType,
+            minOccurs=1,
+            maxOccurs=1,
+            )
+
+        self.access=self.addLiteralInput(
+            identifier="access",
+            title="Access",
+            default="HTTPServer",
+            type=types.StringType,
+            minOccurs=1,
+            maxOccurs=1,
+            )
+
+        self.metadata_format=self.addLiteralInput(
+            identifier="metadata_format",
+            title="metadata_format",
+            default="THREDDS",
+            type=types.StringType,
+            minOccurs=1,
+            maxOccurs=1,
+            )
+
         self.xmlOutputPath= self.addLiteralInput(
             identifier="xmlOutputPath",
             title="Output path for the generated xml files.",
@@ -155,8 +192,14 @@ class TaskFileProcess(malleefowl.process.WPSProcess):
                               
     def execute(self):
         self.status.set(msg="Initiate process", percentDone=0, propagate=True)
-        self.yamltoxml = y2x.Yaml2Xml(self.data_node.getValue(),self.index_node.getValue(),
-                         self.xmlOutputPath.getValue())
+        datan = self.data_node.getValue()
+        indexn = self.index_node.getValue()
+        xmlo = self.xmlOutputPath.getValue()
+        replica= self.replica.getValue()
+        latest= self.latest.getValue()
+        mdf = self.metadata_format.getValue()
+        access= self.access.getValue()
+        self.yamltoxml = y2x.Yaml2Xml(datan,indexn,access,xmlo,replica,latest,mdf)
 
         qcManager = self.qcScriptPath.getValue()+"/qcManager"
         taskfileName = self.taskFile.getValue()

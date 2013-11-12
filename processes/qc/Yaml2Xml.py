@@ -44,8 +44,9 @@ class DOHandler():
 
 
 class Yaml2Xml():
-    def __init__(self,data_node="ipcc-ar5.dkrz.de",index_node="esgf-data.dkrz.de",
-                 xmlOutputPath ="/home/tk/sandbox/xmlresults/"):
+    def __init__(self,data_node="ipcc-ar5.dkrz.de",index_node="esgf-data.dkrz.de",access="HTTPServer",
+                 xmlOutputPath ="/home/tk/sandbox/xmlresults/",replica="false",latest="true",
+                 metadata_format = "THREDDS"):
         self.doHandler = DOHandler()
         #self.handlePrefix="handleoracle.dkrz.de:8090/handle/"
         self.pathListNames=["domain","institute","driving_model","experiment","ensemble","model",
@@ -60,13 +61,12 @@ class Yaml2Xml():
         self.DEG44 = self.importVariableMap(addpath+"c44.csv")
         self.DEG44I = self.importVariableMap(addpath+"c44i.csv")
         self.EXPERIMENTS = self.importVariableMap(addpath+"experimentFamily.csv")
-        self.FIXEDMETA = dict()
-        self.FIXEDMETA["data_node"]=data_node 
-        self.FIXEDMETA["index_node"] =index_node
-        self.FIXEDMETA["latest"]="true"
-        self.FIXEDMETA["replica"]="false"
-        self.FIXEDMETA["access"]="HTTPServer"
-        self.FIXEDMETA["metadata_format"]="THREDDS"
+        self.data_node=data_node 
+        self.index_node =index_node
+        self.latest=latest
+        self.replica=replica
+        self.access=access
+        self.metadata_format=metadata_format
         self.filetypes = ["QC-File","QC-Dataset","File","Dataset"]
         self.allow_esg_search = False #Significantly increases the processing time if True
         self.clear()
@@ -416,12 +416,12 @@ class Yaml2Xml():
         versiondate = self.getDicEntry(["start","date"])
         META["version"]=str(versiondate).replace("-","")[:8]
         #TODO:HARDCODED META START
-        META["data_node"]=self.FIXEDMETA["data_node"]#"ipcc-ar5.dkrz.de" 
-        META["index_node"] =self.FIXEDMETA["index_node"]#"esgf-data.dkrz.de"
-        META["latest"]=self.FIXEDMETA["latest"]#"true"
-        META["replica"]=self.FIXEDMETA["replica"]#"false"
-        META["access"]=self.FIXEDMETA["access"]#"HTTPServer"
-        META["metadata_format"]=self.FIXEDMETA["metadata_format"]#"THREDDS"
+        META["data_node"]=self.data_node#"ipcc-ar5.dkrz.de" 
+        META["index_node"] =self.index_node#"esgf-data.dkrz.de"
+        META["latest"]=self.latest#"true"
+        META["replica"]=self.replica#"false"
+        META["access"]=self.access#"HTTPServer"
+        META["metadata_format"]=self.metadata_format#"THREDDS"
         #HARD CODED META END
         META["type"]="File"
         META["model"] = PATH["model"].lstrip(PATH["institute"]+"-")+"-"+PATH["version"]
