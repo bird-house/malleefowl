@@ -5,10 +5,8 @@ log file for now.
 Author: Tobias Kipp (kipp@dkrz.de)
 """
 import types
-#import datetime
 import os
 import subprocess 
-#from malleefowl.process import WPSProcess
 import malleefowl.process 
 import processes.qc.Yaml2Xml as y2x
 
@@ -232,8 +230,6 @@ class TaskFileProcess(malleefowl.process.WPSProcess):
                         logfile.write(errors)
                         hasIssues = True
                     
-                             
-                #(failCount,omitCount,passCount) = mergeAndCountLogs(path,logfile)
                 logfile.close()
                 
                 logcr = self.mktempfile(suffix=".html")
@@ -272,39 +268,6 @@ def getLogfileNames(path):
     fullPath_LogList = [check_logs_Path+k for k in dirList if '.log' in k]
     return fullPath_LogList
 
-def mergeAndCountLogs(path,targetfileName):
-    logFile = open(targetfileName,'w')
-    (fails,omits,passes) = (0,0,0) 
-    check_logs_Path= path+"/check_logs/"
-    dirList=os.listdir(check_logs_Path)
-    fullPath_LogList = [check_logs_Path+k for k in dirList if '.log' in k]
-    for log in fullPath_LogList:
-        logFile.write("----FILE "+log+" CONTAINS:----\n")
-        tempFile= file(log,'r')
-        lines = tempFile.readlines()
-        
-        for line in lines:
-            """ Search for the lines with CHECK:: e.g.
-                CHECK:: meta data: FAIL,    time: PASS,     data: PASS
-                0       1    2     3        4     5         6     7
-                And count the FAIL, PASS and OMIT.
-                They always have the same format, which allows for a simple parsing."""
-            if(line[:7]=="CHECK::"):
-                lrs = line.replace('\t',' ').split(' ')
-                resList=[lrs[3].rstrip(','),lrs[5].rstrip(','),lrs[7].rstrip('\n')]
-                for word in resList:
-                    if(word=="PASS"):
-                        passes+=1
-                    elif(word=="OMIT"):
-                        omits+=1
-                    elif(word=="FAIL"):
-                        fails+=1
-                    #else:
-                    #    logFile.write("***MISS***:"+str(word)+" "+str(type(word)))
-            logFile.write(line)
-        tempFile.close()
-    logFile.close()
-    return (fails,omits,passes)
 
 """
     Updates the progress bar based on the output of the program.
