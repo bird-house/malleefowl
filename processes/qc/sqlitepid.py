@@ -20,7 +20,7 @@ class SqlitePid():
         self.keywords = ["location","url","identifier"]
     
     def first_run(self):
-        """Makes sure that if the database is empty the required table is created"""
+        """Makes sure that the database has the required table."""
         stmt="CREATE TABLE IF NOT EXISTS "+self.tablename+" (location text,identifier text,url text);"
         self.cursor.executescript(stmt)
         self.conn.commit()

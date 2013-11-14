@@ -1,7 +1,7 @@
 
 """
-Quality Control process. It calls the Quality Control scripts and returns the 
-log file for now.
+Quality Control process. It calls the QC and post processes the results of the analysis.
+
 Author: Tobias Kipp (kipp@dkrz.de)
 """
 import types

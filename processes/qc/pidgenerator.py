@@ -4,9 +4,9 @@ Created on 14.11.2013
 :author: tobiaskipp
 """
 
-import splitqc
-import sqlitepid
-import dohandler
+import processes.qc.dohandler as dohandler
+import processes.qc.splitqc as splitqc
+import processes.qc.sqlitepid as sqlitepid
 
 class PidGenerator():
     """ The PidGenerator is used to access or create a database and add PIDs to it.
@@ -46,12 +46,12 @@ class PidGenerator():
                 identifiers_by_path[path]=[]
             #for each file found in the search check if it already exists in the database
             for filename in sqc.full_path_files:
-                dbentry = pg.sqlpid.get_by_key_value("location",filename)
+                dbentry = self.sqlpid.get_by_key_value("location",filename)
                 path = "/".join(filename.split("/")[:-1])
                 #if it does not exist in the database create a digital object in the handle system,
                 #add the identifier to the dataset's list and store the do information in the database.
                 if(len(dbentry)==0):
-                    url,identifier = pg.doh.link(filename)
+                    url,identifier = self.doh.link(filename)
                     identifiers_by_path[path].append(identifier)
                     self.sqlpid.add_do(filename,identifier,url)
                 #if it exists add the digital object identifier to the dataset list.
@@ -80,13 +80,13 @@ class PidGenerator():
         for error in self.errors:
             print(error)
 
-if __name__ == "__main__":
-    pg = PidGenerator("test5.db")
-    valid = pg.create_pids("/home/tk/sandbox/qc-yaml/data8/")
-    #valid = pg.create_pids("/home/tk/sandbox/temp/results/")
-    if not valid:
-        pg._print_errors()
-    else:
-        print "Finished"
-
-    #print(pg.sqlpid.getIdentifiers())
+#if __name__ == "__main__":
+#    pg = PidGenerator("test5.db")
+#    valid = pg.create_pids("/home/tk/sandbox/qc-yaml/data8/")
+#    #valid = pg.create_pids("/home/tk/sandbox/temp/results/")
+#    if not valid:
+#        pg._print_errors()
+#    else:
+#        print "Finished"
+#
+#    #print(pg.sqlpid.getIdentifiers())
