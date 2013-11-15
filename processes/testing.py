@@ -7,7 +7,7 @@ Author: Carsten Ehbrecht (ehbrecht@dkrz.de)
 from datetime import datetime, date
 import types
 
-from pywps.Process import WPSProcess
+from malleefowl.process import WPSProcess
 
 class InOutProcess(WPSProcess):
     """This process defines several types of literal type of in- and
@@ -19,8 +19,6 @@ class InOutProcess(WPSProcess):
             identifier = "org.malleefowl.test.inout",
             title="Testing all Data Types",
             version = "0.1",
-            storeSupported = "true",   # async
-            statusSupported = "true",  # retrieve status, needs to be true for async 
             # TODO: what can i do with this?
             metadata=[
                 {"title":"Foobar","href":"http://foo/bar"},
@@ -28,7 +26,7 @@ class InOutProcess(WPSProcess):
                 {"title":"Literal process"},
                 {"href":"http://foobar/"}],
             abstract="Just testing data types like date, datetime etc ...",
-            grassLocation = False)
+            )
 
         # Literal Input Data
         # ------------------
@@ -300,14 +298,16 @@ class InOutProcess(WPSProcess):
         # complex
         # write my own
         self.message(msg='write my own xml', force=True)
-        with open('/tmp/climdaps-test.xml', 'w') as fp:
+        xml_filename = self.mktempfile(suffix='.xml')
+        with open(xml_filename, 'w') as fp:
             fp.write('<xml>just testing</xml>')
             fp.close()
             self.xmlFileOut.setValue( fp.name )
 
         # write file from input data
         self.message(msg='write input xml1', force=True)
-        with open('/tmp/xml1.xml', 'w') as fp:
+        xml_filename = self.mktempfile(suffix='.xml')
+        with open(xml_filename, 'w') as fp:
             out_str = '<nothing>found</nothing>'
             value = self.getInputValue(identifier='xml1In')
             if value != None:
