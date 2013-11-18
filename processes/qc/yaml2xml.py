@@ -207,7 +207,7 @@ class Yaml2Xml():
             sortkeys.append(key)
         if regexplist is not None:
            import re
-           regular = "".join(["r^"]+regexplist+["$\""])
+           regular = "".join(["^"]+regexplist+["$"])
            key_pat = re.compile(regular)# r"^(\D+)(\d+)$" )
            def key( item ):
                m= key_pat.match( item )
@@ -250,9 +250,6 @@ class Yaml2Xml():
         self._create_names_shared("QC-Dataset",identifier)
 
     def _create_xml_shared(self,filename,lines):
-        f = open("/home/tk/sandbox/log","w")
-        f.write(filename)
-        f.close()
         f = open(filename,"w")
         for line in lines:
             f.write(line+"\n")
@@ -316,12 +313,12 @@ class Yaml2Xml():
 
     def create_xml_qc_dataset(self,identifier):
         filename = self.xml_filenames["QC-Dataset"][identifier]
-        files = self.dataset_contained_ids[identifier]
+        file_ids = self.dataset_contained_ids[identifier]
         k=0
         events = dict()
         files = dict()
         count_by_checkresult = {"fail":0,"omit":0,"pass":0,"fixed":0}
-        for fileid in files:
+        for fileid in file_ids:
             files["file_"+str(k)] = fileid
             checkmap = self.file_parameters_collection["QC-File-Checks"][fileid]
             for check in checkmap:
