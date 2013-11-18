@@ -23,10 +23,10 @@ class Yaml2Xml():
         if(self.xml_output_path[-1]!="/"):
             self.xml_output_path+="/"
         self.project_data_path = ""
-        self.VARIABLEMAP = self.import_variable_map(ADDPATH+"variableMap.csv")
-        self.DEG44 = self.import_variable_map(ADDPATH+"c44.csv")
-        self.DEG44I = self.import_variable_map(ADDPATH+"c44i.csv")
-        self.EXPERIMENTS = self.import_variable_map(ADDPATH+"experimentFamily.csv")
+        self.VARIABLEMAP = self._import_variable_map(ADDPATH+"variableMap.csv")
+        self.DEG44 = self._import_variable_map(ADDPATH+"c44.csv")
+        self.DEG44I = self._import_variable_map(ADDPATH+"c44i.csv")
+        self.EXPERIMENTS = self._import_variable_map(ADDPATH+"experimentFamily.csv")
         self.data_node=data_node 
         self.index_node =index_node
         self.latest=latest
@@ -42,9 +42,15 @@ class Yaml2Xml():
         self.global_count_by_checkresult = {"fail":0,"omit":0,"pass":0,"fixed":0}
 
     def clear(self):
+        """ Empties the storage for the current log file.
+
+        The method clears the stored variables per log file. It has to be called
+        before the new logfile is loaded with the load_file method.
+        """
         self.errors = []
         self.to_write_files= []
         self.not_write_files = []
+        self.store = None
         self.dataset_contained_ids=dict()#maps a dataset_id to a list of file ids
         #file_parameters_collection[filetype][identifier][parameter_name] => parameter_value
         #Is used to store the parameters as name value pairs for the differnt file types.
@@ -59,55 +65,75 @@ class Yaml2Xml():
             #self.XMLURLS[key]=dict()
             self.xml_filenames[key]=dict()
 
-    """ Collect all files in the yaml and create their xml and from the collection of files
-        with the same dataset_id a dataset xml is created."""
     def run(self):
-        #Clear data from previous runs
-        self._clear_dataset()
+        """Collect information, arrange it and create files.
+
+        It gathers the file information found in the YAML file. The items in the yaml file 
+        contain a file property if there is no serious issue. The file identifier is added
+        to the files that are allowed to be generated and the dataset it belongs to. In addition
+        the check results and events are stored. 
+        If the item has no file property it has to be atomic. In that case no file can be
+        generated and the erros are logged. If it is neither it is a serious issue that needs
+        to be handled by the QC team. 
+
+        After handling each file the dataset information is generated.
+        A name generator creates a name for each file.
+        This name is used in the creation of all files that are allowed to be written.
+        """
         #find the PROJECT_DATA variable in the YAML file
         self.project_data_path=self._get_project_data_path()
         #Collect the information for each file described in the YAML file
-        length=len(self._get_by_keylist(['items']))
+        length=len(self._get_by_keys(['items']))
         for i in range(0,length):
             file_parameters=self._gather_file_parameters(i)
             if(file_parameters is not None):
                 identifier = file_parameters["title"]
-                self.add_to_file_parameters_collection("File",identifier,file_parameters)
+                self._add_to_file_parameters_collection("File",identifier,file_parameters)
                 self.to_write_files.append(identifier)#unless events finds an error allow to write.
                 dataset_id = file_parameters["dataset_id"]
                 if(not(dataset_id in self.not_write_files or dataset_id in self.to_write_files)):
                     self.to_write_files.append(dataset_id)
-                events = self._gather_events(i,file_parameters)#file_parameters is passed for the case of errors.
-                self.add_to_file_parameters_collection("QC-File-Events",identifier,events)
+                events = self._gather_events(i,file_parameters)
+                self._add_to_file_parameters_collection("QC-File-Events",identifier,events)
                 checks = self._gather_checks(i)
-                self.add_to_file_parameters_collection("QC-File-Checks",identifier,checks)
+                self._add_to_file_parameters_collection("QC-File-Checks",identifier,checks)
 
-                self.add_to_dataset(dataset_id,identifier)
+                self._add_to_dataset(dataset_id,identifier)
             else:
-                atomic = self._get_by_keylist(["items",i,"atomic"])
+                atomic = self._get_by_keys(["items",i,"atomic"])
                 if(atomic is None):
                     self._add_error("There is a serious problem, as neither file nor atomic can be "+
                     "found in the quality control log file for the entry with number "+str(i)+".")
                 else:
                     self._add_error("Atomic set "+atomic+" has the tags:")
                     self.not_write_files.append(atomic)
-                events =  self._get_by_keylist(["items",i,"events"])
+                events =  self._get_by_keys(["items",i,"events"])
                 if events is not None:
                    for eventlist in events:
                        self._add_error(eventlist["event"]["tag"])
 
         for dataset_id in self.dataset_contained_ids:
             dataset_parameters = self._gather_dataset_parameters(dataset_id)
-            self.add_to_file_parameters_collection("Dataset",dataset_id,dataset_parameters)
+            self._add_to_file_parameters_collection("Dataset",dataset_id,dataset_parameters)
 
         self._create_names()
         self._create_xml()
-        #self.show_all_errors()
 
     def _add_error(self,message):
+        """ Adds an error message to a temporal storage.
+        
+        :param message: String of the error. 
+        """
         self.errors.append(message)
 
     def show_all_errors(self):
+        """Glues together all found errors in this cycle. 
+           
+           The clear method will erase all errors. Use this method calling clear method 
+           to store the errors elsewhere.
+
+           :returns: A string containing all errors in this cycle.
+        """
         out=""
         for error in self.errors:
             out+=error+"\n"
@@ -117,13 +143,26 @@ class Yaml2Xml():
                 out+=wna+"\n"
         return out
 
-    def add_to_file_parameters_collection(self,filetype,identifier,MAP):
+    def _add_to_file_parameters_collection(self,filetype,identifier,parameters):
+        """Stores the map containing the parameters for the XML files.
+
+        :param filetype: The type of the to generate file. ["File","Dataset","QC-File","QC-Dataset"]
+        :param identifier: An identifier for the current file. It is shared for Metadata and QC.
+        :param parameters: A map from a keyword to its value. e.g. parameters["size"] => 200
+        """
         if filetype not in self.file_parameters_collection:
            self.file_parameters_collection[filetype]=dict()
-        self.file_parameters_collection[filetype][identifier]=MAP
+        self.file_parameters_collection[filetype][identifier]=parameters
 
 
     def esg_search(self,master_id):
+        """Uses the external esg search. It has some delay involved therfore it is not used by default.
+          
+        It searches by the master_id and stores the information found. To avoid duplicate searches
+        with the delay it is checked if the master_id was already used. 
+          
+        :param master_id: The master_id is a facet that allows to find the dataset.
+        """
         if(master_id not in self.esgfinfo_by_masterid):
             self.esgfinfo_by_masterid[master_id]= dict()
             sc = SearchConnection('http://esgf-data.dkrz.de/esg-search', distrib=True)
@@ -141,11 +180,19 @@ class Yaml2Xml():
                     break#just look at the first file
 
     def load_file(self, filename):
+        """Load the log file in YAML format into the memory.
+
+        :param filename: The name of the logfile. 
+        """
         self.store = yaml.safe_load(file(filename, 'r'))
 
-    """ Some entries might not exist.(e.g. period does not exist for fx frequency). In that case
-        None is returned. To avoid the program from crashing the try statement is used."""
-    def _get_by_keylist(self,keylist,base=None):
+    def _get_by_keys(self,keylist,base=None):
+        """Searches through a nested dictionary. If there is a key error None is returned.
+
+        :param keylist: The keys in the order they are to be applied to the nested dictionary.
+        :param base: The root dictionary. If not given the root of the YAML file dictionary is used.
+        :returns: The found entry at the given keys or None.
+        """
         if base is None:
             base = self.store
         out = None
@@ -161,15 +208,19 @@ class Yaml2Xml():
            out = current
         return out
 
-    """ Load a csv-style file with a given separator. The first line contains the header.
-        The following lines start with the key followed by the values of the respective key
-        in the header.
-        e.g.
+    def _import_variable_map(self,filename,separator=","):
+        """Load a csv-style file and store it as map. 
+
+        The first line contains the header. The following lines start with the key
+        followed by the values of the respective keyin the header.
+
+        example file content:
         variable,variable_long                
         tas,Near-Surface Air Temperature
+
         The header lines defines the key "variable_long" and the first non-header line 
-        defines the key "tas". MAP["tas"]["variable_long"] will return Near-Surface Air Temperature"""
-    def import_variable_map(self,filename,separator=","):
+        defines the key "tas". map["tas"]["variable_long"] will return Near-Surface Air Temperature
+        """
         variable_map = dict()
         f = open(filename,"r")
         header = f.readline()
@@ -183,32 +234,44 @@ class Yaml2Xml():
                 variable_map[ls[0]][hs[i]]=ls[i]
         return variable_map
 
-    def add_to_dataset(self,dataset_id,metaid):
+    def _add_to_dataset(self,dataset_id,file_id):
+        """Add a file identifier to its dataset. 
+
+        :param dataset_id: The dataset the file belongs to. If the dataset is not known it is added.
+        :param file_id: The file to be added to the dataset.
+        """
         if dataset_id not in self.dataset_contained_ids:
            self.dataset_contained_ids[dataset_id]=[]
-        self.dataset_contained_ids[dataset_id].append(metaid)
+        self.dataset_contained_ids[dataset_id].append(file_id)
 
-    def _clear_dataset(self):
-        self.dataset_contained_ids=dict()
 
-    """The output format is similar to xml, however it allows the use of duplicate keys.
-       Which keys are duplicate depends on the type. Therfore the shared methods will collect
-       all key value pairs from a dictionary and sort them. The outer block (<doc schema="esgf">)
-       is handled by eachs method to allow for adding the duplicate keys."""
     def _field_name_line(self,field_name,value):
+        """Generates the default XML line for parameters.
+        
+        :param file_name: The name of the facet
+        :param value: The value of the facet.
+        """
         return ("    <field name=\""+str(field_name)+"\">"+str(value)+"</field>")
      
-    """ For now regexplist may only contain (\D+) for text and (\d+) numbers.
-        This is due to the conversion to an integer for (\d+) groups."""
-    def _sorted_field_name_lines(self,Dict,regexplist=None):
+    def _sorted_field_name_lines(self,facets,regexplist=None):
+        """Generates a sorted list of XML lines. The sorting can be set by a limited regular expression.
+
+        Due to mixing of letters and numbers the default sorting might not be good enough. In that 
+        case a regular expression of alternating letters and numbers, however with a fixed structure,
+        can be used. 
+
+        :param facets: The parameters that should be used to generate the XML lines.
+        :param regexplist: A list of strings containing only "(\D+)" and "(\d+)". Use it to get the 
+            sort working right for mixed type keys.
+        """
         outlines = []
         sortkeys = []
-        for key in Dict:
+        for key in facets:
             sortkeys.append(key)
         if regexplist is not None:
            import re
            regular = "".join(["^"]+regexplist+["$"])
-           key_pat = re.compile(regular)# r"^(\D+)(\d+)$" )
+           key_pat = re.compile(regular)
            def key( item ):
                m= key_pat.match( item )
                groups = m.groups()
@@ -218,38 +281,49 @@ class Yaml2Xml():
                        groupl.append(int(groups[i]))
                    else:
                        groupl.append(groups[i])
-               return groupl# m.group(1), int(m.group(2))
+               return groupl
            sortkeys.sort(key=key)
         else:
            sortkeys.sort()
         for key in sortkeys: 
-            outlines.append(self._field_name_line(key,Dict[key]))
+            outlines.append(self._field_name_line(key,facets[key]))
         return outlines
 
-    #def link(self,identifier,location):
-    #    return self.doHandler.link(identifier,location)
 
-    # For now the name creation is the same for all processes, however it should be 
-    # flexible enough to allow idividual implementations.
-    def _create_names_shared(self,filetype,identifier):
+    def _create_name_shared(self,filetype,identifier):
+        """Create names for the files that will be generated. For now the names 
+        are very similar vor the differnt filetypes.
+
+        :param filetype: The type of the XML file. ["File","Dataset","QC-File","QC-Dataset"]
+        :param identifier: The identifier of the file or dataset.
+        """
         filename = self.xml_output_path+filetype+"-"+identifier+".xml"
         self.xml_filenames[filetype][identifier]= filename
         #self.XMLURLS[filetype][identifier] =self.link(None,filename)
         #self.createdLinks.append((self.XMLURLS[filetype][identifier],filename))
          
-    def _create_names_file(self,identifier):
-        self._create_names_shared("File",identifier)
+    def _create_name_file(self,identifier):
+        """Create a name for a "File" type """ 
+        self._create_name_shared("File",identifier)
 
-    def _create_names_qc_file(self,identifier):
-        self._create_names_shared("QC-File",identifier)
+    def _create_name_qc_file(self,identifier):
+        """Create a name for a "QC-File" type """ 
+        self._create_name_shared("QC-File",identifier)
 
-    def _create_names_dataset(self,identifier):
-        self._create_names_shared("Dataset",identifier)
+    def _create_name_dataset(self,identifier):
+        """Create a name for a "Dataset" type """ 
+        self._create_name_shared("Dataset",identifier)
 
-    def _create_names_qc_dataset(self,identifier):
-        self._create_names_shared("QC-Dataset",identifier)
+    def _create_name_qc_dataset(self,identifier):
+        """Create a name for a "QC-Dataset" type """ 
+        self._create_name_shared("QC-Dataset",identifier)
 
     def _create_xml_shared(self,filename,lines):
+        """The _create_xml methods share the write of a list of lines to a file.
+
+        :param filename: The target files name
+        :param lines: The list of lines to be written.
+        """
         f = open(filename,"w")
         for line in lines:
             f.write(line+"\n")
@@ -257,6 +331,12 @@ class Yaml2Xml():
           
 
     def _create_xml_file(self,identifier):
+        """Uses the information found earlier to create an XML file for the "File" type.
+
+        In addition the metadata the checks and the events are added.
+
+        :param identifier: The identifier of the file.
+        """
         filename = self.xml_filenames["File"][identifier] 
         #Meta info
         fieldlines=self._sorted_field_name_lines(self.file_parameters_collection["File"][identifier])
@@ -279,6 +359,12 @@ class Yaml2Xml():
         self._create_xml_shared(filename,lines)
 
     def _create_xml_dataset(self,identifier):
+        """Uses the information found earlier to create an XML file for the "Dataset" type
+
+        In addition the metadata the checks and the events are added.
+
+        :param identifier: The identifier of the dataset.
+        """
         filename = self.xml_filenames["Dataset"][identifier]
         #Meta info
         fieldlines = self._sorted_field_name_lines(
@@ -321,12 +407,19 @@ class Yaml2Xml():
         self._create_xml_shared(filename,lines)
 
     def _rename_map(self,Map,Prefix="",Suffix=""):
+        """ Allows to add a prefix and suffix to all keys in a dictionary """
         map2=dict()
         for key in Map:
             map2[Prefix+key+Suffix]=Map[key]
         return map2
 
     def _create_xml_qc_file(self,identifier):
+        """Uses the information found earlier to create an XML file for the "QC-File" type
+
+        Next to check results and events, references to the metadata are given.
+
+        :param identifier: The identifier of the file.
+        """
         filename = self.xml_filenames["QC-File"][identifier]
         qc_dataset_parameters = dict()
         file_parameters = self.file_parameters_collection["File"][identifier]
@@ -348,6 +441,12 @@ class Yaml2Xml():
         self._create_xml_shared(filename,lines)
 
     def create_xml_qc_dataset(self,identifier):
+        """Uses the information found earlier to create an XML file for the "QC-Dataset" type
+
+        Next to check results and events, references to the metadata are given.
+
+        :param identifier: The identifier of the dataset.
+        """
         filename = self.xml_filenames["QC-Dataset"][identifier]
         file_ids = self.dataset_contained_ids[identifier]
         k=0
@@ -379,31 +478,46 @@ class Yaml2Xml():
         lines.append("</doc>")
         self._create_xml_shared(filename,lines)
 
-    """ To avoid having to write the dictionary name again and again, a concatenation method
-        is defined. It connects the elements of a dictionary by inserting the separator.
-        The last element has no separator following it."""
-    def concatenate(self,DictOrList,Keys,separator,prefix=""):
+    def _concatenate(self,dict_or_list,keys,separator,prefix=""):
+        """The methods helps to avoid using the name of the dictonary or list again and a again.
+
+        :param dict_or_list: A dictionary or list whichs name should not be written again and again.
+        :param keys: The keys according to the type used.
+        :param separator: The text between each element.
+        :param prefix: Add something in front of the the generated text.
+        :returns: The concatenated text.
+        """
         out = prefix
-        for key in Keys:
-            out+=DictOrList[key]+separator
+        for key in keys:
+            out+=dict_or_list[key]+separator
         out=out.rstrip(separator)
         return out
 
-    def _gather_file_parameters(self,fileIndex):
-        filename = self._get_by_keylist(["items",fileIndex,"file"])
+    def _gather_file_parameters(self,file_index):
+        """Searches through the file information with the given index for factes.
+
+        In addition to the facets that can be found directly in the YAML file, 
+        the variables that can be derived are created. 
+        When the esg search is enabled the version and data_node are set accordingly. 
+
+        :param file_index: The index of the file according to the YAML file.
+        :returns: The facets for the file.
+        """
+         
+        filename = self._get_by_keys(["items",file_index,"file"])
         path_info = dict()
         if(filename==None):
             print("filename is a required variable. Stopping XML generation.")
             return None
         file_parameters = dict()
-        path_line = self._get_by_keylist(["items",fileIndex,"data_path"]).lstrip(self.project_data_path)
+        path_line = self._get_by_keys(["items",file_index,"data_path"]).lstrip(self.project_data_path)
         path_list= path_line.split("/")
         path_info["full"] = path_line
         for j in range(len(path_list)):
             path_info[self.PATHLIST_NAMES[j]] = path_list[j]
         file_parameters["title"] = filename
         #version : as the date in YYYYMMDD format.
-        versiondate = self._get_by_keylist(["start","date"])
+        versiondate = self._get_by_keys(["start","date"])
         file_parameters["version"]=str(versiondate).replace("-","")[:8]
         file_parameters["data_node"]=self.data_node
         file_parameters["index_node"] =self.index_node
@@ -436,20 +550,20 @@ class Yaml2Xml():
             file_parameters["experiment_family"]=self.EXPERIMENTS[experiment]["experiment_family"]
         else:
             self._add_error("Unknown experiment_family for experiment "+experiment)
-        file_parameters["project"] = self._get_by_keylist(["configuration","options","PROJECT"])
-        period = self._get_by_keylist(['items',fileIndex,'period'])
+        file_parameters["project"] = self._get_by_keys(["configuration","options","PROJECT"])
+        period = self._get_by_keys(['items',file_index,'period'])
         if(period!=None):
             file_parameters["datetime_start"]=str(period["begin"])
             file_parameters["datetime_stop"]=str(period["end"])
         #generate long variable name from variable if known. Else set it to unknown.
         variable = file_parameters["variable"]
         for keyword in ["variable_long_name","variable_units","cf_standard_name"]:
-            value = self._get_by_keylist([variable,keyword],self.VARIABLEMAP)
+            value = self._get_by_keys([variable,keyword],self.VARIABLEMAP)
             if(value!=None):
                 file_parameters[keyword]=value
 
         path_info["metaModel"]= file_parameters["model"]
-        ds_master_id = self.concatenate(path_info,["domain","institute","driving_model",
+        ds_master_id = self._concatenate(path_info,["domain","institute","driving_model",
                           "experiment","ensemble","metaModel","time_frequency","variable"],
                           ".",prefix="cordex.")
         if(self.allow_esg_search):
@@ -498,9 +612,14 @@ class Yaml2Xml():
             pass
         return file_parameters
 
-    """ If the PROJECT_DATAV variable is a list select the first element as project_data_path"""
     def _get_project_data_path(self):
-        project_data_path=self._get_by_keylist(['configuration','options','PROJECT_DATAV'])
+        """ Searches for the PROJECT_DATA variable in the YAML file. 
+
+        The PROJECT_DATAV may be a list. In that case the first element is used.
+
+        :returns: The PROJECT_DATA value.
+        """
+        project_data_path=self._get_by_keys(['configuration','options','PROJECT_DATAV'])
         if(isinstance(project_data_path,dict)):
             if(len(project_data_path) > 0):
                 project_data_path = project_data_path[0]
@@ -508,12 +627,16 @@ class Yaml2Xml():
             print("Please check project data path. Type:"+str(type(project_data_path)))
         return project_data_path
 
-        
-    """ In the case something is not conform with the standard, there will be events
-        in the YAML file.
-        The file_parameters variable is only to be used in the case of errors."""
-    def _gather_events(self,fileIndex,file_parameters):
-        events_dict = self._get_by_keylist(["items",fileIndex,"events"])
+    def _gather_events(self,file_index,file_parameters):
+        """Finds the events in the YAML file for the given file_index
+
+        The file_parameters are only used when a serious event occurs.
+
+        :param file_index: The index of the item in the YAML file
+        :param file_parameters: The gathered facets of the file.
+        :returns: The events (as dictionary)
+        """
+        events_dict = self._get_by_keys(["items",file_index,"events"])
         events = dict()
         if(events_dict != None):
             def xml_replace(line):
@@ -542,21 +665,29 @@ class Yaml2Xml():
                 k+=1
         return events
 
-    def _gather_checks(self,fileIndex):
-        """Checks are not part of the metadata"""
+    def _gather_checks(self,file_index):
+        """Finds the checks for the given file_index.
+        
+        :param file_index: The item index according to the YAML file.
+        :returns: The found checks.
+        """
         checks = dict()
-        check_dict = self._get_by_keylist(["items",fileIndex,"check"])
+        check_dict = self._get_by_keys(["items",file_index,"check"])
         if(check_dict!=None):
             for key in ["meta_data","time_values","data"]:
                 checks[key] = check_dict[key]
         return checks
 
-    """Generate dataset files from the information of the files that have the same dataset_id
-    """
-    def _gather_dataset_parameters(self,key):
+    def _gather_dataset_parameters(self,dataset_id):
+        """Using the data gathered about files the metadata for the dataset is created.
+
+        :param dataset_id: The identifier of the dataset. (Similar to a path)
+        :returns: The facets of the dataset.
+        """
+
         dataset_parameters = dict()
-        file_count = len(self.dataset_contained_ids[key])
-        identifiers = self.dataset_contained_ids[key]
+        file_count = len(self.dataset_contained_ids[dataset_id])
+        identifiers = self.dataset_contained_ids[dataset_id]
         #TODO: Is the date format always valid.
         """ Due to the fact that datetime objects are used to generate the date
             strings it has always the format %Y-%m-%d %H:%M:%S,
@@ -596,9 +727,9 @@ class Yaml2Xml():
             if(field in file_parameters):#to prevent errors for non existent fields
                 dataset_parameters[field] = file_parameters[field]
 
-        dataset_parameters["id"] = key
+        dataset_parameters["id"] = dataset_id
         #instance_id = id without |data_node
-        instanceid = key.split("|")[0]
+        instanceid = dataset_id.split("|")[0]
         dataset_parameters["instance_id"]=instanceid
         #master_id = instanceid without .v<version>
         masterid = instanceid.rstrip(".v"+dataset_parameters["version"])
@@ -620,6 +751,16 @@ class Yaml2Xml():
         return dataset_parameters
 
     def _create_shared(self,m1,m2,m3,m4):
+        """The name creation and the xml creation share the same pattern with the file generation
+        protection.
+
+        For files the dataset must be allowed to write as well.
+
+        :param m1: The first method for files
+        :param m2: The second method for files
+        :param m3: The first method for datasets
+        :param m4: The second method for datasets
+        """
         for identifier in self.file_parameters_collection["File"]:
             if(identifier in self.to_write_files):
                 dsid= self.file_parameters_collection["File"][identifier]["dataset_id"]
@@ -632,27 +773,14 @@ class Yaml2Xml():
                 m4(identifier)
 
     def _create_names(self):
-        self._create_shared(self._create_names_file,self._create_names_qc_file,
-                          self._create_names_dataset,self._create_names_qc_dataset)
+        """Create the names for the XML files"""
+        self._create_shared(self._create_name_file,self._create_name_qc_file,
+                          self._create_name_dataset,self._create_name_qc_dataset)
 
     def _create_xml(self):
+        """Create the XML files after they received their names with the _create_names method."""
         self._create_shared(self._create_xml_file,self._create_xml_qc_file,
                           self._create_xml_dataset,self.create_xml_qc_dataset)
 
-    #def getCreatedFilenames(self):
-    #    out="<html>\n<body>"
-    #    out+="Created "+str(len(self.createdLinks))+" handles:\n"
-    #    
-    #    for tupl in self.createdLinks:
-    #        x="file://"
-    #        y="file://"
-    #        if(tupl[0][0]!="/"):
-    #            x="http://"
-    #        if(tupl[1][0]!="/"):
-    #            y ="http://"
-    #        out+="<a href=\""+x+tupl[0]+"\">"+tupl[0]+"</a>  =>"
-    #        out+="<a href=\""+y+tupl[1]+"\">"+tupl[1]+"</a><br>"
-    #    out+="</body>\n</html>"
-    #    return out
         
 
