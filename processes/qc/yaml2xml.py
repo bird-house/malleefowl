@@ -258,29 +258,65 @@ class Yaml2Xml():
 
     def _create_xml_file(self,identifier):
         filename = self.xml_filenames["File"][identifier] 
+        #Meta info
         fieldlines=self._sorted_field_name_lines(self.file_parameters_collection["File"][identifier])
         fieldlines.append(self._field_name_line("experiment_family","All"))
         qualityurl = self.xml_filenames["QC-File"][identifier]+"|application/xml|QCDoc"
         fieldlines.append(self._field_name_line("url",qualityurl))
         fieldlines.sort()
+        #QC info
+        checkmap = self.file_parameters_collection["QC-File-Checks"][identifier]
+        checks = self._sorted_field_name_lines(self._rename_map(checkmap,"checks_"))
+        eventmap = self.file_parameters_collection["QC-File-Events"][identifier]
+        events = self._sorted_field_name_lines(eventmap)
+
         lines=[]
         lines.append("<doc schema=\"esgf\">")
         lines+=fieldlines
-        lines.append("<!-- "+self.sqlite_database+"-->")
+        lines+=checks#QC
+        lines+=events#QC
         lines.append("</doc>")
         self._create_xml_shared(filename,lines)
 
     def _create_xml_dataset(self,identifier):
         filename = self.xml_filenames["Dataset"][identifier]
+        #Meta info
         fieldlines = self._sorted_field_name_lines(
             self.file_parameters_collection["Dataset"][identifier])
         qualityurl = self.xml_filenames["QC-Dataset"][identifier]
         fieldlines.append(self._field_name_line("experiment_family","All"))
         fieldlines.append(self._field_name_line("quality_url",qualityurl))
         fieldlines.sort()
+        #QC info
+        file_ids = self.dataset_contained_ids[identifier]
+        k=0
+        events = dict()
+        files = dict()
+        count_by_checkresult = {"fail":0,"omit":0,"pass":0,"fixed":0}
+        for fileid in file_ids:
+            files["file_"+str(k)] = fileid
+            checkmap = self.file_parameters_collection["QC-File-Checks"][fileid]
+            for check in checkmap:
+                result = checkmap[check]
+                count_by_checkresult[result.lower()]+=1
+            eventmap = self.file_parameters_collection["QC-File-Events"][fileid]
+            for key in eventmap:
+                events["file_"+str(k)+"_"+key]=eventmap[key]
+            k+=1
+  
+        qc_dataset_parameters = dict()
+        for key in count_by_checkresult:
+            qc_dataset_parameters["checks_"+key] = count_by_checkresult[key]
+
+
         lines=[]
         lines.append("<doc schema=\"esgf\">")
         lines+=fieldlines
+        lines.append("")#QC information following
+        lines+=self._sorted_field_name_lines(events)
+        lines+=self._sorted_field_name_lines(qc_dataset_parameters)
+        if(len(events) > 0):
+            lines+=self._sorted_field_name_lines(files,["(\D+)","(\d+)"])
         lines.append("</doc>")
         self._create_xml_shared(filename,lines)
 
@@ -369,20 +405,20 @@ class Yaml2Xml():
         #version : as the date in YYYYMMDD format.
         versiondate = self._get_by_keylist(["start","date"])
         file_parameters["version"]=str(versiondate).replace("-","")[:8]
-        #TODO:HARDCODED file_parameters START
-        file_parameters["data_node"]=self.data_node#"ipcc-ar5.dkrz.de" 
-        file_parameters["index_node"] =self.index_node#"esgf-data.dkrz.de"
-        file_parameters["latest"]=self.latest#"true"
-        file_parameters["replica"]=self.replica#"false"
-        file_parameters["access"]=self.access#"HTTPServer"
-        file_parameters["metadata_format"]=self.metadata_format#"THREDDS"
-        #HARD CODED file_parameters END
+        file_parameters["data_node"]=self.data_node
+        file_parameters["index_node"] =self.index_node
+        file_parameters["latest"]=self.latest
+        file_parameters["replica"]=self.replica
+        file_parameters["access"]=self.access
+        file_parameters["metadata_format"]=self.metadata_format
         file_parameters["type"]="File"
+        #The model in the example is RCA4-v1. Therfore the institute- part has to be removed
+        #and the version in the path has to be appended
         file_parameters["model"] =(path_info["model"].lstrip(path_info["institute"]+"-")+
             "-"+path_info["version"])
         kwl=["ensemble","experiment","institute","time_frequency","variable","domain","driving_model"]
-        for keyword in kwl:
-            file_parameters[keyword]= path_info[keyword]
+        for facet in kwl:
+            file_parameters[facet]= path_info[facet]
 
         #Metadata dependent on found Metadata
         domain = file_parameters["domain"]
@@ -395,14 +431,11 @@ class Yaml2Xml():
             for direction in ["west","east","north","south"]:
                 name = direction+"_degrees"
                 file_parameters[name]=deg_dict[domain][name]
-        #file_parameters["experiment_family"]="All"
         experiment = file_parameters["experiment"]
         if experiment in self.EXPERIMENTS:
             file_parameters["experiment_family"]=self.EXPERIMENTS[experiment]["experiment_family"]
         else:
             self._add_error("Unknown experiment_family for experiment "+experiment)
-        #The model in the example is RCA4-v1. Therfore the institute- part has to be removed
-        #and the version in the path has to be appended
         file_parameters["project"] = self._get_by_keylist(["configuration","options","PROJECT"])
         period = self._get_by_keylist(['items',fileIndex,'period'])
         if(period!=None):
@@ -433,7 +466,23 @@ class Yaml2Xml():
                 file_parameters["version"]=c
         else:
             server_dir = "http://"+file_parameters["data_node"]+"/thredds/fileServer/cordex/"
-            file_parameters["url"] = server_dir+path_info['full']+"/"+filename+ HTTPEXTENSION
+            #file_parameters["url"] = server_dir+path_info['full']+"/"+filename+ HTTPEXTENSION
+            results = self.sqlitepid.get_like_location(filename)
+            #results contains a list of results. It is expected to contain 1 result. An error
+            #message will be generated if it does not match with this. If there are more results
+            #The first one will be used in the file generation.
+            #The tuple is (location,identifier,url)
+            url = ""
+            reslen = len(results)
+            if(reslen > 0):
+                url = results[0][2]
+                pid = results[0][1]
+                file_parameters["pid"]=pid
+                if(reslen != 1):
+                    self._add_error("There are too many results for the file "+filename)
+            else:
+                self._add_error("Did not find an url for the file "+filename)
+            file_parameters["url"] = url+HTTPEXTENSION
 
         file_parameters["id"]=(ds_master_id+".v"+file_parameters["version"]+"."+filename+"|"+
             file_parameters["data_node"])

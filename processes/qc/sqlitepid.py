@@ -17,7 +17,7 @@ class SqlitePid():
         self.conn = sqlite3.connect(database_location)
         self.cursor=self.conn.cursor()
         self.tablename = "pidinfo"
-        self.keywords = ["location","url","identifier"]
+        self.keywords = ["location","identifier","url"]
     
     def first_run(self):
         """Makes sure that the database has the required table."""
@@ -43,11 +43,25 @@ class SqlitePid():
         :returns: A list of found tuples (location,identifier,url)
         """
         if(key in self.keywords):
-            stmt="SELECT location,identifier,url FROM "+self.tablename+" WHERE "+key+"=?"
+            stmt="SELECT "+", ".join(self.keywords)+" FROM "+self.tablename+" WHERE "+key+"=?"
             self.cursor.execute(stmt,(value,))
             return self.cursor.fetchall()
         else:
             return []
+
+    def get_like_location(self,location):
+        """ Search for database entries with location ending with the given location.
+
+        :param location: At least end of a full path location of the file. If too short many
+        results might be found.
+        :returns: A list of found matches to the search.
+        """
+        stmt=("SELECT "+", ".join(self.keywords)+" FROM "+self.tablename+" WHERE location LIKE \"%"+
+            location+"\"")
+        self.cursor.execute(stmt)
+        results = self.cursor.fetchall()
+        return results
+        
 
 
     def get_identifiers(self):
