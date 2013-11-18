@@ -75,7 +75,7 @@ class Yaml2Xml():
                 self.add_to_file_parameters_collection("File",identifier,file_parameters)
                 self.to_write_files.append(identifier)#unless events finds an error allow to write.
                 dataset_id = file_parameters["dataset_id"]
-                if(not(dataset_id in self.to_write_files or dataset_id in self.to_write_files)):
+                if(not(dataset_id in self.not_write_files or dataset_id in self.to_write_files)):
                     self.to_write_files.append(dataset_id)
                 events = self._gather_events(i,file_parameters)#file_parameters is passed for the case of errors.
                 self.add_to_file_parameters_collection("QC-File-Events",identifier,events)
