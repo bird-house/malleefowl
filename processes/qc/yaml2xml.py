@@ -5,6 +5,7 @@ Author: Tobias Kipp (kipp@dkrz.de)
 """
 import yaml
 import os
+import datetime
 
 import processes.qc.sqlitepid as sqlitepid 
 from pyesgf.search import SearchConnection
@@ -553,8 +554,14 @@ class Yaml2Xml():
         file_parameters["project"] = self._get_by_keys(["configuration","options","PROJECT"])
         period = self._get_by_keys(['items',file_index,'period'])
         if(period!=None):
-            file_parameters["datetime_start"]=str(period["begin"])
-            file_parameters["datetime_stop"]=str(period["end"])
+            begin = period["begin"]
+            if(isinstance(begin,datetime.datetime)):
+                begin = "T".join(str(begin).split(" "))+"Z"
+            end = period["end"]
+            if(isinstance(end,datetime.datetime)):
+               end = "T".join(str(end).split(" "))+"Z"
+            file_parameters["datetime_start"]=str(begin)
+            file_parameters["datetime_stop"]=str(end)
         #generate long variable name from variable if known. Else set it to unknown.
         variable = file_parameters["variable"]
         for keyword in ["variable_long_name","variable_units","cf_standard_name"]:
