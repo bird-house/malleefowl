@@ -182,14 +182,21 @@ class TaskFileProcess(malleefowl.process.WPSProcess):
                               
     def execute(self):
         self.status.set(msg="Initiate process", percentDone=0, propagate=True)
-        datan = self.data_node.getValue()
-        indexn = self.index_node.getValue()
-        xmlo = self.xml_output_path.getValue()
-        replica= self.replica.getValue()
-        latest= self.latest.getValue()
-        mdf = self.metadata_format.getValue()
-        access= self.access.getValue()
-        self.yaml_to_xml = y2x.Yaml2Xml(datan,indexn,access,xmlo,replica,latest,mdf)
+        input_list = [self.data_node,self.index_node,self.access,self.xml_output_path,self.replica,
+                      self.latest,self.metadata_format,self.database_location]
+        input_parameters = []
+        for literal_input in input_list:
+            input_parameters.append(literal_input.getValue())
+        self.yaml_to_xml = y2x.Yaml2Xml(*input_parameters)
+        #datan = self.data_node.getValue()
+        #indexn = self.index_node.getValue()
+        #xmlo = self.xml_output_path.getValue()
+        #replica= self.replica.getValue()
+        #latest= self.latest.getValue()
+        #mdf = self.metadata_format.getValue()
+        #access= self.access.getValue()
+        #dbloc = self.database_location.getValue()
+        #self.yaml_to_xml = y2x.Yaml2Xml(datan,indexn,access,xmlo,replica,latest,mdf,dbloc)
 
         qc_manager = self.qc_script_path.getValue()+"/qcManager"
         task_file_name = self.task_file.getValue()

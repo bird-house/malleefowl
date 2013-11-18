@@ -6,6 +6,7 @@ Author: Tobias Kipp (kipp@dkrz.de)
 import yaml
 import os
 
+import processes.qc.sqlitepid as sqlitepid 
 from pyesgf.search import SearchConnection
 
 ADDPATH = "/home/tk/sandbox/climdaps/src/Malleefowl/processes/qc/"
@@ -14,10 +15,13 @@ HTTPEXTENSION = "|application/netcdf|HTTPServer"
 class Yaml2Xml():
     def __init__(self,data_node="ipcc-ar5.dkrz.de",index_node="esgf-data.dkrz.de",access="HTTPServer",
                  xml_output_path ="/home/tk/sandbox/xmlresults/",replica="false",latest="true",
-                 metadata_format = "THREDDS"):
+                 metadata_format = "THREDDS",sqlite_database=""):
         self.PATHLIST_NAMES=["domain","institute","driving_model","experiment","ensemble","model",
                        "version", "time_frequency","variable"]
         self.xml_output_path = xml_output_path
+        #make sure that xml_output_path ends with /. 
+        if(self.xml_output_path[-1]!="/"):
+            self.xml_output_path+="/"
         self.project_data_path = ""
         self.VARIABLEMAP = self.import_variable_map(ADDPATH+"variableMap.csv")
         self.DEG44 = self.import_variable_map(ADDPATH+"c44.csv")
@@ -29,6 +33,8 @@ class Yaml2Xml():
         self.replica=replica
         self.access=access
         self.metadata_format=metadata_format
+        self.sqlite_database = sqlite_database
+        self.sqlitepid = sqlitepid.SqlitePid(self.sqlite_database)
         self.FILETYPES = ["QC-File","QC-Dataset","File","Dataset"]
         self.allow_esg_search = False #Significantly increases the processing time if True
         self.clear()
@@ -243,23 +249,29 @@ class Yaml2Xml():
     def _create_names_qc_dataset(self,identifier):
         self._create_names_shared("QC-Dataset",identifier)
 
+    def _create_xml_shared(self,filename,lines):
+        f = open("/home/tk/sandbox/log","w")
+        f.write(filename)
+        f.close()
+        f = open(filename,"w")
+        for line in lines:
+            f.write(line+"\n")
+        f.close()
+          
+
     def _create_xml_file(self,identifier):
         filename = self.xml_filenames["File"][identifier] 
         fieldlines=self._sorted_field_name_lines(self.file_parameters_collection["File"][identifier])
         fieldlines.append(self._field_name_line("experiment_family","All"))
-        #qualityurl = ("http://en.wikipedia.org/wiki/File:Malleefowl-camouflage.JPG|application/xml"+
-        #              "|QCDoc")
         qualityurl = self.xml_filenames["QC-File"][identifier]+"|application/xml|QCDoc"
         fieldlines.append(self._field_name_line("url",qualityurl))
         fieldlines.sort()
         lines=[]
         lines.append("<doc schema=\"esgf\">")
         lines+=fieldlines
+        lines.append("<!-- "+self.sqlite_database+"-->")
         lines.append("</doc>")
-        f = open(filename,"w")
-        for line in lines:
-            f.write(line+"\n")
-        f.close()
+        self._create_xml_shared(filename,lines)
 
     def _create_xml_dataset(self,identifier):
         filename = self.xml_filenames["Dataset"][identifier]
@@ -273,10 +285,7 @@ class Yaml2Xml():
         lines.append("<doc schema=\"esgf\">")
         lines+=fieldlines
         lines.append("</doc>")
-        f = open(filename,"w")
-        for line in lines:
-            f.write(line+"\n")
-        f.close()
+        self._create_xml_shared(filename,lines)
 
     def _rename_map(self,Map,Prefix="",Suffix=""):
         map2=dict()
@@ -303,10 +312,7 @@ class Yaml2Xml():
         lines+=events
         lines+=self._sorted_field_name_lines(qc_dataset_parameters)
         lines.append("</doc>")
-        f = open(filename,"w")
-        for line in lines:
-            f.write(line+"\n")
-        f.close()
+        self._create_xml_shared(filename,lines)
 
     def create_xml_qc_dataset(self,identifier):
         filename = self.xml_filenames["QC-Dataset"][identifier]
@@ -338,10 +344,7 @@ class Yaml2Xml():
         lines+=self._sorted_field_name_lines(qc_dataset_parameters)
         lines+=self._sorted_field_name_lines(files,["(\D+)","(\d+)"])
         lines.append("</doc>")
-        f = open(filename,"w")
-        for line in lines:
-            f.write(line+"\n")
-        f.close()
+        self._create_xml_shared(filename,lines)
 
     """ To avoid having to write the dictionary name again and again, a concatenation method
         is defined. It connects the elements of a dictionary by inserting the separator.
