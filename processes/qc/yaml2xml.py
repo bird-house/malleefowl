@@ -41,6 +41,8 @@ class Yaml2Xml():
         self.clear()
         #self.createdLinks = []
         self.global_count_by_checkresult = {"fail":0,"omit":0,"pass":0,"fixed":0}
+        self.dataset_name_to_path = dict()
+        self._add_dataset_cache = dict()
 
     def clear(self):
         """ Empties the storage for the current log file.
@@ -494,6 +496,32 @@ class Yaml2Xml():
         out=out.rstrip(separator)
         return out
 
+    def _add_dataset(self,path):
+        """ Gathers information from the path, creates a dataset_id and remembers the path for it.
+        
+        To prevent multiple generations of the same data the results are cached.
+        :param path: The path of the dataset
+        :returns: The dataset_id and path_info containing parameters used for facets.
+        """
+
+        if(path not in self._add_dataset_cache):
+            path_info = dict()
+            path_line = path.lstrip(self.project_data_path)
+            path_list= path_line.split("/")
+            for j in range(len(path_list)):
+                path_info[self.PATHLIST_NAMES[j]] = path_list[j]
+            path_info["full"] = path_line
+            #The model in the example is RCA4-v1. Therfore the institute- part has to be removed
+            #and the version in the path has to be appended
+            path_info["metaModel"]= (path_info["model"].lstrip(path_info["institute"]+"-")+
+                "-"+path_info["version"])
+            dataset_id = self._concatenate(path_info,["domain","institute","driving_model",
+                              "experiment","ensemble","metaModel","time_frequency","variable"],
+                              ".",prefix="cordex.")
+            self.dataset_name_to_path[dataset_id]=path
+            self._add_dataset_cache[path] = dataset_id,path_info
+        return self._add_dataset_cache[path]
+
     def _gather_file_parameters(self,file_index):
         """Searches through the file information with the given index for factes.
 
@@ -506,16 +534,12 @@ class Yaml2Xml():
         """
          
         filename = self._get_by_keys(["items",file_index,"file"])
-        path_info = dict()
         if(filename==None):
             print("filename is a required variable. Stopping XML generation.")
             return None
         file_parameters = dict()
-        path_line = self._get_by_keys(["items",file_index,"data_path"]).lstrip(self.project_data_path)
-        path_list= path_line.split("/")
-        path_info["full"] = path_line
-        for j in range(len(path_list)):
-            path_info[self.PATHLIST_NAMES[j]] = path_list[j]
+        path_line = self._get_by_keys(["items",file_index,"data_path"])
+        ds_master_id,path_info = self._add_dataset(path_line)
         file_parameters["title"] = filename
         #version : as the date in YYYYMMDD format.
         versiondate = self._get_by_keys(["start","date"])
@@ -527,15 +551,11 @@ class Yaml2Xml():
         file_parameters["access"]=self.access
         file_parameters["metadata_format"]=self.metadata_format
         file_parameters["type"]="File"
-        #The model in the example is RCA4-v1. Therfore the institute- part has to be removed
-        #and the version in the path has to be appended
-        file_parameters["model"] =(path_info["model"].lstrip(path_info["institute"]+"-")+
-            "-"+path_info["version"])
+        file_parameters["model"] = path_info["metaModel"]
         kwl=["ensemble","experiment","institute","time_frequency","variable","domain","driving_model"]
         for facet in kwl:
             file_parameters[facet]= path_info[facet]
 
-        #Metadata dependent on found Metadata
         domain = file_parameters["domain"]
         deg_dict = None
         if domain in self.DEG44:
@@ -556,10 +576,12 @@ class Yaml2Xml():
         if(period!=None):
             begin = period["begin"]
             if(isinstance(begin,datetime.datetime)):
-                begin = "T".join(str(begin).split(" "))+"Z"
+                #begin = "T".join(str(begin).split(" "))+"Z"
+                begin = str(begin).replace(" ","T")+"Z"
             end = period["end"]
             if(isinstance(end,datetime.datetime)):
-               end = "T".join(str(end).split(" "))+"Z"
+                #end = "T".join(str(end).split(" "))+"Z"
+                end = str(end).replace(" ","T")+"Z"
             file_parameters["datetime_start"]=str(begin)
             file_parameters["datetime_stop"]=str(end)
         #generate long variable name from variable if known. Else set it to unknown.
@@ -569,10 +591,6 @@ class Yaml2Xml():
             if(value!=None):
                 file_parameters[keyword]=value
 
-        path_info["metaModel"]= file_parameters["model"]
-        ds_master_id = self._concatenate(path_info,["domain","institute","driving_model",
-                          "experiment","ensemble","metaModel","time_frequency","variable"],
-                          ".",prefix="cordex.")
         if(self.allow_esg_search):
             #try to find the data in the search. Overwrite data_node and version if it exists.
             self.esg_search(ds_master_id)
@@ -600,7 +618,11 @@ class Yaml2Xml():
                 pid = results[0][1]
                 file_parameters["pid"]=pid
                 if(reslen != 1):
-                    self._add_error("There are too many results for the file "+filename)
+                    self._add_error("There are too many results for the file "+filename+
+                        ". Please check if the duplicates are intended.")
+                    for result in results:
+                        self._add_error(str(result[0]))#location
+                    self._add_error("\n")
             else:
                 self._add_error("Did not find an url for the file "+filename)
             file_parameters["url"] = url+HTTPEXTENSION
@@ -612,7 +634,7 @@ class Yaml2Xml():
         file_parameters["instance_id"]= ds_master_id+".v"+file_parameters["version"]+"."+filename
         file_parameters["master_id"]= ds_master_id+"."+filename
 
-        fullname =self.project_data_path+"/"+path_line+"/"+filename
+        fullname =path_line+"/"+filename
         try:#to get the size if allowed. Works only for local files, like the QC.
             file_parameters["size"] = str(os.stat(fullname).st_size)
         except:
@@ -755,6 +777,26 @@ class Yaml2Xml():
         dataset_parameters["dataset_id_template_"]=("cordex.%(domain)s.%(institute)s."+
             "%(driving_model)s.%(experiment)s.%(ensemble)s."+dataset_parameters["model"]+
             ".%(time_frequency)s.%(variable)s")
+
+        #dataset_name is dataset_id without the version and data_node
+        dataset_name = ".".join(dataset_id.split("|")[0].split(".")[:-1])
+        results = self.sqlitepid.get_like_location(self.dataset_name_to_path[dataset_name])
+        #results contains a list of results. It is expected to contain 1 result. An error
+        #message will be generated if it does not match with this. If there are more results
+        #The first one will be used in the file generation.
+        #The tuple is (location,identifier,url)
+        url = ""
+        reslen = len(results)
+        if(reslen > 0):
+            url = results[0][2]
+            pid = results[0][1]
+            dataset_parameters["pid"]=pid
+            dataset_parameters["pid_url"] = url
+            if(reslen != 1):
+                self._add_error("There are too many results for the dataset "+dataset_id)
+                self._add_error(str(results))
+        else:
+            self._add_error("Did not find an url for the dataset "+dataset_id)
         return dataset_parameters
 
     def _create_shared(self,m1,m2,m3,m4):
