@@ -50,6 +50,10 @@ class WPSProcess(PyWPSProcess):
     def working_dir(self):
         return os.path.abspath(os.curdir)
 
+    @property
+    def thredds_url(self):
+        return config.getConfigValue("server","threddsUrl")
+
     def mktempfile(self, suffix='.txt'):
         (_, filename) = tempfile.mkstemp(dir=self.working_dir, suffix=suffix)
         return filename
