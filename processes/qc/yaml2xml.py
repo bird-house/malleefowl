@@ -381,6 +381,7 @@ class Yaml2Xml():
         k=0
         events = dict()
         files = dict()
+        found_tags = []
         count_by_checkresult = {"fail":0,"omit":0,"pass":0,"fixed":0}
         for fileid in file_ids:
             files["file_"+str(k)] = fileid
@@ -391,7 +392,18 @@ class Yaml2Xml():
             eventmap = self.file_parameters_collection["QC-File-Events"][fileid]
             for key in eventmap:
                 events["file_"+str(k)+"_"+key]=eventmap[key]
+                found_tags.append(eventmap[key].split(":::")[0])
             k+=1
+
+        additional_lines = []
+        dataset_checks_okay = False
+        if((count_by_checkresult["fail"]+count_by_checkresult["omit"])==0):
+            dataset_checks_okay = True
+        additional_lines.append(self._field_name_line("QC_Pass",str(dataset_checks_okay)))
+        additional_lines.append(self._field_name_line("QC_Status","pid"))
+        found_tags = list(set(found_tags))#eliminate duplicates
+        for tag in found_tags:
+            additional_lines.append(self._field_name_line("QC_Tag",tag))
   
         qc_dataset_parameters = dict()
         for key in count_by_checkresult:
@@ -402,6 +414,7 @@ class Yaml2Xml():
         lines.append("<doc schema=\"esgf\">")
         lines+=fieldlines
         lines.append("")#QC information following
+        lines+=additional_lines
         lines+=self._sorted_field_name_lines(events)
         lines+=self._sorted_field_name_lines(qc_dataset_parameters)
         if(len(events) > 0):
