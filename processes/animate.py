@@ -97,7 +97,7 @@ class AnimateWMSLayer(WPSProcess):
             identifier="max_frames",
             title="Max. Frames",
             abstract="Maximum Number of Animation Frames",
-            default=100,
+            default=500,
             type=type(1),
             minOccurs=1,
             maxOccurs=1,
