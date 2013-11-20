@@ -69,4 +69,63 @@ class GetWMSLayers(WPSProcess):
             fp.close()
             self.output.setValue( out_filename )
 
+class AnimateWMSLayer(WPSProcess):
+    """Create gif animation of wms layer for timesteps."""
+
+    def __init__(self):
+        WPSProcess.__init__(
+            self,
+            identifier = "org.malleefowl.wms.animate",
+            title = "Animate WMS Layer",
+            version = "0.1",
+            metadata = [],
+            abstract = "Create gif animation of wms wms layer for timesteps.",
+            )
+
+        self.output = self.addComplexOutput(
+            identifier="output",
+            title="Animated WMS Layer",
+            abstract="Animated gif of WMS Layer",
+            metadata=[],
+            formats=[{"mimeType":"image/gif"}],
+            asReference=True,
+            )
+
+    def execute(self):
+        self.status.set(msg="starting ...", percentDone=10, propagate=True)
+
+        service_url = self.thredds_url + '/wms/test/cordex-eur-tas-year-pywpsInputoZXCTG.nc'
+        wms = WebMapService(service_url, version='1.1.1')
+
+        layer = wms.contents['tas']
+        timesteps = map(str.strip, layer.timepositions)
+
+        img_filename = self.mktempfile(suffix='.gif')
+        img = wms.getmap(layers=['tas'],
+                   bbox=(-112, 36, -106, 41),
+                   size=(300,250),
+                   format='image/gif',
+                   srs='EPSG:4326',)
+        out = open(img_filename, 'wb')
+        out.write(img.read())
+        out.close()
+
+        out_filename = self.mktempfile(suffix='.gif')
+        try:
+            cmd = ["gifsicle", operator]
+            cmd.append("--delay=10")
+            cmd.append("--append")
+            cmd.append(img_filename)
+            cmd.append("--output")
+            cmd.append(out_filename)
+            self.cmd(cmd=cmd, stdout=True)
+        except:
+            self.message(msg='gifscicle failed', force=True)
+
+        self.status.set(msg="done", percentDone=90, propagate=True)
+
+        self.output.setValue( out_filename )
+
+        
+
         
