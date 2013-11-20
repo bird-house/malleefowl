@@ -43,6 +43,9 @@ class Yaml2Xml():
         self.global_count_by_checkresult = {"fail":0,"omit":0,"pass":0,"fixed":0}
         self.dataset_name_to_path = dict()
         self._add_dataset_cache = dict()
+        self.QCDOCSERVERPATH="esgf-dev.dkrz.de/qc_docs/"
+        self.METADATAVIEW = "http://esgf-dev.dkrz.de/esgf-web-fe/metadataview/"
+        self.DATANODETHREDDS = "https://"+self.data_node+"/thredds/fileServer/cordex/"
 
     def clear(self):
         """ Empties the storage for the current log file.
@@ -59,14 +62,14 @@ class Yaml2Xml():
         #Is used to store the parameters as name value pairs for the differnt file types.
         self.file_parameters_collection = dict()
         self.esgfinfo_by_masterid=dict()
-        #TODO: The handle system is no longer used for QC data. For now self.xml_filenames is used.
-        #self.XMLURLS=dict() 
 
-        #xml_filenames[filetype][identifier] => location of the xml file
+        #server_xml_filenames[filetype][identifier] => global location of the xml file
+        #xml_filenames[filetype][identifier] => local location of the xml file
         self.xml_filenames=dict()
-        for key in self.FILETYPES:
-            #self.XMLURLS[key]=dict()
-            self.xml_filenames[key]=dict()
+        self.server_xml_filenames=dict() 
+        for filetype in self.FILETYPES:
+            self.xml_filenames[filetype]=dict()
+            self.server_xml_filenames[filetype]=dict()
 
     def run(self):
         """Collect information, arrange it and create files.
@@ -293,33 +296,62 @@ class Yaml2Xml():
         return outlines
 
 
-    def _create_name_shared(self,filetype,identifier):
-        """Create names for the files that will be generated. For now the names 
-        are very similar vor the differnt filetypes.
+    #def _create_name_shared(self,filetype,identifier):
+    #    """Create names for the files that will be generated. For now the names 
+    #    are very similar vor the differnt filetypes.
 
-        :param filetype: The type of the XML file. ["File","Dataset","QC-File","QC-Dataset"]
-        :param identifier: The identifier of the file or dataset.
-        """
-        filename = self.xml_output_path+filetype+"-"+identifier+".xml"
-        self.xml_filenames[filetype][identifier]= filename
-        #self.XMLURLS[filetype][identifier] =self.link(None,filename)
-        #self.createdLinks.append((self.XMLURLS[filetype][identifier],filename))
-         
+    #    :param filetype: The type of the XML file. ["File","Dataset","QC-File","QC-Dataset"]
+    #    :param identifier: The identifier of the file or dataset.
+    #    """
+    #    filename = self.xml_output_path+filetype+"-"+identifier+".xml"
+    #    self.xml_filenames[filetype][identifier]= filename
+    #    if(filetype=="Dataset"):
+    #        self.server_xml_filenames[filetype][identifier]=self.METADATAVIEW+filename
+    #    if(filetype[:2]=="QC"):
+    #        self.server_xml_filenames[filetype][identifier]=self.QCDOCSERVERPATH+filename
+    #    else:#if File
+    #        self.server_xml_filenames[filetype][identifier]=self.DATANODETHREDDS+filename
+
     def _create_name_file(self,identifier):
         """Create a name for a "File" type """ 
-        self._create_name_shared("File",identifier)
+        filetype="File"
+        name = filetype+"-"+identifier+".xml"
+        self.xml_filenames[filetype][identifier]= self.xml_output_path+name
+        dataset_id = self.file_parameters_collection["File"][identifier]["dataset_id"]
+        dataset_name = ".".join(dataset_id.split("|")[0].split(".")[:-1])
+        path = self.dataset_name_to_path[dataset_name]
+        noprefixpath = path.lstrip(self.project_data_path)
+        self.server_xml_filenames[filetype][identifier] =self.DATANODETHREDDS+noprefixpath+"/"+identifier
 
     def _create_name_qc_file(self,identifier):
         """Create a name for a "QC-File" type """ 
-        self._create_name_shared("QC-File",identifier)
+        filetype="QC-File"
+        name = filetype+"-"+identifier+".xml"
+        self.xml_filenames[filetype][identifier]= self.xml_output_path+name
+        self.server_xml_filenames[filetype][identifier] = self.QCDOCSERVERPATH+name
 
     def _create_name_dataset(self,identifier):
-        """Create a name for a "Dataset" type """ 
-        self._create_name_shared("Dataset",identifier)
+        """Create a name for a "Dataset" type
+        
+        For Dataset the node should not be part of the filename.
+        instance_id is the id without the node
+        """ 
+        filetype = "Dataset"
+        nodeless_identifier = self.file_parameters_collection["Dataset"][identifier]["instance_id"]
+        name = filetype+"-"+nodeless_identifier+".xml"
+        self.xml_filenames[filetype][identifier]= self.xml_output_path+name
+        self.server_xml_filenames[filetype][identifier] = self.METADATAVIEW+identifier+".html"
 
     def _create_name_qc_dataset(self,identifier):
-        """Create a name for a "QC-Dataset" type """ 
-        self._create_name_shared("QC-Dataset",identifier)
+        """Create a name for a "QC-Dataset" type 
+
+        For Dataset the node should not be part of the filename.
+        """ 
+        filetype = "QC-Dataset"
+        nodeless_identifier = self.file_parameters_collection["Dataset"][identifier]["instance_id"]
+        name = filetype+"-"+nodeless_identifier+".xml"
+        self.xml_filenames[filetype][identifier]= self.xml_output_path+name
+        self.server_xml_filenames[filetype][identifier] = self.QCDOCSERVERPATH+name
 
     def _create_xml_shared(self,filename,lines):
         """The _create_xml methods share the write of a list of lines to a file.
@@ -372,7 +404,7 @@ class Yaml2Xml():
         #Meta info
         fieldlines = self._sorted_field_name_lines(
             self.file_parameters_collection["Dataset"][identifier])
-        qualityurl = self.xml_filenames["QC-Dataset"][identifier]
+        qualityurl = self.server_xml_filenames["QC-Dataset"][identifier]
         fieldlines.append(self._field_name_line("experiment_family","All"))
         fieldlines.append(self._field_name_line("quality_url",qualityurl))
         fieldlines.sort()
@@ -443,7 +475,8 @@ class Yaml2Xml():
         if("url" in file_parameters):
             qc_dataset_parameters["file_url"] = file_parameters["url"][:-len(HTTPEXTENSION)]
         qc_dataset_parameters["version"]=file_parameters["version"]
-        qc_dataset_parameters["file_metadata_url"]=self.xml_filenames["File"][identifier]
+
+        #qc_dataset_parameters["file_metadata_url"]=self.server_xml_filenames["File"][identifier]
         checkmap = self.file_parameters_collection["QC-File-Checks"][identifier]
         checks = self._sorted_field_name_lines(self._rename_map(checkmap,"checks_"))
         eventmap = self.file_parameters_collection["QC-File-Events"][identifier]
@@ -485,7 +518,7 @@ class Yaml2Xml():
         for key in count_by_checkresult:
             qc_dataset_parameters["checks_"+key] = count_by_checkresult[key]
         qc_dataset_parameters["number_of_files"]=len(files)
-        qc_dataset_parameters["metadata_url"]=self.xml_filenames["Dataset"][identifier]
+        qc_dataset_parameters["metadata_url"]=self.server_xml_filenames["Dataset"][identifier]
         lines=[]
         lines.append("<doc schema=\"QC-Dataset\">")
         lines+=self._sorted_field_name_lines(events)
