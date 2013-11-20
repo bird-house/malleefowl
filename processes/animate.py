@@ -123,6 +123,17 @@ class AnimateWMSLayer(WPSProcess):
             maxOccurs=1,
             )
 
+        self.resolution_in = self.addLiteralInput(
+            identifier="resolution",
+            title="Temporal Resolution",
+            abstract="Temporal Resolution for Animation",
+            default="monthly",
+            type=type(''),
+            minOccurs=1,
+            maxOccurs=1,
+            allowedValues=['hourly', 'daily', 'monthly', 'yearly']
+            )
+
         self.layer_in = self.addLiteralInput(
             identifier="layer",
             title="Layer",
