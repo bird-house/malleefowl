@@ -100,27 +100,41 @@ class AnimateWMSLayer(WPSProcess):
         layer = wms.contents['tas']
         timesteps = map(str.strip, layer.timepositions)
 
-        img_filename = self.mktempfile(suffix='.gif')
-        img = wms.getmap(layers=['tas'],
-                   bbox=(-112, 36, -106, 41),
-                   size=(300,250),
-                   format='image/gif',
-                   srs='EPSG:4326',)
-        out = open(img_filename, 'wb')
-        out.write(img.read())
-        out.close()
+        images = []
+        percent_done = 10
+        count = 0
+        for time in timesteps:
+            img_filename = self.mktempfile(suffix='.gif')
+            img = wms.getmap(layers=['tas'],
+                             bbox=(-180, -90, 180, 90),
+                             size=(300,200),
+                             format='image/gif',
+                             srs='EPSG:4326',
+                             time=time)
+            out = open(img_filename, 'wb')
+            out.write(img.read())
+            out.close()
+            images.append(img_filename)
+            count = count + 1
+            percent_done = int(percent_done + count * 70 / len(timesteps))
+            self.status.set(
+                msg="wms image %d/%d generated" % (count, len(timesteps)),
+                percentDone=percent_done, propagate=True)
 
+        self.status.set(msg="wms images generated", percentDone=80, propagate=True)
+        
         out_filename = self.mktempfile(suffix='.gif')
         try:
-            cmd = ["gifsicle", operator]
-            cmd.append("--delay=10")
-            cmd.append("--append")
-            cmd.append(img_filename)
+            cmd = ["gifsicle"]
+            cmd.append("--delay=100")
+            cmd.append("--loop")
+            cmd.extend(images)
             cmd.append("--output")
             cmd.append(out_filename)
             self.cmd(cmd=cmd, stdout=True)
         except:
-            self.message(msg='gifscicle failed', force=True)
+            self.message(msg='gifsicle failed', force=True)
+            raise
 
         self.status.set(msg="done", percentDone=90, propagate=True)
 
