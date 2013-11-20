@@ -131,7 +131,7 @@ class AnimateWMSLayer(WPSProcess):
             type=type(''),
             minOccurs=1,
             maxOccurs=1,
-            allowedValues=['hourly', 'daily', 'monthly', 'yearly']
+            allowedValues=['hourly', 'daily', 'weekly', 'monthly', 'yearly']
             )
 
         self.layer_in = self.addLiteralInput(
