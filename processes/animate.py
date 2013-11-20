@@ -4,6 +4,7 @@ from owslib.wms import WebMapService
 
 import json
 from datetime import datetime, date
+from dateutil import parser as date_parser
 import types
 
 class GetWMSLayers(WPSProcess):
@@ -85,7 +86,7 @@ class AnimateWMSLayer(WPSProcess):
         self.delay_in = self.addLiteralInput(
             identifier="delay",
             title="Delay",
-            abstract="Animation Delay",
+            abstract="Animation Delay 1/100 seconds",
             default=10,
             type=type(1),
             minOccurs=1,
@@ -99,6 +100,26 @@ class AnimateWMSLayer(WPSProcess):
             default=100,
             type=type(1),
             minOccurs=1,
+            maxOccurs=1,
+            )
+
+        self.start_in = self.addLiteralInput(
+            identifier="start",
+            title="Start Date",
+            abstract="Start Date of Animation: 2006-01-01",
+            default="2006-01-01",
+            type=type(date(2013,7,11)),
+            minOccurs=0,
+            maxOccurs=1,
+            )
+
+        self.end_in = self.addLiteralInput(
+            identifier="end",
+            title="End Date",
+            abstract="End Date of Animation: 2006-12-31",
+            default="2006-12-31",
+            type=type(date(2013,7,11)),
+            minOccurs=0,
             maxOccurs=1,
             )
 
@@ -182,6 +203,11 @@ class AnimateWMSLayer(WPSProcess):
         percent_done = 10
         count = 0
         for time in timesteps:
+            if time < self.start_in.getValue():
+                continue
+            if time > self.end_in.getValue():
+                break
+            
             img_filename = self.mktempfile(suffix='.gif')
             img = wms.getmap(layers=layers,
                              bbox=bbox,
