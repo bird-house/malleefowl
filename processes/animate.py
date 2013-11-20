@@ -79,7 +79,77 @@ class AnimateWMSLayer(WPSProcess):
             title = "Animate WMS Layer",
             version = "0.1",
             metadata = [],
-            abstract = "Create gif animation of wms wms layer for timesteps.",
+            abstract = "Create gif animation of wms layer for timesteps.",
+            )
+
+        self.delay_in = self.addLiteralInput(
+            identifier="delay",
+            title="Delay",
+            abstract="Animation Delay",
+            default=10,
+            type=type(1),
+            minOccurs=1,
+            maxOccurs=1,
+            )
+
+        self.max_frames_in = self.addLiteralInput(
+            identifier="max_frames",
+            title="Max. Frames",
+            abstract="Maximum Number of Animation Frames",
+            default=100,
+            type=type(1),
+            minOccurs=1,
+            maxOccurs=1,
+            )
+
+        self.layer_in = self.addLiteralInput(
+            identifier="layer",
+            title="Layer",
+            abstract="Layer Name",
+            default="tas",
+            type=type(''),
+            minOccurs=1,
+            maxOccurs=10,
+            )
+
+        self.srs_in = self.addLiteralInput(
+            identifier="srs",
+            title="SRS",
+            abstract="Coordinate System: EPSG:4326",
+            default="EPSG:4326",
+            type=type(''),
+            minOccurs=1,
+            maxOccurs=1,
+            )
+
+        self.width_in = self.addLiteralInput(
+            identifier="width",
+            title="Width",
+            abstract="Image Width",
+            default=300,
+            type=type(1),
+            minOccurs=1,
+            maxOccurs=1,
+            )
+
+        self.height_in = self.addLiteralInput(
+            identifier="height",
+            title="Height",
+            abstract="Image Height",
+            default=200,
+            type=type(1),
+            minOccurs=1,
+            maxOccurs=1,
+            )
+
+        self.bbox_in = self.addLiteralInput(
+            identifier="bbox",
+            title="Bounding Box",
+            abstract="Bounding Box: (minx,miny,maxx,maxy)",
+            default="-180,-90,180,90",
+            type=type(''),
+            minOccurs=1,
+            maxOccurs=1,
             )
 
         self.output = self.addComplexOutput(
@@ -100,33 +170,44 @@ class AnimateWMSLayer(WPSProcess):
         layer = wms.contents['tas']
         timesteps = map(str.strip, layer.timepositions)
 
+        layers = self.layer_in.getValue()
+        if type(layers) != types.ListType:
+            layers = [layers]
+        layers = map(str.strip, layers)
+        width = int(self.width_in.getValue())
+        height = int(self.height_in.getValue())
+        bbox = tuple(map(float, self.bbox_in.getValue().split(",")))
+
         images = []
         percent_done = 10
         count = 0
         for time in timesteps:
             img_filename = self.mktempfile(suffix='.gif')
-            img = wms.getmap(layers=['tas'],
-                             bbox=(-180, -90, 180, 90),
-                             size=(300,200),
+            img = wms.getmap(layers=layers,
+                             bbox=bbox,
+                             size=(width, height),
                              format='image/gif',
-                             srs='EPSG:4326',
+                             srs=self.srs_in.getValue(),
                              time=time)
             out = open(img_filename, 'wb')
             out.write(img.read())
             out.close()
             images.append(img_filename)
             count = count + 1
-            percent_done = int(percent_done + count * 70 / len(timesteps))
-            self.status.set(
-                msg="wms image %d/%d generated" % (count, len(timesteps)),
-                percentDone=percent_done, propagate=True)
+            if (count % 10 == 0):
+                percent_done = int(percent_done + count * 70 / len(timesteps))
+                self.status.set(
+                    msg="wms image %d/%d generated" % (count, len(timesteps)),
+                    percentDone=percent_done, propagate=True)
+            if count == self.max_frames_in.getValue():
+                break
 
         self.status.set(msg="wms images generated", percentDone=80, propagate=True)
         
         out_filename = self.mktempfile(suffix='.gif')
         try:
             cmd = ["gifsicle"]
-            cmd.append("--delay=100")
+            cmd.append("--delay=%d" % self.delay_in.getValue())
             cmd.append("--loop")
             cmd.extend(images)
             cmd.append("--output")
