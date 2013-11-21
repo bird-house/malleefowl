@@ -59,9 +59,9 @@ class Yaml2Xml():
         self.not_write_files = []
         self.store = None
         self.dataset_contained_ids=dict()#maps a dataset_id to a list of file ids
-        #file_parameters_collection[filetype][identifier][parameter_name] => parameter_value
+        #parameters[filetype][identifier][parameter_name] => parameter_value
         #Is used to store the parameters as name value pairs for the differnt file types.
-        self.file_parameters_collection = dict()
+        self.parameters = dict()
         self.esgfinfo_by_masterid=dict()
 
         #server_xml_filenames[filetype][identifier] => global location of the xml file
@@ -95,15 +95,15 @@ class Yaml2Xml():
             file_parameters=self._gather_file_parameters(i)
             if(file_parameters is not None):
                 identifier = file_parameters["title"]
-                self._add_to_file_parameters_collection("File",identifier,file_parameters)
+                self._add_to_parameters("File",identifier,file_parameters)
                 self.to_write_files.append(identifier)#unless events finds an error allow to write.
                 dataset_id = file_parameters["dataset_id"]
                 if(not(dataset_id in self.not_write_files or dataset_id in self.to_write_files)):
                     self.to_write_files.append(dataset_id)
                 events = self._gather_events(i,file_parameters)
-                self._add_to_file_parameters_collection("QC-File-Events",identifier,events)
+                self._add_to_parameters("QC-File-Events",identifier,events)
                 checks = self._gather_checks(i)
-                self._add_to_file_parameters_collection("QC-File-Checks",identifier,checks)
+                self._add_to_parameters("QC-File-Checks",identifier,checks)
 
                 self._add_to_dataset(dataset_id,identifier)
             else:
@@ -121,7 +121,7 @@ class Yaml2Xml():
 
         for dataset_id in self.dataset_contained_ids:
             dataset_parameters = self._gather_dataset_parameters(dataset_id)
-            self._add_to_file_parameters_collection("Dataset",dataset_id,dataset_parameters)
+            self._add_to_parameters("Dataset",dataset_id,dataset_parameters)
 
         self._create_names()
         self._create_xml()
@@ -150,16 +150,16 @@ class Yaml2Xml():
                 out+=wna+"\n"
         return out
 
-    def _add_to_file_parameters_collection(self,filetype,identifier,parameters):
+    def _add_to_parameters(self,filetype,identifier,parameters):
         """Stores the map containing the parameters for the XML files.
 
         :param filetype: The type of the to generate file. ["File","Dataset","QC-File","QC-Dataset"]
         :param identifier: An identifier for the current file. It is shared for Metadata and QC.
         :param parameters: A map from a keyword to its value. e.g. parameters["size"] => 200
         """
-        if filetype not in self.file_parameters_collection:
-           self.file_parameters_collection[filetype]=dict()
-        self.file_parameters_collection[filetype][identifier]=parameters
+        if filetype not in self.parameters:
+           self.parameters[filetype]=dict()
+        self.parameters[filetype][identifier]=parameters
 
 
     def esg_search(self,master_id):
@@ -316,10 +316,10 @@ class Yaml2Xml():
     def _create_name_file(self,identifier):
         """Create a name for a "File" type """ 
         filetype="File"
-        version = self.file_parameters_collection["File"][identifier]["version"]
+        version = self.parameters["File"][identifier]["version"]
         name = filetype+"-"+identifier+".v"+version+".xml"
         self.xml_filenames[filetype][identifier]= self.xml_output_path+name
-        dataset_id = self.file_parameters_collection["File"][identifier]["dataset_id"]
+        dataset_id = self.parameters["File"][identifier]["dataset_id"]
         dataset_name = ".".join(dataset_id.split("|")[0].split(".")[:-1])
         path = self.dataset_name_to_path[dataset_name]
         noprefixpath = path.lstrip(self.project_data_path)
@@ -328,7 +328,7 @@ class Yaml2Xml():
     def _create_name_qc_file(self,identifier):
         """Create a name for a "QC-File" type """ 
         filetype="QC-File"
-        version = self.file_parameters_collection["File"][identifier]["version"]
+        version = self.parameters["File"][identifier]["version"]
         name = filetype+"-"+identifier+".v"+version+".xml"
         self.xml_filenames[filetype][identifier]= self.xml_output_path+name
         self.server_xml_filenames[filetype][identifier] = self.QCDOCSERVERPATH+name
@@ -340,7 +340,7 @@ class Yaml2Xml():
         instance_id is the id without the node
         """ 
         filetype = "Dataset"
-        nodeless_identifier = self.file_parameters_collection["Dataset"][identifier]["instance_id"]
+        nodeless_identifier = self.parameters["Dataset"][identifier]["instance_id"]
         name = filetype+"-"+nodeless_identifier+".xml"
         self.xml_filenames[filetype][identifier]= self.xml_output_path+name
         #The file in server_xml_filenames will not be used directly. The name could be better.
@@ -352,7 +352,7 @@ class Yaml2Xml():
         For Dataset the node should not be part of the filename.
         """ 
         filetype = "QC-Dataset"
-        nodeless_identifier = self.file_parameters_collection["Dataset"][identifier]["instance_id"]
+        nodeless_identifier = self.parameters["Dataset"][identifier]["instance_id"]
         name = filetype+"-"+nodeless_identifier+".xml"
         self.xml_filenames[filetype][identifier]= self.xml_output_path+name
         self.server_xml_filenames[filetype][identifier] = self.QCDOCSERVERPATH+name
@@ -378,15 +378,15 @@ class Yaml2Xml():
         """
         filename = self.xml_filenames["File"][identifier] 
         #Meta info
-        fieldlines=self._sorted_field_name_lines(self.file_parameters_collection["File"][identifier])
+        fieldlines=self._sorted_field_name_lines(self.parameters["File"][identifier])
         fieldlines.append(self._field_name_line("experiment_family","All"))
         qualityurl = self.xml_filenames["QC-File"][identifier]+"|application/xml|QCDoc"
         fieldlines.append(self._field_name_line("url",qualityurl))
         fieldlines.sort()
         #QC info
-        checkmap = self.file_parameters_collection["QC-File-Checks"][identifier]
+        checkmap = self.parameters["QC-File-Checks"][identifier]
         checks = self._sorted_field_name_lines(self._rename_map(checkmap,"checks_"))
-        eventmap = self.file_parameters_collection["QC-File-Events"][identifier]
+        eventmap = self.parameters["QC-File-Events"][identifier]
         events = self._sorted_field_name_lines(eventmap)
 
         lines=[]
@@ -407,7 +407,7 @@ class Yaml2Xml():
         filename = self.xml_filenames["Dataset"][identifier]
         #Meta info
         fieldlines = self._sorted_field_name_lines(
-            self.file_parameters_collection["Dataset"][identifier])
+            self.parameters["Dataset"][identifier])
         qualityurl = self.server_xml_filenames["QC-Dataset"][identifier]
         fieldlines.append(self._field_name_line("experiment_family","All"))
         fieldlines.append(self._field_name_line("quality_url",qualityurl))
@@ -421,11 +421,11 @@ class Yaml2Xml():
         count_by_checkresult = {"fail":0,"omit":0,"pass":0,"fixed":0}
         for fileid in file_ids:
             files["file_"+str(k)] = fileid
-            checkmap = self.file_parameters_collection["QC-File-Checks"][fileid]
+            checkmap = self.parameters["QC-File-Checks"][fileid]
             for check in checkmap:
                 result = checkmap[check]
                 count_by_checkresult[result.lower()]+=1
-            eventmap = self.file_parameters_collection["QC-File-Events"][fileid]
+            eventmap = self.parameters["QC-File-Events"][fileid]
             for key in eventmap:
                 events["file_"+str(k)+"_"+key]=eventmap[key]
                 found_tags.append(eventmap[key].split(":::")[0])
@@ -474,16 +474,16 @@ class Yaml2Xml():
         """
         filename = self.xml_filenames["QC-File"][identifier]
         qc_dataset_parameters = dict()
-        file_parameters = self.file_parameters_collection["File"][identifier]
+        file_parameters = self.parameters["File"][identifier]
         qc_dataset_parameters["file_id"]=file_parameters["master_id"]
         if("url" in file_parameters):
             qc_dataset_parameters["file_url"] = file_parameters["url"][:-len(HTTPEXTENSION)]
         qc_dataset_parameters["version"]=file_parameters["version"]
 
         #qc_dataset_parameters["file_metadata_url"]=self.server_xml_filenames["File"][identifier]
-        checkmap = self.file_parameters_collection["QC-File-Checks"][identifier]
+        checkmap = self.parameters["QC-File-Checks"][identifier]
         checks = self._sorted_field_name_lines(self._rename_map(checkmap,"checks_"))
-        eventmap = self.file_parameters_collection["QC-File-Events"][identifier]
+        eventmap = self.parameters["QC-File-Events"][identifier]
         events=self._sorted_field_name_lines(eventmap)
         lines=[]
         lines.append("<doc schema=\"QC-File\">")
@@ -494,7 +494,7 @@ class Yaml2Xml():
         self.qc_filenames.append(filename)
         self._create_xml_shared(filename,lines)
 
-    def create_xml_qc_dataset(self,identifier):
+    def _create_xml_qc_dataset(self,identifier):
         """Uses the information found earlier to create an XML file for the "QC-Dataset" type
 
         Next to check results and events, references to the metadata are given.
@@ -509,12 +509,12 @@ class Yaml2Xml():
         count_by_checkresult = {"fail":0,"omit":0,"pass":0,"fixed":0}
         for fileid in file_ids:
             files["file_"+str(k)] = fileid
-            checkmap = self.file_parameters_collection["QC-File-Checks"][fileid]
+            checkmap = self.parameters["QC-File-Checks"][fileid]
             for check in checkmap:
                 result = checkmap[check]
                 count_by_checkresult[result.lower()]+=1
                 self.global_count_by_checkresult[result.lower()]+=1
-            eventmap = self.file_parameters_collection["QC-File-Events"][fileid]
+            eventmap = self.parameters["QC-File-Events"][fileid]
             for key in eventmap:
                 events["file_"+str(k)+"_"+key]=eventmap[key]
             k+=1
@@ -587,7 +587,6 @@ class Yaml2Xml():
          
         filename = self._get_by_keys(["items",file_index,"file"])
         if(filename==None):
-            print("filename is a required variable. Stopping XML generation.")
             return None
         file_parameters = dict()
         path_line = self._get_by_keys(["items",file_index,"data_path"])
@@ -782,7 +781,7 @@ class Yaml2Xml():
         size = 0
 
         for identifier in identifiers:
-            file_parameters = self.file_parameters_collection["File"][identifier]
+            file_parameters = self.parameters["File"][identifier]
             if("datetime_start" in file_parameters):#If datetime_start exists datetime_stop should too.
                 start_times.append(file_parameters["datetime_start"])
                 end_times.append(file_parameters["datetime_stop"])
@@ -803,7 +802,7 @@ class Yaml2Xml():
                         "cf_standard_name","experiment_family","west_degrees","east_degrees",
                         "south_degrees","north_degrees","metadata_format"]
         id0= identifiers[0]
-        file_parameters = self.file_parameters_collection["File"][id0]
+        file_parameters = self.parameters["File"][id0]
         for field in sharedValues: 
             if(field in file_parameters):#to prevent errors for non existent fields
                 dataset_parameters[field] = file_parameters[field]
@@ -862,13 +861,13 @@ class Yaml2Xml():
         :param m3: The first method for datasets
         :param m4: The second method for datasets
         """
-        for identifier in self.file_parameters_collection["File"]:
+        for identifier in self.parameters["File"]:
             if(identifier in self.to_write_files):
-                dsid= self.file_parameters_collection["File"][identifier]["dataset_id"]
+                dsid= self.parameters["File"][identifier]["dataset_id"]
                 if(dsid not in self.not_write_files):
                     m1(identifier)
                     m2(identifier)
-        for identifier in self.file_parameters_collection["Dataset"]:
+        for identifier in self.parameters["Dataset"]:
             if(identifier in self.to_write_files):
                 m3(identifier)
                 m4(identifier)
@@ -881,7 +880,7 @@ class Yaml2Xml():
     def _create_xml(self):
         """Create the XML files after they received their names with the _create_names method."""
         self._create_shared(self._create_xml_file,self._create_xml_qc_file,
-                          self._create_xml_dataset,self.create_xml_qc_dataset)
+                          self._create_xml_dataset,self._create_xml_qc_dataset)
 
         
         
