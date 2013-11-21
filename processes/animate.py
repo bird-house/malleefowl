@@ -6,6 +6,7 @@ import json
 from datetime import datetime, date
 from dateutil import parser as date_parser
 import types
+import os
 
 class GetWMSLayers(WPSProcess):
     """Retrieve layers from thredds ncwms service."""
@@ -52,18 +53,30 @@ class GetWMSLayers(WPSProcess):
     def execute(self):
         self.status.set(msg="starting ...", percentDone=10, propagate=True)
 
-        service_url = self.thredds_url + '/wms/test/cordex-eur-tas-year-pywpsInputoZXCTG.nc'
-        wms = WebMapService(service_url, version='1.1.1')
+        files = [f for f in os.listdir(self.files_path) if f.endswith(".nc")]
 
         layers = []
-        for layerid,layer in wms.items():
-            if layerid in ['lat', 'lon']:
+        count = 0
+        percent_done = 10
+        for file_name in files:
+            service_url = self.thredds_url + '/wms/test/' + file_name
+            try:
+                wms = WebMapService(service_url, version='1.1.1')
+            except:
+                self.message("could not access wms %s" % (service_url))
                 continue
-            timesteps = map(str.strip, layer.timepositions)
-            layers.append(dict(service=service_url,
-                               name=layer.name,
-                               title=layer.title,
-                               timesteps=timesteps))
+
+            for layerid,layer in wms.items():
+                if layerid in ['lat', 'lon']:
+                    continue
+                timesteps = map(str.strip, layer.timepositions)
+                layers.append(dict(service=service_url,
+                                   name=layer.name,
+                                   title=layer.title,
+                                   timesteps=timesteps))
+            count = count + 1
+            percent_done = int(percent_done + count * 80 / len(files))
+            self.status.set(msg="adding layer ...", percentDone=percent_done, propagate=True)
 
         self.status.set(msg="done", percentDone=90, propagate=True)
         
