@@ -71,6 +71,7 @@ class GetWMSLayers(WPSProcess):
                     continue
                 timesteps = map(str.strip, layer.timepositions)
                 layers.append(dict(service=service_url,
+                                   service_name=file_name,
                                    name=layer.name,
                                    title=layer.title,
                                    timesteps=timesteps))
