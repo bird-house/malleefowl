@@ -114,7 +114,7 @@ class AnimateWMSLayer(WPSProcess):
             identifier="max_frames",
             title="Max. Frames",
             abstract="Maximum Number of Animation Frames",
-            default=500,
+            default=50,
             type=type(1),
             minOccurs=1,
             maxOccurs=1,
@@ -149,6 +149,15 @@ class AnimateWMSLayer(WPSProcess):
             minOccurs=1,
             maxOccurs=1,
             allowedValues=['hourly', 'daily', 'weekly', 'monthly', 'yearly']
+            )
+
+        self.service_url_in = self.addLiteralInput(
+            identifier="service_url",
+            title="WMS Service",
+            abstract="URL of WMS Service",
+            type=type(''),
+            minOccurs=1,
+            maxOccurs=1,
             )
 
         self.layer_in = self.addLiteralInput(
@@ -213,8 +222,7 @@ class AnimateWMSLayer(WPSProcess):
     def execute(self):
         self.status.set(msg="starting ...", percentDone=10, propagate=True)
 
-        service_url = self.thredds_url + '/wms/test/cordex-eur-tas-year-pywpsInputoZXCTG.nc'
-        wms = WebMapService(service_url, version='1.1.1')
+        wms = WebMapService(self.service_url_in.getValue(), version='1.1.1')
 
         layer = wms.contents['tas']
         timesteps = map(str.strip, layer.timepositions)
