@@ -46,6 +46,7 @@ class Yaml2Xml():
         self.QCDOCSERVERPATH="esgf-dev.dkrz.de/qc_docs/"
         self.METADATAVIEW = "http://esgf-dev.dkrz.de/esgf-web-fe/metadataview/"
         self.DATANODETHREDDS = "https://"+self.data_node+"/thredds/fileServer/cordex/"
+        self.qc_filenames = []
 
     def clear(self):
         """ Empties the storage for the current log file.
@@ -315,7 +316,8 @@ class Yaml2Xml():
     def _create_name_file(self,identifier):
         """Create a name for a "File" type """ 
         filetype="File"
-        name = filetype+"-"+identifier+".xml"
+        version = self.file_parameters_collection["File"][identifier]["version"]
+        name = filetype+"-"+identifier+".v"+version+".xml"
         self.xml_filenames[filetype][identifier]= self.xml_output_path+name
         dataset_id = self.file_parameters_collection["File"][identifier]["dataset_id"]
         dataset_name = ".".join(dataset_id.split("|")[0].split(".")[:-1])
@@ -326,7 +328,8 @@ class Yaml2Xml():
     def _create_name_qc_file(self,identifier):
         """Create a name for a "QC-File" type """ 
         filetype="QC-File"
-        name = filetype+"-"+identifier+".xml"
+        version = self.file_parameters_collection["File"][identifier]["version"]
+        name = filetype+"-"+identifier+".v"+version+".xml"
         self.xml_filenames[filetype][identifier]= self.xml_output_path+name
         self.server_xml_filenames[filetype][identifier] = self.QCDOCSERVERPATH+name
 
@@ -340,6 +343,7 @@ class Yaml2Xml():
         nodeless_identifier = self.file_parameters_collection["Dataset"][identifier]["instance_id"]
         name = filetype+"-"+nodeless_identifier+".xml"
         self.xml_filenames[filetype][identifier]= self.xml_output_path+name
+        #The file in server_xml_filenames will not be used directly. The name could be better.
         self.server_xml_filenames[filetype][identifier] = self.METADATAVIEW+identifier+".html"
 
     def _create_name_qc_dataset(self,identifier):
@@ -487,6 +491,7 @@ class Yaml2Xml():
         lines+=events
         lines+=self._sorted_field_name_lines(qc_dataset_parameters)
         lines.append("</doc>")
+        self.qc_filenames.append(filename)
         self._create_xml_shared(filename,lines)
 
     def create_xml_qc_dataset(self,identifier):
@@ -525,6 +530,7 @@ class Yaml2Xml():
         lines+=self._sorted_field_name_lines(qc_dataset_parameters)
         lines+=self._sorted_field_name_lines(files,["(\D+)","(\d+)"])
         lines.append("</doc>")
+        self.qc_filenames.append(filename)
         self._create_xml_shared(filename,lines)
 
     def _concatenate(self,dict_or_list,keys,separator,prefix=""):
@@ -878,4 +884,4 @@ class Yaml2Xml():
                           self._create_xml_dataset,self.create_xml_qc_dataset)
 
         
-
+        
