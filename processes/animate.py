@@ -60,7 +60,10 @@ class GetWMSLayers(WPSProcess):
             if layerid in ['lat', 'lon']:
                 continue
             timesteps = map(str.strip, layer.timepositions)
-            layers.append(dict(name=layer.name, title=layer.title, timesteps=timesteps))
+            layers.append(dict(service=service_url,
+                               name=layer.name,
+                               title=layer.title,
+                               timesteps=timesteps))
 
         self.status.set(msg="done", percentDone=90, propagate=True)
         
