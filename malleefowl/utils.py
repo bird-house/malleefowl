@@ -15,15 +15,38 @@ import logging
 log = logging.getLogger(__file__)
 
 
-def filter_timesteps(timesteps, aggregation="monthly"):
+def within_date_range(timesteps, start=None, end=None):
+    start_date = None
+    if start != None:
+        start_date = date_parser.parse(start)
+    end_date = None
+    if end != None:
+        end_date = date_parser.parse(end)
+    new_timesteps = []
+    for timestep in timesteps:
+        candidate = date_parser.parse(timestep)
+        # within time range?
+        if start_date != None and candidate < start_date:
+            continue
+        if end_date != None and candidate > end_date:
+            break
+        new_timesteps.append(timestep)
+    return new_timesteps
+    
+def filter_timesteps(timesteps, aggregation="monthly", start=None, end=None):
     if (timesteps == None or len(timesteps) == 0):
         return []
-    new_timesteps = [timesteps[0]]
-    for index in range(1,len(timesteps)):
+    timesteps.sort()
+    work_timesteps = within_date_range(timesteps, start, end)
+    
+    new_timesteps = [work_timesteps[0]]
+    
+    for index in range(1,len(work_timesteps)):
         current = date_parser.parse(new_timesteps[-1])
-        candidate = date_parser.parse(timesteps[index])
+        candidate = date_parser.parse(work_timesteps[index])
+    
         if current.year < candidate.year:
-            new_timesteps.append(timesteps[index])
+            new_timesteps.append(work_timesteps[index])
         elif current.year == candidate.year:
             if aggregation == "daily":
                 if current.timetuple()[7] >= candidate.timetuple()[7]:
@@ -38,7 +61,7 @@ def filter_timesteps(timesteps, aggregation="monthly"):
                 if current.year >= candidate.year:
                     continue
             # all checks passed
-            new_timesteps.append(timesteps[index])
+            new_timesteps.append(work_timesteps[index])
         else:
             continue
     return new_timesteps

@@ -12,20 +12,25 @@ def test_filter_timesteps():
     timesteps = ["2013-11-01T12:00:00Z", "2013-11-01T18:00:00Z", "2013-11-02T12:00:00Z",
                  "2013-11-08T12:00:00Z", "2013-12-01T12:00:00Z", "2014-01-01T12:00:00Z"]
    
-    result = utils.filter_timesteps(timesteps, "hourly")
+    result = utils.filter_timesteps(timesteps, aggregation="hourly")
     nose.tools.ok_(len(result) == 6, result)
 
-    result = utils.filter_timesteps(timesteps, "daily")
+    result = utils.filter_timesteps(timesteps, aggregation="daily")
     nose.tools.ok_(len(result) == 5, result)
 
-    result = utils.filter_timesteps(timesteps, "weekly")
+    result = utils.filter_timesteps(timesteps, aggregation="weekly")
     nose.tools.ok_(len(result) == 4, result)
 
-    result = utils.filter_timesteps(timesteps, "monthly")
+    result = utils.filter_timesteps(timesteps, aggregation="monthly")
     nose.tools.ok_(len(result) == 3, result)
 
-    result = utils.filter_timesteps(timesteps, "yearly")
+    result = utils.filter_timesteps(timesteps, aggregation="yearly")
     nose.tools.ok_(len(result) == 2, result)
+
+    result = utils.filter_timesteps(timesteps, aggregation="hourly",
+                                    start="2013-11-01T18:00:00Z",
+                                    end="2013-12-01T12:00:00Z")
+    nose.tools.ok_(len(result) == 4, result)
 
 def test_nc_copy():
     raise SkipTest

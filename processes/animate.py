@@ -249,12 +249,6 @@ class AnimateWMSLayer(WPSProcess):
             # check max number of frames
             if count >= self.max_frames_in.getValue():
                 break
-            # within time range?
-            if time < self.start_in.getValue():
-                continue
-            if time > self.end_in.getValue():
-                break
-
             # get wms image for timestep
             img = wms.getmap(layers=layers,
                              bbox=bbox,
