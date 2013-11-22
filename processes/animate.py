@@ -7,6 +7,7 @@ from datetime import datetime, date
 from dateutil import parser as date_parser
 import types
 import os
+import shutil
 
 class GetWMSLayers(WPSProcess):
     """Retrieve layers from thredds ncwms service."""
@@ -114,7 +115,7 @@ class AnimateWMSLayer(WPSProcess):
             identifier="max_frames",
             title="Max. Frames",
             abstract="Maximum Number of Animation Frames",
-            default=50,
+            default=365,
             type=type(1),
             minOccurs=1,
             maxOccurs=1,
@@ -235,16 +236,22 @@ class AnimateWMSLayer(WPSProcess):
         height = int(self.height_in.getValue())
         bbox = tuple(map(float, self.bbox_in.getValue().split(",")))
 
-        images = []
+        out_filename = self.mktempfile(suffix='.gif')
+        img_filename = self.mktempfile(suffix='.gif')
+
         percent_done = 10
         count = 0
         for time in timesteps:
+            # check max number of frames
+            if count >= self.max_frames_in.getValue():
+                break
+            # within time range?
             if time < self.start_in.getValue():
                 continue
             if time > self.end_in.getValue():
                 break
-            
-            img_filename = self.mktempfile(suffix='.gif')
+
+            # get wms image for timestep
             img = wms.getmap(layers=layers,
                              bbox=bbox,
                              size=(width, height),
@@ -254,30 +261,47 @@ class AnimateWMSLayer(WPSProcess):
             out = open(img_filename, 'wb')
             out.write(img.read())
             out.close()
-            images.append(img_filename)
             count = count + 1
+
+            # on first image just copy file
+            if (count == 1):
+                shutil.move(img_filename, out_filename)
+
+            # append wms image with gifsicle to animation gif
+            try:
+                cmd = ["gifsicle"]
+                cmd.append("--delay=%d" % (self.delay_in.getValue(),))
+                cmd.append("--loop")
+                cmd.append("--append")
+                cmd.append(img_filename)
+                cmd.append(out_filename)
+                cmd.append("--output")
+                cmd.append(out_filename)
+                self.cmd(cmd=cmd, stdout=True)
+            except:
+                self.message(msg='gifsicle failed', force=True)
+                #raise
+
+            # show progress
             if (count % 10 == 0):
                 percent_done = int(percent_done + count * 70 / len(timesteps))
                 self.status.set(
                     msg="wms image %d/%d generated" % (count, len(timesteps)),
                     percentDone=percent_done, propagate=True)
-            if count == self.max_frames_in.getValue():
-                break
 
-        self.status.set(msg="wms images generated", percentDone=80, propagate=True)
-        
-        out_filename = self.mktempfile(suffix='.gif')
+        # animation is done
         try:
             cmd = ["gifsicle"]
             cmd.append("--delay=%d" % self.delay_in.getValue())
             cmd.append("--loop")
-            cmd.extend(images)
+            cmd.append("--done")
+            cmd.append(out_filename)
             cmd.append("--output")
             cmd.append(out_filename)
             self.cmd(cmd=cmd, stdout=True)
         except:
             self.message(msg='gifsicle failed', force=True)
-            raise
+            #raise
 
         self.status.set(msg="done", percentDone=90, propagate=True)
 
