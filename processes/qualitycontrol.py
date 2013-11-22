@@ -178,6 +178,13 @@ class TaskFileProcess(malleefowl.process.WPSProcess):
             default = False,
             type=types.BooleanType,
             )
+        self.to_publish_qc_files = self.addComplexOutput(
+            identifier="to_publish_qc_files",
+            title="QC files that need to be published",
+            metadata=[],
+            formats=[{"mimeType":"text/plain"}],
+            asReference=True,
+            )
                               
                               
     def execute(self):
@@ -216,6 +223,7 @@ class TaskFileProcess(malleefowl.process.WPSProcess):
             has_issues = False
             path = get_QC_RESULTS(task_file_name)
             if(path!=""):
+                to_publish_qc = open(self.mktempfile(suffix=".txt"),"w")
                 logfilenames = getLogfileNames(path)
                 log = self.mktempfile(suffix=".txt")
                 logfile = open(log,'w')
@@ -224,12 +232,17 @@ class TaskFileProcess(malleefowl.process.WPSProcess):
                     self.yaml_to_xml.load_file(log)
                     self.yaml_to_xml.run()
                     
+                    
                     errors = self.yaml_to_xml.show_all_errors()
                     if(len(errors) > 0):
                         logfile.write(errors)
                         has_issues = True
+                for line in self.yaml_to_xml.qc_filenames:
+                    to_publish_qc.write(line+"\n")
                 logfile.close()
-                
+                to_publish_qc.close()
+                self.to_publish_qc_files.setValue(to_publish_qc)
+
                 logcr = self.mktempfile(suffix=".html")
                 logcreated = open(logcr,'w')
                 #logcreated.write(self.yaml_to_xml.get_created_filenames())
