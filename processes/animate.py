@@ -1,4 +1,5 @@
 from malleefowl.process import WPSProcess
+from malleefowl.utils import filter_timesteps
 
 from owslib.wms import WebMapService
 
@@ -239,9 +240,12 @@ class AnimateWMSLayer(WPSProcess):
         out_filename = self.mktempfile(suffix='.gif')
         img_filename = self.mktempfile(suffix='.gif')
 
+        filtered_timesteps = filter_timesteps(timesteps, self.resolution_in.getValue())
+
         percent_done = 10
         count = 0
-        for time in timesteps:
+        
+        for time in filtered_timesteps:
             # check max number of frames
             if count >= self.max_frames_in.getValue():
                 break
@@ -284,9 +288,9 @@ class AnimateWMSLayer(WPSProcess):
 
             # show progress
             if (count % 10 == 0):
-                percent_done = int(percent_done + count * 70 / len(timesteps))
+                percent_done = int(percent_done + count * 70 / len(filtered_timesteps))
                 self.status.set(
-                    msg="wms image %d/%d generated" % (count, len(timesteps)),
+                    msg="wms image %d/%d generated" % (count, len(filtered_timesteps)),
                     percentDone=percent_done, propagate=True)
 
         # animation is done
