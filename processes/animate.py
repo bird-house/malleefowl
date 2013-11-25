@@ -116,7 +116,7 @@ class AnimateWMSLayer(WPSProcess):
             identifier="max_frames",
             title="Max. Frames",
             abstract="Maximum Number of Animation Frames",
-            default=365,
+            default=100,
             type=type(1),
             minOccurs=1,
             maxOccurs=1,
@@ -240,30 +240,33 @@ class AnimateWMSLayer(WPSProcess):
         out_filename = self.mktempfile(suffix='.gif')
         img_filename = self.mktempfile(suffix='.gif')
 
-        filtered_timesteps = filter_timesteps(timesteps, self.resolution_in.getValue())
+        filtered_timesteps = filter_timesteps(timesteps,
+                                              start = self.start_in.getValue(),
+                                              end = self.end_in.getValue(),
+                                              aggregation=self.resolution_in.getValue())
 
         percent_done = 10
-        count = 0
-        
-        for time in filtered_timesteps:
-            # check max number of frames
-            if count >= self.max_frames_in.getValue():
-                break
+        max_frames = min(len(filtered_timesteps), self.max_frames_in.getValue())
+        #self.status.set(msg="max_frames = %d" % (max_frames), percentDone=percent_done, propagate=True)
+        for index in range(0, max_frames):
             # get wms image for timestep
             img = wms.getmap(layers=layers,
                              bbox=bbox,
                              size=(width, height),
                              format='image/gif',
                              srs=self.srs_in.getValue(),
-                             time=time)
+                             time=filtered_timesteps[index])
             out = open(img_filename, 'wb')
             out.write(img.read())
+            out.flush()
             out.close()
-            count = count + 1
 
-            # on first image just copy file
-            if (count == 1):
+            #self.status.set(msg="calculated = %s" % (filtered_timesteps[index]), percentDone=percent_done, propagate=True)
+
+            # on first image just rename file
+            if (index == 0):
                 shutil.move(img_filename, out_filename)
+                continue
 
             # append wms image with gifsicle to animation gif
             try:
@@ -278,13 +281,14 @@ class AnimateWMSLayer(WPSProcess):
                 self.cmd(cmd=cmd, stdout=True)
             except:
                 self.message(msg='gifsicle failed', force=True)
-                #raise
+                raise
 
             # show progress
-            if (count % 10 == 0):
-                percent_done = int(percent_done + count * 70 / len(filtered_timesteps))
+            count = index + 1
+            if (count % 20 == 0):
+                percent_done = int(percent_done + count * 70 / max_frames)
                 self.status.set(
-                    msg="wms image %d/%d generated" % (count, len(filtered_timesteps)),
+                    msg="wms image %d/%d generated" % (count, max_frames),
                     percentDone=percent_done, propagate=True)
 
         # animation is done
@@ -299,7 +303,7 @@ class AnimateWMSLayer(WPSProcess):
             self.cmd(cmd=cmd, stdout=True)
         except:
             self.message(msg='gifsicle failed', force=True)
-            #raise
+            raise
 
         self.status.set(msg="done", percentDone=90, propagate=True)
 

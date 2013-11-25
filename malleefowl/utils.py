@@ -34,13 +34,15 @@ def within_date_range(timesteps, start=None, end=None):
     return new_timesteps
     
 def filter_timesteps(timesteps, aggregation="monthly", start=None, end=None):
+    log.debug("aggregation: %s", aggregation)
+    
     if (timesteps == None or len(timesteps) == 0):
         return []
     timesteps.sort()
     work_timesteps = within_date_range(timesteps, start, end)
     
     new_timesteps = [work_timesteps[0]]
-    
+
     for index in range(1,len(work_timesteps)):
         current = date_parser.parse(new_timesteps[-1])
         candidate = date_parser.parse(work_timesteps[index])
@@ -49,16 +51,16 @@ def filter_timesteps(timesteps, aggregation="monthly", start=None, end=None):
             new_timesteps.append(work_timesteps[index])
         elif current.year == candidate.year:
             if aggregation == "daily":
-                if current.timetuple()[7] >= candidate.timetuple()[7]:
+                if current.timetuple()[7] == candidate.timetuple()[7]:
                     continue
-            if aggregation == "weekly":
-                if current.isocalendar()[1] >= candidate.isocalendar()[1]:
+            elif aggregation == "weekly":
+                if current.isocalendar()[1] == candidate.isocalendar()[1]:
                     continue
-            if aggregation == "monthly":
-                if current.month >= candidate.month:
+            elif aggregation == "monthly":
+                if current.month == candidate.month:
                     continue
-            if aggregation == "yearly":
-                if current.year >= candidate.year:
+            elif aggregation == "yearly":
+                if current.year == candidate.year:
                     continue
             # all checks passed
             new_timesteps.append(work_timesteps[index])
