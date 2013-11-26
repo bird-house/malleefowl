@@ -24,13 +24,24 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
                       ],
             abstract="Just testing a nice script to calculate the Population dynamics of Anopheles Gambiae",
             extra_metadata={ 
-                  'esgquery': 'variable:tas OR variable:huss OR variable:ps OR variable:pr OR variable:evspsblpot', 
+                  'esgquery': 'variable:tas OR variable:huss OR variable:ps OR variable:pr OR variable:evspsblpot', #  OR variable:sftlf 
                   'esgfilter': 'project:CORDEX,domain:AFR-44,time_frequency:day'  # data_node:esg-dn1.nsc.liu.se
                   },
             )
             
         # Literal Input Data
         # ------------------
+        
+        self.lsm = self.addComplexInput(
+            identifier="lsm",
+            title="land sea mask",
+            abstract="Load land Sea mask from other",
+            metadata=[],
+            minOccurs=1,
+            maxOccurs=1,
+            formats=[{"mimeType":"application/x-netcdf"}],
+            maxmegabites=2
+            )
 
         self.output = self.addComplexOutput(
             identifier="output",

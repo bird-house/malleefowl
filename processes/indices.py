@@ -34,14 +34,25 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
         # Literal Input Data
         # ------------------
         
-        self.floatIn = self.addLiteralInput(
-            identifier="float",
+        self.tasThreshold = self.addLiteralInput(
+            identifier="tasThreshold",
             title="Base temperature",
             abstract="Threshold for termal vegetation period",
             default="5.6",
             type=type(0.1),
             minOccurs=1,
-            maxOccurs=0,
+            maxOccurs=1,
+            )
+
+            
+        self.prThreshold = self.addLiteralInput(
+            identifier="prThreshold",
+            title="Threshold precipitation (mm)",
+            abstract="Threshold for heavy daily precipitation",
+            default="20",
+            type=type(0.1),
+            minOccurs=1,
+            maxOccurs=1,
             )
 
         self.tas_yearmean = self.addLiteralInput(
@@ -97,6 +108,16 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
             minOccurs=1,
             maxOccurs=0,
             )
+            
+        self.heavyprecip = self.addLiteralInput(
+            identifier="heavyprecip",
+            title="heavy precipitation",
+            abstract="Number of days with heavy precipitation",
+            type=type(False),
+            minOccurs=1,
+            maxOccurs=0,
+            )
+            
             
         # defined in WorkflowProcess ...
 
@@ -177,7 +198,16 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
             pr_6to8sum_filename = self.mktempfile(suffix='_pr_6to8sum.nc')
             output_files.append(pr_6to8sum_filename)
             cdo.setname('pr_6to8sum',input = "-yearsum -selmon,6,7,8 "+ prFilePath , output = pr_6to8sum_filename, options =  '-f nc')  #python
-           
+
+        if self.heavyprecip.getValue() == True :  
+            prThreshold_filename = self.mktempfile(suffix='_prThreshold.nc')
+            days_heavyprecip_filename = self.mktempfile(suffix='_days_heavyprecip.nc')
+            output_files.append(days_heavyprecip_filename)
+            cdo.gtc(str(self.prThreshold.getValue() / 60 / 60 / 24), input = prFilePath, options='-f nc', output = prThreshold_filename)
+            cdo.yearsum(input = prThreshold_filename, options='-f nc', output = days_heavyprecip_filename)
+            self.status.set(msg="heavy precipitation days done", percentDone=50, propagate=True)
+    
+            
             #pr_6to8sum = np.squeeze(cdo.yearsum(input  =  " ".join([cdo.selmon('6,7,8',input  =  prFilePath)] ), options='-f nc', returnMaArray='pr'))  #python
             #pr_6to8sum = pr_6to8sum * 60 * 60 * 24 # convert flux to amount            
             #pr_6to8sumFile = NetCDFFile(pr_6to8sum_filename , 'w')
