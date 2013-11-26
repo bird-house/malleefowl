@@ -305,6 +305,17 @@ class AnimateWMSLayer(WPSProcess):
             self.message(msg='gifsicle failed', force=True)
             raise
 
+        # make transparent
+        #try:
+        #    cmd = ["gifsicle"]
+        #    cmd.append("-b")
+        #    cmd.append("-t 0,0,0")
+        #    cmd.append(out_filename)
+        #    self.cmd(cmd=cmd, stdout=True)
+        #except:
+        #    self.message(msg='gifsicle failed', force=True)
+        #    raise
+
         self.status.set(msg="done", percentDone=90, propagate=True)
 
         self.output.setValue( out_filename )
