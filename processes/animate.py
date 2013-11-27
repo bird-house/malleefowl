@@ -267,28 +267,29 @@ class AnimateWMSLayer(WPSProcess):
                 self.status.set(
                     msg="wms image %d/%d generated" % (count, max_frames),
                     percentDone=percent_done, propagate=True)
-                
+
+        # all gif files
+        input_pattern = os.path.join(self.working_dir, "*.gif")
+
         # create animation
         out_filename = self.mktempfile(suffix='.img')
         try:
-            input_pattern = os.path.join(self.working_dir, "*.gif")
+            
             cmd = "gifsicle --delay=%d --loop %s > %s" % (self.delay_in.getValue(), input_pattern, out_filename)
             from subprocess import call
             call(cmd, shell=True)
             #self.cmd(cmd=cmd, stdout=False)
         except:
-            self.message(msg='gifsicle failed', force=True)
+            self.message(msg='gifsicle animation failed', force=True)
             raise
 
-        # make transparent
+        # make gif transparent
         #try:
-        #    cmd = ["gifsicle"]
-        #    cmd.append("-b")
-        #    cmd.append("-t 0,0,0")
-        #    cmd.append(out_filename)
-        #    self.cmd(cmd=cmd, stdout=True)
+        #    cmd = "gifsicle -b --no-background %s" % (out_filename)
+        #    from subprocess import call
+        #    call(cmd, shell=True)
         #except:
-        #    self.message(msg='gifsicle failed', force=True)
+        #    self.message(msg='gifsicle transparent failed', force=True)
         #    raise
 
         self.status.set(msg="done", percentDone=90, propagate=True)
