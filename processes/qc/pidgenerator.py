@@ -85,17 +85,4 @@ class PidGenerator():
             self.errors+=sqc.errors
         return valid
     
-    def _print_errors(self):
-        for error in self.errors:
-            print(error)
 
-#if __name__ == "__main__":
-#    pg = PidGenerator("test5.db")
-#    valid = pg.create_pids("/home/tk/sandbox/qc-yaml/data8/")
-#    #valid = pg.create_pids("/home/tk/sandbox/temp/results/")
-#    if not valid:
-#        pg._print_errors()
-#    else:
-#        print "Finished"
-#
-#    #print(pg.sqlpid.getIdentifiers())
