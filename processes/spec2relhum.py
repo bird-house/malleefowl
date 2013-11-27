@@ -24,7 +24,7 @@ class spec2relhumProcess(malleefowl.process.WorkerProcess):
             abstract="Just testing a nice script to calculate the relative humidity ...",
             extra_metadata={
                   'esgfilter': '',  #institute:MPI-M,
-                  'esgquery': 'variable:tas AND variable:huss AND variable:ps' # institute:MPI-M 
+                  'esgquery': 'variable:tas OR variable:huss OR variable:ps' # institute:MPI-M 
                   },
             )
 
