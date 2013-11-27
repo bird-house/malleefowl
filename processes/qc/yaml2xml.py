@@ -10,13 +10,12 @@ import datetime
 import processes.qc.sqlitepid as sqlitepid 
 from pyesgf.search import SearchConnection
 
-ADDPATH = "/home/tk/sandbox/climdaps/src/Malleefowl/processes/qc/"
 HTTPEXTENSION = "|application/netcdf|HTTPServer"
 
 class Yaml2Xml():
-    def __init__(self,data_node="ipcc-ar5.dkrz.de",index_node="esgf-data.dkrz.de",access="HTTPServer",
-                 xml_output_path ="/home/tk/sandbox/xmlresults/",replica="false",latest="true",
-                 metadata_format = "THREDDS",sqlite_database=""):
+    def __init__(self,data_node,index_node,access, xml_output_path,replica,latest,
+                 metadata_format,sqlite_database,addpath):
+        ADDPATH = addpath
         self.PATHLIST_NAMES=["domain","institute","driving_model","experiment","ensemble","model",
                        "version", "time_frequency","variable"]
         self.xml_output_path = xml_output_path

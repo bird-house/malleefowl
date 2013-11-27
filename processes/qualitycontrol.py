@@ -109,6 +109,13 @@ class TaskFileProcess(malleefowl.process.WPSProcess):
             type=types.StringType,
             )
 
+        self.addpath = self.addLiteralInput(
+            identifier="addpath",
+            title="Path containing additonal data",
+            default = "/home/tk/sandbox/climdaps/src/Malleefowl/processes/qc/",
+            type=types.StringType,
+            )
+
         self.args = self.addLiteralInput(
             identifier="args",
             title="optional arguments",
@@ -190,7 +197,7 @@ class TaskFileProcess(malleefowl.process.WPSProcess):
     def execute(self):
         self.status.set(msg="Initiate process", percentDone=0, propagate=True)
         input_list = [self.data_node,self.index_node,self.access,self.xml_output_path,self.replica,
-                      self.latest,self.metadata_format,self.database_location]
+                      self.latest,self.metadata_format,self.database_location,self.addpath]
         input_parameters = []
         for literal_input in input_list:
             input_parameters.append(literal_input.getValue())
