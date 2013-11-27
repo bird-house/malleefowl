@@ -150,7 +150,7 @@ class AnimateWMSLayer(WPSProcess):
             type=type(''),
             minOccurs=1,
             maxOccurs=1,
-            allowedValues=['hourly', 'daily', 'weekly', 'monthly', 'yearly']
+            allowedValues=['all', 'hourly', 'daily', 'weekly', 'monthly', 'yearly']
             )
 
         self.service_url_in = self.addLiteralInput(
