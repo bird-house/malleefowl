@@ -379,7 +379,7 @@ class Yaml2Xml():
         #Meta info
         fieldlines=self._sorted_field_name_lines(self.parameters["File"][identifier])
         fieldlines.append(self._field_name_line("experiment_family","All"))
-        qualityurl = self.xml_filenames["QC-File"][identifier]+"|application/xml|QCDoc"
+        qualityurl = self.server_xml_filenames["QC-File"][identifier]+"|application/xml|QCDoc"
         fieldlines.append(self._field_name_line("url",qualityurl))
         fieldlines.sort()
         #QC info

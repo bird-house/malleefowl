@@ -7,7 +7,6 @@ Author: Tobias Kipp (kipp@dkrz.de)
 """
 import malleefowl.process 
 import types
-import processes.qc.pidgenerator as pidgenerator
 import os
 import urllib2
 

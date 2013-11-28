@@ -16,7 +16,7 @@ class PidGenerator():
     this case is equivalent to a path.
     Currently only tested with a SQLite3 database.
     """
-    def __init__(self,database_location,data_node="ipcc-ar5.dkrz.de"):
+    def __init__(self,database_location,data_node):
         """ Load or create the database and initialize tables if needed.
         
         :param database_location: The sqlite database file reference.

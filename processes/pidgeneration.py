@@ -38,12 +38,20 @@ class PIDGenerationProcess(malleefowl.process.WPSProcess):
             maxOccurs=1,
             )
 
+        self.data_node = self.addLiteralInput(
+            identifier = "data_node",
+            title = "Data node",
+            default = "ipcc-ar5.dkrz.de",
+            type=types.StringType,
+            )
+
         self.is_valid =self.addLiteralOutput(
             identifier = "isvalid",
             title = "The path has a valid structure.",
             default = False,
             type=types.BooleanType,
             )
+
 
         self.errors = self.addLiteralOutput(
             identifier = "errors",
@@ -54,7 +62,7 @@ class PIDGenerationProcess(malleefowl.process.WPSProcess):
 
     def execute(self):
         #self.status.set(msg="Initiate process", percentDone=0, propagate=True)
-        pg = pidgenerator.PidGenerator(self.database_location.getValue())
+        pg = pidgenerator.PidGenerator(self.database_location.getValue(),self.data_node.getValue())
         valid = pg.create_pids(self.data_path.getValue())
         self.is_valid.setValue(valid)
         errortext = "\n".join(pg.errors)
