@@ -71,6 +71,8 @@ class GetWMSLayers(WPSProcess):
             for layerid,layer in wms.items():
                 if layerid in ['lat', 'lon']:
                     continue
+                if (layer.timepositions == None):
+                    continue
                 timesteps = map(str.strip, layer.timepositions)
                 layers.append(dict(service=service_url,
                                    service_name=file_name,
