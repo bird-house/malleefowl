@@ -768,7 +768,6 @@ class Yaml2Xml():
         dataset_parameters = dict()
         file_count = len(self.dataset_contained_ids[dataset_id])
         identifiers = self.dataset_contained_ids[dataset_id]
-        #TODO: Is the date format always valid.
         """ Due to the fact that datetime objects are used to generate the date
             strings it has always the format %Y-%m-%d %H:%M:%S,
             where %Y is the year in 4 digits year, the year 201 would be "0201"
@@ -817,7 +816,6 @@ class Yaml2Xml():
         dataset_parameters["title"]=masterid
 
         dataset_parameters["type"]="Dataset"
-        #TODO:url
         try:
             dsurls = self.esgfinfo_by_masterid[masterid]["dataseturls"]["Catalog"]
             dataset_parameters["url"]="|".join(dsurls[0])               
