@@ -9,7 +9,9 @@ class SqlitePid():
     """ The class is specifically designed for the use with the QC tool.
     
     Digital Object is abbreviated as DO
-    The database is expected to contain a table with (location,identifier,url) entries.
+    The database is expected to contain a table with (location,identifier) entries.
+    location is the file on the server 
+    identifier is the PID of the digital object (e.g. 10876/CORDEX-adse-adsa-vaef-adsd)
     """
 
     def __init__(self,database_location):
@@ -17,30 +19,33 @@ class SqlitePid():
         self.conn = sqlite3.connect(database_location)
         self.cursor=self.conn.cursor()
         self.tablename = "pidinfo"
-        self.keywords = ["location","identifier","url"]
+        self.keywords = ["location","identifier"]
+        s = "("
+        for key in self.keywords:
+            s+=key+" text,"
+        self.keyword_tuple_string = s[:-1]+");"
     
     def first_run(self):
         """Makes sure that the database has the required table."""
-        stmt="CREATE TABLE IF NOT EXISTS "+self.tablename+" (location text,identifier text,url text);"
+        stmt="CREATE TABLE IF NOT EXISTS "+self.tablename+self.keyword_tuple_string
         self.cursor.executescript(stmt)
         self.conn.commit()
 
-    def add_do(self,location,identifier,url):
+    def add_do(self,location,identifier):
         """Adds a DO and its reference to the database.
 
         :param location: The referenced file or dataset.
         :param identifer: The string identifier for the handle system.
-        :param url: The url to the DO.
         """
-        self.cursor.execute("INSERT INTO "+self.tablename+" VALUES(?,?,?)",(location,identifier,url))
+        self.cursor.execute("INSERT INTO "+self.tablename+" VALUES(?,?)",(location,identifier))
         self.conn.commit()
 
     def get_by_key_value(self,key,value):
         """ Search for database entries with the given key and value.
 
-        :param key: A valid variable name. ["identifier","url","location"]
+        :param key: A valid variable name. ["identifier","location"]
         :param value: The value the variable must have to be selected.
-        :returns: A list of found tuples (location,identifier,url)
+        :returns: A list of found tuples (location,identifier)
         """
         if(key in self.keywords):
             stmt="SELECT "+", ".join(self.keywords)+" FROM "+self.tablename+" WHERE "+key+"=?"

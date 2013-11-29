@@ -45,6 +45,7 @@ class Yaml2Xml():
         self.QCDOCSERVERPATH="esgf-dev.dkrz.de/qc_docs/"
         self.METADATAVIEW = "http://esgf-dev.dkrz.de/esgf-web-fe/metadataview/"
         self.DATANODETHREDDS = "https://"+self.data_node+"/thredds/fileServer/cordex/"
+        self.HANDLESERVER = "http://handleoracle.dkrz.de:8090/handle/"
         self.qc_filenames = []
 
     def clear(self):
@@ -664,14 +665,14 @@ class Yaml2Xml():
             url = ""
             reslen = len(results)
             if(reslen > 0):
-                url = results[0][2]
                 pid = results[0][1]
+                url = self.HANDLESERVER+pid
                 file_parameters["pid"]=pid
                 if(reslen != 1):
                     self._add_error("There are too many results for the file "+filename+
                         ". Please check if the duplicates are intended.")
                     for result in results:
-                        self._add_error(str(result[0]))#location
+                        self._add_error(str(result[1]))#pid
                     self._add_error("\n")
             else:
                 self._add_error("Did not find an url for the file "+filename)
@@ -767,7 +768,6 @@ class Yaml2Xml():
         dataset_parameters = dict()
         file_count = len(self.dataset_contained_ids[dataset_id])
         identifiers = self.dataset_contained_ids[dataset_id]
-        #TODO: Is the date format always valid.
         """ Due to the fact that datetime objects are used to generate the date
             strings it has always the format %Y-%m-%d %H:%M:%S,
             where %Y is the year in 4 digits year, the year 201 would be "0201"
@@ -816,7 +816,6 @@ class Yaml2Xml():
         dataset_parameters["title"]=masterid
 
         dataset_parameters["type"]="Dataset"
-        #TODO:url
         try:
             dsurls = self.esgfinfo_by_masterid[masterid]["dataseturls"]["Catalog"]
             dataset_parameters["url"]="|".join(dsurls[0])               
@@ -838,8 +837,8 @@ class Yaml2Xml():
         url = ""
         reslen = len(results)
         if(reslen > 0):
-            url = results[0][2]
             pid = results[0][1]
+            url = self.HANDLESERVER+url
             dataset_parameters["pid"]=pid
             dataset_parameters["pid_url"] = url
             if(reslen != 1):

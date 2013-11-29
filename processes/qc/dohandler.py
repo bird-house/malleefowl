@@ -37,7 +37,7 @@ class DOHandler():
         
         :param location: The target location which the digital object should reference.
         :param identifier: A PID identifier string. If not given a random identifier will be generated.
-        :returns: (dourl,realidentifier). The url to the DO and the DO identifier string.  
+        :returns: The DO identifier string (PID).  
         """
         do=None
         if(identifier is not None):#check if the digital object exists
@@ -47,8 +47,7 @@ class DOHandler():
         do.resource_location=location
         #do.identifier lacks the additional_identifier_element part. The lookup_pid solves it.
         realidentifier = str(self.infra.lookup_pid(do.identifier))
-        dourl = self.host+":"+str(self.port)+self.path+realidentifier
-        return dourl,realidentifier
+        return realidentifier
 
     def delete_do(self,identifier):
         """ Delete a DO by entering its identifier.
@@ -64,7 +63,7 @@ class DOHandler():
         it creates a new digitial object with a collection class.
 
         :param identifier: DO identifier string. If None a random identifier will be generated.
-        :returns: The DO its string identifier and the url to the DO.
+        :returns: The DO and its string identifier
         """
         do = None
         if identifier is not None:
@@ -72,19 +71,18 @@ class DOHandler():
         if do is None:
             do = self.infra.create_do(identifier,DigitalObjectSet)
         identifier = str(self.infra.lookup_pid(do.identifier))
-        dourl = self.host+":"+str(self.port)+self.path+identifier
-        return do,identifier,dourl
+        return do,identifier
 
-    def add_to_collection(self,do_collection_identifier,do_ids):
+    def add_to_collection(self,do_collection_id,do_ids):
         """ Add a list of DO identfiers to the collection DO.
         
         If an identifier is found in the collection, it is not added again to prevent duplicates.
 
-        :param do_collection_identifier: The string identifier of the DO representing a collection.
+        :param do_collection_id: The string identifier of the DO representing a collection.
         :param do_ids: The list of DO identifiers that should be added to the collection.  
           It may contain duplicates.
         """ 
-        do = self.infra.lookup_pid(do_collection_identifier)
+        do = self.infra.lookup_pid(do_collection_id)
         for identifier in do_ids:
             existingInCollection = do.contains_do(self.infra.lookup_pid(identifier))
             if not existingInCollection:

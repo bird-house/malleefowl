@@ -31,7 +31,7 @@ class QualityPublisherProcess(malleefowl.process.WPSProcess):
         #self.server_path = self.addLiteralInput(
         #    identifier = "server_path",
         #    title = "The path on the server to publish to.",
-        #    default = "/usr/local/tomcat/ROOT/qc_docs",
+        #    default = "/usr/local/tomcat/webapps/ROOT/qc_docs",
         #    type=types.StringType,
         #    )
         self.SERVER_PATH = "/usr/local/tomcat/webapps/ROOT/qc_docs/"
@@ -58,12 +58,12 @@ class QualityPublisherProcess(malleefowl.process.WPSProcess):
         qc_file = urllib2.urlopen(qc_filename)
         text = qc_file.read()
         lines = text.split("\n")
-        logname = self.mktempfile(suffix=".txt")
+        logname = self.mktempfile(suffix=".log")
         system_calls = open(logname,'w')
         for line in lines:
             #cut off the path to use the rest as part of the server filename
             filename_without_path = line.split("/")[-1]
-            if(filename_without_path[0:2]=="QC"):#make sure it is a QC file
+            if(filename_without_path[0:3]=="QC-"):#make sure it is a QC file
                 server_location = self.SERVER_PATH+filename_without_path
                 os.system("scp "+line+" "+ssh_host+":"+server_location)
                 system_calls.write("scp "+line+" "+ssh_host+":"+server_location+"\n")
