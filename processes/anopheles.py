@@ -32,8 +32,8 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
         # Literal Input Data
         # ------------------
         
-        self.sftlf = self.addComplexInput(
-            identifier="sftlf",
+        self.land_sea_mask = self.addComplexInput(
+            identifier="land_sea_mask",
             title="land sea mask",
             abstract="Load land Sea mask from other",
             metadata=[],
@@ -58,6 +58,7 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
         from cdo import *
         import datetime 
         from math import *
+
         cdo = Cdo()
 
         # guess var names of files
@@ -77,7 +78,7 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
             else:
                 raise Exception("input netcdf file has not variable tas|hurs|pr|evspsbl")
             
-        file_sftls = self.sftls.getValue()
+        file_land_sea_mask = self.land_sea_mask.getValue()
 
         # build the n4 out variable based on pr
         file_n4 = path.join(path.abspath(curdir), "n4.nc")       
@@ -90,7 +91,7 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
         nc_evspsblpot = NetCDFFile(file_evspsblpot,'r')
         nc_n4 = NetCDFFile(file_n4,'a')
         
-        nc_sftls = NetCDFFile(file_sftls,'r')
+        nc_land_sea_mask = NetCDFFile(file_land_sea_mask,'r')
         
         #change attributes und variable name here 
         # att.put.nc(nc_n4, "n4", "units", "NC_FLOAT", -9e+33)
@@ -102,7 +103,7 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
         huss = np.squeeze(nc_huss.variables["huss"])
         evspsblpot = np.squeeze(nc_evspsblpot.variables["evspsblpot"])
         
-        sftls = np.squeeze(nc_sftls.variables["sftls"])
+        land_sea_mask = np.squeeze(nc_land_sea_mask.variables["sftlf"])
         
         var_n4 = nc_n4.variables["n4"]
         n4 = np.zeros(pr.shape, dtype='f')
@@ -134,7 +135,7 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
 
         for x in range(0,tas.shape[1],1): #tas.shape[1]
             for y in range(0,tas.shape[2],1): #tas.shape[2]
-                if (sftls[x,y] == 100):
+                if (land_sea_mask[x,y] == 100):
 
                     ## get the appropriate values 
                     #RH = hurs[:,x,y] * 100
