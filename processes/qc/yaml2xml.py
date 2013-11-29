@@ -45,6 +45,7 @@ class Yaml2Xml():
         self.QCDOCSERVERPATH="esgf-dev.dkrz.de/qc_docs/"
         self.METADATAVIEW = "http://esgf-dev.dkrz.de/esgf-web-fe/metadataview/"
         self.DATANODETHREDDS = "https://"+self.data_node+"/thredds/fileServer/cordex/"
+        self.HANDLESERVER = "http://handleoracle.dkrz.de:8090/handle/"
         self.qc_filenames = []
 
     def clear(self):
@@ -664,8 +665,8 @@ class Yaml2Xml():
             url = ""
             reslen = len(results)
             if(reslen > 0):
-                url = results[0][2]
                 pid = results[0][1]
+                url = self.HANDLESERVER+pid
                 file_parameters["pid"]=pid
                 if(reslen != 1):
                     self._add_error("There are too many results for the file "+filename+
@@ -838,8 +839,8 @@ class Yaml2Xml():
         url = ""
         reslen = len(results)
         if(reslen > 0):
-            url = results[0][2]
             pid = results[0][1]
+            url = self.HANDLESERVER+url
             dataset_parameters["pid"]=pid
             dataset_parameters["pid_url"] = url
             if(reslen != 1):

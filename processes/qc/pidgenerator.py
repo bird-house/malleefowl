@@ -8,6 +8,8 @@ import processes.qc.dohandler as dohandler
 import processes.qc.splitqc as splitqc
 import processes.qc.sqlitepid as sqlitepid
 
+import urllib2
+
 class PidGenerator():
     """ The PidGenerator is used to access or create a database and add PIDs to it.
 
@@ -26,10 +28,28 @@ class PidGenerator():
         self.do_handler = dohandler.DOHandler()
         self.errors = []
         self.data_node = data_node
+        self.SERVERDIR = "/thredds/fileServer/cordex"
+        self.HANDLESERVER = "http://handleoracle.dkrz.de:8090/handle/"
+
+    def _to_server_name(self,local_name,search_path):
+        """Create the server path name from the local path name.
+
+        :param local_name: The local name (path or file).
+        :param search_path: The root of the search path
+        :returns: The name on the server
+        """
+        #remove the search_path and CORDEX/
+        stripped_name = local_name.lstrip(search_path).lstrip("CORDEX/")                
+        #create the server path from the stripped path 
+        server_name = self.data_node+self.SERVERDIR+stripped_name
+        return server_name
+
 
     def create_pids(self,search_path):
-        """ Search through the paths structure and create PID for every file and collection.
-        Add the location and PID url and identifier to the database.
+        """ Search through the paths structure. Create a PID for every unknown file. If the 
+        elements in the collection is change create a new PID for the new collection. If 
+        the same data as last time is used make no changes.
+        Add the location and identifier for every new information to the database.
 
         If search_path's structure is not valid error messages are generated and stored in errors.
         
@@ -42,45 +62,58 @@ class PidGenerator():
         valid = sqc.search(search_path)
         if(valid):
             #Create a list for each path/dataset to store string identifiers of digitial objects
-            #TODO: Find a better solution than modifing the location strings to match it to their
-            #real target location after the QC is finished.
-            identifiers_by_path = dict()
+            id_by_path = dict()#map a path to its contained identifiers
             for path in sqc.datasets:
-                path2 = path.lstrip(search_path).lstrip("CORDEX/")                
-                path = self.data_node+"/thredds/fileServer/cordex/"+path2
-                identifiers_by_path[path]=[]
+                server_path = self._to_server_name(path,search_path)
+                id_by_path[server_path]=[]
             #for each file found in the search check if it already exists in the database
             for filename in sqc.full_path_files:
-                filename = filename.lstrip(search_path).lstrip("CORDEX/")
-                filename = self.data_node+"/thredds/fileServer/cordex/"+filename
-                dbentry = self.sqlpid.get_by_key_value("location",filename)
-                path = "/".join(filename.split("/")[:-1])
+                server_filename = self._to_server_name(filename,search_path)
+                dbentry = self.sqlpid.get_by_key_value("location",server_filename)
+                server_path = "/".join(server_filename.split("/")[:-1])
                 #if it does not exist in the database create a digital object in the handle system,
                 #add the identifier to the dataset's list and store the do information in the database.
                 if(len(dbentry)==0):
-                    url,identifier = self.do_handler.link(filename)
-                    identifiers_by_path[path].append(identifier)
-                    self.sqlpid.add_do(filename,identifier,url)
+                    identifier = self.do_handler.link(server_filename)
+                    self.sqlpid.add_do(server_filename,identifier)
                 #if it exists add the digital object identifier to the dataset list.
                 else:
                     #dbentry[0] is the first found result [1] is for the identifier
-                    identifiers_by_path[path].append(str(dbentry[0][1]))
+                    identifier = str(dbentry[0][1])
+                id_by_path[server_path].append(identifier)
             #Similar to the file it is searched for the existance of path/dataset in the database
             #The identifiers for the files are added to the collection.
+            #To avoid duplicate content digitial objects the current collection is compared
+            #with the new collection entries. At any difference a new DO is generated.
             for path in sqc.datasets:
-                path2 = path.lstrip(search_path).lstrip("CORDEX/")                
-                path = self.data_node+"/thredds/fileServer/cordex/"+path2
-                dbentry = self.sqlpid.get_by_key_value("location",path)
+                server_path = self._to_server_name(path,search_path)
+                dbentry = self.sqlpid.get_by_key_value("location",server_path)
                 collection_id=""
-                #if the collection does not exist create it
-                if(len(dbentry)==0):
-                    docollection,collection_id,url = self.do_handler.collection_do()
-                    self.sqlpid.add_do(path,collection_id,url)
-                else:
+                create_new = True
+
+                if(len(dbentry)!=0):
                     collection_id = str(dbentry[0][1])
+                    #find the PIDs in the collection
+                    qc_file = urllib2.urlopen(self.HANDLESERVER+collection_id)
+                    text = qc_file.read()
+                    prefix = "10876/SQL-CORDEX-" 
+                    textsplit = text.split('"')
+                    pids = [k for k in textsplit if k[:len(prefix)]==prefix]
+                    #each pid occurs twice in the handle file therefore duplicates are eliminated
+                    pids = list(set(pids))
+                    pids.sort()
+                    new_pids = id_by_path[server_path]
+                    new_pids.sort()
+                    #compare the collections local and server. If they are equal no new DO is created.
+                    if(new_pids == pids):
+                        create_new = False
+
+                if(create_new):
+                    docollection,collection_id = self.do_handler.collection_do()
+                    self.sqlpid.add_do(server_path,collection_id)
                 #It is assumed that add_to_collection prevents the creation of an digital object if the 
                 #reference already exists in the collection.
-                self.do_handler.add_to_collection(collection_id,identifiers_by_path[path]) 
+                self.do_handler.add_to_collection(collection_id,id_by_path[server_path]) 
         else:
             self.errors+=sqc.errors
         return valid
