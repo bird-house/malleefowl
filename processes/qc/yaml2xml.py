@@ -672,7 +672,7 @@ class Yaml2Xml():
                     self._add_error("There are too many results for the file "+filename+
                         ". Please check if the duplicates are intended.")
                     for result in results:
-                        self._add_error(str(result[0]))#location
+                        self._add_error(str(result[1]))#pid
                     self._add_error("\n")
             else:
                 self._add_error("Did not find an url for the file "+filename)
