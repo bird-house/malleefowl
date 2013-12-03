@@ -35,33 +35,19 @@ args <- commandArgs(trailingOnly = TRUE)                   # pass --args modelna
 print(args)
 
 # content of possible variables
-var <- c("ts6to8",  	  # ID - 1
-	       "ts5to9",	    # ID - 2
-	       "pr6to8",	    # ID - 3 
-	       "pr5to9",	    # ID - 4
-	       "tgsd",		    # ID - 5
-	       "tgsst",	      # ID - 6
-	       "tstgsd",	    # ID - 7
-	       "tmindorm",  	# ID - 8
-	       "prtgsd",    	# ID - 9
-	       "tstgs0to30",	# ID - 10
-	       "prtgs0to30",	# ID - 11
-	       "hdtgs",    	  # ID - 12
-	       "ddtgs",    	  # ID - 13
-	       "dptgs",    	  # ID - 14
-	       "lfdtgs",    	# ID - 15
-	       "glt200",    	# ID - 16
-	       "gltyear",   	# ID - 17
-	       "prsn",    	  # ID - 18
-	       "dummy01",   	# ID - 19
-	       "dummy02"	    # ID - 20
+var <- c("c1",  # ID - 1
+	     "c2",  # ID - 2
+	     "c3",  # ID - 3 
+	     "c4",  # ID - 4
+	     "c5",  # ID - 5
+	     "c6"
          )
-
-# read in the arguments
-file1   <- "./../out/CLIMIN_avg_23872_.nc"     # args[1];  # reference periode 
-file2   <- "./../out/CLIMIN_avg_16807_.nc"     # args[2];  # prediction periode 
+         
+c_files <- c("./../out/CLIMIN_avg_23872_.nc","./../out/CLIMIN_avg_16807_.nc")         
+c_kappa <- c(3,0,0,3,0,3)  # lapply(c(strsplit(args[4], ",")), 
 PA      <- "./../etc/ICP_DATA_Fsylv_Pabie.csv" # args[3];  # PA data 
-ID      <- c(0,0,0,0,0,0,0,3,3,0,0,0,0,0,0,0,0,0,0,0)  # lapply(c(strsplit(args[4], ",")), as.numeric);  # ID list 
+
+c_kappa <- c(0,0,0,0,0,0,0,3,3,0,0,0,0,0,0,0,0,0,0,0)  # lapply(c(strsplit(args[4], ",")), as.numeric);  # ID list 
 pdf     <- "./../out/zwei_Variablen.pdf"    #    args[5];  # pdf file 
 
 print(file1)
@@ -81,12 +67,12 @@ pdf(pdf) # all Graphics are stored one pdf.file
 # prepare list of used variables and read values 
 # ########################################## 
 
-tmp_list <- cbind(var, as.numeric(ID)) 
-var <-  subset(tmp_list, ID > 0)
+tmp_list <- cbind(c_kappa, as.numeric(ID)) 
+c_kappa <-  subset(tmp_list, ID > 0)
 
-for (i in 1:length(var[,1]))
+for (i in 1:length(c_kappa[,1]))
 {
-assign(var[i,1], raster(file1, varname=var[i,1])); 
+assign(c_kappa[i,1], raster(file1, varname=c_kappa[i,1])); 
 # qnames[i] <- list(print(var[i,1], quote = FALSE)); 
 }
 
