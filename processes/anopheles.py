@@ -210,7 +210,6 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
                     d[:,2] = np.where(Vt != 0, 8.560 + 20.654*(1 + (Tw/19.759)**6.827)**(-1) - d[:,1] - d[:,0] , 8.560 + 20.654*(1 + (Ta/19.759)**6.827)**(-1) - d[:,1] - d[:,0])
                     d[:,3] = -1/np.log(p4)
 
-                    
                     p_Tw[:,0] = np.where(Vt != 0,np.where((Ta >= 14) & (Ta <= 40),np.exp(-1/d[:,0]),0),np.where((Ta >= 25) & (Ta <= 35),np.exp(-1./d[:,0]),0))
                     p_Tw[:,1] = np.where(Vt != 0,np.where((Tw >= 18) & (Tw <= 32),np.exp(-1/d[:,1]),0),np.where((Tw >= 18) & (Tw <= 32),np.exp(-1/d[:,1]),0))
                     p_Tw[:,2] = np.where(Vt != 0,np.where((Tw >= 18) & (Tw <= 32),np.exp(-1/d[:,2]),0),np.where((Tw >= 18) & (Tw <= 32),np.exp(-1/d[:,2]),0))
@@ -247,9 +246,10 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
                         N[t+1,2] = (P[t,2] * N[t,2] + G[t,1] * N[t,1])
                         N[t+1,3] = (P[t,3] * N[t,3] + G[t,2] * N[t,2])
 
+                    N[np.isnan(N)] = 0
                     n4[:,x,y] =  N[:,3] #p4[t] # p_D[t,2] #N[t,3]
                 else:
-                    n4[:,x,y] =  0 / 0
+                    n4[:,x,y] =  float('NaN')
 
         # write values into file
         var_n4.assignValue(n4)
