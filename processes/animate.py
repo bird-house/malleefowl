@@ -171,7 +171,7 @@ class AnimateWMSLayer(WPSProcess):
             default="tas",
             type=type(''),
             minOccurs=1,
-            maxOccurs=10,
+            maxOccurs=1,
             )
 
         self.srs_in = self.addLiteralInput(
@@ -228,13 +228,9 @@ class AnimateWMSLayer(WPSProcess):
 
         wms = WebMapService(self.service_url_in.getValue(), version='1.1.1')
 
-        layer = wms.contents['tas']
-        timesteps = map(str.strip, layer.timepositions)
-
-        layers = self.layer_in.getValue()
-        if type(layers) != types.ListType:
-            layers = [layers]
-        layers = map(str.strip, layers)
+        layer_name = self.layer_in.getValue().strip()
+        wms_layer = wms.contents[layer_name]
+        timesteps = map(str.strip, wms_layer.timepositions)
         width = int(self.width_in.getValue())
         height = int(self.height_in.getValue())
         bbox = tuple(map(float, self.bbox_in.getValue().split(",")))
@@ -251,7 +247,7 @@ class AnimateWMSLayer(WPSProcess):
             img_filename = os.path.join(self.working_dir, "img-%04d.gif" % index)
             
             # get wms image for timestep
-            img = wms.getmap(layers=layers,
+            img = wms.getmap(layers=[layer_name],
                              bbox=bbox,
                              size=(width, height),
                              format='image/gif',
@@ -274,16 +270,20 @@ class AnimateWMSLayer(WPSProcess):
         input_pattern = os.path.join(self.working_dir, "*.gif")
 
         # create animation
-        out_filename = self.mktempfile(suffix='.img')
+        img_filename = self.mktempfile(suffix='.img')
         try:
             
-            cmd = "gifsicle --delay=%d --loop %s > %s" % (self.delay_in.getValue(), input_pattern, out_filename)
+            cmd = "gifsicle --delay=%d --loop %s > %s" % (self.delay_in.getValue(), input_pattern, img_filename)
             from subprocess import call
             call(cmd, shell=True)
             #self.cmd(cmd=cmd, stdout=False)
         except:
             self.message(msg='gifsicle animation failed', force=True)
             raise
+
+        
+        out_filename = self.mktempfile(suffix='.gif')
+        os.rename(img_filename, out_filename)
 
         # make gif transparent
         #try:
