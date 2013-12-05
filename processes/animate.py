@@ -91,6 +91,117 @@ class GetWMSLayers(WPSProcess):
             fp.close()
             self.output.setValue( out_filename )
 
+class GetTimestepsForAnimation(WPSProcess):
+    """Get timesteps for animation."""
+
+    def __init__(self):
+        WPSProcess.__init__(
+            self,
+            identifier = "org.malleefowl.wms.animate.timesteps",
+            title = "Timesteps for Animation",
+            version = "0.1",
+            metadata = [],
+            abstract = "Get timesteps for Animation.",
+            )
+
+        self.max_frames_in = self.addLiteralInput(
+            identifier="max_frames",
+            title="Max. Frames",
+            abstract="Maximum Number of Animation Frames",
+            default=60,
+            type=type(1),
+            minOccurs=1,
+            maxOccurs=1,
+            )
+
+        self.start_in = self.addLiteralInput(
+            identifier="start",
+            title="Start Date",
+            abstract="Start Date of Animation: 2006-01-01",
+            default="2006-01-01",
+            type=type(date(2013,7,11)),
+            minOccurs=0,
+            maxOccurs=1,
+            )
+
+        self.end_in = self.addLiteralInput(
+            identifier="end",
+            title="End Date",
+            abstract="End Date of Animation: 2006-12-31",
+            default="2006-12-31",
+            type=type(date(2013,7,11)),
+            minOccurs=0,
+            maxOccurs=1,
+            )
+
+        self.resolution_in = self.addLiteralInput(
+            identifier="resolution",
+            title="Temporal Resolution",
+            abstract="Temporal Resolution for Animation",
+            default="monthly",
+            type=type(''),
+            minOccurs=1,
+            maxOccurs=1,
+            allowedValues=['all', 'hourly', 'daily', 'weekly', 'monthly', 'yearly']
+            )
+
+        self.service_url_in = self.addLiteralInput(
+            identifier="service_url",
+            title="WMS Service",
+            abstract="URL of WMS Service",
+            type=type(''),
+            minOccurs=1,
+            maxOccurs=1,
+            )
+
+        self.layer_in = self.addLiteralInput(
+            identifier="layer",
+            title="Layer",
+            abstract="Layer Name",
+            default="tas",
+            type=type(''),
+            minOccurs=1,
+            maxOccurs=1,
+            )
+
+        self.output = self.addComplexOutput(
+            identifier="output",
+            title="Timesteps for Animation",
+            abstract="Timesteps for Animation as JSON",
+            metadata=[],
+            formats=[{"mimeType":"application/json"}],
+            asReference=True,
+            )
+
+    def execute(self):
+        self.status.set(msg="starting ...", percentDone=10, propagate=True)
+
+        wms = WebMapService(self.service_url_in.getValue(), version='1.1.1')
+
+        layer_name = self.layer_in.getValue().strip()
+        wms_layer = wms.contents[layer_name]
+        timesteps = map(str.strip, wms_layer.timepositions)
+
+        filtered_timesteps = filter_timesteps(timesteps,
+                                              start = self.start_in.getValue(),
+                                              end = self.end_in.getValue(),
+                                              aggregation=self.resolution_in.getValue())
+        wms_time = reduce(lambda t1, t2: str(t1) + ',' + str(t2), filtered_timesteps)
+
+        percent_done = 10
+        max_frames = min(len(filtered_timesteps), self.max_frames_in.getValue())
+
+        out_filename = self.mktempfile(suffix='.txt')
+        with open(out_filename, 'w') as fp:
+            fp.write(json.dumps(filtered_timesteps[:max_frames]))
+            fp.close()
+            self.output.setValue( out_filename )
+
+        self.status.set(msg="done", percentDone=90, propagate=True)
+
+        self.output.setValue( out_filename )
+
+            
 class AnimateWMSLayerWithGifSicle(WPSProcess):
     """Create gif animation of wms layer for timesteps with gifsicle."""
 
