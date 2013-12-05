@@ -540,10 +540,11 @@ class GetAnimationAsKML(WPSProcess):
                                               start = self.start_in.getValue(),
                                               end = self.end_in.getValue(),
                                               aggregation=self.resolution_in.getValue())
-        wms_time = reduce(lambda t1, t2: str(t1) + ',' + str(t2), filtered_timesteps)
-
+       
         percent_done = 10
         max_frames = min(len(filtered_timesteps), self.max_frames_in.getValue())
+        wms_time = reduce(lambda t1, t2: str(t1) + ',' + str(t2),
+                          filtered_timesteps[:max_frames])
 
         out_filename = self.mktempfile(suffix='.kmz')
             
