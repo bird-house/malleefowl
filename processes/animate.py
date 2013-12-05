@@ -91,17 +91,17 @@ class GetWMSLayers(WPSProcess):
             fp.close()
             self.output.setValue( out_filename )
 
-class AnimateWMSLayer(WPSProcess):
-    """Create gif animation of wms layer for timesteps."""
+class AnimateWMSLayerWithGifSicle(WPSProcess):
+    """Create gif animation of wms layer for timesteps with gifsicle."""
 
     def __init__(self):
         WPSProcess.__init__(
             self,
-            identifier = "org.malleefowl.wms.animate",
-            title = "Animate WMS Layer",
+            identifier = "org.malleefowl.wms.animate.gifsicle",
+            title = "Animate WMS Layer with gifsicle",
             version = "0.1",
             metadata = [],
-            abstract = "Create gif animation of wms layer for timesteps.",
+            abstract = "Create gif animation of wms layer for timesteps with gifsicle.",
             )
 
         self.delay_in = self.addLiteralInput(
@@ -285,15 +285,6 @@ class AnimateWMSLayer(WPSProcess):
         out_filename = self.mktempfile(suffix='.gif')
         os.rename(img_filename, out_filename)
 
-        # make gif transparent
-        #try:
-        #    cmd = "gifsicle -b --no-background %s" % (out_filename)
-        #    from subprocess import call
-        #    call(cmd, shell=True)
-        #except:
-        #    self.message(msg='gifsicle transparent failed', force=True)
-        #    raise
-
         self.status.set(msg="done", percentDone=90, propagate=True)
 
         self.output.setValue( out_filename )
@@ -311,16 +302,6 @@ class GetAnimationAsKML(WPSProcess):
             version = "0.1",
             metadata = [],
             abstract = "Create animation of wms layer for timesteps as KML file (GoogleEarth).",
-            )
-
-        self.delay_in = self.addLiteralInput(
-            identifier="delay",
-            title="Delay",
-            abstract="Animation Delay 1/100 seconds",
-            default=10,
-            type=type(1),
-            minOccurs=1,
-            maxOccurs=1,
             )
 
         self.max_frames_in = self.addLiteralInput(
@@ -484,16 +465,6 @@ class GetAnimationAsGIF(WPSProcess):
             version = "0.1",
             metadata = [],
             abstract = "Create animation of wms layer for timesteps as animated gif.",
-            )
-
-        self.delay_in = self.addLiteralInput(
-            identifier="delay",
-            title="Delay",
-            abstract="Animation Delay 1/100 seconds",
-            default=10,
-            type=type(1),
-            minOccurs=1,
-            maxOccurs=1,
             )
 
         self.max_frames_in = self.addLiteralInput(
