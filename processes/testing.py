@@ -9,6 +9,68 @@ import types
 
 from malleefowl.process import WPSProcess
 
+class AddAndWait(WPSProcess):
+    """Adds two integers, waits and resturns a text file"""
+
+    def __init__(self):
+        WPSProcess.__init__(self, 
+            identifier = "org.malleefowl.test.add",
+            title="Add two numbers",
+            version = "0.1",
+            abstract="Adds two numbers, waits and returns result as text file ...",
+            )
+        
+        self.float_a_in = self.addLiteralInput(
+            identifier="num_a",
+            title="Number A",
+            abstract="Enter a number",
+            default="3.1",
+            type=type(0.1),
+            minOccurs=1,
+            maxOccurs=1,
+            )
+
+        self.float_b_in = self.addLiteralInput(
+            identifier="num_b",
+            title="Number B",
+            abstract="Enter a number",
+            default="1.9",
+            type=type(0.1),
+            minOccurs=1,
+            maxOccurs=1,
+            )
+
+        self.output = self.addComplexOutput(
+            identifier="output",
+            title="Result text file",
+            abstract="Text file with result of calculation",
+            metadata=[],
+            formats=[{"mimeType":"text/plain"}],
+            asReference=True,
+            )
+
+    def execute(self):
+        self.status.set(msg="starting calculation", percentDone=10, propagate=True)
+
+        num_a = self.float_a_in.getValue()
+        num_b = self.float_b_in.getValue()
+        result = num_a + num_b
+        result_msg = "%f + %f = %f" % (num_a, num_b, result)
+
+        import time
+
+        for count in range(20,80,10):
+            time.sleep(2)
+            self.status.set(msg="still calculating ...", percentDone=count, propagate=True)
+
+        self.status.set(msg="calculation done", percentDone=90, propagate=True)
+
+        out_filename = self.mktempfile(suffix='.txt')
+        with open(out_filename, 'w') as fp:
+            fp.write(result_msg)
+            fp.close()
+            self.output.setValue( out_filename )
+
 class InOutProcess(WPSProcess):
     """This process defines several types of literal type of in- and
     outputs"""
