@@ -42,13 +42,19 @@ var <- c("c1",  # ID - 1
 	     "c5",  # ID - 5
 	     "c6"
          )
-         
-c_files <- c("./../out/CLIMIN_avg_23872_.nc","./../out/CLIMIN_avg_16807_.nc")         
-c_kappa <- c(3,0,0,3,0,3)  # lapply(c(strsplit(args[4], ",")), 
-PA      <- "./../etc/ICP_DATA_Fsylv_Pabie.csv" # args[3];  # PA data 
 
-c_kappa <- c(0,0,0,0,0,0,0,3,3,0,0,0,0,0,0,0,0,0,0,0)  # lapply(c(strsplit(args[4], ",")), as.numeric);  # ID list 
-pdf     <- "./../out/zwei_Variablen.pdf"    #    args[5];  # pdf file 
+         
+c_files <- c("/home/main/sandbox/climdaps/parts/files/C1_GAM-pywpsInputXZvvTt.nc","
+/home/main/sandbox/climdaps/parts/files/C3_GAM-pywpsInputHWnJUD.nc","
+/home/main/sandbox/climdaps/parts/files/C5_GAM-pywpsInputgGH1Ce.nc
+")         
+c_kappa <- c(3,3,3)  # lapply(c(strsplit(args[4], ",")), 
+PA  <- "/home/main/sandbox/climdaps/parts/files/ICP_DATA_Fsylv_Pabie_2.csv" # args[3];  # PA data 
+pdf     <- "testout.pdf"    #    args[5];  # pdf file 
+
+
+
+
 
 print(file1)
 print(file2)
