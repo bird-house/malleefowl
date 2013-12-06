@@ -17,6 +17,9 @@ class AddAndWait(WPSProcess):
             identifier = "org.malleefowl.test.add",
             title="Add two numbers",
             version = "0.1",
+            metadata=[
+                {"title":"Literal process"},
+                ],
             abstract="Adds two numbers, waits and returns result as text file ...",
             )
         
