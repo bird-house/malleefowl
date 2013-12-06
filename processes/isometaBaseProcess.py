@@ -39,10 +39,10 @@ class BaseOAIMetadata(malleefowl.process.WPSProcess):
 class BaseISOMetadata(malleefowl.process.WPSProcess):
     """Base class for iso metadata processes."""
     def __init__(self, identifier, title, version, metadata=[], abstract=None):
-        metadata.extend([
+        metadata = [
             {"title": "C3Grid", "href": "http://www.c3grid.de"},
             {"title": "ISO 19139 Metadata", "href": "https://geo-ide.noaa.gov/wiki/index.php?title=ISO_19139_Identifiers"}
-            ])
+            ]
         
         malleefowl.process.WPSProcess.__init__(
             self,
