@@ -38,12 +38,12 @@ class GamProcess(malleefowl.process.WorkerProcess):
         self.period_in = self.addLiteralInput(
             identifier="period",
             title="Select period",
-            abstract="Select between reference or prediction period",
+            abstract="Select between reference or projection period",
             default="reference",
             type=type(''),
             minOccurs=1,
             maxOccurs=1,
-            allowedValues=['reference','prediction']
+            allowedValues=['reference','projection']
             )
         
         self.R_in = self.addComplexInput(
@@ -139,7 +139,7 @@ class GamProcess(malleefowl.process.WorkerProcess):
         import numpy as np
         from cdo import *
         import datetime
-        import srting
+        import string
         
         cdo = Cdo()
         
@@ -222,8 +222,14 @@ class GamProcess(malleefowl.process.WorkerProcess):
         
         if self.period_in.getValue() == 'reference' :
             rworkspace = self.mktempfile(suffix='.RData')
-            system("R --vanilla --args %s %s %s %s %s  < /home/main/sandbox/climdaps/src/Malleefowl/processes/gam_reference.r " % (rworkspace, self.R_in.getValue(), len(c_files), string.join(c_names," "), string.join(c_files," "), string.join(c_kappa," ")))
+            system("R --vanilla --args %s %s %s %s %s %s < /home/main/sandbox/climdaps/src/Malleefowl/processes/gam_reference.r " % (rworkspace, self.R_in.getValue(), str(len(c_files)), string.join(c_names," "), string.join(c_files," "), string.join(c_kappa," ")))
             self.output.setValue( rworkspace )
+        
+        
+        if self.period_in.getValue() == 'projection' :
+            summary = self.mktempfile(suffix='.pdf')
+            system("R --vanilla --args %s %s %s %s %s %s  < /home/main/sandbox/climdaps/src/Malleefowl/processes/gam_projection.r " % (summary, self.R_in.getValue(), str(len(c_files)), string.join(c_names," "), string.join(c_files," "), string.join(c_kappa," ")))
+            self.output.setValue( summary )
         
         # from os import curdir, path
         # nc_filename = path.abspath(self.netcdf_in.getValue(asFile=False))
