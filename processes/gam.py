@@ -15,7 +15,7 @@ class GamProcess(malleefowl.process.WorkerProcess):
         # definition of this process
         malleefowl.process.WorkerProcess.__init__(self, 
             identifier = "de.csc.gam",
-            title="Gerneralized Additive Model",
+            title="Species distribution modell ",
             version = "0.1",
             #storeSupported = "true",   # async
             #statusSupported = "true",  # retrieve status, needs to be true for async 
@@ -27,8 +27,8 @@ class GamProcess(malleefowl.process.WorkerProcess):
                 {"href":"http://foobar/"}],
             abstract="Calculation of species distribution",
             extra_metadata={
-                  'esgquery': 'variable:tas OR variable:pr variable:sftlf', # institute:MPI-M 
-                  'esgfilter': 'project:CORDEX,time_frequency:mon,time_frequency:fx'  #institute:MPI-M,
+                  'esgquery': 'variable:tas OR variable:pr ', # institute:MPI-M 
+                  'esgfilter': 'project:CORDEX,time_frequency:mon'  #institute:MPI-M,
                   },
            )
 
@@ -228,7 +228,7 @@ class GamProcess(malleefowl.process.WorkerProcess):
         
         if self.period_in.getValue() == 'projection' :
             summary = self.mktempfile(suffix='.pdf')
-            system("R --vanilla --args %s %s %s %s %s %s  < /home/main/sandbox/climdaps/src/Malleefowl/processes/gam_projection.r " % (summary, self.R_in.getValue(), str(len(c_files)), string.join(c_names," "), string.join(c_files," "), string.join(c_kappa," ")))
+            system("R --vanilla --args %s %s %s %s %s %s  < /home/main/sandbox/climdaps/src/Malleefowl/processes/gam_projection.r > ./gam_projection.log" % (summary, self.R_in.getValue(), str(len(c_files)), string.join(c_names," "), string.join(c_files," "), string.join(c_kappa," ")))
             self.output.setValue( summary )
         
         # from os import curdir, path

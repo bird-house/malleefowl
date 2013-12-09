@@ -29,9 +29,8 @@ args_proj <- commandArgs(trailingOnly = TRUE)  # pass --args modelname (match to
 # (summary, self.R_in.getValue(), str(len(c_files)), string.join(c_names," "), string.join(c_files," "), 
 # string.join(c_kappa," ")))
 
-load(file=args_proj[2])
-
 pdf <- args_proj[1]
+load(file=args_proj[2])
 
 c_files_proj <- vector()
 c_kappa_proj <- vector()
@@ -44,8 +43,6 @@ for (i in c(1:c_nr)) {
   c_files_proj[i] <- args_proj[3+c_nr+i]
   c_kappa_proj[i] <- args_proj[3+(2*c_nr)+i]
 }
-
-c_files <- 
 
 print(c_files)
 print(c_kappa)
@@ -64,9 +61,8 @@ c1_proj_mean = flip(c1_proj_mean,"x")
 c1_proj_mean = t(c1_proj_mean)
 extent(c1_proj_mean) <- c(min(c1_proj_lon),max(c1_proj_lon),min(c1_proj_lat),max(c1_proj_lat))
 
-
 c3_proj.nc = open.ncdf(c_files_proj[2])
-c3_proj_tmly = get.var.ncdf(c3_proj.nc, "tas")
+c3_proj_tmly = get.var.ncdf(c3_proj.nc, "pr")
 c3_proj_lon = get.var.ncdf(c3_proj.nc,varid="lon")
 c3_proj_lat = get.var.ncdf(c3_proj.nc,varid="lat")
 c3_proj_mean = apply(c3_proj_tmly,c(1,2),mean)
@@ -84,8 +80,6 @@ c5_proj_mean = raster(c5_proj_mean)
 c5_proj_mean = flip(c5_proj_mean,"x")
 c5_proj_mean = t(c5_proj_mean)
 extent(c5_proj_mean) <- c(min(c5_proj_lon),max(c5_proj_lon),min(c5_proj_lat),max(c5_proj_lat))
-
-
 
 # ########################################## 
 # prepare list of used variables and read values 
@@ -114,7 +108,6 @@ plot(rstack_proj)
  points(y=c(rep(0,21)),as.numeric(quantile(PAS_Clima[PAS_Clima$Fsylv==0,which(names(PAS_Clima)==NamesSmoothCovMod[i])],probs = seq(0, 1, 0.05), na.rm = TRUE)),pch='|',cex=1)
 }
   title("Response Curves", outer=T, line=-2)
-
 # ###########################################
 # spatial calculation 
 # ###########################################
@@ -131,7 +124,6 @@ FsylvFav <- calc(Fsylv, fun=predfun, filename="/home/main/sandbox/climdaps/parts
 # #######################
 # Gütebewertung 
 # #######################
-
 # Favourabilities and PAS lat long anfügen
   xy$fav <- extract(Fsylv, sp)
 # Datensatz erstellen, wie von Paket benötigt (Key, PA, Preds/Favs...)
@@ -149,7 +141,6 @@ par(mfrow=c(3,1))
 
 # textplot(summary(guete))
 # textplot(df.guete)
-
 #  model threshold       PCC sensitivity specificity     Kappa       AUC
 #1   FAV       0.5 0.7580872   0.5682782   0.8522727 0.4352433 0.8128604
 #  Modellvergleich auch ohne st.dev mgl., es wird meist nur auf PCC, sens und spec sowie Kappa und AUC geachtet
@@ -187,18 +178,16 @@ plot(FsylvFav, breaks=brks, col=rev(Lab.palette(nb)), lab.breaks=brks, main="Fav
 # rstack <- stack(names)
 # plot(rstack)
 
-
 Fsylv_proj <- predict(object=rstack_proj, model=GamFsylv, filename="/home/main/sandbox/climdaps/parts/files/Fsylv_proj.nc", progress="text", 
  		na.rm=TRUE, format = "CDF", overwrite=TRUE,  type="response")
 
-# Umwandlung der Wahrscheinlichkeitsoberfläche in Favourabilities nach Real et al. 2006 (Prävalenz = 0.5)
-# Real, R, Barbosa, AM, Vargas, JM 2006 Obtaining environmental favourability functions from logistic regression Environ Ecol Stat 13: 237-245.
-
-# predfun <- function(Fsylv) {Fsylv/(1-Fsylv)/((PValFsylv/(1-PValFsylv)+ Fsylv/(1-Fsylv)))}
-# FsylvFav_proj <- calc(Fsylv, fun=predfun, filename="/home/main/sandbox/climdaps/parts/files/Fsylv_proj.nc", overwrite=TRUE)
-
+# # Umwandlung der Wahrscheinlichkeitsoberfläche in Favourabilities nach Real et al. 2006 (Prävalenz = 0.5)
+# # Real, R, Barbosa, AM, Vargas, JM 2006 Obtaining environmental favourability functions from logistic regression Environ Ecol Stat 13: 237-245.
+predfun <- function(Fsylv) {Fsylv/(1-Fsylv)/((PValFsylv/(1-PValFsylv)+ Fsylv/(1-Fsylv)))}
+FsylvFav_proj <- calc(Fsylv, fun=predfun, filename="/home/main/sandbox/climdaps/parts/files/Fsylv_proj.nc", overwrite=TRUE)
+# 
 par(mfrow=c(1,1))
-plot(Fsylv_proj, breaks=brks, col=rev(Lab.palette(nb)), lab.breaks=brks, main="Projection",
+plot(Fsylv_proj, breaks=brks, col=rev(Lab.palette(nb)), lab.breaks=brks, main="Favourability (projection)",
      sub=c_files_proj[1], xlab="Longitude", ylab="Latitude")
 
 dev.off() # close the open pdf. 
