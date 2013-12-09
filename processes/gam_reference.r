@@ -56,7 +56,6 @@ print(c_names)
 
 save.image(file=args[1])  
 
-
 # 
 # var <- c("c1",  # ID - 1 
 #          "c3",  # ID - 3
@@ -95,34 +94,12 @@ c5_mean = flip(c5_mean,"x")
 c5_mean = t(c5_mean)
 extent(c5_mean) <- c(min(c5_lon),max(c5_lon),min(c5_lat),max(c5_lat))
 
-
 save.image(file=args[1])  
 
 
 # ########################################## 
 # prepare list of used variables and read values 
 # ########################################## 
-
-# tmp_list <- cbind(c_kappa, as.numeric(ID)) 
-# c_kappa <-  subset(tmp_list, ID > 0)
-
-
-
-# 
-# c_kappa <- as.numeric(c_kappa)
-# 
-# for (i in 1:length(c_kappa[,1]))
-# {
-# assign(c_kappa[i,1], raster(file1, varname=c_kappa[i,1])); 
-# # qnames[i] <- list(print(var[i,1], quote = FALSE)); 
-# }
-# 
-# names <- 0 # inintialisieren 
-# 
-# for (i in 1:length(var[,1]))
-# names[i] <- list(get(var[i,1]))
-
-# is.na(prtgsd) = prtgsd > 2000 
 
 c1_mean[c1_mean>500] = NA 
 c3_mean[c3_mean>500] = NA 
@@ -161,19 +138,9 @@ save.image(file=args[1])
 
 Trans <- function(x){exp(x)/(1+exp(x))}
 
-# Europa <- PAS_Clima
-# dim(Europa)#[1]
-# 
-# # Header an Rasterdaten anpassen
-# names(Europa) <- c("Fsylv","KEY","LONG","LAT")
-# for (i in 1:length(var[,1]))
-# names(Europa)[i+4] <- var[i,1]
-# 
-# write.csv2(Europa, file=("./../out/Test_-2000_Fsylv.csv"))
-
 # set constants 
 set.seed(123)
-PValFsylv <- length(PAS_Clima$Fsylv[PAS_Clima$Fsylv==1])/length(PAS_Clima$Fsylv)
+PValspecies <- length(PAS_Clima$Fsylv[PAS_Clima$Fsylv==1])/length(PAS_Clima$Fsylv)
 df <- as.data.frame(PAS_Clima[,c("Fsylv","KEY")])
 
 save.image(file=args[1])  
@@ -213,23 +180,26 @@ save.image(file=args[1])
 # spatial calculation 
 # ###########################################
 
-Fsylv <- predict(object=rstack, model=GamFsylv, filename="/home/main/sandbox/climdaps/parts/files/Fsylv.nc", progress="text", 
-		na.rm=TRUE , overwrite=TRUE, format="CDF", type="response") # 
+# Fsylv <- predict(object=rstack, model=GamFsylv, filename="/home/main/sandbox/climdaps/parts/files/Fsylv.nc", progress="text", 
+# 		na.rm=TRUE , overwrite=TRUE, format="CDF", type="response") # 
+
+species <- predict(object=rstack, model=GamFsylv, progress="text", na.rm=TRUE, type="response") # 
+
 
 save.image(file=args[1])  
 
 # Umwandlung der Wahrscheinlichkeitsoberfläche in Favourabilities nach Real et al. 2006 (Prävalenz = 0.5)
 # Real, R, Barbosa, AM, Vargas, JM 2006 Obtaining environmental favourability functions from logistic regression Environ Ecol Stat 13: 237-245.
 
-predfun <- function(Fsylv) {Fsylv/(1-Fsylv)/((PValFsylv/(1-PValFsylv)+ Fsylv/(1-Fsylv)))}
-FsylvFav <- calc(Fsylv, fun=predfun, filename="/home/main/sandbox/climdaps/parts/files/FsylvFav.nc", overwrite=TRUE)
+predfun <- function(species) {species/(1-species)/((PValspecies/(1-PValspecies)+ species/(1-species)))}
+speciesFav <- calc(species, fun=predfun)
 
 # #######################
 # Gütebewertung 
 # #######################
 
 # Favourabilities and PAS lat long anfügen
-  xy$fav <- extract(Fsylv, sp)
+  xy$fav <- extract(species, sp)
 # Datensatz erstellen, wie von Paket benötigt (Key, PA, Preds/Favs...)
   guete <- cbind(data[,c("KEY","Fsylv")],xy[,c("fav")])
   names(guete) <- c("KEY","Fsylv", "FAV")
@@ -255,16 +225,14 @@ save.image(file=args[1])
 
 par(mfrow=c(1,1))
 calibration.plot(guete,which.model=1, na.rm=FALSE, alpha=0.05, N.bins=10, xlab="Predicted Favourability", ylab="Amount of Observed Presences")
-boxplot(guete$FAV~guete$Fsylv, names=c("Absences","Presences"), main="Favourabilities Fagus sylvatica")
+boxplot(guete$FAV~guete$Fsylv, names=c("Absences","Presences"), main="Favourabilities Species")
 
 par(mfrow=c(1,1))
  Lab.palette <- colorRampPalette(c("Dark Green", "chartreuse4", "green4",  "green1", "yellow", "orange", "red","dark red", "PeachPuff3", "grey" ), space = "Lab")
  brks <- c(0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1) 
  nb <- length(brks)-1
-plot(FsylvFav, breaks=brks, col=rev(Lab.palette(nb)), lab.breaks=brks, main="Favourability European Beech (1971-2000)",
-     sub=c_files[1], xlab="Longitude", ylab="Latitude")
+plot(speciesFav, breaks=brks, col=rev(Lab.palette(nb)), lab.breaks=brks, main="Favourability Species (reference)",
+     sub='Demo Species', xlab="Longitude", ylab="Latitude")
 
-# 
  # close the open pdf. 
 save.image(file=args[1])  
-

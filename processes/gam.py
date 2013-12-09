@@ -103,7 +103,7 @@ class GamProcess(malleefowl.process.WorkerProcess):
             
         self.climin5 = self.addLiteralInput(
             identifier="climin5",
-            title="Coldest month",
+            title="mean temperature of coldest month",
             abstract="Kappa Value (choose 0 if indice should not be used)",
             default="0",
             type=type(''),
@@ -114,7 +114,7 @@ class GamProcess(malleefowl.process.WorkerProcess):
             
         self.climin6 = self.addLiteralInput(
             identifier="climin6",
-            title="dyest month",
+            title="precipitation sum of dyest month",
             abstract="Kappa Value (choose 0 if indice should not be used)",
             default="0",
             type=type(''),
@@ -222,13 +222,15 @@ class GamProcess(malleefowl.process.WorkerProcess):
         
         if self.period_in.getValue() == 'reference' :
             rworkspace = self.mktempfile(suffix='.RData')
-            system("R --vanilla --args %s %s %s %s %s %s < /home/main/sandbox/climdaps/src/Malleefowl/processes/gam_reference.r " % (rworkspace, self.R_in.getValue(), str(len(c_files)), string.join(c_names," "), string.join(c_files," "), string.join(c_kappa," ")))
+            workdir = self.working_dir
+            system("R --vanilla --args %s %s %s %s %s %s < %s/gam_reference.r " % (rworkspace, self.R_in.getValue(), str(len(c_files)), string.join(c_names," "), string.join(c_files," "), string.join(c_kappa," "), workdir))
             self.output.setValue( rworkspace )
         
         
         if self.period_in.getValue() == 'projection' :
             summary = self.mktempfile(suffix='.pdf')
-            system("R --vanilla --args %s %s %s %s %s %s  < /home/main/sandbox/climdaps/src/Malleefowl/processes/gam_projection.r > ./gam_projection.log" % (summary, self.R_in.getValue(), str(len(c_files)), string.join(c_names," "), string.join(c_files," "), string.join(c_kappa," ")))
+            workdir = self.working_dir
+            system("R --vanilla --args %s %s %s %s %s %s  < %s/gam_projection.r " % (summary, self.R_in.getValue(), str(len(c_files)), string.join(c_names," "), string.join(c_files," "), string.join(c_kappa," "), workdir))
             self.output.setValue( summary )
         
         # from os import curdir, path

@@ -112,20 +112,19 @@ plot(rstack_proj)
 # spatial calculation 
 # ###########################################
 
-Fsylv <- predict(object=rstack, model=GamFsylv, filename="/home/main/sandbox/climdaps/parts/files/Fsylv.nc", progress="text", 
-		na.rm=TRUE , overwrite=TRUE, format="CDF", type="response") # 
+species <- predict(object=rstack, model=GamFsylv, progress="text", na.rm=TRUE, type="response") # 
 
 # Umwandlung der Wahrscheinlichkeitsoberfläche in Favourabilities nach Real et al. 2006 (Prävalenz = 0.5)
 # Real, R, Barbosa, AM, Vargas, JM 2006 Obtaining environmental favourability functions from logistic regression Environ Ecol Stat 13: 237-245.
 
-predfun <- function(Fsylv) {Fsylv/(1-Fsylv)/((PValFsylv/(1-PValFsylv)+ Fsylv/(1-Fsylv)))}
-FsylvFav <- calc(Fsylv, fun=predfun, filename="/home/main/sandbox/climdaps/parts/files/FsylvFav.nc", overwrite=TRUE)
+predfun <- function(species) {species/(1-species)/((PValspecies/(1-PValspecies)+ species/(1-species)))}
+speciesFav <- calc(species, fun=predfun)
 
 # #######################
 # Gütebewertung 
 # #######################
 # Favourabilities and PAS lat long anfügen
-  xy$fav <- extract(Fsylv, sp)
+  xy$fav <- extract(species, sp)
 # Datensatz erstellen, wie von Paket benötigt (Key, PA, Preds/Favs...)
   guete <- cbind(data[,c("KEY","Fsylv")],xy[,c("fav")])
   names(guete) <- c("KEY","Fsylv", "FAV")
@@ -148,13 +147,13 @@ par(mfrow=c(3,1))
 
 par(mfrow=c(1,1))
 calibration.plot(guete,which.model=1, na.rm=FALSE, alpha=0.05, N.bins=10, xlab="Projected Favourability", ylab="Amount of Observed Presences")
-boxplot(guete$FAV~guete$Fsylv, names=c("Absences","Presences"), main="Favourabilities Fagus sylvatica")
+boxplot(guete$FAV~guete$Fsylv, names=c("Absences","Presences"), main="Favourabilities species")
 
 par(mfrow=c(1,1))
  Lab.palette <- colorRampPalette(c("Dark Green", "chartreuse4", "green4",  "green1", "yellow", "orange", "red","dark red", "PeachPuff3", "grey" ), space = "Lab")
  brks <- c(0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1) 
  nb <- length(brks)-1
-plot(FsylvFav, breaks=brks, col=rev(Lab.palette(nb)), lab.breaks=brks, main="Favourability (reference)",
+plot(speciesFav, breaks=brks, col=rev(Lab.palette(nb)), lab.breaks=brks, main="Favourability (reference)",
      sub=c_files[1], xlab="Longitude", ylab="Latitude")
 
 
@@ -178,16 +177,15 @@ plot(FsylvFav, breaks=brks, col=rev(Lab.palette(nb)), lab.breaks=brks, main="Fav
 # rstack <- stack(names)
 # plot(rstack)
 
-Fsylv_proj <- predict(object=rstack_proj, model=GamFsylv, filename="/home/main/sandbox/climdaps/parts/files/Fsylv_proj.nc", progress="text", 
- 		na.rm=TRUE, format = "CDF", overwrite=TRUE,  type="response")
+Fsylv_proj <- predict(object=rstack_proj, model=GamFsylv, progress="text", na.rm=TRUE,  type="response")
 
 # # Umwandlung der Wahrscheinlichkeitsoberfläche in Favourabilities nach Real et al. 2006 (Prävalenz = 0.5)
 # # Real, R, Barbosa, AM, Vargas, JM 2006 Obtaining environmental favourability functions from logistic regression Environ Ecol Stat 13: 237-245.
-predfun <- function(Fsylv) {Fsylv/(1-Fsylv)/((PValFsylv/(1-PValFsylv)+ Fsylv/(1-Fsylv)))}
-FsylvFav_proj <- calc(Fsylv, fun=predfun, filename="/home/main/sandbox/climdaps/parts/files/Fsylv_proj.nc", overwrite=TRUE)
+predfun <- function(species) {species/(1-species)/((PValspecies/(1-PValspecies)+ species/(1-species)))}
+FsylvFav_proj <- calc(species, fun=predfun)
 # 
 par(mfrow=c(1,1))
 plot(Fsylv_proj, breaks=brks, col=rev(Lab.palette(nb)), lab.breaks=brks, main="Favourability (projection)",
-     sub=c_files_proj[1], xlab="Longitude", ylab="Latitude")
+     sub='Demo species', xlab="Longitude", ylab="Latitude")
 
-dev.off() # close the open pdf. 
+dev.off() # close the open pdf.
