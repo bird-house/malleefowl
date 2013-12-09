@@ -8,7 +8,7 @@ class Publish(malleefowl.process.WorkerProcess):
     def __init__(self):
         malleefowl.process.WorkerProcess.__init__(
             self,
-            identifier = "org.malleefowl.publish",
+            identifier = "de.dkrz.publish",
             title = "Publish NetCDF Files to Thredds Server",
             version = "0.1",
             metadata=[
