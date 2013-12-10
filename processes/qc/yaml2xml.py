@@ -24,8 +24,9 @@ class Yaml2Xml():
             self.xml_output_path+="/"
         self.project_data_path = ""
         self.VARIABLEMAP = self._import_variable_map(ADDPATH+"variableMap.csv")
-        self.DEG44 = self._import_variable_map(ADDPATH+"c44.csv")
-        self.DEG44I = self._import_variable_map(ADDPATH+"c44i.csv")
+        #self.DEG44 = self._import_variable_map(ADDPATH+"c44.csv")
+        #self.DEG44I = self._import_variable_map(ADDPATH+"c44i.csv")
+        self.DEGREES = self._import_variable_map(ADDPATH+"domaintodegrees.csv")
         self.EXPERIMENTS = self._import_variable_map(ADDPATH+"experimentFamily.csv")
         self.data_node=data_node 
         self.index_node =index_node
@@ -608,15 +609,10 @@ class Yaml2Xml():
             file_parameters[facet]= path_info[facet]
 
         domain = file_parameters["domain"]
-        deg_dict = None
-        if domain in self.DEG44:
-            deg_dict=self.DEG44
-        elif domain in self.DEG44I:
-            deg_dict=self.DEG44I
-        if(deg_dict is not None):
+        if domain in self.DEGREES:
             for direction in ["west","east","north","south"]:
                 name = direction+"_degrees"
-                file_parameters[name]=deg_dict[domain][name]
+                file_parameters[name]=self.DEGREES[domain][name]
         experiment = file_parameters["experiment"]
         if experiment in self.EXPERIMENTS:
             file_parameters["experiment_family"]=self.EXPERIMENTS[experiment]["experiment_family"]
@@ -650,12 +646,12 @@ class Yaml2Xml():
                 file_parameters["url"]=server_dir+file_parameters["title"]+HTTPEXTENSION
                 file_parameters["data_node"]=server_dir.lstrip("http://").split("/")[0]
                 #the file exists therefore grab the existing version number.
-                a = self.esgfinfo_by_masterid[ds_master_id]["dataseturls"]["Catalog"][0][0]
-                b = a.split(".")[-1]
-                c = b.split("|")[0].lstrip("v")
-                file_parameters["version"]=c
+                #a = self.esgfinfo_by_masterid[ds_master_id]["dataseturls"]["Catalog"][0][0]
+                #b = a.split(".")[-1]
+                #c = b.split("|")[0].lstrip("v")
+                #file_parameters["version"]=c
         else:
-            server_dir = "http://"+file_parameters["data_node"]+"/thredds/fileServer/cordex/"
+            #server_dir = "http://"+file_parameters["data_node"]+"/thredds/fileServer/cordex/"
             #file_parameters["url"] = server_dir+path_info['full']+"/"+filename+ HTTPEXTENSION
             results = self.sqlitepid.get_like_location(filename)
             #results contains a list of results. It is expected to contain 1 result. An error
