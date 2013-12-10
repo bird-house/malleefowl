@@ -194,7 +194,7 @@ class GamProcess(malleefowl.process.WorkerProcess):
             c_kappa.append(self.climin3.getValue())
             c_names.append('c3')
             cdo.selmon('6,7,8' , input= prFilePath, options='-f nc', output = c3_temp)
-            cdo.mulc('86400' input= c3_temp, options='-f nc', output = c3_temp2)
+            cdo.mulc('86400', input= c3_temp, options='-f nc', output = c3_temp2)
             cdo.muldpm( input= c3_temp2, options='-f nc', output = c3_temp3)
             cdo.yearsum(input= c3_temp3, options='-f nc', output = c3_file)
             self.status.set(msg="c3 done", percentDone=30, propagate=True)
@@ -210,7 +210,7 @@ class GamProcess(malleefowl.process.WorkerProcess):
             self.status.set(msg="c4 done", percentDone=40, propagate=True)
             
         if int(self.climin5.getValue()) > 0 :  
-            c5_temp = self.mktempfile(suffix='.nc')
+            c5_file = self.mktempfile(suffix='.nc')
             c_files.append(c5_file)
             c_kappa.append(self.climin5.getValue())
             c_names.append('c5')
