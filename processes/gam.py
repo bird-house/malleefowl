@@ -135,7 +135,8 @@ class GamProcess(malleefowl.process.WorkerProcess):
     def execute(self):
 
         from Scientific.IO.NetCDF import NetCDFFile
-        from os import curdir, path, system
+        # from os import os.curdir, os.path, system
+        import os 
         import numpy as np
         from cdo import *
         import datetime
@@ -157,20 +158,20 @@ class GamProcess(malleefowl.process.WorkerProcess):
         #tasFilePath = '/home/main/sandbox/climdaps/parts/files/tas_AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_20060101_20101231.nc'       
         #prFilePath = '/home/main/sandbox/climdaps/parts/files/pr_AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_20060101_20101231.nc'        
 
-        tasFile = NetCDFFile(tasFilePath , 'r')        
-        prFile = NetCDFFile(prFilePath ,'r')
+        #tasFile = NetCDFFile(tasFilePath , 'r')        
+        #prFile = NetCDFFile(prFilePath ,'r')
         
         c_files = list()
         c_kappa = list()
         c_names = list()
-
+        
         if int(self.climin1.getValue()) > 0 :  
             c1_file = self.mktempfile(suffix='.nc')
             c1_temp = self.mktempfile(suffix='.nc')
             c_files.append(c1_file)
             c_kappa.append(self.climin1.getValue())
             c_names.append('c1')
-            cdo.selmon('6,7,8' , input= tasFilePath, options='-f nc', output = c1_temp)
+            cdo.selmon('6,7,8', input= tasFilePath, options='-f nc', output = c1_temp)
             cdo.yearmean(input= c1_temp, options='-f nc', output = c1_file)
             self.status.set(msg="c1 done", percentDone=10, propagate=True)
 
@@ -187,11 +188,15 @@ class GamProcess(malleefowl.process.WorkerProcess):
         if int(self.climin3.getValue()) > 0 :  
             c3_file = self.mktempfile(suffix='.nc')
             c3_temp = self.mktempfile(suffix='.nc')
+            c3_temp2 = self.mktempfile(suffix='.nc')
+            c3_temp3 = self.mktempfile(suffix='.nc')
             c_files.append(c3_file)
             c_kappa.append(self.climin3.getValue())
             c_names.append('c3')
             cdo.selmon('6,7,8' , input= prFilePath, options='-f nc', output = c3_temp)
-            cdo.yearsum(input= c3_temp, options='-f nc', output = c3_file)
+            cdo.mulc('86400' input= c3_temp, options='-f nc', output = c3_temp2)
+            cdo.muldpm( input= c3_temp2, options='-f nc', output = c3_temp3)
+            cdo.yearsum(input= c3_temp3, options='-f nc', output = c3_file)
             self.status.set(msg="c3 done", percentDone=30, propagate=True)
 
         if int(self.climin4.getValue()) > 0 :  
@@ -205,7 +210,7 @@ class GamProcess(malleefowl.process.WorkerProcess):
             self.status.set(msg="c4 done", percentDone=40, propagate=True)
             
         if int(self.climin5.getValue()) > 0 :  
-            c5_file = self.mktempfile(suffix='.nc')
+            c5_temp = self.mktempfile(suffix='.nc')
             c_files.append(c5_file)
             c_kappa.append(self.climin5.getValue())
             c_names.append('c5')
@@ -222,22 +227,32 @@ class GamProcess(malleefowl.process.WorkerProcess):
         
         if self.period_in.getValue() == 'reference' :
             rworkspace = self.mktempfile(suffix='.RData')
-            workdir = self.working_dir
-            system("R --vanilla --args %s %s %s %s %s %s < %s/gam_reference.r " % (rworkspace, self.R_in.getValue(), str(len(c_files)), string.join(c_names," "), string.join(c_files," "), string.join(c_kappa," "), workdir))
+            paData = self.R_in.getValue()
+            c_nr = str(len(c_files))
+            names = string.join(c_names," ")
+            files = string.join(c_files," ")
+            kappa = string.join(c_kappa," ")
+            #cmd=["R --no-save --args %s %s %s %s %s %s < %s/gam_reference.r " % (rworkspace, paData, c_nr, names , files , kappa , workdir)]
+            #self.cmd(cmd=cmd, stdout=True)
+            os.system("R --no-save --args %s %s %s %s %s %s  < ./../../../../src/Malleefowl/processes/gam_reference.r" % (rworkspace, paData, c_nr, names , files , kappa ))
             self.output.setValue( rworkspace )
         
-        
         if self.period_in.getValue() == 'projection' :
-            summary = self.mktempfile(suffix='.pdf')
-            workdir = self.working_dir
-            system("R --vanilla --args %s %s %s %s %s %s  < %s/gam_projection.r " % (summary, self.R_in.getValue(), str(len(c_files)), string.join(c_names," "), string.join(c_files," "), string.join(c_kappa," "), workdir))
-            self.output.setValue( summary )
+            out_pdf = self.mktempfile(suffix='.pdf')
+            #summary = self.mktempfile(suffix='.pdf')
+            rworkspace = self.R_in.getValue()
+            c_nr = str(len(c_files))
+            names = string.join(c_names," ")
+            files = string.join(c_files," ")
+            kappa = string.join(c_kappa," ")
+            os.system("R --no-save --args %s %s %s %s %s %s < ./../../../../src/Malleefowl/processes/gam_projection.r " % (out_pdf, rworkspace, c_nr, names , files , kappa ))
+            self.output.setValue( out_pdf )
         
-        # from os import curdir, path
-        # nc_filename = path.abspath(self.netcdf_in.getValue(asFile=False))
-        #result = self.cmd(cmd=["/home/main/sandbox/climdaps/src/Malleefowl/processes/dkrz/gam_job.sh", self.path_in.getValue(), self.stringIn.getValue(), self.individualBBoxIn.getValue(), self.start_date_in.getValue(), self.end_date_in.getValue()], stdout=True)
+        # from os import os.curdir, os.path
+        # nc_filename = os.path.absos.path(self.netcdf_in.getValue(asFile=False))
+        #result = self.cmd(cmd=["/home/main/sandbox/climdaps/src/Malleefowl/processes/dkrz/gam_job.sh", self.os.path_in.getValue(), self.stringIn.getValue(), self.individualBBoxIn.getValue(), self.start_date_in.getValue(), self.end_date_in.getValue()], stdout=True)
         ## literals
-        # subprocess.check_output(["/home/main/sandbox/climdaps/src/ClimDaPs_WPS/processes/dkrz/rel_hum.sh", self.path_in.getValue(), self.stringIn.getValue(), self.individualBBoxIn.getValue(), self.start_date_in.getValue(),   self.end_date_in.getValue()])
+        # subprocess.check_output(["/home/main/sandbox/climdaps/src/ClimDaPs_WPS/processes/dkrz/rel_hum.sh", self.os.path_in.getValue(), self.stringIn.getValue(), self.individualBBoxIn.getValue(), self.start_date_in.getValue(),   self.end_date_in.getValue()])
         #self.file_out_ref.setValue("/home/main/wps_data/gam_ref.nc")
         #self.file_out_pred.setValue("/home/main/wps_data/gam_pred.nc")
         #self.output.setValue( c6_file )

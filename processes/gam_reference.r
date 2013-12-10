@@ -32,8 +32,6 @@ rm(list = ls(all = TRUE))
 
 args <- commandArgs(trailingOnly = TRUE) # pass --args modelname (match to filename)
 
-pdf     <- "testout.pdf"    #    args[5];  # pdf file 
-
 c_files <- vector()
 c_kappa <- vector()
 c_names <- vector()

@@ -30,6 +30,9 @@ args_proj <- commandArgs(trailingOnly = TRUE)  # pass --args modelname (match to
 # string.join(c_kappa," ")))
 
 pdf <- args_proj[1]
+# 
+pdf(paste(pdf))
+
 load(file=args_proj[2])
 
 c_files_proj <- vector()
@@ -120,6 +123,8 @@ species <- predict(object=rstack, model=GamFsylv, progress="text", na.rm=TRUE, t
 predfun <- function(species) {species/(1-species)/((PValspecies/(1-PValspecies)+ species/(1-species)))}
 speciesFav <- calc(species, fun=predfun)
 
+# speciesFav <- calc(species, fun=predfun)
+
 # #######################
 # Gütebewertung 
 # #######################
@@ -161,31 +166,18 @@ plot(speciesFav, breaks=brks, col=rev(Lab.palette(nb)), lab.breaks=brks, main="F
 # # spatial calculation for predicted  Szenario
 # # ###########################################
 # 
-# for (i in 1:length(var[,1]))
-# {
-# assign(var[i,1], raster(file2, varname=var[i,1])); 
-# # qnames[i] <- list(print(var[i,1], quote = FALSE)); 
-# }
-# 
-# names <- 0 # inintialisieren 
-# 
-# for (i in 1:length(var[,1]))
-# names[i] <- list(get(var[i,1]))
-# 
-# # is.na(prtgsd) = prtgsd > 2000 
-# 
-# rstack <- stack(names)
-# plot(rstack)
-
-Fsylv_proj <- predict(object=rstack_proj, model=GamFsylv, progress="text", na.rm=TRUE,  type="response")
+species_proj <- predict(object=rstack_proj, model=GamFsylv, progress="text", na.rm=TRUE,  type="response")
 
 # # Umwandlung der Wahrscheinlichkeitsoberfläche in Favourabilities nach Real et al. 2006 (Prävalenz = 0.5)
 # # Real, R, Barbosa, AM, Vargas, JM 2006 Obtaining environmental favourability functions from logistic regression Environ Ecol Stat 13: 237-245.
-predfun <- function(species) {species/(1-species)/((PValspecies/(1-PValspecies)+ species/(1-species)))}
-FsylvFav_proj <- calc(species, fun=predfun)
+predfun <- function(species_proj) {species_proj/(1-species_proj)/((PValspecies/(1-PValspecies)+ species_proj/(1-species_proj)))}
+speciesFav_proj <- calc(species_proj, fun=predfun)
 # 
 par(mfrow=c(1,1))
-plot(Fsylv_proj, breaks=brks, col=rev(Lab.palette(nb)), lab.breaks=brks, main="Favourability (projection)",
-     sub='Demo species', xlab="Longitude", ylab="Latitude")
+plot(speciesFav_proj, breaks=brks, col=rev(Lab.palette(nb)), lab.breaks=brks, main="Favourability (projection)",
+     sub=c_files[1], xlab="Longitude", ylab="Latitude")
 
 dev.off() # close the open pdf.
+
+# save.image() 
+
