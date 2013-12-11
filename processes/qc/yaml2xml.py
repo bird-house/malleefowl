@@ -795,7 +795,7 @@ class Yaml2Xml():
                         "institute",  "latest","project","model","replica","time_frequency",
                         "variable","variable_long_name","version","variable_units",
                         "cf_standard_name","experiment_family","west_degrees","east_degrees",
-                        "south_degrees","north_degrees","metadata_format"]
+                        "south_degrees","north_degrees","metadata_format","access"]
         id0= identifiers[0]
         file_parameters = self.parameters["File"][id0]
         for field in sharedValues: 
@@ -825,7 +825,19 @@ class Yaml2Xml():
 
         #dataset_name is dataset_id without the version and data_node
         dataset_name = ".".join(dataset_id.split("|")[0].split(".")[:-1])
-        results = self.sqlitepid.get_like_location(self.dataset_name_to_path[dataset_name])
+        dataset_path = self.dataset_name_to_path[dataset_name]
+        def _dataset_server_path(dataset_path,data_path_prefix):
+            """
+            :param dataset_path: The local path of the dataset
+            :param data_path_prefix: The local prefix 
+            :return: The server path of the dataset
+            """
+            SERVERDIR = "/thredds/fileServer/cordex/"
+            stripped_name = dataset_path.lstrip(data_path_prefix).lstrip("CORDEX/")                
+            server_name = self.data_node+SERVERDIR+stripped_name
+            return server_name
+        dataset_server_path =  _dataset_server_path(dataset_path,self.project_data_path)
+        results = self.sqlitepid.get_like_location(dataset_server_path)
         #results contains a list of results. It is expected to contain 1 result. An error
         #message will be generated if it does not match with this. If there are more results
         #The first one will be used in the file generation.
@@ -834,14 +846,14 @@ class Yaml2Xml():
         reslen = len(results)
         if(reslen > 0):
             pid = results[0][1]
-            url = self.HANDLESERVER+url
+            url = self.HANDLESERVER+pid
             dataset_parameters["pid"]=pid
             dataset_parameters["pid_url"] = url
             if(reslen != 1):
-                self._add_error("There are too many results for the dataset "+dataset_id)
+                self._add_error("There are too many results for the dataset "+dataset_server_path)
                 self._add_error(str(results))
         else:
-            self._add_error("Did not find an url for the dataset "+dataset_id)
+            self._add_error("Did not find an url for the dataset "+dataset_server_path)
         return dataset_parameters
 
     def _create_shared(self,m1,m2,m3,m4):
