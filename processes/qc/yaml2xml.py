@@ -474,12 +474,12 @@ class Yaml2Xml():
         :param identifier: The identifier of the file.
         """
         filename = self.xml_filenames["QC-File"][identifier]
-        qc_dataset_parameters = dict()
+        qc_file_parameters = dict()
         file_parameters = self.parameters["File"][identifier]
-        qc_dataset_parameters["file_id"]=file_parameters["master_id"]
+        qc_file_parameters["file_id"]=file_parameters["master_id"]
         if("url" in file_parameters):
-            qc_dataset_parameters["file_url"] = file_parameters["url"][:-len(HTTPEXTENSION)]
-        qc_dataset_parameters["version"]=file_parameters["version"]
+            qc_file_parameters["file_url"] = file_parameters["url"][:-len(HTTPEXTENSION)]
+        qc_file_parameters["version"]=file_parameters["version"]
 
         #qc_dataset_parameters["file_metadata_url"]=self.server_xml_filenames["File"][identifier]
         checkmap = self.parameters["QC-File-Checks"][identifier]
@@ -490,7 +490,7 @@ class Yaml2Xml():
         lines.append("<doc schema=\"QC-File\">")
         lines+=checks
         lines+=events
-        lines+=self._sorted_field_name_lines(qc_dataset_parameters)
+        lines+=self._sorted_field_name_lines(qc_file_parameters)
         lines.append("</doc>")
         self.qc_filenames.append(filename)
         self._create_xml_shared(filename,lines)
@@ -502,6 +502,7 @@ class Yaml2Xml():
 
         :param identifier: The identifier of the dataset.
         """
+        dataset_parameters = self.parameters["Dataset"][identifier]
         filename = self.xml_filenames["QC-Dataset"][identifier]
         file_ids = self.dataset_contained_ids[identifier]
         k=0
@@ -525,6 +526,7 @@ class Yaml2Xml():
             qc_dataset_parameters["checks_"+key] = count_by_checkresult[key]
         qc_dataset_parameters["number_of_files"]=len(files)
         qc_dataset_parameters["metadata_url"]=self.server_xml_filenames["Dataset"][identifier]
+        qc_dataset_parameters["version"]=dataset_parameters["version"]
         lines=[]
         lines.append("<doc schema=\"QC-Dataset\">")
         lines+=self._sorted_field_name_lines(events)
