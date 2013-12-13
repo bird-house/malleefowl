@@ -28,7 +28,7 @@ class PidGenerator():
         self.do_handler = dohandler.DOHandler()
         self.errors = []
         self.data_node = data_node
-        self.SERVERDIR = "/thredds/fileServer/cordex"
+        self.SERVERDIR = "/thredds/fileServer/cordex/"
         self.HANDLESERVER = "http://handleoracle.dkrz.de:8090/handle/"
 
     def _to_server_name(self,local_name,search_path):

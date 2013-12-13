@@ -24,8 +24,9 @@ class Yaml2Xml():
             self.xml_output_path+="/"
         self.project_data_path = ""
         self.VARIABLEMAP = self._import_variable_map(ADDPATH+"variableMap.csv")
-        self.DEG44 = self._import_variable_map(ADDPATH+"c44.csv")
-        self.DEG44I = self._import_variable_map(ADDPATH+"c44i.csv")
+        #self.DEG44 = self._import_variable_map(ADDPATH+"c44.csv")
+        #self.DEG44I = self._import_variable_map(ADDPATH+"c44i.csv")
+        self.DEGREES = self._import_variable_map(ADDPATH+"domaintodegrees.csv")
         self.EXPERIMENTS = self._import_variable_map(ADDPATH+"experimentFamily.csv")
         self.data_node=data_node 
         self.index_node =index_node
@@ -473,12 +474,12 @@ class Yaml2Xml():
         :param identifier: The identifier of the file.
         """
         filename = self.xml_filenames["QC-File"][identifier]
-        qc_dataset_parameters = dict()
+        qc_file_parameters = dict()
         file_parameters = self.parameters["File"][identifier]
-        qc_dataset_parameters["file_id"]=file_parameters["master_id"]
+        qc_file_parameters["file_id"]=file_parameters["master_id"]
         if("url" in file_parameters):
-            qc_dataset_parameters["file_url"] = file_parameters["url"][:-len(HTTPEXTENSION)]
-        qc_dataset_parameters["version"]=file_parameters["version"]
+            qc_file_parameters["file_url"] = file_parameters["url"][:-len(HTTPEXTENSION)]
+        qc_file_parameters["version"]=file_parameters["version"]
 
         #qc_dataset_parameters["file_metadata_url"]=self.server_xml_filenames["File"][identifier]
         checkmap = self.parameters["QC-File-Checks"][identifier]
@@ -489,7 +490,7 @@ class Yaml2Xml():
         lines.append("<doc schema=\"QC-File\">")
         lines+=checks
         lines+=events
-        lines+=self._sorted_field_name_lines(qc_dataset_parameters)
+        lines+=self._sorted_field_name_lines(qc_file_parameters)
         lines.append("</doc>")
         self.qc_filenames.append(filename)
         self._create_xml_shared(filename,lines)
@@ -501,6 +502,7 @@ class Yaml2Xml():
 
         :param identifier: The identifier of the dataset.
         """
+        dataset_parameters = self.parameters["Dataset"][identifier]
         filename = self.xml_filenames["QC-Dataset"][identifier]
         file_ids = self.dataset_contained_ids[identifier]
         k=0
@@ -524,6 +526,7 @@ class Yaml2Xml():
             qc_dataset_parameters["checks_"+key] = count_by_checkresult[key]
         qc_dataset_parameters["number_of_files"]=len(files)
         qc_dataset_parameters["metadata_url"]=self.server_xml_filenames["Dataset"][identifier]
+        qc_dataset_parameters["version"]=dataset_parameters["version"]
         lines=[]
         lines.append("<doc schema=\"QC-Dataset\">")
         lines+=self._sorted_field_name_lines(events)
@@ -608,15 +611,10 @@ class Yaml2Xml():
             file_parameters[facet]= path_info[facet]
 
         domain = file_parameters["domain"]
-        deg_dict = None
-        if domain in self.DEG44:
-            deg_dict=self.DEG44
-        elif domain in self.DEG44I:
-            deg_dict=self.DEG44I
-        if(deg_dict is not None):
+        if domain in self.DEGREES:
             for direction in ["west","east","north","south"]:
                 name = direction+"_degrees"
-                file_parameters[name]=deg_dict[domain][name]
+                file_parameters[name]=self.DEGREES[domain][name]
         experiment = file_parameters["experiment"]
         if experiment in self.EXPERIMENTS:
             file_parameters["experiment_family"]=self.EXPERIMENTS[experiment]["experiment_family"]
@@ -650,12 +648,12 @@ class Yaml2Xml():
                 file_parameters["url"]=server_dir+file_parameters["title"]+HTTPEXTENSION
                 file_parameters["data_node"]=server_dir.lstrip("http://").split("/")[0]
                 #the file exists therefore grab the existing version number.
-                a = self.esgfinfo_by_masterid[ds_master_id]["dataseturls"]["Catalog"][0][0]
-                b = a.split(".")[-1]
-                c = b.split("|")[0].lstrip("v")
-                file_parameters["version"]=c
+                #a = self.esgfinfo_by_masterid[ds_master_id]["dataseturls"]["Catalog"][0][0]
+                #b = a.split(".")[-1]
+                #c = b.split("|")[0].lstrip("v")
+                #file_parameters["version"]=c
         else:
-            server_dir = "http://"+file_parameters["data_node"]+"/thredds/fileServer/cordex/"
+            #server_dir = "http://"+file_parameters["data_node"]+"/thredds/fileServer/cordex/"
             #file_parameters["url"] = server_dir+path_info['full']+"/"+filename+ HTTPEXTENSION
             results = self.sqlitepid.get_like_location(filename)
             #results contains a list of results. It is expected to contain 1 result. An error
@@ -799,7 +797,7 @@ class Yaml2Xml():
                         "institute",  "latest","project","model","replica","time_frequency",
                         "variable","variable_long_name","version","variable_units",
                         "cf_standard_name","experiment_family","west_degrees","east_degrees",
-                        "south_degrees","north_degrees","metadata_format"]
+                        "south_degrees","north_degrees","metadata_format","access"]
         id0= identifiers[0]
         file_parameters = self.parameters["File"][id0]
         for field in sharedValues: 
@@ -829,7 +827,19 @@ class Yaml2Xml():
 
         #dataset_name is dataset_id without the version and data_node
         dataset_name = ".".join(dataset_id.split("|")[0].split(".")[:-1])
-        results = self.sqlitepid.get_like_location(self.dataset_name_to_path[dataset_name])
+        dataset_path = self.dataset_name_to_path[dataset_name]
+        def _dataset_server_path(dataset_path,data_path_prefix):
+            """
+            :param dataset_path: The local path of the dataset
+            :param data_path_prefix: The local prefix 
+            :return: The server path of the dataset
+            """
+            SERVERDIR = "/thredds/fileServer/cordex/"
+            stripped_name = dataset_path.lstrip(data_path_prefix).lstrip("CORDEX/")                
+            server_name = self.data_node+SERVERDIR+stripped_name
+            return server_name
+        dataset_server_path =  _dataset_server_path(dataset_path,self.project_data_path)
+        results = self.sqlitepid.get_like_location(dataset_server_path)
         #results contains a list of results. It is expected to contain 1 result. An error
         #message will be generated if it does not match with this. If there are more results
         #The first one will be used in the file generation.
@@ -838,14 +848,14 @@ class Yaml2Xml():
         reslen = len(results)
         if(reslen > 0):
             pid = results[0][1]
-            url = self.HANDLESERVER+url
+            url = self.HANDLESERVER+pid
             dataset_parameters["pid"]=pid
             dataset_parameters["pid_url"] = url
             if(reslen != 1):
-                self._add_error("There are too many results for the dataset "+dataset_id)
+                self._add_error("There are too many results for the dataset "+dataset_server_path)
                 self._add_error(str(results))
         else:
-            self._add_error("Did not find an url for the dataset "+dataset_id)
+            self._add_error("Did not find an url for the dataset "+dataset_server_path)
         return dataset_parameters
 
     def _create_shared(self,m1,m2,m3,m4):
