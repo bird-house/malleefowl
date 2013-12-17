@@ -7,6 +7,7 @@ import pymongo
 from netCDF4 import Dataset
 from datetime import datetime
 from dateutil import parser as date_parser
+import os
 
 from pywps import config
 
@@ -14,6 +15,34 @@ import logging
 
 log = logging.getLogger(__file__)
 
+def logon(openid, password):
+    from pyesgf.logon import LogonManager
+    # TODO: unset x509 env
+    #del os.environ['X509_CERT_DIR']
+    #del os.environ['X509_USER_PROXY']
+    
+    esgf_dir = os.path.abspath(os.curdir)
+    # NetCDF DAP support looks in CWD for configuration
+    dap_config = os.path.join(esgf_dir, '.dodsrc')
+    esgf_credentials = os.path.join(esgf_dir, 'credentials.pem')
+        
+    lm = LogonManager(esgf_dir, dap_config=dap_config)
+    lm.logoff()
+    
+    lm.logon_with_openid(
+        openid=openid,
+        password=password,
+        bootstrap=True, 
+        update_trustroots=True, 
+        interactive=False)
+
+    if not lm.is_logged_on():
+        raise Exception("Logon failed")
+
+    return esgf_credentials
+
+def user_id(openid):
+    pass
 
 def within_date_range(timesteps, start=None, end=None):
     start_date = None

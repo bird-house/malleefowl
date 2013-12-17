@@ -11,36 +11,9 @@ import types
 import StringIO
 
 from netCDF4 import Dataset
-from pyesgf.logon import LogonManager
 
-#from malleefowl.process import WPSProcess, SourceProcess, WorkerProcess
 import malleefowl.process 
 from malleefowl import utils
-
-def logon(openid, password):
-    # TODO: unset x509 env
-    #del os.environ['X509_CERT_DIR']
-    #del os.environ['X509_USER_PROXY']
-    
-    esgf_dir = os.path.abspath(os.curdir)
-    # NetCDF DAP support looks in CWD for configuration
-    dap_config = os.path.join(esgf_dir, '.dodsrc')
-    esgf_credentials = os.path.join(esgf_dir, 'credentials.pem')
-        
-    lm = LogonManager(esgf_dir, dap_config=dap_config)
-    lm.logoff()
-    
-    lm.logon_with_openid(
-        openid=openid,
-        password=password,
-        bootstrap=True, 
-        update_trustroots=True, 
-        interactive=False)
-
-    if not lm.is_logged_on():
-        raise Exception("Logon failed")
-
-    return esgf_credentials
 
 class Wget(malleefowl.process.SourceProcess):
     """This process downloads files form esgf data node via wget and http"""
@@ -79,7 +52,7 @@ class Wget(malleefowl.process.SourceProcess):
     def execute(self):
         self.status.set(msg="starting esgf download", percentDone=5, propagate=True)
 
-        esgf_credentials = logon(
+        esgf_credentials = utils.logon(
             openid=self.openid_in.getValue(), 
             password=self.password_in.getValue())
         
@@ -155,7 +128,7 @@ class OpenDAP(malleefowl.process.SourceProcess):
     def execute(self):
         self.status.set(msg="starting esgf download", percentDone=5, propagate=True)
 
-        logon(
+        utils.logon(
             openid=self.openid_in.getValue(), 
             password=self.password_in.getValue())
 
