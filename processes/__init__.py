@@ -18,7 +18,9 @@ __all__ = ["base",
            "qualitycontrol",
            "pidgeneration",
            "qualitypublisher",
-           "animate"]
+           "animate",
+           "dummyprocess",
+           "ultimatequestionprocess"]
 
 
 
