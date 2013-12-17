@@ -42,7 +42,7 @@ def logon(openid, password):
     return esgf_credentials
 
 def user_id(openid):
-    """generate user_id from openid """
+    """generate user_id from openid"""
 
     import re
     
@@ -50,12 +50,18 @@ def user_id(openid):
 
     user_id = None
     mo = re.match(ESGF_OPENID_REXP, openid)
-    if mo:
+    try:
         hostname = mo.group(1)
         username = mo.group(2)
-        user_id = "%s@%s" % (username, hostname)
+        user_id = "%s_%s" % (username, hostname)
+    except:
+        raise Exception("unsupported openid")
     return user_id
-        
+
+def mkdir(path):
+    if not os.path.exists(path):
+        os.mkdir(path)
+    
 def within_date_range(timesteps, start=None, end=None):
     start_date = None
     if start != None:

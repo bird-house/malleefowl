@@ -9,10 +9,13 @@ from netCDF4 import Dataset
 
 def test_user_id():
     user_id = utils.user_id("https://esgf-data.dkrz.de/esgf-idp/openid/jule")
-    nose.tools.ok_(user_id == "jule@esgf-data.dkrz.de", user_id)
+    nose.tools.ok_(user_id == "jule_esgf-data.dkrz.de", user_id)
 
-    user_id = utils.user_id("https://esgf-data.dkrz.de/bla/blu/jule")
-    nose.tools.ok_(user_id == None, user_id)
+    try:
+        user_id = utils.user_id("https://esgf-data.dkrz.de/bla/blu/jule")
+        nose.tools.ok_(False, user_id)
+    except:
+        nose.tools.ok_(True)
 
 
 def test_within_date_range():
