@@ -7,6 +7,13 @@ import tempfile
 
 from netCDF4 import Dataset
 
+def test_user_id():
+    user_id = utils.user_id("https://esgf-data.dkrz.de/esgf-idp/openid/jule")
+    nose.tools.ok_(user_id == "jule@esgf-data.dkrz.de", user_id)
+
+    user_id = utils.user_id("https://esgf-data.dkrz.de/bla/blu/jule")
+    nose.tools.ok_(user_id == None, user_id)
+
 
 def test_within_date_range():
     timesteps = ["2013-11-01T12:00:00.000Z", "2013-11-01T18:00:00.000Z", "2013-11-02T12:00:00.000Z",

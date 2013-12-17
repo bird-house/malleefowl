@@ -42,8 +42,18 @@ def logon(openid, password):
     return esgf_credentials
 
 def user_id(openid):
-    pass
+    import re
+    
+    ESGF_OPENID_REXP = r'https://(.*)/esgf-idp/openid/(.*)'
 
+    user_id = None
+    mo = re.match(ESGF_OPENID_REXP, openid)
+    if mo:
+        hostname = mo.group(1)
+        username = mo.group(2)
+        user_id = "%s@%s" % (username, hostname)
+    return user_id
+        
 def within_date_range(timesteps, start=None, end=None):
     start_date = None
     if start != None:
