@@ -22,24 +22,45 @@ class WhoAreYou(WPSProcess):
             abstract="Process with username",
             )
 
-        self.notes_in = self.addLiteralInput(
-            identifier="notes",
-            title="Notes",
-            abstract="Notes",
+        self.username_in = self.addLiteralInput(
+            identifier="username",
+            title="Username",
+            abstract="Enter your email as username",
             default="",
             type=type(''),
             minOccurs=1,
             maxOccurs=1,
             )
 
+        self.password_in = self.addLiteralInput(
+            identifier="password",
+            title="Password",
+            abstract="Enter your password",
+            default="",
+            type=type(''),
+            minOccurs=1,
+            maxOccurs=1,
+            )
+
+        self.notes_in = self.addLiteralInput(
+            identifier="notes",
+            title="Notes",
+            abstract="Notes",
+            default="",
+            type=type(''),
+            minOccurs=0,
+            maxOccurs=1,
+            )
+
         self.output = self.addLiteralOutput(
-            identifier="output", 
+            identifier="output",
+            type=type(''),
             title="Output")
 
     def execute(self):
         self.status.set(msg="starting ...", percentDone=10, propagate=True)
 
-        self.output.setValue('test')
+        self.output.setValue('Hello %s' % (self.username_in.getValue()))
 
 
 class AddAndWait(WPSProcess):
