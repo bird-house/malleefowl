@@ -42,6 +42,8 @@ def logon(openid, password):
     return esgf_credentials
 
 def user_id(openid):
+    """generate user_id from openid """
+
     import re
     
     ESGF_OPENID_REXP = r'https://(.*)/esgf-idp/openid/(.*)'
