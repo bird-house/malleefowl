@@ -9,6 +9,39 @@ import types
 
 from malleefowl.process import WPSProcess
 
+class WhoAreYou(WPSProcess):
+    def __init__(self):
+        WPSProcess.__init__(
+            self, 
+            identifier = "org.malleefowl.test.whoareyou",
+            title="Process with username",
+            version = "0.1",
+            metadata=[
+                {"title":"Literal process"},
+                ],
+            abstract="Process with username",
+            )
+
+        self.notes_in = self.addLiteralInput(
+            identifier="notes",
+            title="Notes",
+            abstract="Notes",
+            default="",
+            type=type(''),
+            minOccurs=1,
+            maxOccurs=1,
+            )
+
+        self.output = self.addLiteralOutput(
+            identifier="output", 
+            title="Output")
+
+    def execute(self):
+        self.status.set(msg="starting ...", percentDone=10, propagate=True)
+
+        self.output.setValue('test')
+
+
 class AddAndWait(WPSProcess):
     """Adds two integers, waits and resturns a text file"""
 
