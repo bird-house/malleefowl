@@ -1,5 +1,5 @@
 from malleefowl.process import WPSProcess
-from malleefowl.utils import filter_timesteps
+from malleefowl import utils
 
 from owslib.wms import WebMapService
 
@@ -9,6 +9,7 @@ from dateutil import parser as date_parser
 import types
 import os
 import shutil
+
 
 class GetWMSLayers(WPSProcess):
     """Retrieve layers from thredds ncwms service."""
@@ -21,6 +22,15 @@ class GetWMSLayers(WPSProcess):
             version = "0.1",
             metadata = [],
             abstract = "Get all Layers from Thredds ncWMS Service",
+            )
+
+        self.openid_in = self.addLiteralInput(
+            identifier = "openid",
+            title = "ESGF OpenID",
+            abstract = "Enter ESGF OpenID",
+            minOccurs = 1,
+            maxOccurs = 1,
+            type = type('')
             )
 
         self.start_in = self.addLiteralInput(
@@ -55,13 +65,17 @@ class GetWMSLayers(WPSProcess):
     def execute(self):
         self.status.set(msg="starting ...", percentDone=10, propagate=True)
 
-        files = [f for f in os.listdir(self.files_path) if f.endswith(".nc")]
+        user_id = utils.user_id(self.openid_in.getValue())
+        files_path = os.path.join(self.files_path, user_id)
+        utils.mkdir(files_path)
+
+        files = [f for f in os.listdir(files_path) if f.endswith(".nc")]
 
         layers = []
         count = 0
         percent_done = 10
         for file_name in files:
-            service_url = self.thredds_url + '/wms/test/' + file_name
+            service_url = self.thredds_url + '/wms/test/' + user_id + '/' +file_name
             try:
                 wms = WebMapService(service_url, version='1.1.1')
             except:
@@ -182,10 +196,10 @@ class GetTimestepsForAnimation(WPSProcess):
         wms_layer = wms.contents[layer_name]
         timesteps = map(str.strip, wms_layer.timepositions)
 
-        filtered_timesteps = filter_timesteps(timesteps,
-                                              start = self.start_in.getValue(),
-                                              end = self.end_in.getValue(),
-                                              aggregation=self.resolution_in.getValue())
+        filtered_timesteps = utils.filter_timesteps(timesteps,
+                                                    start = self.start_in.getValue(),
+                                                    end = self.end_in.getValue(),
+                                                    aggregation=self.resolution_in.getValue())
         wms_time = reduce(lambda t1, t2: str(t1) + ',' + str(t2), filtered_timesteps)
 
         percent_done = 10
@@ -346,7 +360,7 @@ class AnimateWMSLayerWithGifSicle(WPSProcess):
         height = int(self.height_in.getValue())
         bbox = tuple(map(float, self.bbox_in.getValue().split(",")))
 
-        filtered_timesteps = filter_timesteps(timesteps,
+        filtered_timesteps = utils.filter_timesteps(timesteps,
                                               start = self.start_in.getValue(),
                                               end = self.end_in.getValue(),
                                               aggregation=self.resolution_in.getValue())
@@ -536,7 +550,7 @@ class GetAnimationAsKML(WPSProcess):
         height = int(self.height_in.getValue())
         bbox = tuple(map(float, self.bbox_in.getValue().split(",")))
 
-        filtered_timesteps = filter_timesteps(timesteps,
+        filtered_timesteps = utils.filter_timesteps(timesteps,
                                               start = self.start_in.getValue(),
                                               end = self.end_in.getValue(),
                                               aggregation=self.resolution_in.getValue())
