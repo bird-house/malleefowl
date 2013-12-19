@@ -7,6 +7,8 @@ Author: Carsten Ehbrecht (ehbrecht@dkrz.de)
 #from malleefowl.process import WorkerProcess
 import malleefowl.process
 
+import logging
+
 class CDOOperation(malleefowl.process.WorkerProcess):
     """This process calls cdo with operation on netcdf file"""
     def __init__(self):
@@ -108,13 +110,16 @@ class CDOInfo(malleefowl.process.WorkerProcess):
     def execute(self):
         self.status.set(msg="starting cdo sinfo", percentDone=10, propagate=True)
 
+        logging.debug('running cdo sinfo')
+        self.message(msg='debugging cdo sinfo', force=True)
+
         from os import curdir, path
         nc_files = self.get_nc_files()
 
         result = ''
         for nc_file in nc_files:
             try:
-                result += self.cmd(cmd=["cdo", "sinfo", nc_file], stdout=True)
+                result += self.cmd(cmd=["cdo", "sinfo", nc_file], stdout=False)
             except:
                 pass
 
