@@ -29,9 +29,9 @@ class Process(WPSProcess):
           self.Output1=self.addLiteralOutput(identifier="output1", 
                                              title="Output1 add 1 result")
           self.Output2=self.addLiteralOutput(identifier="output2",title="Output2 subtract 1 result" )                                   
-          def execute(self):
-               logging.debug("just testing ...")
-               self.message(msg='starting calculation', force=True)
-               self.Output1.setValue(self.Input1.getValue()+1)
-               self.Output2.setValue(self.Input1.getValue()-1)
-               return
+     def execute(self):
+          logging.debug("running dummy process ...")
+          
+          self.Output1.setValue(self.Input1.getValue()+1)
+          self.Output2.setValue(self.Input1.getValue()-1)
+          return
