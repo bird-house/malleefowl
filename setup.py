@@ -11,7 +11,6 @@ requires = [
     'lxml',
     #'htmltmpl',
     'python-magic',
-    'esgf-pyclient',
     'MyProxyClient',
     'netCDF4',
     'pymongo',
