@@ -55,7 +55,7 @@ class VisualisationProcess(malleefowl.process.WorkerProcess):
             
     def execute(self):
         
-        from Scientific.IO.NetCDF import NetCDFFile
+        from netCDF4 import Dataset
         from os import curdir, path
         import datetime
         from mpl_toolkits.basemap import Basemap , cm 
@@ -72,7 +72,7 @@ class VisualisationProcess(malleefowl.process.WorkerProcess):
         ncFile = self.get_nc_files()[0]
         var = self.variableIn.getValue()
 
-        dataFile=NetCDFFile(ncFile)
+        dataFile=Dataset(ncFile)
 
         lat = dataFile.variables.get('rlat')
         lon = dataFile.variables.get('rlon')

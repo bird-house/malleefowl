@@ -52,7 +52,7 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
             )         
             
     def execute(self):
-        from Scientific.IO.NetCDF import NetCDFFile
+        from netCDF4 import Dataset
         from os import curdir, path
         import numpy as np
         from cdo import *
@@ -64,7 +64,7 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
         # guess var names of files
         nc_files = self.get_nc_files()
         for nc_file in nc_files: 
-            ds = NetCDFFile(nc_file)
+            ds = Dataset(nc_file)
             if "tas" in ds.variables.keys():
                 file_tas = nc_file
             elif "huss" in ds.variables.keys():
@@ -74,7 +74,7 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
             elif "pr" in ds.variables.keys():
                 file_pr = nc_file
             elif "evspsblpot" in ds.variables.keys():
-                file_evspsblpot = nc_file                          # NetCDFFile(nc_file , 'r')   
+                file_evspsblpot = nc_file                          # Dataset(nc_file , 'r')   
             else:
                 raise Exception("input netcdf file has not variable tas|hurs|pr|evspsbl")
             
@@ -84,14 +84,14 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
         file_n4 = path.join(path.abspath(curdir), "n4.nc")       
         cdo.setname('n4', input=file_pr, output=file_n4)
         
-        nc_tas = NetCDFFile(file_tas,'r')
-        nc_pr = NetCDFFile(file_pr,'r')
-        nc_ps = NetCDFFile(file_ps,'r')
-        nc_huss = NetCDFFile(file_huss,'r')
-        nc_evspsblpot = NetCDFFile(file_evspsblpot,'r')
-        nc_n4 = NetCDFFile(file_n4,'a')
+        nc_tas = Dataset(file_tas,'r')
+        nc_pr = Dataset(file_pr,'r')
+        nc_ps = Dataset(file_ps,'r')
+        nc_huss = Dataset(file_huss,'r')
+        nc_evspsblpot = Dataset(file_evspsblpot,'r')
+        nc_n4 = Dataset(file_n4,'a')
         
-        nc_land_sea_mask = NetCDFFile(file_land_sea_mask,'r')
+        nc_land_sea_mask = Dataset(file_land_sea_mask,'r')
         
         #change attributes und variable name here 
         # att.put.nc(nc_n4, "n4", "units", "NC_FLOAT", -9e+33)

@@ -134,7 +134,7 @@ class GamProcess(malleefowl.process.WorkerProcess):
          
     def execute(self):
 
-        from Scientific.IO.NetCDF import NetCDFFile
+        from netCDF4 import Dataset
         # from os import os.curdir, os.path, system
         import os 
         import numpy as np
@@ -147,7 +147,7 @@ class GamProcess(malleefowl.process.WorkerProcess):
         # get the appropriate files
         nc_files = self.get_nc_files()
         for nc_file in nc_files: 
-            ds = NetCDFFile(nc_file)
+            ds = Dataset(nc_file)
             if "tas" in ds.variables.keys():
                 tasFilePath = nc_file
             elif "pr" in ds.variables.keys():
@@ -158,8 +158,8 @@ class GamProcess(malleefowl.process.WorkerProcess):
         #tasFilePath = '/home/main/sandbox/climdaps/parts/files/tas_AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_20060101_20101231.nc'       
         #prFilePath = '/home/main/sandbox/climdaps/parts/files/pr_AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_20060101_20101231.nc'        
 
-        #tasFile = NetCDFFile(tasFilePath , 'r')        
-        #prFile = NetCDFFile(prFilePath ,'r')
+        #tasFile = Dataset(tasFilePath , 'r')        
+        #prFile = Dataset(prFilePath ,'r')
         
         c_files = list()
         c_kappa = list()

@@ -136,7 +136,7 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
             
     def execute(self):
         
-        from Scientific.IO.NetCDF import NetCDFFile
+        from netCDF4 import Dataset
         from os import curdir, path
         import numpy as np
         from cdo import *
@@ -148,7 +148,7 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
         # get the appropriate files
         nc_files = self.get_nc_files()
         for nc_file in nc_files: 
-            ds = NetCDFFile(nc_file)
+            ds = Dataset(nc_file)
             if "tas" in ds.variables.keys():
                 tasFilePath = nc_file
             elif "pr" in ds.variables.keys():
@@ -159,8 +159,8 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
         #tasFilePath = '/home/main/sandbox/climdaps/parts/files/tas_AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_20060101_20101231.nc'       
         #prFilePath = '/home/main/sandbox/climdaps/parts/files/pr_AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_20060101_20101231.nc'        
 
-        tasFile = NetCDFFile(tasFilePath , 'r')        
-        prFile = NetCDFFile(prFilePath ,'r')
+        tasFile = Dataset(tasFilePath , 'r')        
+        prFile = Dataset(prFilePath ,'r')
         output_files = list()
         
         # get the dimensions
@@ -210,7 +210,7 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
             
             #pr_6to8sum = np.squeeze(cdo.yearsum(input  =  " ".join([cdo.selmon('6,7,8',input  =  prFilePath)] ), options='-f nc', returnMaArray='pr'))  #python
             #pr_6to8sum = pr_6to8sum * 60 * 60 * 24 # convert flux to amount            
-            #pr_6to8sumFile = NetCDFFile(pr_6to8sum_filename , 'w')
+            #pr_6to8sumFile = Dataset(pr_6to8sum_filename , 'w')
             #pr_6to8sumTimeDim = pr_6to8sumFile.createDimension('time', pr_6to8sum.shape[0])
             #pr_6to8sumLatDim = pr_6to8sumFile.createDimension('lat', pr_6to8sum.shape[1])
             #pr_6to8sumLonDim = pr_6to8sumFile.createDimension('lon', pr_6to8sum.shape[2])

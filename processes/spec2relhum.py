@@ -41,7 +41,7 @@ class spec2relhumProcess(malleefowl.process.WorkerProcess):
             )         
             
     def execute(self):
-        from Scientific.IO.NetCDF import NetCDFFile
+        from netCDF4 import Dataset
         from os import curdir, path
 
         # default var names
@@ -51,7 +51,7 @@ class spec2relhumProcess(malleefowl.process.WorkerProcess):
         # guess var names of files
         nc_files = self.get_nc_files()
         for nc_file in nc_files: 
-            ds = NetCDFFile(nc_file)
+            ds = Dataset(nc_file)
             if "tas" in ds.variables.keys():
                 nc_tas = nc_file
             elif "huss" in ds.variables.keys():
