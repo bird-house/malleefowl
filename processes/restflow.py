@@ -44,7 +44,7 @@ class Run(malleefowl.process.WPSProcess):
             metadata=[],
             minOccurs=1,
             maxOccurs=1,
-            maxmegabites=2,
+            maxmegabites=20,
             formats=[{"mimeType":"text/yaml"}],
             )
 
@@ -88,8 +88,8 @@ class Run(malleefowl.process.WPSProcess):
         cmd = ["restflow", options, "-f", wf_filename, "--run", "restflow", "--daemon"]
         try:
             p = subprocess.Popen(cmd)
-        except Exception,e :
-            raise Exception("Could not perform command [%s]: %s" % (cmd,e))
+        except:
+            raise Exception("Could not perform command [%s]" % (cmd))
         
         products_path = path.join(self.working_dir, "restflow", "_metadata", "products.yaml")
         endstate_path = path.join(self.working_dir, "restflow", "_metadata", "endstate.yaml")
