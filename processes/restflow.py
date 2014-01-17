@@ -6,8 +6,9 @@ Author: Carsten Ehbrecht (ehbrecht@dkrz.de)
 
 from os import path
 import time
-
 import yaml
+
+import logging
 
 #from malleefowl.process import WPSProcess
 import malleefowl.process
@@ -75,6 +76,7 @@ class Run(malleefowl.process.WPSProcess):
         self.status.set(msg="starting restflow workflow", percentDone=5, propagate=True)
 
         wf_filename = path.abspath(self.workflow_description_in.getValue(asFile=False))
+        logging.debug("wf_filename = %s", wf_filename)
 
         options = ''
         
@@ -85,14 +87,14 @@ class Run(malleefowl.process.WPSProcess):
 
         # run async command
         import subprocess
-        cmd = ["restflow", options, "-f", wf_filename, "--run", "restflow", "--daemon"]
-        try:
-            p = subprocess.Popen(cmd)
-        except:
-            raise Exception("Could not perform command [%s]" % (cmd))
-        
+        from subprocess import PIPE
+        cmd = ["restflow", options, "-f", wf_filename, "--run", "restflow"]
+        p = subprocess.Popen(cmd, stdout=PIPE, stderr=PIPE)
+                
         products_path = path.join(self.working_dir, "restflow", "_metadata", "products.yaml")
         endstate_path = path.join(self.working_dir, "restflow", "_metadata", "endstate.yaml")
+
+        logging.debug("products_path = %s", products_path)
 
         self.status.set(msg="starting download", percentDone=10, propagate=True)
 
@@ -115,7 +117,8 @@ class Run(malleefowl.process.WPSProcess):
                 self.status.set(msg="all files downloaded", percentDone=55, propagate=True)
 
         # wait till finished
-        p.wait()
+        (stdoutdata, stderrdata) = p.communicate()
+        self.status.set(msg=stdoutdata, percentDone=80, propagate=True)
 
         products = yaml.load( open(products_path) )
         self.work_output.setValue(products.get('/wps/work/output/1'))
