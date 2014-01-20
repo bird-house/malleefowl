@@ -69,7 +69,8 @@ class CDOOperation(malleefowl.process.WorkerProcess):
             cmd.append(out_filename)
             self.cmd(cmd=cmd, stdout=True)
         except:
-            self.message(msg='cdo failed', force=True)
+            logging.error("cdo command failed")
+            raise Exception("cdo command failed")
 
         self.status.set(msg="cdo operator done", percentDone=90, propagate=True)
         self.output.setValue( out_filename )
