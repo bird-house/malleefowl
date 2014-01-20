@@ -4,6 +4,9 @@ from malleefowl import utils
 
 import os
 
+import logging
+log = logging.getLogger(__name__)
+
 class Publish(malleefowl.process.WorkerProcess):
     """Publish netcdf files to thredds server"""
     def __init__(self):
@@ -82,7 +85,7 @@ class Publish(malleefowl.process.WorkerProcess):
                 os.link(os.path.abspath(nc_file), outfile)
                 result = result + "success\n"
             except:
-                self.message(msg="publish failed", force=True)
+                log.error("publishing of %s failed", nc_file)
                 result = result + "failed\n"
             count = count + 1
             percent_done = int(20 + 70.0 / len(nc_files) * count)
