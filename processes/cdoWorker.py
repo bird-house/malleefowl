@@ -8,6 +8,7 @@ Author: Carsten Ehbrecht (ehbrecht@dkrz.de)
 import malleefowl.process
 
 import logging
+log = logging.getLogger(__name__)
 
 class CDOOperation(malleefowl.process.WorkerProcess):
     """This process calls cdo with operation on netcdf file"""
@@ -68,8 +69,8 @@ class CDOOperation(malleefowl.process.WorkerProcess):
                 cmd.append(nc_files[0])
             cmd.append(out_filename)
             self.cmd(cmd=cmd, stdout=True)
-        except:
-            raise Exception("cdo command failed")
+        except Exception, err:
+            raise RuntimeError("cdo command failed (%s)." % (err.message))
 
         self.status.set(msg="cdo operator done", percentDone=90, propagate=True)
         self.output.setValue( out_filename )
@@ -110,8 +111,7 @@ class CDOInfo(malleefowl.process.WorkerProcess):
     def execute(self):
         self.status.set(msg="starting cdo sinfo", percentDone=10, propagate=True)
 
-        logging.debug('running cdo sinfo')
-        self.message(msg='debugging cdo sinfo', force=True)
+        log.debug('running cdo sinfo')
 
         from os import curdir, path
         nc_files = self.get_nc_files()
@@ -119,9 +119,9 @@ class CDOInfo(malleefowl.process.WorkerProcess):
         result = ''
         for nc_file in nc_files:
             try:
-                result += self.cmd(cmd=["cdo", "sinfo", nc_file], stdout=False)
-            except:
-                raise Exception("cdo sinfo failed")
+                result += self.cmd(cmd=["cdo", "sinfo", nc_file], stdout=True)
+            except Exception, err:
+                raise RuntimeError("cdo sinfo failed (%s)." % (err.message))
 
         self.status.set(msg="cdo sinfo done", percentDone=90, propagate=True)
 
