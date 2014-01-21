@@ -112,6 +112,11 @@ class QualityControlProcess(malleefowl.process.WPSProcess):
             title="qc_call",
             type=types.StringType,
             )
+        self.found_tags = self.addLiteralOutput(
+            identifier="found_tags",
+            title="found_tags",
+            type=types.StringType,
+            )
         self.fail_count = self.addLiteralOutput(
             identifier="fail_count",
             title="Fail count",
@@ -157,7 +162,6 @@ class QualityControlProcess(malleefowl.process.WPSProcess):
 
     def execute(self):
         self.status.set(msg="Initiate process", percentDone=0, propagate=True)
-        output=dict()
         param_dict = dict(project_data_dir = self.project_data_dir.getValue(),
                           args = self.args.getValue(),
                           project= self.project.getValue(),
@@ -177,13 +181,14 @@ class QualityControlProcess(malleefowl.process.WPSProcess):
         _run_process(qcp.quality_control,kwargs=param_dict,wpsprocess=self)
 
         output = param_dict["queue"].get()
-        self.qc_call_exit_code.setValue(output["qc_info"])
+        self.qc_call_exit_code.setValue(output["qc_call_exit_code"])
         self.qc_call.setValue(output["qc_call"])
         self.fail_count.setValue(output["fail_count"])
         self.pass_count.setValue(output["pass_count"])
         self.omit_count.setValue(output["omit_count"])
         self.fixed_count.setValue(output["fixed_count"])
         self.has_issues.setValue(output["has_issues"])
+        self.found_tags.setValue(output["found_tags"])
 
         process_log = _create_server_copy_of_file(output["process_log"],self)
         self.process_log.setValue(process_log)
