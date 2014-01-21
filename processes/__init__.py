@@ -20,7 +20,8 @@ __all__ = ["base",
            "qualitypublisher",
            "animate",
            "dummyprocess",
-           "ultimatequestionprocess"]
+           "ultimatequestionprocess",
+           "quality_processes"]
 
 
 

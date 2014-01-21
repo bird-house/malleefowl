@@ -1,4 +1,3 @@
-
 """
 Quality Control process. It calls the QC and post processes the results of the analysis.
 
@@ -9,8 +8,6 @@ import os
 import subprocess 
 import malleefowl.process 
 import processes.qc.yaml2xml as y2x
-
-            
                  
 class TaskFileProcess(malleefowl.process.WPSProcess):
     """Process to run a qualtiy check on the specified data.  
