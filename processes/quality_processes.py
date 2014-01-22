@@ -10,6 +10,96 @@ import qc_processes.qcprocesses as qcprocesses
 
 from multiprocessing import Process, Pipe, Queue
 
+DATABASE_LOCATION="/home/tk/sandbox/databases/pidinfo.db"#TODO relative to climdaps.
+
+class PidGenerationProcess(malleefowl.process.WPSProcess):
+    """
+    The process checks a path to be valid for processing and generates a PID
+    for each new found .nc file and for each dataset that differs from the 
+    previously found ones. This relies on the local database storing the previously
+    found files and datasets.
+    """
+    def __init__(self):
+
+        self.pipe = Pipe()
+        status_conn, qc_conn = self.pipe
+        self.printmethod = qc_conn.send
+        self.database_location = DATABASE_LOCATION
+       
+
+        malleefowl.process.WPSProcess.__init__(self,
+            identifier = "QC_PID_Generation",
+            title="PIDGeneration using qc_processes",
+            version="2014.01.22",
+            metadata=[],
+            abstract="If the given directory is valid included files and datasets receive a PID.")
+
+
+        self.data_path= self.addLiteralInput(
+            identifier="datapath",
+            title="Root path of the to index data.",
+            default="/home/tk/sandbox/qc-yaml/data3/",
+            type=types.StringType,
+            minOccurs=1,
+            maxOccurs=1,
+            )
+           
+        self.database_location = DATABASE_LOCATION
+
+        self.data_node = self.addLiteralInput(
+            identifier = "data_node",
+            title = "Data node",
+            default = "ipcc-ar5.dkrz.de",
+            type=types.StringType,
+            )
+
+        self.is_valid =self.addLiteralOutput(
+            identifier = "isvalid",
+            title = "The path has a valid structure.",
+            default = False,
+            type=types.BooleanType,
+            )
+
+
+        self.errors = self.addLiteralOutput(
+            identifier = "errors",
+            title = "Error messages",
+            default = "",
+            type=types.StringType,
+            )
+
+        self.data_path_out = self.addLiteralOutput(
+            identifier = "data_path",
+            title = "Data path",
+            type=types.StringType)
+        
+        self.data_node_out = self.addLiteralOutput(
+            identifier = "data_node",
+            title = "Data node",
+            type=types.StringType)
+
+    def execute(self):
+        self.status.set(msg="Initiate process", percentDone=0, propagate=True)
+        data_path = self.data_path.getValue()
+        data_node = self.data_node.getValue()
+        param_dict = dict(data_path=data_path,
+                          data_node=data_node,
+                          queue = Queue()
+                          )
+                         
+
+        qcp = qcprocesses.QCProcesses(self.database_location,
+                                      printmethod=self.printmethod,
+                                      work_dir = "/home/tk/sandbox/climdaps/var/qc_cache/"
+                                      )
+        _run_process(qcp.pid_generation,kwargs=param_dict,wpsprocess=self)
+
+        output = param_dict["queue"].get()
+        self.is_valid.setValue(output["valid"])
+        self.errors.setValue(output["errors"])
+        self.data_node_out.setValue(data_node)
+        self.data_path_out.setValue(data_path)
+
 class QualityControlProcess(malleefowl.process.WPSProcess):
     """
     The process runs the qc_processes QualityControl method and 
@@ -21,13 +111,12 @@ class QualityControlProcess(malleefowl.process.WPSProcess):
         status_conn, qc_conn = self.pipe
         self.printmethod = qc_conn.send
         self.parallel_id = "web1"#TODO set as parameter
-        self.database_location = "/home/tk/sandbox/databases/pidinfo.db"#TODO relative to climdaps.
-       
+        self.database_location = DATABASE_LOCATION
 
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_Quality_Control",
             title="Quality Control using qc_processes",
-            version="2014.01.20",
+            version="2014.01.21",
             metadata=[],
             abstract="Runs a quality check on a given folder and generates metadata and quality files")
 
