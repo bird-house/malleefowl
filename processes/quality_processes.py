@@ -201,6 +201,14 @@ class QualityControlProcess(malleefowl.process.WPSProcess):
             default="true",
             type=types.StringType,
             )
+
+        self.clean_work = self.addLiteralInput(
+            identifier ="clean_work",
+            title="clean work",
+            abstract=("Remove data from the working directory. Quality Check skips already checked"+ 
+              " files. After clean up it will check all files."),
+            type=types.BooleanType,
+            )
         
         self.qc_call_exit_code = self.addLiteralOutput(
             identifier="qc_call_exit_code",
@@ -280,6 +288,9 @@ class QualityControlProcess(malleefowl.process.WPSProcess):
                                       printmethod=self.printmethod,
                                       work_dir = WORK_DIR
                                       )
+        if self.clean_work.getValue() == True:
+            qcp.clean_work()
+
         _run_process(qcp.quality_control,kwargs=param_dict,wpsprocess=self)
 
         output = param_dict["queue"].get()
