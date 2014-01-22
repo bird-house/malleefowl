@@ -11,6 +11,7 @@ import qc_processes.qcprocesses as qcprocesses
 from multiprocessing import Process, Pipe, Queue
 
 DATABASE_LOCATION="/home/tk/sandbox/databases/pidinfo.db"#TODO relative to climdaps.
+WORK_DIR = "/home/tk/sandbox/climdaps/var/qc_cache/"
 
 class PidGenerationProcess(malleefowl.process.WPSProcess):
     """
@@ -26,14 +27,12 @@ class PidGenerationProcess(malleefowl.process.WPSProcess):
         self.printmethod = qc_conn.send
         self.database_location = DATABASE_LOCATION
        
-
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_PID_Generation",
             title="PIDGeneration using qc_processes",
             version="2014.01.22",
             metadata=[],
             abstract="If the given directory is valid included files and datasets receive a PID.")
-
 
         self.data_path= self.addLiteralInput(
             identifier="datapath",
@@ -78,6 +77,16 @@ class PidGenerationProcess(malleefowl.process.WPSProcess):
             title = "Data node",
             type=types.StringType)
 
+        self.new_files_counter = self.addLiteralOutput(
+            identifier= "new_files_counter",
+            title = "New PIDs generates for n files.",
+            type = types.IntType)
+
+        self.new_datasets_counter = self.addLiteralOutput(
+            identifier= "new_datasets_counter",
+            title = "New PIDs generates for n datasets.",
+            type = types.IntType)
+
     def execute(self):
         self.status.set(msg="Initiate process", percentDone=0, propagate=True)
         data_path = self.data_path.getValue()
@@ -86,11 +95,10 @@ class PidGenerationProcess(malleefowl.process.WPSProcess):
                           data_node=data_node,
                           queue = Queue()
                           )
-                         
 
         qcp = qcprocesses.QCProcesses(self.database_location,
                                       printmethod=self.printmethod,
-                                      work_dir = "/home/tk/sandbox/climdaps/var/qc_cache/"
+                                      work_dir = WORK_DIR
                                       )
         _run_process(qcp.pid_generation,kwargs=param_dict,wpsprocess=self)
 
@@ -99,6 +107,11 @@ class PidGenerationProcess(malleefowl.process.WPSProcess):
         self.errors.setValue(output["errors"])
         self.data_node_out.setValue(data_node)
         self.data_path_out.setValue(data_path)
+        self.new_datasets_counter.setValue(output["new_datasets_counter"])
+        self.new_files_counter.setValue(output["new_files_counter"])
+
+        return 
+
 
 class QualityControlProcess(malleefowl.process.WPSProcess):
     """
@@ -188,6 +201,14 @@ class QualityControlProcess(malleefowl.process.WPSProcess):
             default="true",
             type=types.StringType,
             )
+
+        self.clean_work = self.addLiteralInput(
+            identifier ="clean_work",
+            title="clean work",
+            abstract=("Remove data from the working directory. Quality Check skips already checked"+ 
+              " files. After clean up it will check all files."),
+            type=types.BooleanType,
+            )
         
         self.qc_call_exit_code = self.addLiteralOutput(
             identifier="qc_call_exit_code",
@@ -263,10 +284,13 @@ class QualityControlProcess(malleefowl.process.WPSProcess):
                           queue = Queue())
 
         qcp = qcprocesses.QCProcesses(self.database_location,
-                                      self.parallel_id,
+                                      parallel_id = self.parallel_id,
                                       printmethod=self.printmethod,
-                                      work_dir = "/home/tk/sandbox/climdaps/var/qc_cache/"
+                                      work_dir = WORK_DIR
                                       )
+        if self.clean_work.getValue() == True:
+            qcp.clean_work()
+
         _run_process(qcp.quality_control,kwargs=param_dict,wpsprocess=self)
 
         output = param_dict["queue"].get()
@@ -283,8 +307,61 @@ class QualityControlProcess(malleefowl.process.WPSProcess):
         self.process_log.setValue(process_log)
         to_publish_qc_files_log = _create_server_copy_of_file(output["to_publish_qc_files_log"],self)
         self.to_publish_qc_files.setValue(to_publish_qc_files_log)
+        return
 
 
+class QualityPublisherProcess(malleefowl.process.WPSProcess):
+    def __init__(self):
+        self.pipe = Pipe()
+        status_conn, qc_conn = self.pipe
+        self.printmethod = qc_conn.send
+        self.parallel_id = "web1"#TODO set as parameter
+        self.database_location = DATABASE_LOCATION
+        abstract_ml =("Read trough a file containing one filename per line and publish it.")
+
+        malleefowl.process.WPSProcess.__init__(self,
+            identifier = "QC_QualityPublisher", 
+            title="Publish QualityControl results using qc_processes.",
+            version = "2014.01.22",
+            metadata=[],
+            abstract=abstract_ml)
+            
+        self.ssh_name= self.addLiteralInput(
+            identifier="ssh_name",
+            title="ssh_name",
+            abstract="The ssh_name is a shortform for a ssh connection defined in .ssh/config. ",
+            default="esgf-dev",
+            type=types.StringType,
+            )
+           
+        self.filename_from_qualitycontrol = self.addLiteralInput(
+            identifier = "filename_from_qualitycontrol",
+            title = "The file containing the generated quality results file names.",
+            default = "",
+            type=types.StringType,
+            )
+
+        self.process_log = self.addComplexOutput(
+            identifier = "process_log",
+            title = "Log of the process containing system calls.",
+            formats=[{"mimeType":"text/plain"}],
+            asReference=True,
+            )
+    def execute(self):
+        self.status.set(msg="Initiate process", percentDone=0, propagate=True)
+        param_dict = dict(ssh_name=self.ssh_name.getValue(),
+                          to_publish_qc_log = self.filename_from_qualitycontrol.getValue(),
+                          queue = Queue())
+
+        qcp = qcprocesses.QCProcesses(self.database_location,
+                                      printmethod=self.printmethod,
+                                      work_dir = WORK_DIR
+                                      )
+        _run_process(qcp.qualitypublisher,kwargs=param_dict,wpsprocess=self)
+
+        output = param_dict["queue"].get()
+        process_log = _create_server_copy_of_file(output["process_log_name"],self)
+        self.process_log.setValue(process_log)
 
         return
 
