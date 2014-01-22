@@ -11,6 +11,7 @@ import qc_processes.qcprocesses as qcprocesses
 from multiprocessing import Process, Pipe, Queue
 
 DATABASE_LOCATION="/home/tk/sandbox/databases/pidinfo.db"#TODO relative to climdaps.
+WORK_DIR = "/home/tk/sandbox/climdaps/var/qc_cache/"
 
 class PidGenerationProcess(malleefowl.process.WPSProcess):
     """
@@ -26,14 +27,12 @@ class PidGenerationProcess(malleefowl.process.WPSProcess):
         self.printmethod = qc_conn.send
         self.database_location = DATABASE_LOCATION
        
-
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_PID_Generation",
             title="PIDGeneration using qc_processes",
             version="2014.01.22",
             metadata=[],
             abstract="If the given directory is valid included files and datasets receive a PID.")
-
 
         self.data_path= self.addLiteralInput(
             identifier="datapath",
@@ -78,6 +77,16 @@ class PidGenerationProcess(malleefowl.process.WPSProcess):
             title = "Data node",
             type=types.StringType)
 
+        self.new_files_counter = self.addLiteralOutput(
+            identifier= "new_files_counter",
+            title = "New PIDs generates for n files.",
+            type = types.IntType)
+
+        self.new_datasets_counter = self.addLiteralOutput(
+            identifier= "new_datasets_counter",
+            title = "New PIDs generates for n datasets.",
+            type = types.IntType)
+
     def execute(self):
         self.status.set(msg="Initiate process", percentDone=0, propagate=True)
         data_path = self.data_path.getValue()
@@ -86,11 +95,10 @@ class PidGenerationProcess(malleefowl.process.WPSProcess):
                           data_node=data_node,
                           queue = Queue()
                           )
-                         
 
         qcp = qcprocesses.QCProcesses(self.database_location,
                                       printmethod=self.printmethod,
-                                      work_dir = "/home/tk/sandbox/climdaps/var/qc_cache/"
+                                      work_dir = WORK_DIR
                                       )
         _run_process(qcp.pid_generation,kwargs=param_dict,wpsprocess=self)
 
@@ -99,6 +107,8 @@ class PidGenerationProcess(malleefowl.process.WPSProcess):
         self.errors.setValue(output["errors"])
         self.data_node_out.setValue(data_node)
         self.data_path_out.setValue(data_path)
+        self.new_datasets_counter.setValue(output["new_datasets_counter"])
+        self.new_files_counter.setValue(output["new_files_counter"])
 
 class QualityControlProcess(malleefowl.process.WPSProcess):
     """
@@ -265,7 +275,7 @@ class QualityControlProcess(malleefowl.process.WPSProcess):
         qcp = qcprocesses.QCProcesses(self.database_location,
                                       self.parallel_id,
                                       printmethod=self.printmethod,
-                                      work_dir = "/home/tk/sandbox/climdaps/var/qc_cache/"
+                                      work_dir = WORK_DIR
                                       )
         _run_process(qcp.quality_control,kwargs=param_dict,wpsprocess=self)
 
