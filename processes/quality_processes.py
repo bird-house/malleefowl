@@ -301,9 +301,15 @@ class QualityControlProcess(malleefowl.process.WPSProcess):
 
 class QualityPublisherProcess(malleefowl.process.WPSProcess):
     def __init__(self):
+        self.pipe = Pipe()
+        status_conn, qc_conn = self.pipe
+        self.printmethod = qc_conn.send
+        self.parallel_id = "web1"#TODO set as parameter
+        self.database_location = DATABASE_LOCATION
         abstract_ml =("Read trough a file containing one filename per line and publish it.")
+
         malleefowl.process.WPSProcess.__init__(self,
-            identifier = "QualityPublisher", 
+            identifier = "QC_QualityPublisher", 
             title="Publish QualityControl results using qc_processes.",
             version = "2014.01.22",
             metadata=[],
@@ -325,8 +331,8 @@ class QualityPublisherProcess(malleefowl.process.WPSProcess):
             )
 
         self.process_log = self.addComplexOutput(
-            identifier = "system_calls",
-            title = "Used system calls",
+            identifier = "process_log",
+            title = "Log of the process containing system calls.",
             formats=[{"mimeType":"text/plain"}],
             asReference=True,
             )
