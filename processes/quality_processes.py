@@ -110,6 +110,9 @@ class PidGenerationProcess(malleefowl.process.WPSProcess):
         self.new_datasets_counter.setValue(output["new_datasets_counter"])
         self.new_files_counter.setValue(output["new_files_counter"])
 
+        return 
+
+
 class QualityControlProcess(malleefowl.process.WPSProcess):
     """
     The process runs the qc_processes QualityControl method and 
@@ -273,7 +276,7 @@ class QualityControlProcess(malleefowl.process.WPSProcess):
                           queue = Queue())
 
         qcp = qcprocesses.QCProcesses(self.database_location,
-                                      self.parallel_id,
+                                      parallel_id = self.parallel_id,
                                       printmethod=self.printmethod,
                                       work_dir = WORK_DIR
                                       )
@@ -293,8 +296,55 @@ class QualityControlProcess(malleefowl.process.WPSProcess):
         self.process_log.setValue(process_log)
         to_publish_qc_files_log = _create_server_copy_of_file(output["to_publish_qc_files_log"],self)
         self.to_publish_qc_files.setValue(to_publish_qc_files_log)
+        return
 
 
+class QualityPublisherProcess(malleefowl.process.WPSProcess):
+    def __init__(self):
+        abstract_ml =("Read trough a file containing one filename per line and publish it.")
+        malleefowl.process.WPSProcess.__init__(self,
+            identifier = "QualityPublisher", 
+            title="Publish QualityControl results using qc_processes.",
+            version = "2014.01.22",
+            metadata=[],
+            abstract=abstract_ml)
+            
+        self.ssh_name= self.addLiteralInput(
+            identifier="ssh_name",
+            title="ssh_name",
+            abstract="The ssh_name is a shortform for a ssh connection defined in .ssh/config. ",
+            default="esgf-dev",
+            type=types.StringType,
+            )
+           
+        self.filename_from_qualitycontrol = self.addLiteralInput(
+            identifier = "filename_from_qualitycontrol",
+            title = "The file containing the generated quality results file names.",
+            default = "",
+            type=types.StringType,
+            )
+
+        self.process_log = self.addComplexOutput(
+            identifier = "system_calls",
+            title = "Used system calls",
+            formats=[{"mimeType":"text/plain"}],
+            asReference=True,
+            )
+    def execute(self):
+        self.status.set(msg="Initiate process", percentDone=0, propagate=True)
+        param_dict = dict(ssh_name=self.ssh_name.getValue(),
+                          to_publish_qc_log = self.filename_from_qualitycontrol.getValue(),
+                          queue = Queue())
+
+        qcp = qcprocesses.QCProcesses(self.database_location,
+                                      printmethod=self.printmethod,
+                                      work_dir = WORK_DIR
+                                      )
+        _run_process(qcp.qualitypublisher,kwargs=param_dict,wpsprocess=self)
+
+        output = param_dict["queue"].get()
+        process_log = _create_server_copy_of_file(output["process_log_name"],self)
+        self.process_log.setValue(process_log)
 
         return
 
