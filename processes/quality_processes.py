@@ -9,8 +9,14 @@ import malleefowl.process
 import qc_processes.qcprocesses as qcprocesses
 
 from multiprocessing import Process, Pipe, Queue
-DATABASE_LOCATION="/home/tk/sandbox/databases/pidinfo.db"#TODO relative to climdaps.
-WORK_DIR = "/home/tk/sandbox/climdaps/var/qc_cache/"
+
+import os
+
+curdir = os.path.dirname(__file__)
+climdapsabs = os.path.abspath(os.path.join(curdir,"../../.."))
+
+DATABASE_LOCATION=os.path.join(climdapsabs,"examples/pidinfo.db")
+WORK_DIR = os.path.join(climdapsabs,"var/qc_cache/")
 
 class PidGenerationProcess(malleefowl.process.WPSProcess):
     """
@@ -36,7 +42,7 @@ class PidGenerationProcess(malleefowl.process.WPSProcess):
         self.data_path= self.addLiteralInput(
             identifier="datapath",
             title="Root path of the to index data.",
-            default="/home/tk/sandbox/qc-yaml/data3/",
+            default=os.path.join(climdapsabs,"examples/data/CORDEX"),
             type=types.StringType,
             minOccurs=1,
             maxOccurs=1,
@@ -136,7 +142,7 @@ class QualityControlProcess(malleefowl.process.WPSProcess):
             identifier="project_data_dir",
             title="To analyse data path",
             abstract="A local path",
-            default="/home/tk/sandbox/qc-yaml/data3/CORDEX",
+            default=os.path.join(climdapsabs,"examples/data/CORDEX"),
             type=types.StringType,
             )
 
@@ -144,7 +150,6 @@ class QualityControlProcess(malleefowl.process.WPSProcess):
             identifier = "args",
             title="Additional QC parameters",
             abstract = "Using options of the QC tool. (e.g. -E_SELECT .*)",
-            #default = str("--pb "),
             minOccurs = 0,
             maxOccurs = 1,
             type=types.StringType,
