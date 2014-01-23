@@ -9,7 +9,6 @@ import malleefowl.process
 import qc_processes.qcprocesses as qcprocesses
 
 from multiprocessing import Process, Pipe, Queue
-
 DATABASE_LOCATION="/home/tk/sandbox/databases/pidinfo.db"#TODO relative to climdaps.
 WORK_DIR = "/home/tk/sandbox/climdaps/var/qc_cache/"
 
