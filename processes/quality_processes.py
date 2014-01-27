@@ -359,7 +359,8 @@ class EvaluateQualityCheckProcess(malleefowl.process.WPSProcess):
                           metadata_format = self.metadata_format.getValue(),
                           replica = self.replica.getValue(),
                           latest = self.latest.getValue(),
-                          queue = Queue())
+                          queue = Queue(),
+                          wpsstatus = self.status)
 
         qcp = qcprocesses.QCProcesses(self.database_location,
                                       username = self.username.getValue(),
