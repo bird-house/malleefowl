@@ -4,6 +4,7 @@ Quality Control processes.
 Author: Tobias Kipp (kipp@dkrz.de)
 Creation date: 21.01.2014
 """
+from __future__ import print_function
 import types
 import malleefowl.process 
 import qc_processes.qcprocesses as qcprocesses
@@ -172,6 +173,7 @@ class QualityCheckProcess(malleefowl.process.WPSProcess):
             title="The project used.",
             abstract="Currently only CORDEX is fully supported.",
             default="CORDEX",
+            allowedValues=['CORDEX'],
             type=types.StringType,
             )
 
@@ -352,6 +354,8 @@ class EvaluateQualityCheckProcess(malleefowl.process.WPSProcess):
 
     def execute(self):
         self.status.set(msg="Initiate process", percentDone=0, propagate=True)
+        def statmethod(cur,end):
+            statusmethod(cur,end,self)
         param_dict = dict(
                           data_node=self.data_node.getValue(),
                           index_node=self.index_node.getValue(),
@@ -360,16 +364,18 @@ class EvaluateQualityCheckProcess(malleefowl.process.WPSProcess):
                           replica = self.replica.getValue(),
                           latest = self.latest.getValue(),
                           queue = Queue(),
-                          wpsstatus = self.status)
+                          statusmethod = statmethod
+                          )
 
         qcp = qcprocesses.QCProcesses(self.database_location,
                                       username = self.username.getValue(),
                                       parallel_id = self.parallel_id.getValue(),
-                                      printmethod=self.printmethod,
+                                      printmethod=print,
                                       work_dir = WORK_DIR
                                       )
 
-        _run_process(qcp.evaluate_quality_check,kwargs=param_dict,wpsprocess=self)
+        qcp.evaluate_quality_check(**param_dict)
+        #_run_process(qcp.evaluate_quality_check,kwargs=param_dict,wpsprocess=self)
 
         output = param_dict["queue"].get()
         self.fail_count.setValue(output["fail_count"])
@@ -671,6 +677,15 @@ class QualityPublisherProcess(malleefowl.process.WPSProcess):
 ##################
 # Helper methods #
 ##################
+
+def statusmethod(current,end,wpsprocess):
+    """
+    :param current: The current counter
+    :param end: The end counter
+    :param wpsprocess: The process that needs to update the statusbar.
+    """
+    wpsprocess.status.set(msg="runnig", percentDone=float(current)*100.0/float(end),propagate=True)
+    
 
 def _run_process(target,kwargs,wpsprocess):
     status_conn, qc_conn = wpsprocess.pipe
