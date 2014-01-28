@@ -15,6 +15,7 @@ climdapsabs = os.path.abspath(os.path.join(curdir,"../../.."))
 
 DATABASE_LOCATION=os.path.join(climdapsabs,"examples/pidinfo.db")
 WORK_DIR = os.path.join(climdapsabs,"var/qc_cache/")
+QC_TOOL_DIR = os.path.join(climdapsabs,"parts/QC-0.4")
 
 class PidGenerationProcess(malleefowl.process.WPSProcess):
     """
@@ -196,6 +197,7 @@ class QualityCheckProcess(malleefowl.process.WPSProcess):
         param_dict = dict(project_data_dir = self.project_data_dir.getValue(),
                           args = self.args.getValue(),
                           project= self.project.getValue(),
+                          qc_tool_path = QC_TOOL_DIR,
                           )
 
         def statmethod(cur,end):
