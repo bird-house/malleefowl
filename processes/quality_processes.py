@@ -664,6 +664,9 @@ def statusmethod(msg,current,end,wpsprocess):
     :param end: The end counter
     :param wpsprocess: The process that needs to update the statusbar.
     """
+    #workaround division 0
+    if int(end) == 0:
+        end = 1
     wpsprocess.status.set(msg=msg, percentDone=float(current)*100.0/float(end),propagate=True)
 
 def _create_server_copy_of_file(filename,wpsprocess):
