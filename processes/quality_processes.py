@@ -4,12 +4,9 @@ Quality Control processes.
 Author: Tobias Kipp (kipp@dkrz.de)
 Creation date: 21.01.2014
 """
-from __future__ import print_function
 import types
 import malleefowl.process 
 import qc_processes.qcprocesses as qcprocesses
-
-from multiprocessing import Process, Pipe, Queue
 
 import os
 
@@ -28,9 +25,6 @@ class PidGenerationProcess(malleefowl.process.WPSProcess):
     """
     def __init__(self):
 
-        self.pipe = Pipe()
-        status_conn, qc_conn = self.pipe
-        self.printmethod = qc_conn.send
         self.database_location = DATABASE_LOCATION
        
         malleefowl.process.WPSProcess.__init__(self,
@@ -97,18 +91,18 @@ class PidGenerationProcess(malleefowl.process.WPSProcess):
         self.status.set(msg="Initiate process", percentDone=0, propagate=True)
         data_path = self.data_path.getValue()
         data_node = self.data_node.getValue()
+        def statmethod(cur,end):
+            statusmethod("Running",cur,end,self)
         param_dict = dict(data_path=data_path,
                           data_node=data_node,
-                          queue = Queue()
                           )
 
         qcp = qcprocesses.QCProcesses(self.database_location,
-                                      printmethod=self.printmethod,
+                                      statusmethod = statmethod,
                                       work_dir = WORK_DIR
                                       )
-        _run_process(qcp.pid_generation,kwargs=param_dict,wpsprocess=self)
+        output = qcp.pid_generation(**param_dict)
 
-        output = param_dict["queue"].get()
         self.is_valid.setValue(output["valid"])
         self.errors.setValue(output["errors"])
         self.data_node_out.setValue(data_node)
@@ -122,9 +116,6 @@ class PidGenerationProcess(malleefowl.process.WPSProcess):
 class QualityCheckProcess(malleefowl.process.WPSProcess):
     def __init__(self):
 
-        self.pipe = Pipe()
-        status_conn, qc_conn = self.pipe
-        self.printmethod = qc_conn.send
         self.database_location = DATABASE_LOCATION
 
         malleefowl.process.WPSProcess.__init__(self,
@@ -205,20 +196,20 @@ class QualityCheckProcess(malleefowl.process.WPSProcess):
         param_dict = dict(project_data_dir = self.project_data_dir.getValue(),
                           args = self.args.getValue(),
                           project= self.project.getValue(),
-                          queue = Queue())
+                          )
 
+        def statmethod(cur,end):
+            statusmethod("Running",cur,end,self)
         qcp = qcprocesses.QCProcesses(self.database_location,
                                       username = self.username.getValue(),
                                       parallel_id = self.parallel_id.getValue(),
-                                      printmethod=self.printmethod,
+                                      statusmethod = statmethod,
                                       work_dir = WORK_DIR
                                       )
         if self.clean_process_dir.getValue() == True:
             qcp.clean_process_dir()
 
-        _run_process(qcp.quality_check,kwargs=param_dict,wpsprocess=self)
-
-        output = param_dict["queue"].get()
+        output = qcp.quality_check(**param_dict)
         self.qc_call_exit_code.setValue(output["qc_call_exit_code"])
         self.qc_call.setValue(output["qc_call"])
 
@@ -231,9 +222,6 @@ class EvaluateQualityCheckProcess(malleefowl.process.WPSProcess):
     """
     def __init__(self):
 
-        self.pipe = Pipe()
-        status_conn, qc_conn = self.pipe
-        self.printmethod = qc_conn.send
         self.database_location = DATABASE_LOCATION
 
         malleefowl.process.WPSProcess.__init__(self,
@@ -354,8 +342,6 @@ class EvaluateQualityCheckProcess(malleefowl.process.WPSProcess):
 
     def execute(self):
         self.status.set(msg="Initiate process", percentDone=0, propagate=True)
-        def statmethod(cur,end):
-            statusmethod(cur,end,self)
         param_dict = dict(
                           data_node=self.data_node.getValue(),
                           index_node=self.index_node.getValue(),
@@ -363,21 +349,19 @@ class EvaluateQualityCheckProcess(malleefowl.process.WPSProcess):
                           metadata_format = self.metadata_format.getValue(),
                           replica = self.replica.getValue(),
                           latest = self.latest.getValue(),
-                          queue = Queue(),
-                          statusmethod = statmethod
                           )
 
+        def statmethod(cur,end):
+            statusmethod("Running",cur,end,self)
         qcp = qcprocesses.QCProcesses(self.database_location,
                                       username = self.username.getValue(),
                                       parallel_id = self.parallel_id.getValue(),
-                                      printmethod=print,
+                                      statusmethod = statmethod,
                                       work_dir = WORK_DIR
                                       )
 
-        qcp.evaluate_quality_check(**param_dict)
-        #_run_process(qcp.evaluate_quality_check,kwargs=param_dict,wpsprocess=self)
+        output = qcp.evaluate_quality_check(**param_dict)
 
-        output = param_dict["queue"].get()
         self.fail_count.setValue(output["fail_count"])
         self.pass_count.setValue(output["pass_count"])
         self.omit_count.setValue(output["omit_count"])
@@ -398,9 +382,6 @@ class QualityControlProcess(malleefowl.process.WPSProcess):
     """
     def __init__(self):
 
-        self.pipe = Pipe()
-        status_conn, qc_conn = self.pipe
-        self.printmethod = qc_conn.send
         self.database_location = DATABASE_LOCATION
 
         malleefowl.process.WPSProcess.__init__(self,
@@ -574,20 +555,22 @@ class QualityControlProcess(malleefowl.process.WPSProcess):
                           metadata_format = self.metadata_format.getValue(),
                           replica = self.replica.getValue(),
                           latest = self.latest.getValue(),
-                          queue = Queue())
+                          )
+
+        def statmethod(cur,end):
+            statusmethod("Running",cur,end,self)
 
         qcp = qcprocesses.QCProcesses(self.database_location,
                                       username = self.username.getValue(),
                                       parallel_id = self.parallel_id.getValue(),
-                                      printmethod=self.printmethod,
+                                      statusmethod=statmethod,
                                       work_dir = WORK_DIR
                                       )
         if self.clean_process_dir.getValue() == True:
             qcp.clean_process_dir()
 
-        _run_process(qcp.quality_control,kwargs=param_dict,wpsprocess=self)
+        output = qcp.quality_control(**param_dict)
 
-        output = param_dict["queue"].get()
         self.qc_call_exit_code.setValue(output["qc_call_exit_code"])
         self.qc_call.setValue(output["qc_call"])
         self.fail_count.setValue(output["fail_count"])
@@ -606,9 +589,6 @@ class QualityControlProcess(malleefowl.process.WPSProcess):
 
 class QualityPublisherProcess(malleefowl.process.WPSProcess):
     def __init__(self):
-        self.pipe = Pipe()
-        status_conn, qc_conn = self.pipe
-        self.printmethod = qc_conn.send
         self.parallel_id = "web1"#TODO set as parameter
         self.database_location = DATABASE_LOCATION
         abstract_ml =("Read trough a file containing one filename per line and publish it.")
@@ -658,17 +638,15 @@ class QualityPublisherProcess(malleefowl.process.WPSProcess):
     def execute(self):
         self.status.set(msg="Initiate process", percentDone=0, propagate=True)
         param_dict = dict(ssh_name=self.ssh_name.getValue(),
-                          queue = Queue())
-
+                         )
         qcp = qcprocesses.QCProcesses(self.database_location,
                                       username = self.username.getValue(),
                                       printmethod=self.printmethod,
                                       work_dir = WORK_DIR,
                                       parallel_id = self.parallel_id.getValue(),
                                       )
-        _run_process(qcp.qualitypublisher,kwargs=param_dict,wpsprocess=self)
+        output = qcp.qualitypublisher(**param_dict)
 
-        output = param_dict["queue"].get()
         process_log = _create_server_copy_of_file(output["process_log_name"],self)
         self.process_log.setValue(process_log)
 
@@ -678,35 +656,13 @@ class QualityPublisherProcess(malleefowl.process.WPSProcess):
 # Helper methods #
 ##################
 
-def statusmethod(current,end,wpsprocess):
+def statusmethod(msg,current,end,wpsprocess):
     """
     :param current: The current counter
     :param end: The end counter
     :param wpsprocess: The process that needs to update the statusbar.
     """
-    wpsprocess.status.set(msg="runnig", percentDone=float(current)*100.0/float(end),propagate=True)
-    
-
-def _run_process(target,kwargs,wpsprocess):
-    status_conn, qc_conn = wpsprocess.pipe
-    p = Process(target=target,kwargs = kwargs)
-    p.start()
-    run = True
-    while run:
-        val = status_conn.recv()
-        stat = "status:"
-        if(val[:len(stat)]==stat):
-            sval = val.split(" ")
-            if(len(sval)==3):
-               try:
-                   cur = float(sval[1])
-                   end = float(sval[2])
-                   wpsprocess.status.set(msg="runnig", percentDone=cur*100.0/end,propagate=True)
-                   if(cur==end):
-                       run = False
-               except:
-                   pass#it is not of "status: current max" format. Ignore it.
-    
+    wpsprocess.status.set(msg=msg, percentDone=float(current)*100.0/float(end),propagate=True)
 
 def _create_server_copy_of_file(filename,wpsprocess):
     serverfile =  open(wpsprocess.mktempfile(suffix=".txt"),"w")
