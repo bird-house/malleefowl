@@ -46,7 +46,7 @@ class PidGenerationProcess(malleefowl.process.WPSProcess):
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_PID_Generation",
             title="PIDGeneration using qc_processes",
-            version="2014.01.22",
+            version="2014.01.30",
             metadata=[],
             abstract="If the given directory is valid included files and datasets receive a PID.")
 
@@ -61,12 +61,7 @@ class PidGenerationProcess(malleefowl.process.WPSProcess):
            
         self.database_location = DATABASE_LOCATION
 
-        self.data_node = self.addLiteralInput(
-            identifier = "data_node",
-            title = "Data node",
-            default = "ipcc-ar5.dkrz.de",
-            type=types.StringType,
-            )
+        self.data_node = DATA["data_node"]
 
         self.is_valid =self.addLiteralOutput(
             identifier = "isvalid",
@@ -106,7 +101,7 @@ class PidGenerationProcess(malleefowl.process.WPSProcess):
     def execute(self):
         self.status.set(msg="Initiate process", percentDone=0, propagate=True)
         data_path = self.data_path.getValue()
-        data_node = self.data_node.getValue()
+        data_node = self.data_node
         def statmethod(cur,end):
             statusmethod("Running",cur,end,self)
         param_dict = dict(data_path=data_path,
