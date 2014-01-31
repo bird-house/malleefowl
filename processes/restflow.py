@@ -73,7 +73,7 @@ class Run(malleefowl.process.WPSProcess):
             )
 
     def execute(self):
-        self.status.set(msg="starting restflow workflow", percentDone=5, propagate=True)
+        self.status.set(msg="Starting restflow workflow", percentDone=5, propagate=True)
 
         wf_filename = path.abspath(self.workflow_description_in.getValue(asFile=False))
         logging.debug("wf_filename = %s", wf_filename)
@@ -88,7 +88,7 @@ class Run(malleefowl.process.WPSProcess):
         # run async command
         import subprocess
         from subprocess import PIPE
-        cmd = ["restflow", options, "-f", wf_filename, "--run", "restflow"]
+        cmd = ["restflow", options, "-t", "-f", wf_filename, "--run", "restflow"]
         p = subprocess.Popen(cmd, stdout=PIPE, stderr=PIPE)
                 
         products_path = path.join(self.working_dir, "restflow", "_metadata", "products.yaml")
@@ -96,10 +96,10 @@ class Run(malleefowl.process.WPSProcess):
 
         logging.debug("products_path = %s", products_path)
 
-        self.status.set(msg="starting download", percentDone=10, propagate=True)
+        self.status.set(msg="Downloading ...", percentDone=10, propagate=True)
 
         while p.poll() == None:   
-            time.sleep(2)
+            time.sleep(1)
 
             if path.isfile(endstate_path):
                 break
@@ -111,19 +111,19 @@ class Run(malleefowl.process.WPSProcess):
                 continue
             
             if products.has_key('/wps/download/file_identifier/1'):
-                self.status.set(msg="first file downloaded", percentDone=20, propagate=True)
+                self.status.set(msg="First file downloaded", percentDone=20, propagate=True)
 
             if products.has_key('/wps/download/file_identifiers/1'):
-                self.status.set(msg="all files downloaded", percentDone=55, propagate=True)
+                self.status.set(msg="All files downloaded", percentDone=55, propagate=True)
 
         # wait till finished
         (stdoutdata, stderrdata) = p.communicate()
-        self.status.set(msg=stdoutdata, percentDone=80, propagate=True)
+        self.status.set(msg=stdoutdata + stderrdata, percentDone=80, propagate=True)
 
         products = yaml.load( open(products_path) )
         self.work_output.setValue(products.get('/wps/work/output/1'))
         self.work_status.setValue(products.get('/wps/work/status/1'))
        
-        self.status.set(msg="workflow done", percentDone=90, propagate=True)
+        self.status.set(msg="Workflow done", percentDone=90, propagate=True)
 
         self.output.setValue( path.join(self.working_dir, "restflow", "_metadata", "stdout.txt") )
