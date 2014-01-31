@@ -9,14 +9,28 @@ import malleefowl.process
 import qc_processes.qcprocesses as qcprocesses
 
 import os
+import logging
+logger = logging.getLogger(__name__)
+hdlr = logging.FileHandler('/var/tmp/qc_processes.log')
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+hdlr.setFormatter(formatter)
+logger.addHandler(hdlr) 
+logger.setLevel(logging.DEBUG)
 
 curdir = os.path.dirname(__file__)
 climdapsabs = os.path.abspath(os.path.join(curdir,"../../.."))
 
 DATABASE_LOCATION=os.path.join(climdapsabs,"examples/pidinfo.db")
 WORK_DIR = os.path.join(climdapsabs,"var/qc_cache/")
-QC_TOOL_DIR = os.path.join(climdapsabs,"parts/QC-0.4")
+QC_TOOL_DIR = os.path.join(climdapsabs,"src/QC-0.4")
 #QC_TOOL_DIR = os.path.join(climdapsabs,"src/qc-processes/qc_processes/dependencies/QC-Build-0.4")
+
+
+DATA = {}
+fn = os.path.join(os.path.dirname(__file__),'quality_processes.conf')
+logger.debug("WPS: Loading data from file: "+fn)
+execfile(fn,DATA)
+logger.debug("WPS: Loaded file to DATA variable")
 
 class PidGenerationProcess(malleefowl.process.WPSProcess):
     """
@@ -32,7 +46,7 @@ class PidGenerationProcess(malleefowl.process.WPSProcess):
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_PID_Generation",
             title="PIDGeneration using qc_processes",
-            version="2014.01.22",
+            version="2014.01.30",
             metadata=[],
             abstract="If the given directory is valid included files and datasets receive a PID.")
 
@@ -47,12 +61,7 @@ class PidGenerationProcess(malleefowl.process.WPSProcess):
            
         self.database_location = DATABASE_LOCATION
 
-        self.data_node = self.addLiteralInput(
-            identifier = "data_node",
-            title = "Data node",
-            default = "ipcc-ar5.dkrz.de",
-            type=types.StringType,
-            )
+        self.data_node = DATA["data_node"]
 
         self.is_valid =self.addLiteralOutput(
             identifier = "isvalid",
@@ -92,7 +101,7 @@ class PidGenerationProcess(malleefowl.process.WPSProcess):
     def execute(self):
         self.status.set(msg="Initiate process", percentDone=0, propagate=True)
         data_path = self.data_path.getValue()
-        data_node = self.data_node.getValue()
+        data_node = self.data_node
         def statmethod(cur,end):
             statusmethod("Running",cur,end,self)
         param_dict = dict(data_path=data_path,
@@ -225,6 +234,7 @@ class EvaluateQualityCheckProcess(malleefowl.process.WPSProcess):
     """
     def __init__(self):
 
+        logger.debug("WPS: eval init ")
         self.database_location = DATABASE_LOCATION
 
         malleefowl.process.WPSProcess.__init__(self,
@@ -252,48 +262,30 @@ class EvaluateQualityCheckProcess(malleefowl.process.WPSProcess):
             type = types.StringType,
             )
 
-        self.data_node= self.addLiteralInput(
-            identifier="data_node",
-            title="Data node",
-            default="ipcc-ar5.dkrz.de",
-            type=types.StringType,
-            )
+        logger.debug("WPS: eval Loading DATA parameters")
+        logger.debug(str(DATA))
+        self.data_node= DATA.get("data_node")
 
-        self.index_node= self.addLiteralInput(
-            identifier="index_node",
-            title="Index node",
-            default="esgf-data.dkrz.de",
-            type=types.StringType,
-            )
+        self.index_node= DATA.get("index_node")
 
-        self.access=self.addLiteralInput(
-            identifier="access",
-            title="Access",
-            default="HTTPServer",
-            type=types.StringType,
-            )
-
-        self.metadata_format=self.addLiteralInput(
-            identifier="metadata_format",
-            title="metadata_format",
-            default="THREDDS",
-            type=types.StringType,
-            )
-
+        self.access= DATA.get("access")
+        self.metadata_format=DATA.get("metadata_format")
+        logger.debug("WPS: eval loading DATA parameters as default")
         self.replica= self.addLiteralInput(
             identifier="replica",
             title="Replica",
-            default="false",
+            default=DATA.get("replica"),
             type=types.StringType,
             )
             
         self.latest= self.addLiteralInput(
             identifier="latest",
             title="Latest",
-            default="true",
+            default=DATA.get("latest"),
             type=types.StringType,
             )
 
+        logger.debug("WPS: eval define outputs")
         
         self.found_tags = self.addLiteralOutput(
             identifier="found_tags",
@@ -341,19 +333,22 @@ class EvaluateQualityCheckProcess(malleefowl.process.WPSProcess):
             formats=[{"mimeType":"text/plain"}],
             asReference=True,
             )
+        logger.debug("WPS: eval finished init")
 
 
     def execute(self):
+        logger.debug("WPS: execute EvaluateQualityCheckProcess")
         self.status.set(msg="Initiate process", percentDone=0, propagate=True)
         param_dict = dict(
-                          data_node=self.data_node.getValue(),
-                          index_node=self.index_node.getValue(),
-                          access=self.access.getValue(),
-                          metadata_format = self.metadata_format.getValue(),
+                          data_node=self.data_node,
+                          index_node=self.index_node,
+                          access=self.access,
+                          metadata_format = self.metadata_format,
                           replica = self.replica.getValue(),
                           latest = self.latest.getValue(),
                           )
 
+        logger.debug("WPS: eval init qcp")
         def statmethod(cur,end):
             statusmethod("Running",cur,end,self)
         qcp = qcprocesses.QCProcesses(self.database_location,
@@ -363,8 +358,10 @@ class EvaluateQualityCheckProcess(malleefowl.process.WPSProcess):
                                       work_dir = WORK_DIR
                                       )
 
+        logger.debug("WPS: eval run evaluate")
         output = qcp.evaluate_quality_check(**param_dict)
 
+        logger.debug("WPS: eval setting outputs")
         self.fail_count.setValue(output["fail_count"])
         self.pass_count.setValue(output["pass_count"])
         self.omit_count.setValue(output["omit_count"])
@@ -378,216 +375,217 @@ class EvaluateQualityCheckProcess(malleefowl.process.WPSProcess):
         self.to_publish_qc_files.setValue(to_publish_qc_files_log)
         return
 
-class QualityControlProcess(malleefowl.process.WPSProcess):
-    """
-    The process runs the qc_processes QualityControl method and 
-    handles the progress bar depending on the output of the method.
-    """
-    def __init__(self):
-
-        self.database_location = DATABASE_LOCATION
-
-        malleefowl.process.WPSProcess.__init__(self,
-            identifier = "QC_Quality_Control",
-            title="Quality Control using qc_processes",
-            version="2014.01.21",
-            metadata=[],
-            abstract="Runs a quality check on a given folder and generates metadata and quality files")
-
-        self.parallel_id = self.addLiteralInput(
-            identifier="parallel_id",
-            title="Parallel ID",
-            abstract=("An ID for the current process. If multiple processes are running in parallel "
-                      +"choose an unused one."),
-            default ="web1",
-            type=types.StringType,
-            )
-        self.username = self.addLiteralInput(
-            identifier = "username",
-            title = "Username",
-            abstract = ("The username is used to prevent two users working in the same directory."
-                        +" Currently this is a work around until the username can be derived "
-                        +"automatically."),
-            default = "defaultuser",
-            type = types.StringType,
-            )
-        self.project_data_dir = self.addLiteralInput(
-            identifier="project_data_dir",
-            title="To analyse data path",
-            abstract="A local path",
-            default=os.path.join(climdapsabs,"examples/data/CORDEX"),
-            type=types.StringType,
-            )
-
-        self.args = self.addLiteralInput(
-            identifier = "args",
-            title="Additional QC parameters",
-            abstract = "Using options of the QC tool. (e.g. -E_SELECT .*)",
-            minOccurs = 0,
-            maxOccurs = 1,
-            type=types.StringType,
-            )
-
-        self.project = self.addLiteralInput(
-            identifier="project",
-            title="The project used.",
-            abstract="Currently only CORDEX is fully supported.",
-            default="CORDEX",
-            type=types.StringType,
-            )
-
-
-        self.data_node= self.addLiteralInput(
-            identifier="data_node",
-            title="Data node",
-            default="ipcc-ar5.dkrz.de",
-            type=types.StringType,
-            )
-
-        self.index_node= self.addLiteralInput(
-            identifier="index_node",
-            title="Index node",
-            default="esgf-data.dkrz.de",
-            type=types.StringType,
-            )
-
-        self.access=self.addLiteralInput(
-            identifier="access",
-            title="Access",
-            default="HTTPServer",
-            type=types.StringType,
-            )
-
-        self.metadata_format=self.addLiteralInput(
-            identifier="metadata_format",
-            title="metadata_format",
-            default="THREDDS",
-            type=types.StringType,
-            )
-
-        self.replica= self.addLiteralInput(
-            identifier="replica",
-            title="Replica",
-            default="false",
-            type=types.StringType,
-            )
-            
-        self.latest= self.addLiteralInput(
-            identifier="latest",
-            title="Latest",
-            default="true",
-            type=types.StringType,
-            )
-
-        self.clean_process_dir = self.addLiteralInput(
-            identifier ="clean_process_dir",
-            title="clean work",
-            abstract=("Remove data from the working directory. Quality Check skips already checked"+ 
-              " files. After clean up it will check all files."),
-            type=types.BooleanType,
-            )
-        
-        self.qc_call_exit_code = self.addLiteralOutput(
-            identifier="qc_call_exit_code",
-            title ="qcManager exit code",
-            abstract ="Exit code of the quality control tool.",
-            type = types.StringType,
-            )
-
-        self.qc_call = self.addLiteralOutput(
-            identifier="qc_call",
-            title="qc_call",
-            type=types.StringType,
-            )
-        self.found_tags = self.addLiteralOutput(
-            identifier="found_tags",
-            title="found_tags",
-            type=types.StringType,
-            )
-        self.fail_count = self.addLiteralOutput(
-            identifier="fail_count",
-            title="Fail count",
-            type=types.IntType,
-            )
-        self.omit_count = self.addLiteralOutput(
-            identifier="omit_count",
-            title="Omit count",
-            type=types.IntType,
-            )
-        self.pass_count = self.addLiteralOutput(
-            identifier="pass_count",
-            title="Pass count",
-            type=types.IntType,
-            )
-        self.fixed_count = self.addLiteralOutput(
-            identifier="fixed_count",
-            title="Fixed count",
-            type=types.IntType,
-            )
-
-        self.has_issues = self.addLiteralOutput(
-            identifier="has_issues",
-            title="There is something wrong with the checked files.",
-            type=types.BooleanType,
-            )
-
-        self.process_log = self.addComplexOutput(
-            identifier="process_log",
-            title="Log of this process.",
-            metadata=[],
-            formats=[{"mimeType":"text/plain"}],
-            asReference=True,
-            )
-        self.to_publish_qc_files = self.addComplexOutput(
-            identifier="to_publish_qc_files",
-            title="QC files that need to be published",
-            metadata=[],
-            formats=[{"mimeType":"text/plain"}],
-            asReference=True,
-            )
-
-
-    def execute(self):
-        self.status.set(msg="Initiate process", percentDone=0, propagate=True)
-        param_dict = dict(project_data_dir = self.project_data_dir.getValue(),
-                          args = self.args.getValue(),
-                          project= self.project.getValue(),
-                          data_node=self.data_node.getValue(),
-                          index_node=self.index_node.getValue(),
-                          access=self.access.getValue(),
-                          metadata_format = self.metadata_format.getValue(),
-                          replica = self.replica.getValue(),
-                          latest = self.latest.getValue(),
-                          )
-
-        def statmethod(cur,end):
-            statusmethod("Running",cur,end,self)
-
-        qcp = qcprocesses.QCProcesses(self.database_location,
-                                      username = self.username.getValue(),
-                                      parallel_id = self.parallel_id.getValue(),
-                                      statusmethod=statmethod,
-                                      work_dir = WORK_DIR
-                                      )
-        if self.clean_process_dir.getValue() == True:
-            qcp.clean_process_dir()
-
-        output = qcp.quality_control(**param_dict)
-
-        self.qc_call_exit_code.setValue(output["qc_call_exit_code"])
-        self.qc_call.setValue(output["qc_call"])
-        self.fail_count.setValue(output["fail_count"])
-        self.pass_count.setValue(output["pass_count"])
-        self.omit_count.setValue(output["omit_count"])
-        self.fixed_count.setValue(output["fixed_count"])
-        self.has_issues.setValue(output["has_issues"])
-        self.found_tags.setValue(output["found_tags"])
-
-        process_log = _create_server_copy_of_file(output["process_log"],self)
-        self.process_log.setValue(process_log)
-        to_publish_qc_files_log = _create_server_copy_of_file(output["to_publish_qc_files_log"],self)
-        self.to_publish_qc_files.setValue(to_publish_qc_files_log)
-        return
+#The process is now split into two 
+#class QualityControlProcess(malleefowl.process.WPSProcess):
+#    """
+#    The process runs the qc_processes QualityControl method and 
+#    handles the progress bar depending on the output of the method.
+#    """
+#    def __init__(self):
+#
+#        self.database_location = DATABASE_LOCATION
+#
+#        malleefowl.process.WPSProcess.__init__(self,
+#            identifier = "QC_Quality_Control",
+#            title="Quality Control using qc_processes",
+#            version="2014.01.21",
+#            metadata=[],
+#            abstract="Runs a quality check on a given folder and generates metadata and quality files")
+#
+#        self.parallel_id = self.addLiteralInput(
+#            identifier="parallel_id",
+#            title="Parallel ID",
+#            abstract=("An ID for the current process. If multiple processes are running in parallel "
+#                      +"choose an unused one."),
+#            default ="web1",
+#            type=types.StringType,
+#            )
+#        self.username = self.addLiteralInput(
+#            identifier = "username",
+#            title = "Username",
+#            abstract = ("The username is used to prevent two users working in the same directory."
+#                        +" Currently this is a work around until the username can be derived "
+#                        +"automatically."),
+#            default = "defaultuser",
+#            type = types.StringType,
+#            )
+#        self.project_data_dir = self.addLiteralInput(
+#            identifier="project_data_dir",
+#            title="To analyse data path",
+#            abstract="A local path",
+#            default=os.path.join(climdapsabs,"examples/data/CORDEX"),
+#            type=types.StringType,
+#            )
+#
+#        self.args = self.addLiteralInput(
+#            identifier = "args",
+#            title="Additional QC parameters",
+#            abstract = "Using options of the QC tool. (e.g. -E_SELECT .*)",
+#            minOccurs = 0,
+#            maxOccurs = 1,
+#            type=types.StringType,
+#            )
+#
+#        self.project = self.addLiteralInput(
+#            identifier="project",
+#            title="The project used.",
+#            abstract="Currently only CORDEX is fully supported.",
+#            default="CORDEX",
+#            type=types.StringType,
+#            )
+#
+#
+#        self.data_node= self.addLiteralInput(
+#            identifier="data_node",
+#            title="Data node",
+#            default="ipcc-ar5.dkrz.de",
+#            type=types.StringType,
+#            )
+#
+#        self.index_node= self.addLiteralInput(
+#            identifier="index_node",
+#            title="Index node",
+#            default="esgf-data.dkrz.de",
+#            type=types.StringType,
+#            )
+#
+#        self.access=self.addLiteralInput(
+#            identifier="access",
+#            title="Access",
+#            default="HTTPServer",
+#            type=types.StringType,
+#            )
+#
+#        self.metadata_format=self.addLiteralInput(
+#            identifier="metadata_format",
+#            title="metadata_format",
+#            default="THREDDS",
+#            type=types.StringType,
+#            )
+#
+#        self.replica= self.addLiteralInput(
+#            identifier="replica",
+#            title="Replica",
+#            default="false",
+#            type=types.StringType,
+#            )
+#            
+#        self.latest= self.addLiteralInput(
+#            identifier="latest",
+#            title="Latest",
+#            default="true",
+#            type=types.StringType,
+#            )
+#
+#        self.clean_process_dir = self.addLiteralInput(
+#            identifier ="clean_process_dir",
+#            title="clean work",
+#            abstract=("Remove data from the working directory. Quality Check skips already checked"+ 
+#              " files. After clean up it will check all files."),
+#            type=types.BooleanType,
+#            )
+#        
+#        self.qc_call_exit_code = self.addLiteralOutput(
+#            identifier="qc_call_exit_code",
+#            title ="qcManager exit code",
+#            abstract ="Exit code of the quality control tool.",
+#            type = types.StringType,
+#            )
+#
+#        self.qc_call = self.addLiteralOutput(
+#            identifier="qc_call",
+#            title="qc_call",
+#            type=types.StringType,
+#            )
+#        self.found_tags = self.addLiteralOutput(
+#            identifier="found_tags",
+#            title="found_tags",
+#            type=types.StringType,
+#            )
+#        self.fail_count = self.addLiteralOutput(
+#            identifier="fail_count",
+#            title="Fail count",
+#            type=types.IntType,
+#            )
+#        self.omit_count = self.addLiteralOutput(
+#            identifier="omit_count",
+#            title="Omit count",
+#            type=types.IntType,
+#            )
+#        self.pass_count = self.addLiteralOutput(
+#            identifier="pass_count",
+#            title="Pass count",
+#            type=types.IntType,
+#            )
+#        self.fixed_count = self.addLiteralOutput(
+#            identifier="fixed_count",
+#            title="Fixed count",
+#            type=types.IntType,
+#            )
+#
+#        self.has_issues = self.addLiteralOutput(
+#            identifier="has_issues",
+#            title="There is something wrong with the checked files.",
+#            type=types.BooleanType,
+#            )
+#
+#        self.process_log = self.addComplexOutput(
+#            identifier="process_log",
+#            title="Log of this process.",
+#            metadata=[],
+#            formats=[{"mimeType":"text/plain"}],
+#            asReference=True,
+#            )
+#        self.to_publish_qc_files = self.addComplexOutput(
+#            identifier="to_publish_qc_files",
+#            title="QC files that need to be published",
+#            metadata=[],
+#            formats=[{"mimeType":"text/plain"}],
+#            asReference=True,
+#            )
+#
+#
+#    def execute(self):
+#        self.status.set(msg="Initiate process", percentDone=0, propagate=True)
+#        param_dict = dict(project_data_dir = self.project_data_dir.getValue(),
+#                          args = self.args.getValue(),
+#                          project= self.project.getValue(),
+#                          data_node=self.data_node.getValue(),
+#                          index_node=self.index_node.getValue(),
+#                          access=self.access.getValue(),
+#                          metadata_format = self.metadata_format.getValue(),
+#                          replica = self.replica.getValue(),
+#                          latest = self.latest.getValue(),
+#                          )
+#
+#        def statmethod(cur,end):
+#            statusmethod("Running",cur,end,self)
+#
+#        qcp = qcprocesses.QCProcesses(self.database_location,
+#                                      username = self.username.getValue(),
+#                                      parallel_id = self.parallel_id.getValue(),
+#                                      statusmethod=statmethod,
+#                                      work_dir = WORK_DIR
+#                                      )
+#        if self.clean_process_dir.getValue() == True:
+#            qcp.clean_process_dir()
+#
+#        output = qcp.quality_control(**param_dict)
+#
+#        self.qc_call_exit_code.setValue(output["qc_call_exit_code"])
+#        self.qc_call.setValue(output["qc_call"])
+#        self.fail_count.setValue(output["fail_count"])
+#        self.pass_count.setValue(output["pass_count"])
+#        self.omit_count.setValue(output["omit_count"])
+#        self.fixed_count.setValue(output["fixed_count"])
+#        self.has_issues.setValue(output["has_issues"])
+#        self.found_tags.setValue(output["found_tags"])
+#
+#        process_log = _create_server_copy_of_file(output["process_log"],self)
+#        self.process_log.setValue(process_log)
+#        to_publish_qc_files_log = _create_server_copy_of_file(output["to_publish_qc_files_log"],self)
+#        self.to_publish_qc_files.setValue(to_publish_qc_files_log)
+#        return
 
 
 class QualityPublisherProcess(malleefowl.process.WPSProcess):
