@@ -22,8 +22,6 @@ climdapsabs = os.path.abspath(os.path.join(curdir,"../../.."))
 
 DATABASE_LOCATION = os.path.join(climdapsabs,"examples/pidinfo.db")
 WORK_DIR = os.path.join(climdapsabs,"var/qc_cache/")
-QC_TOOL_DIR = os.path.join(climdapsabs,"src/QC-0.4")
-#QC_TOOL_DIR = os.path.join(climdapsabs,"src/qc-processes/qc_processes/dependencies/QC-Build-0.4")
 
 
 DATA = {}
@@ -201,13 +199,17 @@ class QualityCheckProcess(malleefowl.process.WPSProcess):
             type = types.StringType,
             )
 
+        self.qc_svn_version = self.addLiteralOutput(
+            identifier = "qc_svn_version",
+            title = "QC_SVN_Version",
+            type = types.StringType,
+            )
 
     def execute(self):
         self.status.set(msg = "Initiate process", percentDone = 0, propagate = True)
         param_dict = dict(project_data_dir = self.project_data_dir.getValue(),
                           args = self.args.getValue(),
                           project = self.project.getValue(),
-                          qc_tool_path = QC_TOOL_DIR,
                           )
 
         def statmethod(cur,end):
@@ -224,6 +226,7 @@ class QualityCheckProcess(malleefowl.process.WPSProcess):
         output = qcp.quality_check(**param_dict)
         self.qc_call_exit_code.setValue(output["qc_call_exit_code"])
         self.qc_call.setValue(output["qc_call"])
+        self.qc_svn_version.setValue(output["QC_SVN_Version"])
 
         return
 
