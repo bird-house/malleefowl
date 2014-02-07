@@ -43,8 +43,8 @@ class PidGenerationProcess(malleefowl.process.WPSProcess):
        
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_PID_Generation",
-            title = "PIDGeneration using qc_processes",
-            version = "2014.01.30",
+            title = "PID generation",
+            version = "2014.02.07",
             metadata = [],
             abstract = "If the given directory is valid included files and datasets receive a PID.")
 
@@ -129,8 +129,8 @@ class QualityCheckProcess(malleefowl.process.WPSProcess):
 
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_Quality_Check",
-            title = "Quality Check using qc_processes",
-            version = "2014.01.27",
+            title = "Quality Check",
+            version = "2014.02.07",
             metadata = [],
             abstract = "Runs a quality check on a given folder.")
 
@@ -242,8 +242,8 @@ class EvaluateQualityCheckProcess(malleefowl.process.WPSProcess):
 
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_Evaluate_Quality_Check",
-            title = "Evaluate Quality Check using qc_processes",
-            version = "2014.02.04",
+            title = "Evaluate Quality Check",
+            version = "2014.02.07",
             metadata = [],
             abstract = "Evaluates the quality check and generates metadata and quality files")
 
@@ -384,14 +384,13 @@ class EvaluateQualityCheckProcess(malleefowl.process.WPSProcess):
 
 class QualityPublisherProcess(malleefowl.process.WPSProcess):
     def __init__(self):
-        self.parallel_id = "web1"#TODO set as parameter
         self.database_location = DATABASE_LOCATION
         abstract_ml = ("Read trough a file containing one filename per line and publish it.")
 
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_QualityPublisher", 
-            title = "Publish QualityControl results using qc_processes.",
-            version = "2014.02.06",
+            title = "Publish generated quality XML files.",
+            version = "2014.02.07",
             metadata = [],
             abstract = abstract_ml)
            
@@ -443,6 +442,65 @@ class QualityPublisherProcess(malleefowl.process.WPSProcess):
 
         return
 
+class MetaPublisherProcess(malleefowl.process.WPSProcess):
+    def __init__(self):
+        self.database_location = DATABASE_LOCATION
+        abstract_ml = ("Read trough a file containing one filename per line and publish it.")
+
+        malleefowl.process.WPSProcess.__init__(self,
+            identifier = "QC_QualityPublisher", 
+            title = "Publish generated metadata XML files.",
+            version = "2014.02.07",
+            metadata = [],
+            abstract = abstract_ml)
+           
+        self.parallel_id = self.addLiteralInput(
+            identifier = "parallel_id",
+            title = "Parallel ID",
+            abstract = ("An ID for the current process. The processes_dir contains the to upload files"
+                      +" list."),
+            default = "web1",
+            type = types.StringType,
+            )
+
+        self.username = self.addLiteralInput(
+            identifier = "username",
+            title = "Username",
+            abstract = ("The username is used to prevent two users working in the same directory."
+                        +" Currently this is a work around until the username can be derived "
+                        +"automatically."),
+            default = "defaultuser",
+            type = types.StringType,
+            )
+            
+
+        self.process_log = self.addComplexOutput(
+            identifier = "process_log",
+            title = "Log of the process containing system calls.",
+            formats = [{"mimeType":"text/plain"}],
+            asReference = True,
+            )
+    def execute(self):
+        self.status.set(msg = "Initiate process", percentDone = 0, propagate = True)
+        param_dict = dict(publish_method="swift",
+                          subdir = "metaxml",
+                          keyfile = os.path.join(climdapsabs,"stvariables.conf")
+                         )
+        def statmethod(cur,end):
+            statusmethod("Running",cur,end,self)
+
+        qcp = qcprocesses.QCProcesses(self.database_location,
+                                      username = self.username.getValue(),
+                                      statusmethod = statmethod,
+                                      work_dir = WORK_DIR,
+                                      parallel_id = self.parallel_id.getValue(),
+                                      )
+        output = qcp.metadatapublisher(**param_dict)
+
+        process_log = _create_server_copy_of_file(output["process_log_name"],self)
+        self.process_log.setValue(process_log)
+
+        return
 ##################
 # Helper methods #
 ##################
