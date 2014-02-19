@@ -59,20 +59,24 @@ class Wget(malleefowl.process.SourceProcess):
         self.status.set(msg="logon successful", percentDone=10, propagate=True)
 
         netcdf_url = self.file_identifier.getValue()
-        
-        self.cmd(cmd=["wget", 
-                      "--certificate", esgf_credentials, 
-                      "--private-key", esgf_credentials, 
-                      "--no-check-certificate", 
-                      "-N",
-                      "-P", self.cache_path,
-                      "--progress", "dot:mega",
-                      netcdf_url], stdout=True)
-        
+
+        try:
+            cmd = ["wget",
+                   "--certificate", esgf_credentials, 
+                   "--private-key", esgf_credentials, 
+                   "--no-check-certificate", 
+                   "-N",
+                   "-P", self.cache_path,
+                   "--progress", "dot:mega",
+                   netcdf_url]
+            self.cmd(cmd, stdout=True)
+        except Exception, err:
+            raise RuntimeError("wget failed (%s)." % (err.message))
+
         out = os.path.join(self.cache_path, os.path.basename(netcdf_url))
         self.message('out path=%s' % (out), force=True)
         self.status.set(msg="retrieved netcdf file", percentDone=90, propagate=True)
-        
+
         self.output.setValue(out)
 
 
