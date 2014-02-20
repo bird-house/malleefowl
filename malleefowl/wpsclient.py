@@ -1,3 +1,9 @@
+##
+## docs
+## http://bip.weizmann.ac.il/course/python/PyMOTW/PyMOTW/docs/optparse/index.html#module-optparse
+## http://pymotw.com/2/json/
+
+
 import json
 
 class MyEncoder(json.JSONEncoder):
@@ -43,23 +49,18 @@ def describe_process(service, identifier, json_format=False, verbose=False):
         print "Data Inputs      = ", reduce(lambda x,y: x + ', ' + y.identifier, process.dataInputs, '')
         print "Process Outputs  = ", reduce(lambda x,y: x + ', ' + y.identifier, process.processOutputs, '')
 
-def execute(service, identifier, inputs=[], outputs=[], openid=None, password=None, file_identifiers=None, verbose=False):
+def execute(service, identifier, inputs=[], outputs=[], json_format=False, sleep_secs=1, verbose=False):
     wps = WebProcessingService(service, verbose=verbose)
-    if openid != None:
-        inputs.append( ("openid", openid) )
-    if password != None:
-        inputs.append( ("password", password) )
-    if file_identifiers != None:
-        for file_identifier in file_identifiers.split(','):
-            inputs.append( ("file_identifier", file_identifier) )
     execution = wps.execute(identifier, inputs=inputs, output=outputs)
-    monitorExecution(execution, sleepSecs=1)
-    status = execution.status
-    print status
-    print execution.processOutputs
-    for out in execution.processOutputs:
-        print out.reference
-    #output = execution.processOutputs[0].reference
+    monitorExecution(execution, sleepSecs=sleep_secs)
+
+    if json_format:
+        print MyEncoder(sort_keys=True, indent=2).encode(execution.processOutputs)
+
+    output = None
+    if len(execution.processOutputs) > 0:
+        output = execution.processOutputs[0].reference
+    return output
 
 def main():
     import optparse
@@ -91,15 +92,21 @@ def main():
         parser, 'Execute Options',
         'Options for exection command')
     execute_opts.add_option('--input',
-                            dest="inputs",
-                            action="append",
-                            default=[],
-                            help="zero or more input params: key=value")
+                            dest = "inputs",
+                            action = "append",
+                            default = [],
+                            help = "zero or more input params: key=value")
     execute_opts.add_option('--output',
-                            dest="outputs",
-                            action="append",
-                            default=[],
-                            help="one or more output params")
+                            dest = "outputs",
+                            action = "append",
+                            default = [],
+                            help = "one or more output params")
+    execute_opts.add_option('--sleep',
+                            dest = "sleep_secs",
+                            action = "store",
+                            default = 1,
+                            type="int",
+                            help = "sleep interval in seconds when checking process status")
     parser.add_option_group(execute_opts)
 
     options, remainder = parser.parse_args()
@@ -109,7 +116,8 @@ def main():
         print "IDENTIFIER = ", options.identifier
         print "INPUTS     = ", options.inputs
         print "OUTPUTS    = ", options.outputs
-        print "JSON       = ", options.json
+        print "SLEPP      = ", options.sleep_secs
+        print "JSON       = ", options.json_format
         print "COMMAND    = ", remainder
 
     inputs = []
@@ -138,6 +146,8 @@ def main():
             identifier = options.identifier,
             inputs = inputs,
             outputs = outputs,
+            sleep_secs = options.sleep_secs,
+            json_format = options.json_format,
             verbose = options.verbose)
     else:
         print "Unknown command", remainder
