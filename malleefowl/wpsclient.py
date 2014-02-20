@@ -4,6 +4,7 @@
 ## http://pymotw.com/2/json/
 
 
+import sys
 import json
 
 class MyEncoder(json.JSONEncoder):
@@ -62,6 +63,9 @@ def execute(service, identifier, inputs=[], outputs=[], json_format=False, sleep
         output = execution.processOutputs[0].reference
     return output
 
+def message(msg=None):
+    print >>sys.stderr, msg
+
 def main():
     import optparse
 
@@ -112,13 +116,13 @@ def main():
     options, remainder = parser.parse_args()
     
     if options.verbose:
-        print "SERVICE    = ", options.service
-        print "IDENTIFIER = ", options.identifier
-        print "INPUTS     = ", options.inputs
-        print "OUTPUTS    = ", options.outputs
-        print "SLEPP      = ", options.sleep_secs
-        print "JSON       = ", options.json_format
-        print "COMMAND    = ", remainder
+        message("SERVICE    = %s" % ( options.service ))
+        message("IDENTIFIER = %s" % ( options.identifier ))
+        message("INPUTS     = %s" % ( options.inputs ))
+        message("OUTPUTS    = %s" % ( options.outputs ))
+        message("SLEPP      = %s" % ( options.sleep_secs ))
+        message("JSON       = %s" % ( options.json_format ))
+        message("COMMAND    = %s" % ( remainder ))
 
     inputs = []
     for param in options.inputs:
