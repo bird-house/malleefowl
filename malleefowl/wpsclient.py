@@ -5,9 +5,8 @@ class MyEncoder(json.JSONEncoder):
     def default(self, obj):
         #print 'default(', repr(obj), ')'
         # Convert objects to a dictionary of their representation
-        d = ""
+        d = {}
         try:
-            d = {}
             d.update(obj.__dict__)
         except:
             pass
@@ -15,35 +14,34 @@ class MyEncoder(json.JSONEncoder):
 
 from owslib.wps import WebProcessingService, monitorExecution
 
-def get_caps(service, verbose=False):
+def get_caps(service, json_format=False, verbose=False):
     wps = WebProcessingService(service, verbose=verbose)
     wps.getcapabilities()
-    for process in wps.processes:
-        # TODO: return result as yaml or json
-        print "Title      = ", process.title
-        print "Identifier = ", process.identifier
-        print "Abstract   = ", process.abstract
-        print "********************************************"
-    print "Number of processes:", len(wps.processes)
-        
 
-def describe_process(service, identifier, verbose=False):
+    if json_format:
+         # TODO: return result as yaml or json
+         print MyEncoder(sort_keys=True, indent=2).encode(wps.processes)
+    else:
+        count = 0
+        for process in wps.processes:
+            count = count + 1
+            print "%3d. %s [%s]" % (count, process.title, process.identifier)
+
+def describe_process(service, identifier, json_format=False, verbose=False):
     wps = WebProcessingService(service, verbose=verbose)
     process = wps.describeprocess(identifier)
 
-    # TODO: return result as yaml or json
-    print "Title            = ", process.title
-    print "Identifier       = ", process.identifier
-    print "Abstract         = ", process.abstract
-    print "Store Supported  = ", process.storeSupported
-    print "Status Supported = ", process.statusSupported
-    print "Data Inputs      = ", reduce(lambda x,y: x + ', ' + y.identifier, process.dataInputs, '')
-    print "Process Outputs  = ", reduce(lambda x,y: x + ', ' + y.identifier, process.processOutputs, '')
-
-    print
-    print "*** json output ***"
-
-    print MyEncoder(sort_keys=True, indent=2).encode(process)
+    if json_format:
+        # TODO: return result as yaml or json
+        print MyEncoder(sort_keys=True, indent=2).encode(process)
+    else:
+        print "Title            = ", process.title
+        print "Identifier       = ", process.identifier
+        print "Abstract         = ", process.abstract
+        print "Store Supported  = ", process.storeSupported
+        print "Status Supported = ", process.statusSupported
+        print "Data Inputs      = ", reduce(lambda x,y: x + ', ' + y.identifier, process.dataInputs, '')
+        print "Process Outputs  = ", reduce(lambda x,y: x + ', ' + y.identifier, process.processOutputs, '')
 
 def execute(service, identifier, inputs=[], outputs=[], openid=None, password=None, file_identifiers=None, verbose=False):
     wps = WebProcessingService(service, verbose=verbose)
@@ -83,6 +81,11 @@ def main():
                       dest="identifier",
                       action="store",
                       help="WPS process identifier")
+    parser.add_option('--json',
+                      dest="json_format",
+                      default=False,
+                      action="store_true",
+                      help="print results in json format")
 
     execute_opts = optparse.OptionGroup(
         parser, 'Execute Options',
@@ -106,7 +109,8 @@ def main():
         print "IDENTIFIER = ", options.identifier
         print "INPUTS     = ", options.inputs
         print "OUTPUTS    = ", options.outputs
-        print "REMAINDER  = ", remainder
+        print "JSON       = ", options.json
+        print "COMMAND    = ", remainder
 
     inputs = []
     for param in options.inputs:
@@ -118,15 +122,23 @@ def main():
         outputs.append( (param, True) )
 
     if 'caps' in remainder:
-        get_caps(service=options.service, verbose=options.verbose)
+        get_caps(
+            service = options.service,
+            json_format = options.json_format,
+            verbose = options.verbose)
     elif 'info' in remainder:
-        describe_process(service=options.service, identifier=options.identifier, verbose=options.verbose)
+        describe_process(
+            service = options.service,
+            identifier = options.identifier,
+            json_format = options.json_format,
+            verbose = options.verbose)
     elif 'run' in remainder:
-        execute(service = options.service,
-                identifier = options.identifier,
-                inputs = inputs,
-                outputs = outputs,
-                verbose=options.verbose)
+        execute(
+            service = options.service,
+            identifier = options.identifier,
+            inputs = inputs,
+            outputs = outputs,
+            verbose = options.verbose)
     else:
         print "Unknown command", remainder
         exit(1)
