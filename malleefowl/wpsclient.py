@@ -1,9 +1,25 @@
+import json
+
+class MyEncoder(json.JSONEncoder):
+    
+    def default(self, obj):
+        #print 'default(', repr(obj), ')'
+        # Convert objects to a dictionary of their representation
+        d = ""
+        try:
+            d = {}
+            d.update(obj.__dict__)
+        except:
+            pass
+        return d
+
 from owslib.wps import WebProcessingService, monitorExecution
 
 def get_caps(service, verbose=False):
     wps = WebProcessingService(service, verbose=verbose)
     wps.getcapabilities()
     for process in wps.processes:
+        # TODO: return result as yaml or json
         print "Title      = ", process.title
         print "Identifier = ", process.identifier
         print "Abstract   = ", process.abstract
@@ -11,8 +27,23 @@ def get_caps(service, verbose=False):
     print "Number of processes:", len(wps.processes)
         
 
-def describe_process(service, identifer, verbose=False):
-    raise NotImplementedError('to be done ...')
+def describe_process(service, identifier, verbose=False):
+    wps = WebProcessingService(service, verbose=verbose)
+    process = wps.describeprocess(identifier)
+
+    # TODO: return result as yaml or json
+    print "Title            = ", process.title
+    print "Identifier       = ", process.identifier
+    print "Abstract         = ", process.abstract
+    print "Store Supported  = ", process.storeSupported
+    print "Status Supported = ", process.statusSupported
+    print "Data Inputs      = ", reduce(lambda x,y: x + ', ' + y.identifier, process.dataInputs, '')
+    print "Process Outputs  = ", reduce(lambda x,y: x + ', ' + y.identifier, process.processOutputs, '')
+
+    print
+    print "*** json output ***"
+
+    print MyEncoder(sort_keys=True, indent=2).encode(process)
 
 def execute(service, identifier, inputs=[], outputs=[], openid=None, password=None, file_identifiers=None, verbose=False):
     wps = WebProcessingService(service, verbose=verbose)
