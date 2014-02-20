@@ -1,4 +1,10 @@
-def _execute(service, identifier, inputs=[], outputs=[], openid=None, password=None, file_identifiers=None):
+def get_caps(service):
+    raise NotImplementedError('to be done ...')
+
+def describe_process(service, identifer):
+    raise NotImplementedError('to be done ...')
+
+def execute(service, identifier, inputs=[], outputs=[], openid=None, password=None, file_identifiers=None):
     import urllib2
     from owslib.wps import WebProcessingService, monitorExecution
 
@@ -22,7 +28,8 @@ def _execute(service, identifier, inputs=[], outputs=[], openid=None, password=N
 def main():
     import optparse
 
-    parser = optparse.OptionParser()
+    parser = optparse.OptionParser(usage='%prog execute|describe|caps [options]',
+                                   version='0.1')
     parser.add_option('-v', '--verbose',
                       dest="verbose",
                       default=False,
@@ -32,18 +39,27 @@ def main():
     parser.add_option('-s', '--service',
                       dest="service",
                       default="http://localhost:8090/wps",
-                      action="store")
+                      action="store",
+                      help="WPS service url (default: http://localhost:8090/wps)")
     parser.add_option('-i', '--identifier',
                       dest="identifier",
-                      action="store")
-    parser.add_option('--input',
-                      dest="inputs",
-                      action="append",
-                      default=[])
-    parser.add_option('--output',
-                      dest="outputs",
-                      action="append",
-                      default=[])
+                      action="store",
+                      help="WPS process identifier")
+
+    execute_opts = optparse.OptionGroup(
+        parser, 'Execute Options',
+        'Options for exection command')
+    execute_opts.add_option('--input',
+                            dest="inputs",
+                            action="append",
+                            default=[],
+                            help="zero or more input params: key=value")
+    execute_opts.add_option('--output',
+                            dest="outputs",
+                            action="append",
+                            default=[],
+                            help="one or more output params")
+    parser.add_option_group(execute_opts)
 
     options, remainder = parser.parse_args()
     
@@ -52,6 +68,7 @@ def main():
         print "IDENTIFIER = ", options.identifier
         print "INPUTS     = ", options.inputs
         print "OUTPUTS    = ", options.outputs
+        print "REMAINDER  = ", remainder
 
     inputs = []
     for param in options.inputs:
@@ -62,15 +79,17 @@ def main():
     for param in options.outputs:
         outputs.append( (param, True) )
 
-    if options.verbose:
-        print "SERVICE    = ", options.service
-        print "IDENTIFIER = ", options.identifier
-        print "INPUTS     = ", inputs
-        print "OUTPUTS    = ", outputs
-
-    _execute(service = options.service,
-             identifier = options.identifier,
-             inputs = inputs,
-             outputs = outputs)
+    if 'caps' in remainder:
+        get_caps(service=options.service)
+    elif 'info' in remainder:
+        describe_process(service=options.service, identifier=options.identifier)
+    elif 'run' in remainder:
+        execute(service = options.service,
+                identifier = options.identifier,
+                inputs = inputs,
+                outputs = outputs)
+    else:
+        print "Unknown command", remainder
+        exit(1)
 
     
