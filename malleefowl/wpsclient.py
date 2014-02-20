@@ -1,14 +1,21 @@
-def get_caps(service):
+from owslib.wps import WebProcessingService, monitorExecution
+
+def get_caps(service, verbose=False):
+    wps = WebProcessingService(service, verbose=verbose)
+    wps.getcapabilities()
+    for process in wps.processes:
+        print "Title      = ", process.title
+        print "Identifier = ", process.identifier
+        print "Abstract   = ", process.abstract
+        print "********************************************"
+    print "Number of processes:", len(wps.processes)
+        
+
+def describe_process(service, identifer, verbose=False):
     raise NotImplementedError('to be done ...')
 
-def describe_process(service, identifer):
-    raise NotImplementedError('to be done ...')
-
-def execute(service, identifier, inputs=[], outputs=[], openid=None, password=None, file_identifiers=None):
-    import urllib2
-    from owslib.wps import WebProcessingService, monitorExecution
-
-    wps = WebProcessingService(service, verbose=False)
+def execute(service, identifier, inputs=[], outputs=[], openid=None, password=None, file_identifiers=None, verbose=False):
+    wps = WebProcessingService(service, verbose=verbose)
     if openid != None:
         inputs.append( ("openid", openid) )
     if password != None:
@@ -80,14 +87,15 @@ def main():
         outputs.append( (param, True) )
 
     if 'caps' in remainder:
-        get_caps(service=options.service)
+        get_caps(service=options.service, verbose=options.verbose)
     elif 'info' in remainder:
-        describe_process(service=options.service, identifier=options.identifier)
+        describe_process(service=options.service, identifier=options.identifier, verbose=options.verbose)
     elif 'run' in remainder:
         execute(service = options.service,
                 identifier = options.identifier,
                 inputs = inputs,
-                outputs = outputs)
+                outputs = outputs,
+                verbose=options.verbose)
     else:
         print "Unknown command", remainder
         exit(1)
