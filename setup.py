@@ -44,6 +44,9 @@ setup(name='Malleefowl',
       zip_safe=False,
       test_suite='nose.collector',
       install_requires=requires,
-      #entry_points="""\
-      #""",
+      entry_points = {
+          'console_scripts': [
+              'wpsclient=malleefowl.wpsclient:main',
+              ]}     
+      ,
       )
