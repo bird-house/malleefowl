@@ -25,6 +25,7 @@ class MyEncoder(json.JSONEncoder):
             pass
         return d
 
+
 from owslib.wps import WebProcessingService, monitorExecution
 
 def get_caps(service, verbose=False):
@@ -53,17 +54,18 @@ def _write_caps(fp, processes, format='text'):
         count = count + 1
         fp.write("%3d. %s [%s]\n" % (count, process.title, process.identifier))
 
-def _write_process(fp, processes, format='text'):
-    fp.write("Title            = %s\n", process.title)
-    fp.write("Identifier       = %s\n", process.identifier)
-    fp.write("Abstract         = %s\n", process.abstract)
-    fp.write("Store Supported  = %s\n", process.storeSupported)
-    fp.write("Status Supported = %s\n", process.statusSupported)
-    fp.write("Data Inputs      = %s\n", reduce(lambda x,y: x + ', ' + y.identifier, process.dataInputs, ''))
-    fp.write("Process Outputs  = %s\n", reduce(lambda x,y: x + ', ' + y.identifier, process.processOutputs, ''))
+def _write_describe(fp, process, format='text'):
+    fp.write("Title            = %s\n" % ( process.title))
+    fp.write("Identifier       = %s\n" % ( process.identifier))
+    fp.write("Abstract         = %s\n" % ( process.abstract))
+    fp.write("Store Supported  = %s\n" % ( process.storeSupported))
+    fp.write("Status Supported = %s\n" % ( process.statusSupported))
+    fp.write("Data Inputs      = %s\n" % ( reduce(lambda x,y: x + ', ' + y, map(lambda x: x.identifier, process.dataInputs))))
+    fp.write("Process Outputs  = %s\n" % ( reduce(lambda x,y: x + ', ' + y, map(lambda x: x.identifier, process.processOutputs))))
 
 def _write_execute(fp, processes, format='text'):
-    pass
+    for process in processes:
+        fp.write("%s: %s\n" % (process.identifier, process.reference))
 
 def write_result(outfile, command, result, format='text'):
     try:
