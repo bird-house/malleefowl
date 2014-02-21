@@ -57,7 +57,7 @@ def execute(service, identifier, inputs=[], outputs=[], sleep_secs=1, verbose=Fa
 def message(msg=None):
     print msg
 
-def write_result(outfile, result):
+def write_result(outfile, result, format='json'):
     try:
         fp = outfile
         if not type(outfile) is file:
@@ -70,7 +70,7 @@ def write_result(outfile, result):
 def main():
     import optparse
 
-    parser = optparse.OptionParser(usage='%prog execute|describe|caps [options]',
+    parser = optparse.OptionParser(usage='%prog caps|describe|execute [options]',
                                    version='0.1')
     parser.add_option('-v', '--verbose',
                       dest="verbose",
@@ -87,11 +87,13 @@ def main():
                       dest="identifier",
                       action="store",
                       help="WPS process identifier")
-    parser.add_option('--json',
-                      dest="json_format",
-                      default=False,
-                      action="store_true",
-                      help="print results in json format")
+    parser.add_option('-f', '--format',
+                      dest="format",
+                      type = "choice",
+                      choices = ['json'],
+                      default="json",
+                      action="store",
+                      help="format for result (default: json)")
     parser.add_option('-o', '--outfile',
                       dest="outfile",
                       default=sys.stdout,
@@ -127,7 +129,7 @@ def main():
         message("INPUTS     = %s" % ( options.inputs ))
         message("OUTPUTS    = %s" % ( options.outputs ))
         message("SLEEP      = %s" % ( options.sleep_secs ))
-        message("JSON       = %s" % ( options.json_format ))
+        message("FORMAT     = %s" % ( options.format ))
         message("COMMAND    = %s" % ( remainder ))
 
     inputs = []
@@ -144,12 +146,12 @@ def main():
         result = get_caps(
             service = options.service,
             verbose = options.verbose)
-    elif 'info' in remainder:
+    elif 'describe' in remainder:
         result = describe_process(
             service = options.service,
             identifier = options.identifier,
             verbose = options.verbose)
-    elif 'run' in remainder:
+    elif 'execute' in remainder:
         result = execute(
             service = options.service,
             identifier = options.identifier,
@@ -162,4 +164,4 @@ def main():
         exit(1)
 
     
-    write_result(options.outfile, result)
+    write_result(options.outfile, result, format=options.format)
