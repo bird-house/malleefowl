@@ -8,6 +8,11 @@
 import sys
 import json
 
+import logging
+logging.basicConfig(format='%(message)s')
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
 class MyEncoder(json.JSONEncoder):
     
     def default(self, obj):
@@ -29,7 +34,7 @@ def get_caps(service, verbose=False):
     count = 0
     for process in wps.processes:
         count = count + 1
-        print "%3d. %s [%s]" % (count, process.title, process.identifier)
+        logger.info("%3d. %s [%s]" % (count, process.title, process.identifier))
 
     return wps.processes
 
@@ -37,13 +42,13 @@ def describe_process(service, identifier, verbose=False):
     wps = WebProcessingService(service, verbose=verbose)
     process = wps.describeprocess(identifier)
 
-    print "Title            = ", process.title
-    print "Identifier       = ", process.identifier
-    print "Abstract         = ", process.abstract
-    print "Store Supported  = ", process.storeSupported
-    print "Status Supported = ", process.statusSupported
-    print "Data Inputs      = ", reduce(lambda x,y: x + ', ' + y.identifier, process.dataInputs, '')
-    print "Process Outputs  = ", reduce(lambda x,y: x + ', ' + y.identifier, process.processOutputs, '')
+    logger.info("Title            = %s", process.title)
+    logger.info("Identifier       = %s", process.identifier)
+    logger.info("Abstract         = %s", process.abstract)
+    logger.info("Store Supported  = %s", process.storeSupported)
+    logger.info("Status Supported = %s", process.statusSupported)
+    logger.info("Data Inputs      = %s", reduce(lambda x,y: x + ', ' + y.identifier, process.dataInputs, ''))
+    logger.info("Process Outputs  = %s", reduce(lambda x,y: x + ', ' + y.identifier, process.processOutputs, ''))
 
     return process
 
@@ -53,9 +58,6 @@ def execute(service, identifier, inputs=[], outputs=[], sleep_secs=1, verbose=Fa
     monitorExecution(execution, sleepSecs=sleep_secs)
 
     return execution.processOutputs
-
-def message(msg=None):
-    print msg
 
 def write_result(outfile, result, format='json'):
     try:
@@ -124,13 +126,15 @@ def main():
     options, remainder = parser.parse_args()
     
     if options.verbose:
-        message("SERVICE    = %s" % ( options.service ))
-        message("IDENTIFIER = %s" % ( options.identifier ))
-        message("INPUTS     = %s" % ( options.inputs ))
-        message("OUTPUTS    = %s" % ( options.outputs ))
-        message("SLEEP      = %s" % ( options.sleep_secs ))
-        message("FORMAT     = %s" % ( options.format ))
-        message("COMMAND    = %s" % ( remainder ))
+        logger.setLevel(logging.DEBUG)
+        
+    logger.debug("SERVICE    = %s", options.service)
+    logger.debug("IDENTIFIER = %s", options.identifier)
+    logger.debug("INPUTS     = %s", options.inputs)
+    logger.debug("OUTPUTS    = %s", options.outputs)
+    logger.debug("SLEEP      = %s", options.sleep_secs)
+    logger.debug("FORMAT     = %s", options.format)
+    logger.debug("COMMAND    = %s", remainder)
 
     inputs = []
     for param in options.inputs:
@@ -160,7 +164,7 @@ def main():
             sleep_secs = options.sleep_secs,
             verbose = options.verbose)
     else:
-        print "Unknown command", remainder
+        logger.error("Unknown command %s", remainder)
         exit(1)
 
     
