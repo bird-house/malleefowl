@@ -1,8 +1,7 @@
 ##
-## docs
-## http://bip.weizmann.ac.il/course/python/PyMOTW/PyMOTW/docs/optparse/index.html#module-optparse
-## http://pymotw.com/2/json/
-## http://groovy.codehaus.org/Executing+External+Processes+From+Groovy
+## Simple script to call wps service. Using wps module from owslib.
+##
+## Results are written as json to output file.
 
 
 import sys
