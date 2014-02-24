@@ -11,11 +11,6 @@ import qc_processes.qcprocesses as qcprocesses
 import os
 import logging
 logger = logging.getLogger(__name__)
-#hdlr = logging.FileHandler("/var/tmp/quality_processes.log")
-#formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
-#hdlr.setFormatter(formatter)
-#logger.addHandler(hdlr) 
-#logger.setLevel(logging.DEBUG)
 
 curdir = os.path.dirname(__file__)
 climdapsabs = os.path.abspath(os.path.join(curdir,"../../.."))
@@ -332,13 +327,23 @@ class EvaluateQualityCheckProcess(malleefowl.process.WPSProcess):
             formats = [{"mimeType":"text/plain"}],
             asReference = True,
             )
+
         self.to_publish_qc_files = self.addComplexOutput(
             identifier = "to_publish_qc_files",
-            title = "QC files that need to be published",
+            title = "QC files that can be published",
             metadata = [],
             formats = [{"mimeType":"text/plain"}],
             asReference = True,
             )
+
+        self.to_publish_metadata_files = self.addComplexOutput(
+            identifier = "to_publish_metadata_files",
+            title = "Metadata files that can be published",
+            metadata = [],
+            formats = [{"mimeType":"text/plain"}],
+            asReference = True,
+            )
+
         logger.debug("qp: eval finished init")
 
 
@@ -379,6 +384,9 @@ class EvaluateQualityCheckProcess(malleefowl.process.WPSProcess):
         self.process_log.setValue(process_log)
         to_publish_qc_files_log = _create_server_copy_of_file(output["to_publish_qc_files_log"],self)
         self.to_publish_qc_files.setValue(to_publish_qc_files_log)
+        to_publish_metadata_files_log = _create_server_copy_of_file(
+            output["to_publish_metadata_files_log"],self)
+        self.to_publish_metadata_files.setValue(to_publish_metadata_files_log)
         return
 
 
