@@ -15,11 +15,17 @@ def test_execute():
         inputs = [('input1', '2'), ('input2', '3')],
         outputs = [('output1', True), ('output2', True)]
         )
-    nose.tools.ok_(len(result) == 2)
+    nose.tools.ok_(len(result) == 2, result)
+    nose.tools.ok_('http' in result[0]['reference'])
+    nose.tools.ok_('http' in result[1]['reference'])
 
-    f = tempfile.NamedTemporaryFile(mode='w+')
-    wpsclient.write_result(f.name, 'execute', result, format='json')
-    obj = json.load(f)
-    nose.tools.ok_(len(obj) == 2)
-    nose.tools.ok_(obj[0]['reference'] != None)
-    nose.tools.ok_(obj[1]['reference'] != None)
+    fp = tempfile.NamedTemporaryFile(mode='w+')
+    fp.write(json.dumps(result))
+    fp.flush()
+    fp.seek(0)
+
+    result2 = json.load(fp)
+    nose.tools.ok_(len(result2) == 2, result2)
+    nose.tools.ok_('http' in result2[0]['reference'])
+    nose.tools.ok_('http' in result2[1]['reference'])
+

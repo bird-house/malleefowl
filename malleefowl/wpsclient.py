@@ -21,6 +21,7 @@ class MyEncoder(json.JSONEncoder):
         d = {}
         try:
             d.update(obj.__dict__)
+            d.pop('_root', None)
         except:
             pass
         return d
@@ -31,60 +32,40 @@ from owslib.wps import WebProcessingService, monitorExecution
 def get_caps(service, verbose=False):
     wps = WebProcessingService(service, verbose=verbose)
     wps.getcapabilities()
-    return wps.processes
+
+    count = 0
+    for process in wps.processes:
+        count = count + 1
+        logger.info("%3d. %s [%s]", count, process.title, process.identifier)
+
+    return to_json(wps.processes)
 
 def describe_process(service, identifier, verbose=False):
     wps = WebProcessingService(service, verbose=verbose)
     process = wps.describeprocess(identifier)
-    return process
+
+    logger.info("Title            = %s", process.title)
+    logger.info("Identifier       = %s", process.identifier)
+    logger.info("Abstract         = %s", process.abstract)
+    logger.info("Store Supported  = %s", process.storeSupported)
+    logger.info("Status Supported = %s", process.statusSupported)
+    logger.info("Data Inputs      = %s", reduce(lambda x,y: x + ', ' + y, map(lambda x: x.identifier, process.dataInputs)))
+    logger.info("Process Outputs  = %s", reduce(lambda x,y: x + ', ' + y, map(lambda x: x.identifier, process.processOutputs)))
+    
+    return to_json(process)
 
 def execute(service, identifier, inputs=[], outputs=[], sleep_secs=1, verbose=False):
     wps = WebProcessingService(service, verbose=verbose)
     execution = wps.execute(identifier, inputs=inputs, output=outputs)
     monitorExecution(execution, sleepSecs=sleep_secs)
-    return execution.processOutputs
 
-def _write_json(fp, result):
-    chunk = MyEncoder(sort_keys=True, indent=2).encode(result)
-    fp.write(chunk)
+    for process in execution.processOutputs:
+        logger.info("%s: %s", process.identifier, process.reference)
 
-def _write_caps(fp, processes, format='text'):
-    count = 0
-    for process in processes:
-        count = count + 1
-        fp.write("%3d. %s [%s]\n" % (count, process.title, process.identifier))
-
-def _write_describe(fp, process, format='text'):
-    fp.write("Title            = %s\n" % ( process.title))
-    fp.write("Identifier       = %s\n" % ( process.identifier))
-    fp.write("Abstract         = %s\n" % ( process.abstract))
-    fp.write("Store Supported  = %s\n" % ( process.storeSupported))
-    fp.write("Status Supported = %s\n" % ( process.statusSupported))
-    fp.write("Data Inputs      = %s\n" % ( reduce(lambda x,y: x + ', ' + y, map(lambda x: x.identifier, process.dataInputs))))
-    fp.write("Process Outputs  = %s\n" % ( reduce(lambda x,y: x + ', ' + y, map(lambda x: x.identifier, process.processOutputs))))
-
-def _write_execute(fp, processes, format='text'):
-    for process in processes:
-        fp.write("%s: %s\n" % (process.identifier, process.reference))
-
-def write_result(outfile, command, result, format='text'):
-    try:
-        fp = outfile
-        if not type(outfile) is file:
-            fp = open(outfile, 'w')
-
-        if format=='json':
-            _write_json(fp, result)
-        elif 'caps' in command:
-            _write_caps(fp, result, format)
-        elif 'describe' in command:
-            _write_describe(fp, result, format)
-        elif 'execute' in command:
-            _write_execute(fp, result, format)
-        else:
-            logger.error('unknown command: %s', command)
-    finally:
-        fp.close()
+    return to_json(execution.processOutputs)
+    
+def to_json(result):
+    return json.loads( MyEncoder(sort_keys=True, indent=2).encode(result) )
 
 def main():
     import optparse
@@ -106,18 +87,10 @@ def main():
                       dest="identifier",
                       action="store",
                       help="WPS process identifier")
-    parser.add_option('-f', '--format',
-                      dest="format",
-                      type = "choice",
-                      choices = ['json', 'text'],
-                      default="text",
-                      action="store",
-                      help="format for result [json, text] (default: text)")
     parser.add_option('-o', '--outfile',
                       dest="outfile",
-                      default=sys.stdout,
                       action="store",
-                      help="output file for results (default: stdout)")
+                      help="output file for results")
 
     execute_opts = optparse.OptionGroup(
         parser, 'Execute Options',
@@ -150,7 +123,6 @@ def main():
     logger.debug("INPUTS     = %s", options.inputs)
     logger.debug("OUTPUTS    = %s", options.outputs)
     logger.debug("SLEEP      = %s", options.sleep_secs)
-    logger.debug("FORMAT     = %s", options.format)
     logger.debug("COMMAND    = %s", command)
 
     inputs = []
@@ -184,5 +156,7 @@ def main():
         logger.error("Unknown command %s", command)
         exit(1)
 
-    
-    write_result(options.outfile, command, result, format=options.format)
+    if options.outfile:
+        with open(options.outfile, "w") as fp:
+            json.dump(result, fp, sort_keys=True, indent=2)
+
