@@ -10,9 +10,9 @@ mylookup = TemplateLookup(directories=[os.path.join(os.path.dirname(__file__), '
 import logging
 logger = logging.getLogger(__name__)
 
-def generate():
-    mytemplate = mylookup.get_template('simpleWorkflow.yaml')
-    return  mytemplate.render()
+def generate(name, service, identifier, input=[]):
+    mytemplate = mylookup.get_template(name + '.yaml')
+    return  mytemplate.render(service=service, identifier=identifier, input=input)
 
 def write(filename, workflow):
     with open(filename, 'w') as fp:
@@ -33,4 +33,6 @@ def run(filename, basedir=None, verbose=False):
     p = subprocess.Popen(cmd, stdout=PIPE, stderr=PIPE, cwd=basedir)
 
     (stdoutdata, stderrdata) = p.communicate()
+
+    return stdoutdata + stderrdata
     

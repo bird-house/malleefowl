@@ -33,14 +33,18 @@
   type: GroovyActor
   properties:
     step: |
-      proc = ['wpsclient', 'execute', 
+      cmd = ['wpsclient', 'execute', 
                     '-s', service,
                     '-i', identifier,
-                    '--input', 'input1=1',
-                    '--input', 'input2=2',
                     '--output', 'output1',
                     '--output', 'output2',
-                    '-o', 'wps_result.json'].execute()
+                    '-o', 'wps_result.json']
+      for (item in input) {
+          cmd.add('--input')
+          cmd.add('' + e.value)
+      }
+
+      proc = cmd.execute()
       proc.waitFor()
 
       import org.yaml.snakeyaml.Yaml
@@ -53,12 +57,12 @@
     inputs:
       identifier: 
       service:
-      file_identifiers:
-        type: String
+      input:
+        type: Collection
         optional: true
         nullable: true
-      input_params:
-        type: Collection
+      source:
+        type: String
         optional: true
         nullable: true
     outputs:

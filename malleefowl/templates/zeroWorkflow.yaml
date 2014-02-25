@@ -1,0 +1,42 @@
+imports:
+
+- classpath:/common/directors.yaml
+- classpath:/common/groovy/actors.yaml
+
+components:
+
+# actors
+
+<%include file="wpsActors.yaml"/>
+
+# workflow
+
+- id: ZeroWorkflow
+  type: Workflow
+  properties:
+    director: !ref MTDataDrivenDirector
+    nodes:
+    - !ref RunWpsProcess
+    - !ref RenderResult
+
+- id: RunWpsProcess
+  type: Node
+  properties:
+    actor: !ref WpsExecute
+    constants:
+      service: ${service}
+      identifier: ${identifier}
+      input: ${input}
+    inflows:
+      source: /wps/download/source
+    outflows:
+      status: /wps/work/status/
+      output: /wps/work/output/  
+ 
+- id: RenderResult
+  type: Node
+  properties:
+    actor: !ref PrintStreamWriter
+    inflows:
+      message: /wps/work/output/
+
