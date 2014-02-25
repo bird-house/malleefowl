@@ -25,7 +25,7 @@ logger.debug("qp: Loading data from file: "+fn)
 execfile(fn,DATA)
 logger.debug("qp: Loaded file to DATA variable")
 
-class PidGenerationProcess(malleefowl.process.WPSProcess):
+class DirectoryValidatorProcess(malleefowl.process.WPSProcess):
     """
     The process checks a path to be valid for processing and generates a PID
     for each new found .nc file and for each dataset that differs from the 
@@ -34,85 +34,68 @@ class PidGenerationProcess(malleefowl.process.WPSProcess):
     """
     def __init__(self):
 
-        self.database_location = DATABASE_LOCATION
        
         malleefowl.process.WPSProcess.__init__(self,
-            identifier = "QC_PID_Generation",
-            title = "PID generation",
-            version = "2014.02.07",
+            identifier = "DirectoryValid",
+            title = "Directory requirements check",
+            version = "2014.02.25",
             metadata = [],
             abstract = "If the given directory is valid included files and datasets receive a PID.")
 
         self.data_path = self.addLiteralInput(
-            identifier = "datapath",
-            title = "Root path of the to index data.",
+            identifier = "data_path",
+            title = "Root path of the to check data",
             default = os.path.join(climdapsabs,"examples/data/CORDEX"),
             type = types.StringType,
             minOccurs = 1,
             maxOccurs = 1,
             )
            
-        self.database_location = DATABASE_LOCATION
-
-        self.data_node = DATA["data_node"]
-
-        self.is_valid = self.addLiteralOutput(
-            identifier = "isvalid",
-            title = "The path has a valid structure.",
+        self.all_okay = self.addLiteralOutput(
+            identifier = "all_okay",
+            title = "The path has a valid structure",
             default = False,
             type = types.BooleanType,
             )
 
+        self.process_log = self.addComplexOutput(
+            identifier = "process_log",
+            title = "Log of this process",
+            metadata = [],
+            formats = [{"mimeType":"text/plain"}],
+            asReference = True,
+            )
 
-        self.errors = self.addLiteralOutput(
-            identifier = "errors",
-            title = "Error messages",
-            default = "",
+        self.project = self.addLiteralInput(
+            identifier = "project",
+            title = "The project used.",
+            abstract = "Currently only CORDEX is fully supported.",
+            default = "CORDEX",
+            allowedValues = ["CORDEX"],
             type = types.StringType,
             )
 
-        self.data_path_out = self.addLiteralOutput(
-            identifier = "data_path",
-            title = "Data path",
-            type = types.StringType)
-        
-        self.data_node_out = self.addLiteralOutput(
-            identifier = "data_node",
-            title = "Data node",
-            type = types.StringType)
-
-        self.new_files_counter = self.addLiteralOutput(
-            identifier = "new_files_counter",
-            title = "New PIDs generates for n files.",
-            type = types.IntType)
-
-        self.new_datasets_counter = self.addLiteralOutput(
-            identifier = "new_datasets_counter",
-            title = "New PIDs generates for n datasets.",
-            type = types.IntType)
 
     def execute(self):
         self.status.set(msg = "Initiate process", percentDone = 0, propagate = True)
         data_path = self.data_path.getValue()
-        data_node = self.data_node
         def statmethod(cur,end):
             statusmethod("Running",cur,end,self)
-        param_dict = dict(data_path = data_path,
-                          data_node = data_node,
-                          )
 
-        qcp = qcprocesses.QCProcesses(self.database_location,
+        qcp = qcprocesses.QCProcesses(DATABASE_LOCATION,
                                       statusmethod = statmethod,
                                       work_dir = WORK_DIR
                                       )
-        output = qcp.pid_generation(**param_dict)
+        project = self.project.getValue()
+        output = qcp.validate_directory(data_path, project)
 
-        self.is_valid.setValue(output["valid"])
-        self.errors.setValue(output["errors"])
-        self.data_node_out.setValue(data_node)
-        self.data_path_out.setValue(data_path)
-        self.new_datasets_counter.setValue(output["new_datasets_counter"])
-        self.new_files_counter.setValue(output["new_files_counter"])
+        self.all_okay.setValue(output["all_okay"])
+        log = open(self.mktempfile(suffix = ".txt"),"w")
+        for messages in output["messages"]:
+            for message in messages:
+                log.write(str(message)+"\n")
+        log.close()
+        self.process_log.setValue(log)
 
         return 
 
@@ -200,6 +183,12 @@ class QualityCheckProcess(malleefowl.process.WPSProcess):
             type = types.StringType,
             )
 
+        self.error_messages = self.addLiteralOutput(
+            identifier = "error_messages",
+            title = "Errors",
+            type = types.StringType,
+            )
+
     def execute(self):
         self.status.set(msg = "Initiate process", percentDone = 0, propagate = True)
         param_dict = dict(project_data_dir = self.project_data_dir.getValue(),
@@ -222,6 +211,7 @@ class QualityCheckProcess(malleefowl.process.WPSProcess):
         self.qc_call_exit_code.setValue(output["qc_call_exit_code"])
         self.qc_call.setValue(output["qc_call"])
         self.qc_svn_version.setValue(output["QC_SVN_Version"])
+        self.error_messages.setValue(str(output["stderr"]))
 
         return
 
