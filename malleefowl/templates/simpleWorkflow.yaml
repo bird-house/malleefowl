@@ -24,7 +24,7 @@ components:
 - id: DownloadData
   type: Node
   properties:
-    actor: !ref ExecuteWPSProcess
+    actor: !ref WpsExecute
     constants:
       service: http://localhost:8090/wps
       identifier: org.malleefowl.test.dummyprocess
@@ -50,7 +50,7 @@ components:
 - id: RunDataProcessing
   type: Node
   properties:
-    actor: !ref ExecuteWPSProcess
+    actor: !ref WpsExecute
     constants:
       service: http://localhost:8090/wps
       identifier: org.malleefowl.test.dummyprocess

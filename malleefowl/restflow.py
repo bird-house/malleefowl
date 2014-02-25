@@ -18,16 +18,19 @@ def write(filename, workflow):
     with open(filename, 'w') as fp:
         fp.write(workflow)
 
-def run(filename, verbose=False):
-    import subprocess
-    from subprocess import PIPE
-
+def run(filename, basedir=None, verbose=False):
     logger.debug("filename = %s", filename)
     
     cmd = ["restflow", "-f", filename, "--run", "restflow"]
     if verbose:
         cmd.append('-t')
-    p = subprocess.Popen(cmd, stdout=PIPE, stderr=PIPE)
+    if basedir:
+        cmd.append('--base')
+        cmd.append(basedir)
+        
+    import subprocess
+    from subprocess import PIPE
+    p = subprocess.Popen(cmd, stdout=PIPE, stderr=PIPE, cwd=basedir)
 
     (stdoutdata, stderrdata) = p.communicate()
     

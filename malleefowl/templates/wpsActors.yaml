@@ -29,11 +29,11 @@
       currentSources:
       count:
 
-- id: ExecuteWPSProcess
+- id: WpsExecute
   type: GroovyActor
   properties:
     step: |
-      proc = ['/home/pingu/sandbox/climdaps/bin/wpsclient', 'execute', 
+      proc = ['wpsclient', 'execute', 
                     '-s', service,
                     '-i', identifier,
                     '--input', 'input1=1',
