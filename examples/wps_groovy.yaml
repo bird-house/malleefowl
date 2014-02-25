@@ -44,7 +44,8 @@ components:
   properties:
     step: |
       proc = ['/home/pingu/sandbox/climdaps/bin/wpsclient', 'execute', 
-                    '-i', 'org.malleefowl.test.dummyprocess',
+                    '-s', service,
+                    '-i', identifier,
                     '--input', 'input1=1',
                     '--input', 'input2=2',
                     '--output', 'output1',
@@ -62,14 +63,6 @@ components:
     inputs:
       identifier: 
       service:
-      openid:
-        type: String
-        optional: true
-        nullable: true
-      password:
-        type: String
-        optional: true
-        nullable: true
       file_identifiers:
         type: String
         optional: true
@@ -141,5 +134,5 @@ components:
   properties:
     actor: !ref PrintStreamWriter
     inflows:
-      message: /wps/work/status/
+      message: /wps/work/output/
 
