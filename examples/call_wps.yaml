@@ -1,0 +1,51 @@
+imports:
+
+- classpath:/common/directors.yaml
+- classpath:/common/groovy/actors.yaml
+
+components:
+
+- id: CallWps
+  type: Workflow
+  properties:
+    director: !ref MTDataDrivenDirector
+    nodes:
+    - !ref CallWps1
+    - !ref PrintResult
+
+- id: CallWps1
+  type: Node
+  properties:
+    actor: !ref CallWpsActor
+    constants:
+      service: 'http://localhost:8090/wps'
+    outflows:
+      result: /result/
+
+- id: PrintResult
+  type: GroovyActorNode
+  properties:
+    actor.step: |
+      println result
+    inflows:
+      result: /result/
+    
+- id: CallWpsActor
+  type: GroovyActor
+  properties:
+    step: |
+      proc = ['/home/pingu/sandbox/climdaps/bin/wpsclient', 'caps', '-o', 'mytest.json'].execute()
+      proc.waitFor()
+
+      import org.yaml.snakeyaml.Yaml
+      input = new FileInputStream(new File("mytest.json"))
+      yaml = new Yaml()
+      caps = yaml.load(input)
+      result = caps[0].identifier
+    inputs:
+      service:
+    outputs:
+      result:
+
+    
+
