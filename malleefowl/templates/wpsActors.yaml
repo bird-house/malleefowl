@@ -1,5 +1,3 @@
-components:
-
 - id: CollectSources
   type: GroovyActor
   properties:

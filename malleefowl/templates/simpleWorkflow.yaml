@@ -2,9 +2,14 @@ imports:
 
 - classpath:/common/directors.yaml
 - classpath:/common/groovy/actors.yaml
-- file:/home/pingu/sandbox/climdaps/src/Malleefowl/examples/wpsActors.yaml
 
 components:
+
+# actors
+
+<%include file="wpsActors.yaml"/>
+
+# workflow
 
 - id: SimpleProcessing
   type: Workflow
