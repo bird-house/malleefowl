@@ -1,0 +1,65 @@
+imports:
+
+- classpath:/common/directors.yaml
+- classpath:/common/groovy/actors.yaml
+- file:/home/pingu/sandbox/climdaps/src/Malleefowl/examples/wpsActors.yaml
+
+components:
+
+- id: SimpleProcessing
+  type: Workflow
+  properties:
+    director: !ref MTDataDrivenDirector
+    nodes:
+    - !ref DownloadData
+    - !ref WaitForDownloads
+    - !ref RunDataProcessing
+    - !ref RenderResult
+
+- id: DownloadData
+  type: Node
+  properties:
+    actor: !ref ExecuteWPSProcess
+    constants:
+      service: http://localhost:8090/wps
+      identifier: org.malleefowl.test.dummyprocess
+      input_params: []
+    sequences:
+      file_identifiers: 
+        - test123.nc
+    outflows:
+      status: /wps/download/status/
+      output: /wps/download/file_identifier/
+
+- id: WaitForDownloads
+  type: Node
+  properties:
+    actor: !ref CollectSources
+    constants:
+      max: 1
+    inflows:
+      source: /wps/download/file_identifier/
+    outflows:
+      allSources: /wps/download/file_identifiers/
+
+- id: RunDataProcessing
+  type: Node
+  properties:
+    actor: !ref ExecuteWPSProcess
+    constants:
+      service: http://localhost:8090/wps
+      identifier: org.malleefowl.test.dummyprocess
+      input_params: []
+    inflows:
+      file_identifiers: /wps/download/file_identifiers
+    outflows:
+      status: /wps/work/status/
+      output: /wps/work/output/  
+ 
+- id: RenderResult
+  type: Node
+  properties:
+    actor: !ref PrintStreamWriter
+    inflows:
+      message: /wps/work/output/
+
