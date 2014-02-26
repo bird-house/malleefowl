@@ -36,9 +36,9 @@ class DirectoryValidatorProcess(malleefowl.process.WPSProcess):
 
        
         malleefowl.process.WPSProcess.__init__(self,
-            identifier = "DirectoryValid",
+            identifier = "QC_DirectoryValid",
             title = "Directory requirements check",
-            version = "2014.02.25",
+            version = "2014.02.26",
             metadata = [],
             abstract = "If the given directory is valid included files and datasets receive a PID.")
 
@@ -108,7 +108,7 @@ class QualityCheckProcess(malleefowl.process.WPSProcess):
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_Quality_Check",
             title = "Quality Check",
-            version = "2014.02.07",
+            version = "2014.02.26",
             metadata = [],
             abstract = "Runs a quality check on a given folder.")
 
@@ -120,15 +120,16 @@ class QualityCheckProcess(malleefowl.process.WPSProcess):
             default = "web1",
             type = types.StringType,
             )
-        self.username = self.addLiteralInput(
-            identifier = "username",
-            title = "Username",
-            abstract = ("The username is used to prevent two users working in the same directory."
-                        +" Currently this is a work around until the username can be derived "
-                        +"automatically."),
-            default = "defaultuser",
-            type = types.StringType,
-            )
+        #self.username =  self.addLiteralInput(
+        #    identifier = "username",
+        #    title = "Username",
+        #    abstract = ("The username is used to prevent two users working in the same directory."
+        #                +" Currently this is a work around until the username can be derived "
+        #                +"automatically."),
+        #    default = "defaultuser",
+        #    type = types.StringType,
+        #    )
+        self.username = "defaultuser"
         self.project_data_dir = self.addLiteralInput(
             identifier = "project_data_dir",
             title = "To analyse data path",
@@ -199,7 +200,7 @@ class QualityCheckProcess(malleefowl.process.WPSProcess):
         def statmethod(cur,end):
             statusmethod("Running",cur,end,self)
         qcp = qcprocesses.QCProcesses(self.database_location,
-                                      username = self.username.getValue(),
+                                      username = self.username,
                                       parallel_id = self.parallel_id.getValue(),
                                       statusmethod = statmethod,
                                       work_dir = WORK_DIR
@@ -228,30 +229,32 @@ class EvaluateQualityCheckProcess(malleefowl.process.WPSProcess):
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_Evaluate_Quality_Check",
             title = "Evaluate Quality Check",
-            version = "2014.02.07",
+            version = "2014.02.26",
             metadata = [],
             abstract = "Evaluates the quality check and generates metadata and quality files")
 
+        #self.username = self.addLiteralInput(
+        #    identifier = "username",
+        #    title = "Username",
+        #    abstract = ("The username is used to prevent two users working in the same directory."
+        #                +" Currently this is a work around until the username can be derived "
+        #                +"automatically."),
+        #    default = "defaultuser",
+        #    type = types.StringType,
+        #    )
+        self.username = "defaultuser"
+
+        selectable_parallelids = get_user_parallelids(self.username)
         self.parallel_id = self.addLiteralInput(
             identifier = "parallel_id",
             title = "Parallel ID",
-            abstract = ("An ID for the current process. If multiple processes are running in parallel "
-                      +"choose an unused one."),
-            default = "web1",
-            type = types.StringType,
-            )
-        self.username = self.addLiteralInput(
-            identifier = "username",
-            title = "Username",
-            abstract = ("The username is used to prevent two users working in the same directory."
-                        +" Currently this is a work around until the username can be derived "
-                        +"automatically."),
-            default = "defaultuser",
+            abstract = ("An ID for the current process. Select the one matchting to the quality check"),
+            allowedValues = selectable_parallelids,
             type = types.StringType,
             )
 
+
         logger.debug("qp: eval Loading DATA parameters")
-        #logger.debug(str(DATA))
         self.data_node = DATA.get("data_node")
 
         self.index_node = DATA.get("index_node")
@@ -353,7 +356,7 @@ class EvaluateQualityCheckProcess(malleefowl.process.WPSProcess):
         def statmethod(cur,end):
             statusmethod("Running",cur,end,self)
         qcp = qcprocesses.QCProcesses(self.database_location,
-                                      username = self.username.getValue(),
+                                      username = self.username,
                                       parallel_id = self.parallel_id.getValue(),
                                       statusmethod = statmethod,
                                       work_dir = WORK_DIR
@@ -388,33 +391,34 @@ class QualityPublisherProcess(malleefowl.process.WPSProcess):
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_QualityPublisher", 
             title = "Publish generated quality XML files.",
-            version = "2014.02.07",
+            version = "2014.02.26",
             metadata = [],
             abstract = abstract_ml)
            
+
+        #self.username = self.addLiteralInput(
+        #    identifier = "username",
+        #    title = "Username",
+        #    abstract = ("The username is used to prevent two users working in the same directory."
+        #                +" Currently this is a work around until the username can be derived "
+        #                +"automatically."),
+        #    default = "defaultuser",
+        #    type = types.StringType,
+        #    )
+        self.username = "defaultuser"    
+
+        selectable_parallelids = get_user_parallelids(self.username)
         self.parallel_id = self.addLiteralInput(
             identifier = "parallel_id",
             title = "Parallel ID",
-            abstract = ("An ID for the current process. The processes folder contains the to upload files"
-                      +" list."),
-            default = "web1",
+            abstract = ("An ID for the current process. Select the one matchting to the quality check"),
+            allowedValues = selectable_parallelids,
             type = types.StringType,
             )
-
-        self.username = self.addLiteralInput(
-            identifier = "username",
-            title = "Username",
-            abstract = ("The username is used to prevent two users working in the same directory."
-                        +" Currently this is a work around until the username can be derived "
-                        +"automatically."),
-            default = "defaultuser",
-            type = types.StringType,
-            )
-            
 
         self.process_log = self.addComplexOutput(
             identifier = "process_log",
-            title = "Log of the process containing system calls.",
+            title = "Log of the process containing system calls that equal the actions performed.",
             formats = [{"mimeType":"text/plain"}],
             asReference = True,
             )
@@ -428,7 +432,7 @@ class QualityPublisherProcess(malleefowl.process.WPSProcess):
             statusmethod("Running",cur,end,self)
 
         qcp = qcprocesses.QCProcesses(self.database_location,
-                                      username = self.username.getValue(),
+                                      username = self.username,
                                       statusmethod = statmethod,
                                       work_dir = WORK_DIR,
                                       parallel_id = self.parallel_id.getValue(),
@@ -446,35 +450,36 @@ class MetaPublisherProcess(malleefowl.process.WPSProcess):
         abstract_ml = ("Read trough a file containing one filename per line and publish it.")
 
         malleefowl.process.WPSProcess.__init__(self,
-            identifier = "QC_QualityPublisher", 
+            identifier = "QC_MetaPublisher", 
             title = "Publish generated metadata XML files.",
-            version = "2014.02.07",
+            version = "2014.02.26",
             metadata = [],
             abstract = abstract_ml)
            
+        #self.username = self.addLiteralInput(
+        #    identifier = "username",
+        #    title = "Username",
+        #    abstract = ("The username is used to prevent two users working in the same directory."
+        #                +" Currently this is a work around until the username can be derived "
+        #                +"automatically."),
+        #    default = "defaultuser",
+        #    type = types.StringType,
+        #    )
+        self.username = "defaultuser"
+
+        selectable_parallelids = get_user_parallelids(self.username)
+
         self.parallel_id = self.addLiteralInput(
             identifier = "parallel_id",
             title = "Parallel ID",
-            abstract = ("An ID for the current process. The processes_dir contains the to upload files"
-                      +" list."),
-            default = "web1",
+            abstract = ("An ID for the current process. Select the one matchting to the quality check"),
+            allowedValues = selectable_parallelids,
             type = types.StringType,
             )
-
-        self.username = self.addLiteralInput(
-            identifier = "username",
-            title = "Username",
-            abstract = ("The username is used to prevent two users working in the same directory."
-                        +" Currently this is a work around until the username can be derived "
-                        +"automatically."),
-            default = "defaultuser",
-            type = types.StringType,
-            )
-            
 
         self.process_log = self.addComplexOutput(
             identifier = "process_log",
-            title = "Log of the process containing system calls.",
+            title = "Log of the process containing system calls that equal the actions performed.",
             formats = [{"mimeType":"text/plain"}],
             asReference = True,
             )
@@ -488,7 +493,7 @@ class MetaPublisherProcess(malleefowl.process.WPSProcess):
             statusmethod("Running",cur,end,self)
 
         qcp = qcprocesses.QCProcesses(self.database_location,
-                                      username = self.username.getValue(),
+                                      username = self.username,
                                       statusmethod = statmethod,
                                       work_dir = WORK_DIR,
                                       parallel_id = self.parallel_id.getValue(),
@@ -522,4 +527,10 @@ def _create_server_copy_of_file(filename,wpsprocess):
     serverfile.close()
     return serverfile
 
+def get_user_dir(user):
+    return os.path.join(climdapsabs,"var","qc_cache",user)
 
+def get_user_parallelids(user):
+    path = get_user_dir(user)
+    content = os.listdir(path)
+    return [x for x in content if os.path.isdir(os.path.join(path,x))]
