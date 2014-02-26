@@ -8,7 +8,7 @@ from malleefowl import restflow
 
 service="http://localhost:8090/wps"
 
-# set path to buildout/bin
+# set path to buildout/bin to have access to restflow binary
 os.environ['PATH'] = '%s:%s' % (
     os.path.join(os.path.dirname(restflow.__file__), '..', '..', '..', 'bin'),
     os.environ['PATH'])

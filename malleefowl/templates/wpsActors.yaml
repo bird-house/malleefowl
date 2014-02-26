@@ -41,7 +41,7 @@
                     '-o', 'wps_result.json']
       for (item in input) {
           cmd.add('--input')
-          cmd.add('' + e.value)
+          cmd.add('' + item.value)
       }
 
       proc = cmd.execute()

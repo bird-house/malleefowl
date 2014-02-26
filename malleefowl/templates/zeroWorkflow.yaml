@@ -16,10 +16,29 @@ components:
   properties:
     director: !ref MTDataDrivenDirector
     nodes:
-    - !ref RunWpsProcess
+    - !ref DownloadData
+    - !ref ShowDownload
+    - !ref RunProcess
     - !ref RenderResult
 
-- id: RunWpsProcess
+- id: DownloadData
+  type: Node
+  properties:
+    actor: !ref ConstantSource
+    constants:
+      value: 
+        - http://localhost:8090/files/test.nc
+    outflows:
+      value: /wps/download/source/
+
+- id: ShowDownload
+  type: Node
+  properties:
+    actor: !ref PrintStreamWriter
+    inflows:
+      message: /wps/download/source/
+
+- id: RunProcess
   type: Node
   properties:
     actor: !ref WpsExecute
@@ -28,9 +47,8 @@ components:
       identifier: ${identifier}
       input: ${input}
     inflows:
-      source: /wps/download/source
+      source: /wps/download/source/
     outflows:
-      status: /wps/work/status/
       output: /wps/work/output/  
  
 - id: RenderResult
