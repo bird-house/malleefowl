@@ -531,6 +531,17 @@ def get_user_dir(user):
     return os.path.join(climdapsabs,"var","qc_cache",user)
 
 def get_user_parallelids(user):
+    """
+    It is assumed that no processing directories are moved into the work directory by hand or
+    other tools than the qc-processes.
+    """
     path = get_user_dir(user)
-    content = os.listdir(path)
-    return [x for x in content if os.path.isdir(os.path.join(path,x))]
+    history_fn = os.path.join(path, "parallel_id.history")
+    history = []
+    if os.path.isfile(history_fn):
+        with open(history_fn, "r") as hist:
+            lines = hist.readlines()
+            for line in lines:
+                history.append(line.rstrip("\n"))
+    existing_history = [x for x in history if os.path.isdir(os.path.join(path,x))] 
+    return existing_history
