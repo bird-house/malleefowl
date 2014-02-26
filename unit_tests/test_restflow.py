@@ -1,11 +1,18 @@
 import nose.tools
 from nose import SkipTest
 
+import os
 import tempfile
 
 from malleefowl import restflow
 
 service="http://localhost:8090/wps"
+
+# set path to buildout/bin
+os.environ['PATH'] = '%s:%s' % (
+    os.path.join(os.path.dirname(restflow.__file__), '..', '..', '..', 'bin'),
+    os.environ['PATH'])
+
 
 def test_generate():
     wf = restflow.generate("zeroWorkflow",
