@@ -504,6 +504,44 @@ class MetaPublisherProcess(malleefowl.process.WPSProcess):
         self.process_log.setValue(process_log)
 
         return
+
+class RemoveDataProcess(malleefowl.process.WPSProcess):
+    def __init__(self):
+        self.database_location = DATABASE_LOCATION
+
+        malleefowl.process.WPSProcess.__init__(self,
+            identifier = "QC_RemoveData", 
+            title = "Remove all data for the given Parallel ID.",
+            version = "2014.02.26",
+            metadata = [],
+            abstract = "Remove all data for the given Parallel ID")
+           
+        self.username = "defaultuser"
+
+        selectable_parallelids = get_user_parallelids(self.username)
+
+        self.parallel_id = self.addLiteralInput(
+            identifier = "parallel_id",
+            title = "Parallel ID",
+            abstract = ("An ID for the current process. Select the one matchting to the quality check"),
+            allowedValues = selectable_parallelids,
+            type = types.StringType,
+            )
+
+    def execute(self):
+        self.status.set(msg = "Initiate process", percentDone = 0, propagate = True)
+        def statmethod(cur,end):
+            statusmethod("Running",cur,end,self)
+
+        qcp = qcprocesses.QCProcesses(self.database_location,
+                                      username = self.username,
+                                      statusmethod = statmethod,
+                                      work_dir = WORK_DIR,
+                                      parallel_id = self.parallel_id.getValue(),
+                                      )
+        qcp.remove_process_dir()
+        self.status.set(msg = "Finished", percentDone = 100, propagate = True)
+        return
 ##################
 # Helper methods #
 ##################
