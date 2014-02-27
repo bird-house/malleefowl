@@ -31,9 +31,7 @@ components:
       output: ${source.get('output')}
       verbose: true
     sequences:
-      sources: 
-        - [test1.nc]
-        - [test2.nc]
+      sources: ${source.get('sources')}
     outflows:
       result: /source/
 

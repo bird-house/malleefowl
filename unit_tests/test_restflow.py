@@ -40,7 +40,8 @@ def test_run_simple():
         service = service,
         identifier = "org.malleefowl.storage.testfiles.source",
         input = [],
-        output = ['output']
+        output = ['output'],
+        sources = [['test1.nc'], ['test2.nc']]
         )
     worker = dict(
         service = service,
