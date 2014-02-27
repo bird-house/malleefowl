@@ -36,8 +36,8 @@ class DirectoryValidatorProcess(malleefowl.process.WPSProcess):
 
        
         malleefowl.process.WPSProcess.__init__(self,
-            identifier = "QC_DirectoryValid",
-            title = "Directory requirements check",
+            identifier = "QC_DirectoryValidator",
+            title = "Quality Initialization",
             version = "2014.02.27",
             metadata = [],
             abstract = "If the given directory is valid included files and datasets receive a PID.")
@@ -237,7 +237,7 @@ class EvaluateQualityCheckProcess(malleefowl.process.WPSProcess):
 
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_Evaluate_Quality_Check",
-            title = "Evaluate Quality Check",
+            title = "Quality Evaluate",
             version = "2014.02.27",
             metadata = [],
             abstract = "Evaluates the quality check and generates metadata and quality files")
@@ -390,7 +390,7 @@ class QualityPublisherProcess(malleefowl.process.WPSProcess):
 
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_QualityPublisher", 
-            title = "Publish generated quality XML files.",
+            title = "Quality Publish Quality-XML",
             version = "2014.02.27",
             metadata = [],
             abstract = abstract_ml)
@@ -441,7 +441,7 @@ class MetaPublisherProcess(malleefowl.process.WPSProcess):
 
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_MetaPublisher", 
-            title = "Publish generated metadata XML files.",
+            title = "Quality Publish Metadata-XML",
             version = "2014.02.27",
             metadata = [],
             abstract = abstract_ml)
@@ -492,7 +492,7 @@ class RemoveDataProcess(malleefowl.process.WPSProcess):
 
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_RemoveData", 
-            title = "Remove work data",
+            title = "Quality Clean up",
             version = "2014.02.27",
             metadata = [],
             abstract = "Remove data by Parallel ID or your complete work data.")
