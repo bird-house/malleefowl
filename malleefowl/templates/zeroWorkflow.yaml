@@ -29,14 +29,14 @@ components:
       value: 
         - http://localhost:8090/files/test.nc
     outflows:
-      value: /wps/download/source/
+      value: /download/source/
 
 - id: ShowDownload
   type: Node
   properties:
     actor: !ref PrintStreamWriter
     inflows:
-      message: /wps/download/source/
+      message: /download/source/
 
 - id: RunProcess
   type: Node
@@ -46,15 +46,16 @@ components:
       service: ${service}
       identifier: ${identifier}
       input: ${input}
+      output: ${output}
     inflows:
-      source: /wps/download/source/
+      source: /download/source/
     outflows:
-      output: /wps/work/output/  
+      result: /wps/result/  
  
 - id: RenderResult
   type: Node
   properties:
     actor: !ref PrintStreamWriter
     inflows:
-      message: /wps/work/output/
+      message: /wps/result/
 

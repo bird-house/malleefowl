@@ -36,11 +36,13 @@
       cmd = ['wpsclient', 'execute', 
                     '-s', service,
                     '-i', identifier,
-                    '--output', 'output1',
-                    '--output', 'output2',
                     '-o', 'wps_result.json']
       for (item in input) {
           cmd.add('--input')
+          cmd.add('' + item.value)
+      }
+      for (item in output) {
+          cmd.add('--output')
           cmd.add('' + item.value)
       }
 
@@ -53,11 +55,15 @@
       result = yaml.load(input)
 
       status = 'done'
-      output = result[0].reference
+      result = result[0].reference
     inputs:
       identifier: 
       service:
       input:
+        type: Collection
+        optional: true
+        nullable: true
+      output:
         type: Collection
         optional: true
         nullable: true
@@ -67,4 +73,4 @@
         nullable: true
     outputs:
       status: 
-      output:
+      result:
