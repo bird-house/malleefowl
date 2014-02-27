@@ -10,6 +10,8 @@ import json
 import malleefowl
 from malleefowl import utils
 
+import logging
+log = logging.getLogger(__name__)
 
 class ListLocalFiles(malleefowl.process.WPSProcess):
     """This process lists files from local filesystem."""
@@ -97,6 +99,29 @@ class GetFileFromFilesystem(malleefowl.process.SourceProcess):
 
         files = [f for f in os.listdir(files_path) if file_id in f]
         file_path = os.path.join(files_path, files[0])
+
+        self.status.set(msg="retrieved file", percentDone=90, propagate=True)
+        
+        self.output.setValue(file_path)
+
+
+class GetTestFiles(malleefowl.process.SourceProcess):
+    """This process retrieves test files."""
+
+    def __init__(self):
+        malleefowl.process.SourceProcess.__init__(self,
+            identifier = "org.malleefowl.storage.testfiles",
+            title = "Get files for testing",
+            version = "0.1",
+            metadata=[
+                ],
+            abstract="Get files for testing")
+
+    def execute(self):
+        self.status.set(msg="starting ...", percentDone=5, propagate=True)
+
+        file_path = os.path.join(self.files_path, self.file_identifier.getValue())
+        log.debug('test file: %s', file_path)
 
         self.status.set(msg="retrieved file", percentDone=90, propagate=True)
         

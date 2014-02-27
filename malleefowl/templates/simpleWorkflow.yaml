@@ -11,60 +11,66 @@ components:
 
 # workflow
 
-- id: SimpleProcessing
+- id: SimpleWorkflow
   type: Workflow
   properties:
     director: !ref MTDataDrivenDirector
     nodes:
-    - !ref DownloadData
-    - !ref WaitForDownloads
-    - !ref RunDataProcessing
-    - !ref RenderResult
+    - !ref GetSource
+    - !ref WaitForSources
+    - !ref RunWorker
+    - !ref WriteResult
 
-- id: DownloadData
+- id: GetSource
   type: Node
   properties:
     actor: !ref WpsExecute
     constants:
-      service: http://localhost:8090/wps
-      identifier: org.malleefowl.test.dummyprocess
-      input_params: []
+      service: ${service}
+      identifier: org.malleefowl.storage.testfiles.source
+      output: 
+        - output
+      verbose: true
     sequences:
-      file_identifiers: 
-        - test123.nc
+      sources: 
+        - [test1.nc]
+        - [test2.nc]
     outflows:
-      status: /wps/download/status/
-      output: /wps/download/file_identifier/
+      result: /source/
 
-- id: WaitForDownloads
+- id: WaitForSources
   type: Node
   properties:
     actor: !ref CollectSources
     constants:
-      max: 1
+      max: 2
     inflows:
-      source: /wps/download/file_identifier/
+      source: /source/
     outflows:
-      allSources: /wps/download/file_identifiers/
+      sources: /sources/
 
-- id: RunDataProcessing
+- id: RunWorker
   type: Node
   properties:
     actor: !ref WpsExecute
     constants:
-      service: http://localhost:8090/wps
-      identifier: org.malleefowl.test.dummyprocess
-      input_params: []
+      service: ${service}
+      identifier: ${identifier}
+      input: ${input}
+      output: ${output}
+      verbose: true
     inflows:
-      file_identifiers: /wps/download/file_identifiers
+      sources: /sources/
     outflows:
-      status: /wps/work/status/
-      output: /wps/work/output/  
+      result: /worker/  
  
-- id: RenderResult
+- id: WriteResult
   type: Node
   properties:
-    actor: !ref PrintStreamWriter
+    actor: !ref FileWriter
+    constants:
+      filename: wps_output.txt
     inflows:
-      message: /wps/work/output/
+      result: /worker/
+
 

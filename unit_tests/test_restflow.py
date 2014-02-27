@@ -40,3 +40,17 @@ def test_run_zero():
     result = restflow.run(filename, basedir=tempfile.mkdtemp(), verbose=True)
     nose.tools.ok_('wpsoutputs' in result, result)
 
+@attr('online')
+def test_run_simple():
+    wf = restflow.generate("simpleWorkflow",
+                           service=service,
+                           identifier="de.dkrz.cdo.sinfo.worker",
+                           input=[],
+                           output=['output'])
+
+    (fp, filename) = tempfile.mkstemp(suffix=".yaml", prefix="restflow-")
+    restflow.write(filename, wf)
+
+    result = restflow.run(filename, basedir=tempfile.mkdtemp(), verbose=True)
+    nose.tools.ok_('wpsoutputs' in result, result)
+
