@@ -1,5 +1,6 @@
 import nose.tools
 from nose import SkipTest
+from nose.plugins.attrib import attr
 
 from malleefowl import wpsclient
 
@@ -8,16 +9,19 @@ service = "http://localhost:8090/wps"
 import json
 import tempfile
 
+@attr('online')
 def test_get_caps():
     result = wpsclient.get_caps(service=service)
     nose.tools.ok_(len(result) > 1, result)
 
+@attr('online')
 def test_describe():
     result = wpsclient.describe_process(
         service = service,
         identifier = "org.malleefowl.test.dummyprocess")
     nose.tools.ok_(result['identifier'] == "org.malleefowl.test.dummyprocess", result)
 
+@attr('online')
 def test_execute():
     result = wpsclient.execute(
         service = service,
