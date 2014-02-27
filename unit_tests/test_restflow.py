@@ -1,5 +1,6 @@
 import nose.tools
 from nose import SkipTest
+from nose.plugins.attrib import attr
 
 import os
 import tempfile
@@ -25,6 +26,7 @@ def test_generate_zero():
     nose.tools.ok_('input2' in wf, wf)
     nose.tools.ok_('output2' in wf, wf)
 
+@attr('online')
 def test_run_zero():
     wf = restflow.generate("zeroWorkflow",
                            service=service,

@@ -26,7 +26,7 @@ components:
     actor: !ref ConstantSource
     constants:
       value: 
-        - http://localhost:8090/files/test.nc
+        - http://localhost:8090/files/test1.nc
     outflows:
       value: /source/
 
