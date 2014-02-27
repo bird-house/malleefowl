@@ -36,6 +36,5 @@ def test_run_zero():
     restflow.write(filename, wf)
 
     result = restflow.run(filename, basedir=tempfile.mkdtemp(), verbose=True)
-    output = result.get('/wps/result/1')
-    nose.tools.ok_('wpsoutputs' in output, result)
+    nose.tools.ok_('wpsoutputs' in result, result)
 

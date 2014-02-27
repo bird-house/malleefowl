@@ -17,9 +17,8 @@ components:
     director: !ref MTDataDrivenDirector
     nodes:
     - !ref DownloadData
-    - !ref ShowDownload
     - !ref RunProcess
-    - !ref RenderResult
+    - !ref PrintResult
 
 - id: DownloadData
   type: Node
@@ -30,13 +29,6 @@ components:
         - http://localhost:8090/files/test.nc
     outflows:
       value: /download/source/
-
-- id: ShowDownload
-  type: Node
-  properties:
-    actor: !ref PrintStreamWriter
-    inflows:
-      message: /download/source/
 
 - id: RunProcess
   type: Node
@@ -52,10 +44,13 @@ components:
     outflows:
       result: /wps/result/  
  
-- id: RenderResult
-  type: Node
+- id: PrintResult
+  type: GroovyActorNode
   properties:
-    actor: !ref PrintStreamWriter
+    actor.step: |
+      f = new File("wps_output.txt")
+      f.write( result )
     inflows:
-      message: /wps/result/
+      result: /wps/result/
+
 

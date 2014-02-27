@@ -1,6 +1,5 @@
 import os
 import tempfile
-import yaml
 
 from mako.template import Template
 from mako.lookup import TemplateLookup
@@ -29,17 +28,19 @@ def run(filename, basedir=None, verbose=False):
         cmd.append('-t')
     cmd.append('--base')
     cmd.append(basedir)
+    cmd.append('--outfile')
+    cmd.append('result.yaml')
         
     import subprocess
     from subprocess import PIPE
     p = subprocess.Popen(cmd, stdout=PIPE, stderr=PIPE, cwd=basedir)
 
-    products_path = os.path.join(basedir, "restflow", "_metadata", "products.yaml")
-    endstate_path = os.path.join(basedir, "restflow", "_metadata", "endstate.yaml")
-
     (stdoutdata, stderrdata) = p.communicate()
 
-    products = yaml.load( open(products_path) )
+    result = ''
+    result_file = os.path.join(basedir, 'wps_output.txt')
+    with open(result_file, 'r') as fp:
+        result = fp.readline()
 
-    return products
+    return result
     

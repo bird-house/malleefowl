@@ -33,10 +33,12 @@
   type: GroovyActor
   properties:
     step: |
+      tempFile = File.createTempFile('wps-result-', '.json', new File('.'))
+      outfile = tempFile.absolutePath
       cmd = ['wpsclient', 'execute', 
                     '-s', service,
                     '-i', identifier,
-                    '-o', 'wps_result.json']
+                    '-o', outfile]
       for (item in input) {
           cmd.add('--input')
           cmd.add('' + item.value)
@@ -51,8 +53,10 @@
 
       import org.yaml.snakeyaml.Yaml
       yaml = new Yaml()
-      wps_result = yaml.load(new FileInputStream(new File("wps_result.json")))
-      result = wps_result[0].reference
+      wps_result = yaml.load(new FileInputStream(new File(outfile)))
+      for (item in wps_result) {
+         result = item.reference
+      }
     inputs:
       identifier: 
       service:
@@ -70,3 +74,4 @@
         nullable: true
     outputs:
       result:
+      outfile:
