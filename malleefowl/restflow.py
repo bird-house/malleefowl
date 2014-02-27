@@ -10,9 +10,9 @@ mylookup = TemplateLookup(directories=[os.path.join(os.path.dirname(__file__), '
 import logging
 log = logging.getLogger(__name__)
 
-def generate(name, service, identifier, input=[], output=[]):
+def generate(name, source, worker):
     mytemplate = mylookup.get_template(name + '.yaml')
-    return  mytemplate.render(service=service, identifier=identifier, input=input, output=output)
+    return  mytemplate.render(source=source, worker=worker)
 
 def write(filename, workflow):
     with open(filename, 'w') as fp:

@@ -26,10 +26,9 @@ components:
   properties:
     actor: !ref WpsExecute
     constants:
-      service: ${service}
-      identifier: org.malleefowl.storage.testfiles.source
-      output: 
-        - output
+      service: ${source.get('service')}
+      identifier: ${source.get('identifier')}
+      output: ${source.get('output')}
       verbose: true
     sequences:
       sources: 
@@ -54,10 +53,10 @@ components:
   properties:
     actor: !ref WpsExecute
     constants:
-      service: ${service}
-      identifier: ${identifier}
-      input: ${input}
-      output: ${output}
+      service: ${worker.get('service')}
+      identifier: ${worker.get('identifier')}
+      input: ${worker.get('input')}
+      output: ${worker.get('output')}
       verbose: true
     inflows:
       sources: /sources/
