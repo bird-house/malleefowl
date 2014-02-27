@@ -45,11 +45,9 @@ components:
       result: /wps/  
  
 - id: WriteResult
-  type: GroovyActorNode
+  type: Node
   properties:
-    actor.step: |
-      f = new File("wps_output.txt")
-      f.write( result )
+    actor: !ref WriteToFile
     inflows:
       result: /wps/
 

@@ -75,3 +75,12 @@
     outputs:
       result:
       outfile:
+
+- id: WriteToFile
+  type: GroovyActor
+  properties:
+    step: |
+      f = new File("wps_output.txt")
+      f.write( result )
+    inputs:
+      result:
