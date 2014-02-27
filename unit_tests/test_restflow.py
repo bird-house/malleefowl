@@ -30,9 +30,9 @@ def test_generate_zero():
 def test_run_zero():
     wf = restflow.generate("zeroWorkflow",
                            service=service,
-                           identifier="org.malleefowl.test.dummyprocess",
-                           input=['input1=1', 'input2=2'],
-                           output=['output1', 'output2'])
+                           identifier="de.dkrz.cdo.sinfo.worker",
+                           input=[],
+                           output=['output'])
 
     (fp, filename) = tempfile.mkstemp(suffix=".yaml", prefix="restflow-")
     restflow.write(filename, wf)

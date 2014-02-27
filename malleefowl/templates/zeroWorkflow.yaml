@@ -16,21 +16,34 @@ components:
   properties:
     director: !ref MTDataDrivenDirector
     nodes:
-    - !ref DownloadData
-    - !ref RunProcess
+    - !ref GetSource
+    - !ref WaitForSources
+    - !ref RunWorker
     - !ref WriteResult
 
-- id: DownloadData
+- id: GetSource
   type: Node
   properties:
     actor: !ref ConstantSource
-    constants:
+    sequences:
       value: 
         - http://localhost:8090/files/test1.nc
+        - http://localhost:8090/files/test2.nc
     outflows:
       value: /source/
 
-- id: RunProcess
+- id: WaitForSources
+  type: Node
+  properties:
+    actor: !ref CollectSources
+    constants:
+      max: 2
+    inflows:
+      source: /source/
+    outflows:
+      sources: /sources/
+
+- id: RunWorker
   type: Node
   properties:
     actor: !ref WpsExecute
@@ -39,16 +52,19 @@ components:
       identifier: ${identifier}
       input: ${input}
       output: ${output}
+      verbose: true
     inflows:
-      source: /source/
+      sources: /sources/
     outflows:
-      result: /wps/  
+      result: /worker/  
  
 - id: WriteResult
   type: Node
   properties:
-    actor: !ref WriteToFile
+    actor: !ref FileWriter
+    constants:
+      filename: wps_output.txt
     inflows:
-      result: /wps/
+      result: /worker/
 
 

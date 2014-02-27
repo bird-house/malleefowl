@@ -54,6 +54,9 @@ def describe_process(service, identifier, verbose=False):
     return to_json(process)
 
 def execute(service, identifier, inputs=[], outputs=[], sleep_secs=1, verbose=False):
+    logger.debug("inputs %s", inputs)
+    logger.debug("outputs %s", outputs)
+    
     wps = WebProcessingService(service, verbose=verbose)
     execution = wps.execute(identifier, inputs=inputs, output=outputs)
     monitorExecution(execution, sleepSecs=sleep_secs)

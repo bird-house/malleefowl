@@ -2,21 +2,14 @@
   type: GroovyActor
   properties:
     initialize: |
-      count = 0
-      currentSources = ''
+      myList = []
     step: |
-      count = count + 1
-      if (count == 1) {
-        currentSources = source
-      }
-      else {
-        currentSources = currentSources + ',' + source
-      }
-      if (count <  max) {
-        _status.setOutputEnable('allSources', false)
+      myList.add(source)
+      if (myList.size() <  max) {
+        _status.setOutputEnable('sources', false)
       } else {
-        allSources = currentSources
-        _status.setOutputEnable('allSources', true)
+        sources = myList
+        _status.setOutputEnable('sources', true)
       }
     inputs:
       max:
@@ -24,10 +17,10 @@
       source:
         type: String
     outputs:
-      allSources:
+      sources:
+        type: Collection
     state:
-      currentSources:
-      count:
+      myList:
 
 - id: WpsExecute
   type: GroovyActor
@@ -39,6 +32,13 @@
                     '-s', service,
                     '-i', identifier,
                     '-o', outfile]
+      if (verbose) {
+          cmd.add('-v')
+      }
+      for (item in sources) {
+          cmd.add('--input')
+          cmd.add("file_identifier=" + item.value)
+      }
       for (item in input) {
           cmd.add('--input')
           cmd.add('' + item.value)
@@ -47,9 +47,17 @@
           cmd.add('--output')
           cmd.add('' + item.value)
       }
+     
+      if (verbose) {
+          println cmd
+      }
 
       proc = cmd.execute()
       proc.waitFor()
+
+      if (verbose) {
+          println proc.text
+      }
 
       import org.yaml.snakeyaml.Yaml
       yaml = new Yaml()
@@ -68,19 +76,23 @@
         type: Collection
         optional: true
         nullable: true
-      source:
-        type: String
+      sources:
+        type: Collection
         optional: true
         nullable: true
+      verbose:
+        type: Bool
     outputs:
       result:
       outfile:
 
-- id: WriteToFile
+- id: FileWriter
   type: GroovyActor
   properties:
     step: |
-      f = new File("wps_output.txt")
+      f = new File(filename)
       f.write( result )
     inputs:
+      filename:
+        type: String
       result:

@@ -8,7 +8,7 @@ mylookup = TemplateLookup(directories=[os.path.join(os.path.dirname(__file__), '
                           module_directory=os.path.join(tempfile.gettempdir(), 'mako_cache'))
 
 import logging
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 def generate(name, service, identifier, input=[], output=[]):
     mytemplate = mylookup.get_template(name + '.yaml')
@@ -19,7 +19,7 @@ def write(filename, workflow):
         fp.write(workflow)
 
 def run(filename, basedir=None, verbose=False):
-    logger.debug("filename = %s", filename)
+    log.debug("filename = %s", filename)
 
     basedir = basedir if basedir is not None else os.curdir()
     
@@ -36,11 +36,15 @@ def run(filename, basedir=None, verbose=False):
     p = subprocess.Popen(cmd, stdout=PIPE, stderr=PIPE, cwd=basedir)
 
     (stdoutdata, stderrdata) = p.communicate()
-
+    log.debug("stdoutdata: %s", stdoutdata)
+    log.debug("stderrdata: %s", stderrdata)
+    
     result = ''
     result_file = os.path.join(basedir, 'wps_output.txt')
+
     with open(result_file, 'r') as fp:
         result = fp.readline()
+        log.debug("result: %s", result)
 
     return result
     
