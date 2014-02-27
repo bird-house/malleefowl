@@ -18,7 +18,7 @@ components:
     nodes:
     - !ref DownloadData
     - !ref RunProcess
-    - !ref PrintResult
+    - !ref WriteResult
 
 - id: DownloadData
   type: Node
@@ -28,7 +28,7 @@ components:
       value: 
         - http://localhost:8090/files/test.nc
     outflows:
-      value: /download/source/
+      value: /source/
 
 - id: RunProcess
   type: Node
@@ -40,17 +40,17 @@ components:
       input: ${input}
       output: ${output}
     inflows:
-      source: /download/source/
+      source: /source/
     outflows:
-      result: /wps/result/  
+      result: /wps/  
  
-- id: PrintResult
+- id: WriteResult
   type: GroovyActorNode
   properties:
     actor.step: |
       f = new File("wps_output.txt")
       f.write( result )
     inflows:
-      result: /wps/result/
+      result: /wps/
 
 
