@@ -520,11 +520,13 @@ class RemoveDataProcess(malleefowl.process.WPSProcess):
 
         selectable_parallelids = get_user_parallelids(self.username)
 
-        self.parallel_id = self.addLiteralInput(
-            identifier = "parallel_id",
-            title = "Parallel ID",
-            abstract = ("An ID for the current process. Select the one matchting to the quality check"),
+        self.parallel_ids = self.addLiteralInput(
+            identifier = "parallel_ids",
+            title = "Parallel IDs",
+            abstract = ("IDs for the to remove work data."),
             allowedValues = selectable_parallelids,
+            minOccurs = 0,
+            maxOccurs = len(selectable_parallelids),
             type = types.StringType,
             )
         
@@ -541,17 +543,32 @@ class RemoveDataProcess(malleefowl.process.WPSProcess):
         def statmethod(cur,end):
             statusmethod("Running",cur,end,self)
 
-        qcp = qcprocesses.QCProcesses(self.database_location,
+        remove_all = self.remove_user_dir.getValue()
+        if remove_all:
+            qcp = qcprocesses.QCProcesses(self.database_location,
                                       username = self.username,
                                       statusmethod = statmethod,
                                       work_dir = WORK_DIR,
-                                      parallel_id = self.parallel_id.getValue(),
+                                      parallel_id = "deleteall",
                                       )
-        remove_all = self.remove_user_dir.getValue()
-        if remove_all:
             qcp.remove_user_dir()
         else:
-            qcp.remove_process_dir()
+            parallel_ids = self.parallel_ids.getValue()
+            if parallel_ids == None:
+                parallel_ids = []
+            cur = 0
+            end = len(parallel_ids)
+            for par_id in parallel_ids:
+                qcp = qcprocesses.QCProcesses(self.database_location,
+                                          username = self.username,
+                                          statusmethod = statmethod,
+                                          work_dir = WORK_DIR,
+                                          parallel_id = par_id,
+                                          )
+                qcp.remove_process_dir()
+                percent = cur*100.0/end#end is not 0, as there is at least one element in parallel_ids
+                self.status.set(msg = "Finished", percentDone = percent, propagate = True)
+                cur += 1
         self.status.set(msg = "Finished", percentDone = 100, propagate = True)
         return
 ##################
