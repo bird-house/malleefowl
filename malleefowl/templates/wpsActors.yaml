@@ -50,12 +50,9 @@
       proc.waitFor()
 
       import org.yaml.snakeyaml.Yaml
-      input = new FileInputStream(new File("wps_result.json"))
       yaml = new Yaml()
-      result = yaml.load(input)
-
-      status = 'done'
-      result = result[0].reference
+      wps_result = yaml.load(new FileInputStream(new File("wps_result.json")))
+      result = wps_result[0].reference
     inputs:
       identifier: 
       service:
@@ -72,5 +69,4 @@
         optional: true
         nullable: true
     outputs:
-      status: 
       result:
