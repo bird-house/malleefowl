@@ -26,12 +26,12 @@ components:
   properties:
     actor: !ref WpsExecute
     constants:
-      service: ${source.get('service')}
-      identifier: ${source.get('identifier')}
-      output: ${source.get('output')}
+      service: ${nodes['source'].get('service')}
+      identifier: ${nodes['source'].get('identifier')}
+      output: ${nodes['source'].get('output')}
       verbose: true
     sequences:
-      sources: ${source.get('sources')}
+      sources: ${nodes['source'].get('sources')}
     outflows:
       result: /source/
 
@@ -40,7 +40,7 @@ components:
   properties:
     actor: !ref CollectSources
     constants:
-      max: ${len(source.get('sources'))}
+      max: ${len(nodes['source'].get('sources'))}
     inflows:
       source: /source/
     outflows:
@@ -51,10 +51,10 @@ components:
   properties:
     actor: !ref WpsExecute
     constants:
-      service: ${worker.get('service')}
-      identifier: ${worker.get('identifier')}
-      input: ${worker.get('input')}
-      output: ${worker.get('output')}
+      service: ${nodes['worker'].get('service')}
+      identifier: ${nodes['worker'].get('identifier')}
+      input: ${nodes['worker'].get('input')}
+      output: ${nodes['worker'].get('output')}
       verbose: true
     inflows:
       sources: /sources/

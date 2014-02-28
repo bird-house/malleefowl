@@ -7,17 +7,83 @@ Author: Carsten Ehbrecht (ehbrecht@dkrz.de)
 from os import path
 import time
 import yaml
+import json
+import types
 
 import logging
+log = logging.getLogger(__name__)
 
-#from malleefowl.process import WPSProcess
-import malleefowl.process
+from malleefowl.process import WPSProcess
+from malleefowl import restflow
 
-class Run(malleefowl.process.WPSProcess):
+class Generate(WPSProcess):
+    """Generates workflow description document in yaml for restflow"""
+
+    def __init__(self):
+        WPSProcess.__init__(self,
+            identifier = "org.malleefowl.restflow.generate",
+            title = "Generate Restflow Workflow",
+            version = "0.1",
+            metadata=[
+                {"title":"Restflow","href":"https://github.com/restflow-org"},
+                ],
+            abstract="Generate YAML workflow description for restflow")
+
+        self.name = self.addLiteralInput(
+            identifier="name",
+            title="Workflow",
+            abstract="Choose Workflow",
+            default="simpleWorkflow",
+            type=type(''),
+            minOccurs=1,
+            maxOccurs=1,
+            allowedValues=['simpleWorkflow']
+            )
+
+        self.nodes= self.addComplexInput(
+            identifier="nodes",
+            title="Workflow Nodes",
+            abstract="Workflow Nodes in JSON",
+            metadata=[],
+            minOccurs=1,
+            maxOccurs=1,
+            formats=[{"mimeType":"text/json"}],
+            maxmegabites=2
+            )
+
+        self.output = self.addComplexOutput(
+            identifier="output",
+            title="Workflow Description",
+            abstract="Workflow Description in YAML",
+            metadata=[],
+            formats=[{"mimeType":"text/yaml"}],
+            asReference=True,
+            )
+
+    def execute(self):
+        self.status.set(msg="Generate workflow ...", percentDone=5, propagate=True)
+
+        # TODO: handle multiple values (fix in pywps)
+        log.debug('json doc: %s', self.nodes.getValue())
+        fp = open(self.nodes.getValue())
+        nodes = json.load(fp)
+        log.debug("nodes: %s", nodes)
+   
+        wf = restflow.generate(self.name.getValue(), nodes)
+        log.debug("generated wf: %s", wf)
+        
+        outfile = self.mktempfile(suffix='.yaml')
+        restflow.write( outfile, wf )
+
+        self.status.set(msg="Generate workflow ... Done", percentDone=90, propagate=True)
+
+        self.output.setValue( outfile )
+
+class Run(WPSProcess):
     """This process runs a restflow workflow description"""
 
     def __init__(self):
-        malleefowl.process.WPSProcess.__init__(self,
+        WPSProcess.__init__(self,
             identifier = "org.malleefowl.restflow",
             title = "Run restflow workflow",
             version = "0.1",
@@ -76,7 +142,7 @@ class Run(malleefowl.process.WPSProcess):
         self.status.set(msg="Starting restflow workflow", percentDone=5, propagate=True)
 
         wf_filename = path.abspath(self.workflow_description_in.getValue(asFile=False))
-        logging.debug("wf_filename = %s", wf_filename)
+        log.debug("wf_filename = %s", wf_filename)
 
         options = ''
         
@@ -94,7 +160,7 @@ class Run(malleefowl.process.WPSProcess):
         products_path = path.join(self.working_dir, "restflow", "_metadata", "products.yaml")
         endstate_path = path.join(self.working_dir, "restflow", "_metadata", "endstate.yaml")
 
-        logging.debug("products_path = %s", products_path)
+        log.debug("products_path = %s", products_path)
 
         self.status.set(msg="Downloading ...", percentDone=10, propagate=True)
 

@@ -29,7 +29,9 @@ def test_generate_simple():
         input=['input1=1', 'input2=2'],
         output=['output1', 'output2']
         )
-    wf = restflow.generate("simpleWorkflow", source, worker)
+    nodes = dict(source=source, worker=worker)
+    
+    wf = restflow.generate("simpleWorkflow", nodes)
     nose.tools.ok_("WpsExecute" in wf, wf)
     nose.tools.ok_(service in wf, wf)
     nose.tools.ok_('input2' in wf, wf)
@@ -49,7 +51,8 @@ def test_run_simple():
         identifier = "de.dkrz.cdo.sinfo.worker",
         input = [],
         output = ['output'])
-    wf = restflow.generate("simpleWorkflow", source, worker)
+    nodes = dict(source=source, worker=worker)
+    wf = restflow.generate("simpleWorkflow", nodes)
 
     (fp, filename) = tempfile.mkstemp(suffix=".yaml", prefix="restflow-")
     restflow.write(filename, wf)
