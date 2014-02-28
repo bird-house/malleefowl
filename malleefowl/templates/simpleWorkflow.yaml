@@ -40,7 +40,7 @@ components:
   properties:
     actor: !ref CollectSources
     constants:
-      max: 2
+      max: ${len(source.get('sources'))}
     inflows:
       source: /source/
     outflows:

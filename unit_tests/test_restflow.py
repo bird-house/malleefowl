@@ -20,7 +20,8 @@ def test_generate_simple():
         service = service,
         identifier = "org.malleefowl.storage.testfiles.source",
         input = [],
-        output = ['output']
+        output = ['output'],
+        sources = []
         )
     worker = dict(
         service=service,
