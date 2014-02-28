@@ -83,7 +83,7 @@ class Run(WPSProcess):
 
     def __init__(self):
         WPSProcess.__init__(self,
-            identifier = "org.malleefowl.restflow",
+            identifier = "org.malleefowl.restflow.run",
             title = "Run restflow workflow",
             version = "0.1",
             metadata=[
