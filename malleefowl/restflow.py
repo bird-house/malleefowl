@@ -1,16 +1,16 @@
 import os
 import tempfile
 
-from mako.template import Template
-from mako.lookup import TemplateLookup
-
-mylookup = TemplateLookup(directories=[os.path.join(os.path.dirname(__file__), 'templates')],
-                          module_directory=os.path.join(tempfile.gettempdir(), 'mako_cache'))
-
 import logging
 log = logging.getLogger(__name__)
 
 def generate(name, nodes):
+    from mako.template import Template
+    from mako.lookup import TemplateLookup
+    
+    mylookup = TemplateLookup(directories=[os.path.join(os.path.dirname(__file__), 'templates')],
+                              disable_unicode=True, input_encoding='utf-8', encoding_errors='replace',
+                              module_directory=os.path.join(tempfile.gettempdir(), 'mako_cache'))
     mytemplate = mylookup.get_template(name + '.yaml')
     return  mytemplate.render(nodes=nodes)
 
@@ -21,15 +21,13 @@ def write(filename, workflow):
 def run(filename, basedir=None, verbose=False):
     log.debug("filename = %s", filename)
 
-    basedir = basedir if basedir is not None else os.curdir()
+    basedir = basedir if basedir is not None else os.curdir
     
     cmd = ["restflow", "-f", filename, "--run", "restflow"]
     if verbose:
         cmd.append('-t')
     cmd.append('--base')
     cmd.append(basedir)
-    cmd.append('--outfile')
-    cmd.append('result.yaml')
         
     import subprocess
     from subprocess import PIPE
@@ -38,13 +36,8 @@ def run(filename, basedir=None, verbose=False):
     (stdoutdata, stderrdata) = p.communicate()
     log.debug("stdoutdata: %s", stdoutdata)
     log.debug("stderrdata: %s", stderrdata)
-    
-    result = ''
-    result_file = os.path.join(basedir, 'wps_output.txt')
 
-    with open(result_file, 'r') as fp:
-        result = fp.readline()
-        log.debug("result: %s", result)
+    result_file = os.path.join(basedir, 'restflow_output.txt')
 
-    return result
+    return result_file
     
