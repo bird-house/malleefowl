@@ -9,7 +9,7 @@ def generate(name, nodes):
     from mako.lookup import TemplateLookup
     
     mylookup = TemplateLookup(directories=[os.path.join(os.path.dirname(__file__), 'templates')],
-                              disable_unicode=True, input_encoding='utf-8', encoding_errors='replace',
+                              output_encoding='ascii', input_encoding='utf-8', encoding_errors='replace',
                               module_directory=os.path.join(tempfile.gettempdir(), 'mako_cache'))
     mytemplate = mylookup.get_template(name + '.yaml')
     return  mytemplate.render(nodes=nodes)

@@ -61,11 +61,13 @@ class Generate(WPSProcess):
         self.status.set(msg="Generate workflow ...", percentDone=5, propagate=True)
 
         # TODO: handle multiple values (fix in pywps)
+        # http://pymotw.com/2/json/
         log.debug('json doc: %s', self.nodes.getValue())
         fp = open(self.nodes.getValue())
         
-        import json
-        nodes = json.load(fp)
+        import yaml
+        # TODO: fix json encode to unicode
+        nodes = yaml.load(fp)
         log.debug("nodes: %s", nodes)
    
         wf = restflow.generate(self.name.getValue(), nodes)
@@ -130,6 +132,9 @@ class Run(WPSProcess):
 
         result = restflow.run(filename, verbose=True)
 
-        self.status.set(msg="Workflow done", percentDone=90, propagate=True)        
+        self.status.set(msg="Workflow done", percentDone=90, propagate=True)
+
+        #import time
+        #time.sleep(20)
 
         self.output.setValue( result )

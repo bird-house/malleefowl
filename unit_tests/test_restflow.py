@@ -52,6 +52,13 @@ def test_run_simple():
         input = [],
         output = ['output'])
     nodes = dict(source=source, worker=worker)
+
+    # TODO: fix json encoding to unicode
+    import yaml
+    raw = yaml.dump(nodes)
+    nodes = yaml.load(raw)
+    print nodes
+    
     wf = restflow.generate("simpleWorkflow", nodes)
 
     (fp, filename) = tempfile.mkstemp(suffix=".yaml", prefix="restflow-")
