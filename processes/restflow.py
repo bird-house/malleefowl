@@ -13,6 +13,77 @@ log = logging.getLogger(__name__)
 from malleefowl.process import WPSProcess
 from malleefowl import restflow
 
+class GenerateAndRun(WPSProcess):
+    """Generates workflow description document in yaml and runs it"""
+
+    def __init__(self):
+        WPSProcess.__init__(self,
+            identifier = "org.malleefowl.restflow.genrun",
+            title = "Generate and run Restflow Workflow",
+            version = "0.1",
+            metadata=[
+                {"title":"Restflow","href":"https://github.com/restflow-org"},
+                ],
+            abstract="Generate YAML workflow description and run it")
+
+        self.name = self.addLiteralInput(
+            identifier="name",
+            title="Workflow",
+            abstract="Choose Workflow",
+            default="simpleWorkflow",
+            type=type(''),
+            minOccurs=1,
+            maxOccurs=1,
+            allowedValues=['simpleWorkflow']
+            )
+
+        self.nodes= self.addComplexInput(
+            identifier="nodes",
+            title="Workflow Nodes",
+            abstract="Workflow Nodes in JSON",
+            metadata=[],
+            minOccurs=1,
+            maxOccurs=1,
+            formats=[{"mimeType":"text/json"}],
+            maxmegabites=2
+            )
+
+        self.output = self.addComplexOutput(
+            identifier="output",
+            title="Workflow Result",
+            abstract="Workflow Result",
+            metadata=[],
+            formats=[{"mimeType":"text/txt"}],
+            asReference=True,
+            )
+
+    def execute(self):
+        self.status.set(msg="Generate workflow ...", percentDone=5, propagate=True)
+
+        # TODO: handle multiple values (fix in pywps)
+        # http://pymotw.com/2/json/
+        log.debug('json doc: %s', self.nodes.getValue())
+        fp = open(self.nodes.getValue())
+        
+        import yaml
+        # TODO: fix json encode to unicode
+        nodes = yaml.load(fp)
+        log.debug("nodes: %s", nodes)
+   
+        wf = restflow.generate(self.name.getValue(), nodes)
+        log.debug("generated wf: %s", wf)
+
+        outfile = self.mktempfile(suffix='.txt')
+        restflow.write( outfile, wf )
+
+        self.status.set(msg="Run workflow ...", percentDone=10, propagate=True)
+
+        result = restflow.run(outfile, verbose=True)
+        
+        self.status.set(msg="Workflow ... Done", percentDone=90, propagate=True)
+
+        self.output.setValue( result )
+
 class Generate(WPSProcess):
     """Generates workflow description document in yaml for restflow"""
 

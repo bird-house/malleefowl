@@ -27,7 +27,7 @@ components:
     actor: !ref WpsExecute
     constants:
       service: ${nodes['source'].get('service')}
-      identifier: ${nodes['source'].get('identifier')}
+      input: ${nodes['source'].get('input')}
       output: ${nodes['source'].get('output')}
       verbose: true
     sequences:
@@ -52,7 +52,6 @@ components:
     actor: !ref WpsExecute
     constants:
       service: ${nodes['worker'].get('service')}
-      identifier: ${nodes['worker'].get('identifier')}
       input: ${nodes['worker'].get('input')}
       output: ${nodes['worker'].get('output')}
       verbose: true
