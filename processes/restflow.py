@@ -8,7 +8,7 @@ import os.path
 import types
 
 import logging
-log = logging.getLogger(__name__)
+logging.debug('check logging')
 
 from malleefowl.process import WPSProcess
 from malleefowl import restflow
@@ -62,27 +62,30 @@ class GenerateAndRun(WPSProcess):
 
         # TODO: handle multiple values (fix in pywps)
         # http://pymotw.com/2/json/
-        log.debug('json doc: %s', self.nodes.getValue())
+        logging.debug('json doc: %s', self.nodes.getValue())
         fp = open(self.nodes.getValue())
         
         import yaml
         # TODO: fix json encode to unicode
         nodes = yaml.load(fp)
-        log.debug("nodes: %s", nodes)
+        logging.debug("nodes: %s", nodes)
+        self.message("nodes: %s" % (nodes))
    
         wf = restflow.generate(self.name.getValue(), nodes)
-        log.debug("generated wf: %s", wf)
-
+        logging.debug("generated wf: %s", wf)
+        self.message("generatd wf: %s" % (wf))
+        
         outfile = self.mktempfile(suffix='.txt')
         restflow.write( outfile, wf )
 
         self.status.set(msg="Run workflow ...", percentDone=10, propagate=True)
 
-        result = restflow.run(outfile, verbose=True)
+        (result_file, retcode, stdoutdata, stderrdata) = restflow.run(outfile, verbose=True)
+        self.message("result %s %s %s %s" % (result_file, retcode, stdoutdata, stderrdata))
         
         self.status.set(msg="Workflow ... Done", percentDone=90, propagate=True)
 
-        self.output.setValue( result )
+        self.output.setValue( result_file )
 
 class Generate(WPSProcess):
     """Generates workflow description document in yaml for restflow"""
@@ -133,16 +136,16 @@ class Generate(WPSProcess):
 
         # TODO: handle multiple values (fix in pywps)
         # http://pymotw.com/2/json/
-        log.debug('json doc: %s', self.nodes.getValue())
+        logging.debug('json doc: %s', self.nodes.getValue())
         fp = open(self.nodes.getValue())
         
         import yaml
         # TODO: fix json encode to unicode
         nodes = yaml.load(fp)
-        log.debug("nodes: %s", nodes)
+        logging.debug("nodes: %s", nodes)
    
         wf = restflow.generate(self.name.getValue(), nodes)
-        log.debug("generated wf: %s", wf)
+        logging.debug("generated wf: %s", wf)
         
         outfile = self.mktempfile(suffix='.txt')
         restflow.write( outfile, wf )
@@ -199,7 +202,7 @@ class Run(WPSProcess):
         self.status.set(msg="Starting Workflow", percentDone=5, propagate=True)
 
         filename = os.path.abspath(self.workflow_description.getValue(asFile=False))
-        log.debug("filename = %s", filename)
+        logging.debug("filename = %s", filename)
 
         result = restflow.run(filename, verbose=True)
 

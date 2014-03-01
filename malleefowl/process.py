@@ -13,6 +13,10 @@ from pywps import config
 
 import utils
 
+import logging
+log = logging.getLogger(__name__)
+
+
 class WPSProcess(PyWPSProcess):
     """This is the base class for all climdaps wps processes."""
 
@@ -26,6 +30,7 @@ class WPSProcess(PyWPSProcess):
         #metadata.append(
         #    {"title":"Hardworking Bird Malleefowl", "href":"http://en.wikipedia.org/wiki/Malleefowl"}
         #    )
+
         PyWPSProcess.__init__(
             self,
             identifier = identifier,
@@ -70,6 +75,8 @@ class SourceProcess(WPSProcess):
         #    {"title":"C3Grid", "href":"http://www.c3grid.de"},
         #    )
 
+        log.debug("init source process %s", wf_identifier)
+        
         WPSProcess.__init__(
             self,
             identifier = wf_identifier,

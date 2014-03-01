@@ -36,8 +36,9 @@ def run(filename, basedir=None, verbose=False):
     (stdoutdata, stderrdata) = p.communicate()
     log.debug("stdoutdata: %s", stdoutdata)
     log.debug("stderrdata: %s", stderrdata)
+    retcode = p.wait()
 
     result_file = os.path.join(basedir, 'restflow_output.txt')
 
-    return result_file
+    return (result_file, retcode, stdoutdata, stderrdata) 
     
