@@ -52,9 +52,12 @@ class Wget(malleefowl.process.SourceProcess):
     def execute(self):
         self.status.set(msg="starting esgf download", percentDone=5, propagate=True)
 
-        esgf_credentials = utils.logon(
-            openid=self.openid_in.getValue(), 
-            password=self.password_in.getValue())
+        try:
+            esgf_credentials = utils.logon(
+                openid=self.openid_in.getValue(), 
+                password=self.password_in.getValue())
+        except Exception, err:
+            raise RuntimeError("logon failed (%s)." % (err.message))
         
         self.status.set(msg="logon successful", percentDone=10, propagate=True)
 

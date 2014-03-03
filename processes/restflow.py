@@ -69,11 +69,9 @@ class GenerateAndRun(WPSProcess):
         # TODO: fix json encode to unicode
         nodes = yaml.load(fp)
         logger.debug("nodes: %s", nodes)
-        self.message("nodes: %s" % (nodes))
    
         wf = restflow.generate(self.name.getValue(), nodes)
         logger.debug("generated wf: %s", wf)
-        self.message("generatd wf: %s" % (wf))
         
         outfile = self.mktempfile(suffix='.txt')
         restflow.write( outfile, wf )
@@ -81,7 +79,7 @@ class GenerateAndRun(WPSProcess):
         self.status.set(msg="Run workflow ...", percentDone=10, propagate=True)
 
         (result_file, retcode, stdoutdata, stderrdata) = restflow.run(outfile, verbose=True)
-        self.message("result %s %s %s %s" % (result_file, retcode, stdoutdata, stderrdata))
+        log.debug("result %s %s %s %s", result_file, retcode, stdoutdata, stderrdata)
         
         self.status.set(msg="Workflow ... Done", percentDone=90, propagate=True)
 
@@ -201,8 +199,6 @@ class Run(WPSProcess):
             )
 
     def execute(self):
-        logger = logging.getLogger(__name__)
-        
         self.status.set(msg="Starting Workflow", percentDone=5, propagate=True)
 
         filename = os.path.abspath(self.workflow_description.getValue(asFile=False))
@@ -210,11 +206,8 @@ class Run(WPSProcess):
 
         (result_file, retcode, stdoutdata, stderrdata) = restflow.run(filename, verbose=True)
 
-        logger.debug("restflow done, result_file=%s, ret_code=%s", result_file, ret_code)
+        logger.debug("restflow done, result_file=%s, retcode=%s", result_file, retcode)
 
         self.status.set(msg="Workflow done", percentDone=90, propagate=True)
-
-        import time
-        time.sleep(2)
 
         self.output.setValue( result_file )

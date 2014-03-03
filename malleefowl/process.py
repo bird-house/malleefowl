@@ -13,8 +13,8 @@ from pywps import config
 
 import utils
 
-import logging
-log = logging.getLogger(__name__)
+from malleefowl import wpslogging as logging
+logger = logging.getLogger(__name__)
 
 
 class WPSProcess(PyWPSProcess):
@@ -66,6 +66,10 @@ class WPSProcess(PyWPSProcess):
         (_, filename) = tempfile.mkstemp(dir=self.working_dir, suffix=suffix)
         return filename
 
+    def sleep(self, secs):
+        import time
+        time.sleep(secs)
+
 class SourceProcess(WPSProcess):
      """This is the base class for all source processes."""
 
@@ -75,7 +79,7 @@ class SourceProcess(WPSProcess):
         #    {"title":"C3Grid", "href":"http://www.c3grid.de"},
         #    )
 
-        log.debug("init source process %s", wf_identifier)
+        logger.debug("init source process %s", wf_identifier)
         
         WPSProcess.__init__(
             self,
@@ -121,6 +125,8 @@ class WorkerProcess(WPSProcess):
         #metadata.append(
         #    {"title":"C3Grid", "href":"http://www.c3grid.de"},
         #    )
+
+        logger.debug("init worker process %s", wf_identifier)
 
         utils.register_process_metadata(wf_identifier, extra_metadata)
         

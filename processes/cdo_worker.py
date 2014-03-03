@@ -9,8 +9,8 @@ import malleefowl.process
 
 from cdo import Cdo
 
-import logging
-log = logging.getLogger(__name__)
+from malleefowl import wpslogging as logging
+logger = logging.getLogger(__name__)
 
 class CDOOperation(malleefowl.process.WorkerProcess):
     """This process calls cdo with operation on netcdf file"""
@@ -57,6 +57,8 @@ class CDOOperation(malleefowl.process.WorkerProcess):
             )
 
     def execute(self):
+        logger.debug("running cdo operator")
+        
         self.status.set(msg="starting cdo operator", percentDone=10, propagate=True)
 
         nc_files = self.get_nc_files()
@@ -107,7 +109,7 @@ class CDOInfo(malleefowl.process.WorkerProcess):
     def execute(self):
         self.status.set(msg="starting cdo sinfo", percentDone=10, propagate=True)
 
-        log.debug('running cdo sinfo')
+        logger.debug('running cdo sinfo')
 
         cdo = Cdo()
 
@@ -123,5 +125,7 @@ class CDOInfo(malleefowl.process.WorkerProcess):
                 fp.write('\n\n')
 
         self.status.set(msg="cdo sinfo done", percentDone=90, propagate=True)
+
+        logger.debug("cdo sinfo done")
 
         self.output.setValue( outfile )
