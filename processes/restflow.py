@@ -7,8 +7,8 @@ Author: Carsten Ehbrecht (ehbrecht@dkrz.de)
 import os.path
 import types
 
-import logging
-logging.debug('check logging')
+from malleefowl import wpslogging as logging
+logger = logging.getLogger(__name__)
 
 from malleefowl.process import WPSProcess
 from malleefowl import restflow
@@ -62,17 +62,17 @@ class GenerateAndRun(WPSProcess):
 
         # TODO: handle multiple values (fix in pywps)
         # http://pymotw.com/2/json/
-        logging.debug('json doc: %s', self.nodes.getValue())
+        logger.debug('json doc: %s', self.nodes.getValue())
         fp = open(self.nodes.getValue())
         
         import yaml
         # TODO: fix json encode to unicode
         nodes = yaml.load(fp)
-        logging.debug("nodes: %s", nodes)
+        logger.debug("nodes: %s", nodes)
         self.message("nodes: %s" % (nodes))
    
         wf = restflow.generate(self.name.getValue(), nodes)
-        logging.debug("generated wf: %s", wf)
+        logger.debug("generated wf: %s", wf)
         self.message("generatd wf: %s" % (wf))
         
         outfile = self.mktempfile(suffix='.txt')
@@ -136,19 +136,21 @@ class Generate(WPSProcess):
 
         # TODO: handle multiple values (fix in pywps)
         # http://pymotw.com/2/json/
-        logging.debug('json doc: %s', self.nodes.getValue())
+        logger.debug('json doc: %s', self.nodes.getValue())
         fp = open(self.nodes.getValue())
         
         import yaml
         # TODO: fix json encode to unicode
         nodes = yaml.load(fp)
-        logging.debug("nodes: %s", nodes)
+        logger.debug("nodes: %s", nodes)
    
         wf = restflow.generate(self.name.getValue(), nodes)
-        logging.debug("generated wf: %s", wf)
+        logger.debug("generated wf: %s", wf)
         
         outfile = self.mktempfile(suffix='.txt')
         restflow.write( outfile, wf )
+
+        log.debug("wf generation done")
 
         self.status.set(msg="Generate workflow ... Done", percentDone=90, propagate=True)
 
@@ -199,16 +201,20 @@ class Run(WPSProcess):
             )
 
     def execute(self):
+        logger = logging.getLogger(__name__)
+        
         self.status.set(msg="Starting Workflow", percentDone=5, propagate=True)
 
         filename = os.path.abspath(self.workflow_description.getValue(asFile=False))
-        logging.debug("filename = %s", filename)
+        logger.debug("filename = %s", filename)
 
-        result = restflow.run(filename, verbose=True)
+        (result_file, retcode, stdoutdata, stderrdata) = restflow.run(filename, verbose=True)
+
+        logger.debug("restflow done, result_file=%s, ret_code=%s", result_file, ret_code)
 
         self.status.set(msg="Workflow done", percentDone=90, propagate=True)
 
-        #import time
-        #time.sleep(20)
+        import time
+        time.sleep(2)
 
-        self.output.setValue( result )
+        self.output.setValue( result_file )

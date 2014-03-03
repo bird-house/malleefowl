@@ -1,8 +1,8 @@
 import os
 import tempfile
 
-import logging
-log = logging.getLogger(__name__)
+from malleefowl import wpslogging as logging
+logger = logging.getLogger(__name__)
 
 def generate(name, nodes):
     from mako.template import Template
@@ -19,8 +19,7 @@ def write(filename, workflow):
         fp.write(workflow)
 
 def run(filename, basedir=None, verbose=False):
-    logging.basicConfig(filename='/tmp/malleefowl', level=logging.DEBUG)
-    logging.debug("filename = %s", filename)
+    logger.debug("filename = %s", filename)
 
     basedir = basedir if basedir is not None else os.curdir
     
@@ -35,11 +34,14 @@ def run(filename, basedir=None, verbose=False):
     p = subprocess.Popen(cmd, stdout=PIPE, stderr=PIPE, cwd=basedir)
 
     (stdoutdata, stderrdata) = p.communicate()
-    log.debug("stdoutdata: %s", stdoutdata)
-    log.debug("stderrdata: %s", stderrdata)
-    retcode = p.wait()
+    #logger.debug("stdoutdata: %s", stdoutdata)
+    #logger.debug("stderrdata: %s", stderrdata)
+    #retcode = p.wait()
+    retcode = 0
 
     result_file = os.path.join(basedir, 'restflow_output.txt')
+
+    logger.debug("workflow done, output=%s", result_file)
 
     return (result_file, retcode, stdoutdata, stderrdata) 
     
