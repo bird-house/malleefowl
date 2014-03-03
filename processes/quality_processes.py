@@ -105,8 +105,6 @@ class DirectoryValidatorProcess(malleefowl.process.WPSProcess):
                                       work_dir = WORK_DIR
                                       )
         project = self.project.getValue()
-        #remove old data
-        qcp.clean_process_dir()
         #set the new data
         output = qcp.validate_directory(data_path, project)
 
@@ -213,7 +211,6 @@ class QualityCheckProcess(malleefowl.process.WPSProcess):
 
     def execute(self):
 
-
         self.status.set(msg = "Initiate process", percentDone = 0, propagate = True)
 
         def statmethod(cur,end):
@@ -228,34 +225,24 @@ class QualityCheckProcess(malleefowl.process.WPSProcess):
         data_path_file = open(os.path.join(qcp.process_dir,"data_path"),"r") 
         data_path = data_path_file.readline()
         data_path_file.close()
-        select = self.select.getValue()
-        if select == '<colander.null>':
-            select =  ""
-        lock = self.lock.getValue()
-        if lock == '<colander.null>':
-            lock =  ""
-        #remove characters that could be used for injection attacks
-        for remove_char in ["&","|"]:
-            select = select.replace(remove_char,"")
-            lock = lock.replace(remove_char,"")
-        select_list = [x.strip() for x in select.split(",")]
-        lock_list = [x.strip() for x in lock.split(",")]
+        selects = self.select.getValue()
+        if selects == '<colander.null>':
+            selects =  ""
+        locks = self.lock.getValue()
+        if locks == '<colander.null>':
+            locks =  ""
         
-
-        select = ["-E_SELECT .*"+x+".*" for x in select_list if x != ""]
-        lock = ["-E_LOCK .*"+x+".*" for x in lock_list if x != ""]
-
-        selection = " ".join(select+lock) 
-
         output = qcp.quality_check(
-                                   project_data_dir = data_path,
-                                   args = selection,
-                                   project = self.project.getValue(),
-                                   )
+                               project_data_dir = data_path,
+                               selects = selects,
+                               locks = locks,
+                               project = self.project.getValue(),
+                               )
         self.qc_call_exit_code.setValue(output["qc_call_exit_code"])
         self.qc_call.setValue(output["qc_call"])
         self.qc_svn_version.setValue(output["QC_SVN_Version"])
         self.error_messages.setValue(str(output["stderr"]))
+
 
         return
 
