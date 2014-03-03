@@ -1,7 +1,7 @@
 __all__ = ["base",
            "restflow",
            "publish",
-           "cdoWorker",
+           "cdo_worker",
            "ensembles",
            "esgf",
            "testing",
