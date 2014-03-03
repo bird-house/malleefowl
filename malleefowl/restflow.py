@@ -37,11 +37,10 @@ def run(filename, basedir=None, verbose=False):
     logger.debug("stdoutdata: %s", stdoutdata)
     logger.debug("stderrdata: %s", stderrdata)
     #retcode = p.wait()
-    retcode = 0
 
     result_file = os.path.join(basedir, 'restflow_output.txt')
 
     logger.debug("workflow done, output=%s", result_file)
 
-    return (result_file, retcode, stdoutdata, stderrdata) 
+    return result_file
     
