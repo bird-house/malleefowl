@@ -62,20 +62,14 @@ class CDOOperation(malleefowl.process.WorkerProcess):
         nc_files = self.get_nc_files()
         operator = self.operator_in.getValue()
 
-        out_filename = self.mktempfile(suffix='.nc')
-        try:
-            cmd = ["cdo", operator]
-            if operator == 'merge':
-                cmd.extend(nc_files)
-            else:
-                cmd.append(nc_files[0])
-            cmd.append(out_filename)
-            self.cmd(cmd=cmd, stdout=True)
-        except Exception, err:
-            raise RuntimeError("cdo command failed (%s)." % (err.message))
+        cdo = Cdo()
+        cdo_op = getattr(cdo, operator)
 
+        outfile = self.mktempfile(suffix='.nc')
+        cdo_op(input= " ".join(nc_files), output=outfile)
+        
         self.status.set(msg="cdo operator done", percentDone=90, propagate=True)
-        self.output.setValue( out_filename )
+        self.output.setValue( outfile )
 
 
 class CDOInfo(malleefowl.process.WorkerProcess):
