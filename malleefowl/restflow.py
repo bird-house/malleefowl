@@ -19,7 +19,8 @@ def write(filename, workflow):
         fp.write(workflow)
 
 def run(filename, basedir=None, verbose=False):
-    log.debug("filename = %s", filename)
+    logging.basicConfig(filename='/tmp/malleefowl', level=logging.DEBUG)
+    logging.debug("filename = %s", filename)
 
     basedir = basedir if basedir is not None else os.curdir
     

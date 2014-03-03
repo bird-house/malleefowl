@@ -7,6 +7,8 @@ Author: Carsten Ehbrecht (ehbrecht@dkrz.de)
 #from malleefowl.process import WorkerProcess
 import malleefowl.process
 
+from cdo import Cdo
+
 import logging
 log = logging.getLogger(__name__)
 
@@ -113,20 +115,19 @@ class CDOInfo(malleefowl.process.WorkerProcess):
 
         log.debug('running cdo sinfo')
 
+        cdo = Cdo()
+
         from os import curdir, path
         nc_files = self.get_nc_files()
 
-        result = ''
-        for nc_file in nc_files:
-            try:
-                result += self.cmd(cmd=["cdo", "sinfo", nc_file], stdout=True)
-            except Exception, err:
-                raise RuntimeError("cdo sinfo failed (%s)." % (err.message))
+        outfile = self.mktempfile(suffix='.txt')
+        with open(outfile, 'w') as fp: 
+            for nc_file in nc_files:
+                sinfo = cdo.sinfo(input=nc_file, output=outfile)
+                for line in sinfo:
+                    fp.write(line + '\n')
+                fp.write('\n\n')
 
         self.status.set(msg="cdo sinfo done", percentDone=90, propagate=True)
 
-        out_filename = self.mktempfile(suffix='.txt')
-        with open(out_filename, 'w') as fp:
-            fp.write(result)
-            fp.close()
-            self.output.setValue( out_filename )
+        self.output.setValue( outfile )
