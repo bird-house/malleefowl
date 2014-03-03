@@ -228,16 +228,20 @@ class QualityCheckProcess(malleefowl.process.WPSProcess):
         data_path_file = open(os.path.join(qcp.process_dir,"data_path"),"r") 
         data_path = data_path_file.readline()
         data_path_file.close()
-        select_list = self.select.getValue()
-        if select_list == '<colander.null>':
-            select_list =  ""
-        if not isinstance(select_list,list): 
-            select_list = [select_list]
-        lock_list= self.lock.getValue()
-        if lock_list == '<colander.null>':
-            lock_list =  ""
-        if not isinstance(lock_list,list):
-            lock_list = [lock_list]
+        select = self.select.getValue()
+        if select == '<colander.null>':
+            select =  ""
+        lock = self.lock.getValue()
+        if lock == '<colander.null>':
+            lock =  ""
+        #remove characters that could be used for injection attacks
+        for remove_char in ["&","|"]:
+            select = select.replace(remove_char,"")
+            lock = lock.replace(remove_char,"")
+        select_list = [x.strip() for x in select.split(",")]
+        lock_list = [x.strip() for x in lock.split(",")]
+        
+
         select = ["-E_SELECT .*"+x+".*" for x in select_list if x != ""]
         lock = ["-E_LOCK .*"+x+".*" for x in lock_list if x != ""]
 
