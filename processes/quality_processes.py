@@ -133,7 +133,7 @@ class QualityCheckProcess(malleefowl.process.WPSProcess):
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_Quality_Check",
             title = "Quality Check",
-            version = "2014.02.27",
+            version = "2014.03.03",
             metadata = [],
             abstract = "Runs a quality check on a given folder.")
 
@@ -150,10 +150,26 @@ class QualityCheckProcess(malleefowl.process.WPSProcess):
             )
 
 
-        self.args = self.addLiteralInput(
-            identifier = "args",
-            title = "Additional QC parameters",
-            abstract = "Using options of the QC tool. (e.g. -E_SELECT .*)",
+        self.select = self.addLiteralInput(
+            identifier = "select",
+            title = "QC SELECT",
+            abstract = ("Comma separated list of parts of the path." + 
+                        " If at least one of the elements in the list matches with a path in the data" +
+                        " directory, its nc files are added to the check. "+
+                        "added. (e.g. 'AFR-44/.*/tas' would search any nc file in the AFR-44 domain " +
+                        "ith the variable tas. Use '/' to ensure that it does not search for " +
+                        "something containing the given word."),
+            minOccurs = 0,
+            maxOccurs = 1,
+            type = types.StringType,
+            )
+
+        self.lock = self.addLiteralInput(
+            identifier = "lock",
+            title = "QC LOCK",
+            abstract = ("Works similar as select, but prevents the given paths being added."+
+                        " Lock is stronger than select. (e.g. select tas and lock AFR-44/ "+
+                        " checks all tas that are not in AFR-44.)"),
             minOccurs = 0,
             maxOccurs = 1,
             type = types.StringType,
@@ -212,10 +228,28 @@ class QualityCheckProcess(malleefowl.process.WPSProcess):
         data_path_file = open(os.path.join(qcp.process_dir,"data_path"),"r") 
         data_path = data_path_file.readline()
         data_path_file.close()
+        select = self.select.getValue()
+        if select == '<colander.null>':
+            select =  ""
+        lock = self.lock.getValue()
+        if lock == '<colander.null>':
+            lock =  ""
+        #remove characters that could be used for injection attacks
+        for remove_char in ["&","|"]:
+            select = select.replace(remove_char,"")
+            lock = lock.replace(remove_char,"")
+        select_list = [x.strip() for x in select.split(",")]
+        lock_list = [x.strip() for x in lock.split(",")]
+        
+
+        select = ["-E_SELECT .*"+x+".*" for x in select_list if x != ""]
+        lock = ["-E_LOCK .*"+x+".*" for x in lock_list if x != ""]
+
+        selection = " ".join(select+lock) 
 
         output = qcp.quality_check(
                                    project_data_dir = data_path,
-                                   args = self.args.getValue(),
+                                   args = selection,
                                    project = self.project.getValue(),
                                    )
         self.qc_call_exit_code.setValue(output["qc_call_exit_code"])
