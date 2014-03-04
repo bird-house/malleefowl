@@ -59,13 +59,18 @@ def execute(service, identifier, inputs=[], outputs=[], sleep_secs=1, verbose=Fa
     execution = wps.execute(identifier, inputs=inputs, output=outputs)
     monitorExecution(execution, sleepSecs=sleep_secs)
 
-    for process in execution.processOutputs:
-        logger.info("%s: %s", process.identifier, process.reference)
+    logger.info("process %s results", identifier)
+    for item in execution.processOutputs:
+        logger.info("%s: %s", item.identifier, item.reference)
 
     return to_json(execution.processOutputs)
     
 def to_json(result):
-    return json.loads( MyEncoder(sort_keys=True, indent=2).encode(result) )
+    # TODO fix json encoding (unicode, ascii)
+    import yaml
+    result_json = yaml.load( MyEncoder().encode(result) )
+    logger.debug("result as json: %s", result_json)
+    return result_json
 
 def main():
     import optparse
