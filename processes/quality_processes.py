@@ -49,7 +49,7 @@ class DirectoryValidatorProcess(malleefowl.process.WPSProcess):
             identifier = "parallel_id",
             title = "Parallel ID",
             default = "web1",
-            abstract = ("An identifer used to avoid processes running on the same directory." +
+            abstract = ("An identifier used to avoid processes running on the same directory." +
                         "Using an existing one will remove all data inside its work directory."+
                         "The existing Parallel IDs are: "+", ".join(sorted(selectable_parallelids))
                         ),
@@ -131,7 +131,7 @@ class QualityCheckProcess(malleefowl.process.WPSProcess):
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_Quality_Check",
             title = "Quality Check",
-            version = "2014.03.03",
+            version = "2014.03.04",
             metadata = [],
             abstract = "Runs a quality check on a given folder.")
 
@@ -141,7 +141,7 @@ class QualityCheckProcess(malleefowl.process.WPSProcess):
         self.parallel_id = self.addLiteralInput(
             identifier = "parallel_id",
             title = "Parallel ID",
-            abstract = ("An ID for the current process. Select the one matchting to the directory "+
+            abstract = ("An ID for the current process. Select the one matching to the directory "+
                         "requirements check process."),
             allowedValues = selectable_parallelids,
             type = types.StringType,
@@ -153,10 +153,14 @@ class QualityCheckProcess(malleefowl.process.WPSProcess):
             title = "QC SELECT",
             abstract = ("Comma separated list of parts of the path." + 
                         " If at least one of the elements in the list matches with a path in the data" +
-                        " directory, its nc files are added to the check. "+
-                        "added. (e.g. 'AFR-44/.*/tas' would search any nc file in the AFR-44 domain " +
-                        "ith the variable tas. Use '/' to ensure that it does not search for " +
-                        "something containing the given word."),
+                        " directory, its nc files are added to the check." +
+                        " added. At least one '/' must in per list element." +
+                        " The first element of the path does not start with a '/' and the" +
+                        " last element does not end with a '/'." +
+                        " The wildcard '.*'" +
+                        " should be used with care, to avoid unexpected results." +
+                        " (Assuming the paths exist a valid example is:" +
+                        " AFR-44/.*/tas, EUR.*/, /fx/)"),
             minOccurs = 0,
             maxOccurs = 1,
             type = types.StringType,
@@ -165,8 +169,8 @@ class QualityCheckProcess(malleefowl.process.WPSProcess):
         self.lock = self.addLiteralInput(
             identifier = "lock",
             title = "QC LOCK",
-            abstract = ("Works similar as select, but prevents the given paths being added."+
-                        " Lock is stronger than select. (e.g. select tas and lock AFR-44/ "+
+            abstract = ("Works similar to select, but prevents the given paths being added."+
+                        " Lock is stronger than select. (e.g. select /tas and lock AFR-44/ "+
                         " checks all tas that are not in AFR-44.)"),
             minOccurs = 0,
             maxOccurs = 1,
@@ -269,7 +273,7 @@ class EvaluateQualityCheckProcess(malleefowl.process.WPSProcess):
         self.parallel_id = self.addLiteralInput(
             identifier = "parallel_id",
             title = "Parallel ID",
-            abstract = "An ID for the current process. Select the one matchting to the quality check.",
+            abstract = "An ID for the current process. Select the one matching to the quality check.",
             allowedValues = selectable_parallelids,
             type = types.StringType,
             )
@@ -422,7 +426,7 @@ class QualityPublisherProcess(malleefowl.process.WPSProcess):
         self.parallel_id = self.addLiteralInput(
             identifier = "parallel_id",
             title = "Parallel ID",
-            abstract = ("An ID for the current process. Select the one matchting to the evaluation."),
+            abstract = ("An ID for the current process. Select the one matching to the evaluation."),
             allowedValues = selectable_parallelids,
             type = types.StringType,
             )
@@ -474,7 +478,7 @@ class MetaPublisherProcess(malleefowl.process.WPSProcess):
         self.parallel_id = self.addLiteralInput(
             identifier = "parallel_id",
             title = "Parallel ID",
-            abstract = ("An ID for the current process. Select the one matchting to the evaluation."),
+            abstract = ("An ID for the current process. Select the one matching to the evaluation."),
             allowedValues = selectable_parallelids,
             type = types.StringType,
             )
@@ -577,7 +581,7 @@ class RemoveDataProcess(malleefowl.process.WPSProcess):
 # Helper methods #
 ##################
 
-def statusmethod(msg,current,end,wpsprocess):
+def statusmethod(msg, current, end, wpsprocess):
     """
     :param current: The current counter
     :param end: The end counter
@@ -586,18 +590,18 @@ def statusmethod(msg,current,end,wpsprocess):
     #workaround division 0
     if int(end) == 0:
         end = 1
-    wpsprocess.status.set(msg = msg, percentDone = float(current)*100.0/float(end),propagate = True)
+    wpsprocess.status.set(msg = msg, percentDone = float(current)*100.0/float(end), propagate = True)
 
-def _create_server_copy_of_file(filename,wpsprocess):
-    serverfile = open(wpsprocess.mktempfile(suffix = ".txt"),"w")
-    localfile = open(filename,"r")
+def _create_server_copy_of_file(filename, wpsprocess):
+    serverfile = open(wpsprocess.mktempfile(suffix = ".txt"), "w")
+    localfile = open(filename, "r")
     serverfile.write(localfile.read())
     localfile.close()
     serverfile.close()
     return serverfile
 
 def get_user_dir(user):
-    return os.path.join(climdapsabs,"var","qc_cache",user)
+    return os.path.join(climdapsabs, "var", "qc_cache", user)
 
 def get_user_parallelids(user):
     """
@@ -612,5 +616,5 @@ def get_user_parallelids(user):
             lines = hist.readlines()
             for line in lines:
                 history.append(line.rstrip("\n"))
-    existing_history = [x for x in history if os.path.isdir(os.path.join(path,x))] 
+    existing_history = [x for x in history if os.path.isdir(os.path.join(path, x))] 
     return existing_history
