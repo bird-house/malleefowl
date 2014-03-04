@@ -154,13 +154,14 @@ class QualityCheckProcess(malleefowl.process.WPSProcess):
             abstract = ("Comma separated list of parts of the path." + 
                         " If at least one of the elements in the list matches with a path in the data" +
                         " directory, its nc files are added to the check." +
-                        " added. At least one '/' must in per list element." +
+                        " It is recommended to put variables into '/' to avoid accidental" +
+                        " matches with other path elements." +
                         " The first element of the path does not start with a '/' and the" +
                         " last element does not end with a '/'." +
                         " The wildcard '.*'" +
-                        " should be used with care, to avoid unexpected results." +
+                        " should be used with care, as the handling of '/' is considered undefined." +
                         " (Assuming the paths exist a valid example is:" +
-                        " AFR-44/.*/tas, EUR.*/, /fx/)"),
+                        " AFR-44/.*/tas, EUR.*, /fx/)"),
             minOccurs = 0,
             maxOccurs = 1,
             type = types.StringType,
@@ -170,7 +171,7 @@ class QualityCheckProcess(malleefowl.process.WPSProcess):
             identifier = "lock",
             title = "QC LOCK",
             abstract = ("Works similar to select, but prevents the given paths being added."+
-                        " Lock is stronger than select. (e.g. select /tas and lock AFR-44/ "+
+                        " Lock is stronger than select. (e.g. select tas and lock AFR-44 "+
                         " checks all tas that are not in AFR-44.)"),
             minOccurs = 0,
             maxOccurs = 1,
