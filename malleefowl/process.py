@@ -79,7 +79,7 @@ class SourceProcess(WPSProcess):
         #    {"title":"C3Grid", "href":"http://www.c3grid.de"},
         #    )
 
-        logger.debug("init source process %s", wf_identifier)
+        #logger.debug("init source process %s", wf_identifier)
         
         WPSProcess.__init__(
             self,
@@ -126,7 +126,7 @@ class WorkerProcess(WPSProcess):
         #    {"title":"C3Grid", "href":"http://www.c3grid.de"},
         #    )
 
-        logger.debug("init worker process %s", wf_identifier)
+        #logger.debug("init worker process %s", wf_identifier)
 
         utils.register_process_metadata(wf_identifier, extra_metadata)
         

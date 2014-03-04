@@ -34,8 +34,9 @@ def run(filename, basedir=None, verbose=False):
     p = subprocess.Popen(cmd, stdout=PIPE, stderr=PIPE, cwd=basedir)
 
     (stdoutdata, stderrdata) = p.communicate()
-    logger.debug("stdoutdata: %s", stdoutdata)
-    logger.debug("stderrdata: %s", stderrdata)
+    logger.debug("after process call")
+    #logger.debug("stdoutdata: %s", stdoutdata)
+    #logger.debug("stderrdata: %s", stderrdata)
     #retcode = p.wait()
 
     result_file = os.path.join(basedir, 'restflow_output.txt')

@@ -64,7 +64,7 @@ def test_run_simple():
     (fp, filename) = tempfile.mkstemp(suffix=".yaml", prefix="restflow-")
     restflow.write(filename, wf)
 
-    (result_file, retcode, stdoutdata, stderrdata) = restflow.run(filename, basedir=tempfile.mkdtemp(), verbose=True)
+    result_file = restflow.run(filename, basedir=tempfile.mkdtemp(), verbose=True)
     with open(result_file) as fp:
         line = fp.readline()
         nose.tools.ok_('wpsoutputs' in line, line)
