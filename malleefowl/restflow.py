@@ -21,7 +21,7 @@ def write(filename, workflow):
 def status(msg, percent_done):
     logger.info('STATUS - percent done: %d, status: %s', percent_done, msg)
 
-def run(filename, basedir=None, timeout=30, status_callback=status, verbose=False):
+def run(filename, basedir=None, timeout=300, status_callback=status, verbose=False):
     logger.debug("filename = %s", filename)
 
     basedir = basedir if basedir is not None else os.curdir

@@ -10,8 +10,8 @@ import json
 import malleefowl
 from malleefowl import utils
 
-import logging
-log = logging.getLogger(__name__)
+from malleefowl import wpslogging as logging
+logger = logging.getLogger(__name__)
 
 class ListLocalFiles(malleefowl.process.WPSProcess):
     """This process lists files from local filesystem."""
@@ -52,7 +52,7 @@ class ListLocalFiles(malleefowl.process.WPSProcess):
             )
 
     def execute(self):
-        self.status.set(msg="starting ...", percentDone=5, propagate=True)
+        self.show_status("starting ...", 5)
 
         user_id = utils.user_id(self.openid_in.getValue())
         files_path = os.path.join(self.files_path, user_id)
@@ -62,7 +62,7 @@ class ListLocalFiles(malleefowl.process.WPSProcess):
 
         files = [f for f in os.listdir(files_path) if filter in f]
 
-        self.status.set(msg="retrieved file list", percentDone=90, propagate=True)
+        self.show_status("retrieved file list", 90)
         
         self.filelist_out.setValue(json.dumps(files))
 
@@ -89,7 +89,7 @@ class GetFileFromFilesystem(malleefowl.process.SourceProcess):
             )
 
     def execute(self):
-        self.status.set(msg="starting ...", percentDone=5, propagate=True)
+        self.show_status("starting ...", 5)
 
         user_id = utils.user_id(self.openid_in.getValue())
         files_path = os.path.join(self.files_path, user_id)
@@ -100,7 +100,7 @@ class GetFileFromFilesystem(malleefowl.process.SourceProcess):
         files = [f for f in os.listdir(files_path) if file_id in f]
         file_path = os.path.join(files_path, files[0])
 
-        self.status.set(msg="retrieved file", percentDone=90, propagate=True)
+        self.show_status("retrieved file", 90)
         
         self.output.setValue(file_path)
 
@@ -118,12 +118,12 @@ class GetTestFiles(malleefowl.process.SourceProcess):
             abstract="Get files for testing")
 
     def execute(self):
-        self.status.set(msg="starting ...", percentDone=5, propagate=True)
+        self.show_status("starting ...", 5)
 
         file_path = os.path.join(self.files_path, self.file_identifier.getValue())
-        log.debug('test file: %s', file_path)
+        logger.debug('test file: %s', file_path)
 
-        self.status.set(msg="retrieved file", percentDone=90, propagate=True)
+        self.show_status("retrieved file", 90)
         
         self.output.setValue(file_path)
 

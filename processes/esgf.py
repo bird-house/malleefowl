@@ -15,6 +15,9 @@ from netCDF4 import Dataset
 import malleefowl.process 
 from malleefowl import utils
 
+from malleefowl import wpslogging as logging
+logger = logging.getLogger(__name__)
+
 class Wget(malleefowl.process.SourceProcess):
     """This process downloads files form esgf data node via wget and http"""
 
@@ -50,7 +53,7 @@ class Wget(malleefowl.process.SourceProcess):
             )
 
     def execute(self):
-        self.status.set(msg="starting esgf download", percentDone=5, propagate=True)
+        self.show_status("starting esgf download", 5)
 
         try:
             esgf_credentials = utils.logon(
@@ -59,7 +62,7 @@ class Wget(malleefowl.process.SourceProcess):
         except Exception, err:
             raise RuntimeError("logon failed (%s)." % (err.message))
         
-        self.status.set(msg="logon successful", percentDone=10, propagate=True)
+        self.show_status("logon successful", 10)
 
         netcdf_url = self.file_identifier.getValue()
 
@@ -76,11 +79,12 @@ class Wget(malleefowl.process.SourceProcess):
         except Exception, err:
             raise RuntimeError("wget failed (%s)." % (err.message))
 
-        out = os.path.join(self.cache_path, os.path.basename(netcdf_url))
-        self.message('out path=%s' % (out), force=True)
-        self.status.set(msg="retrieved netcdf file", percentDone=90, propagate=True)
+        outfile = os.path.join(self.cache_path, os.path.basename(netcdf_url))
+        logger.debug('result file=%s', outfile)
+        
+        self.show_status("retrieved netcdf file", 90)
 
-        self.output.setValue(out)
+        self.output.setValue(outfile)
 
 
 class OpenDAP(malleefowl.process.SourceProcess):

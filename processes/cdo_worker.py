@@ -59,7 +59,7 @@ class CDOOperation(malleefowl.process.WorkerProcess):
     def execute(self):
         logger.debug("running cdo operator")
         
-        self.status.set(msg="starting cdo operator", percentDone=10, propagate=True)
+        self.show_status("starting cdo operator", 10)
 
         nc_files = self.get_nc_files()
         operator = self.operator_in.getValue()
@@ -70,7 +70,7 @@ class CDOOperation(malleefowl.process.WorkerProcess):
         outfile = self.mktempfile(suffix='.nc')
         cdo_op(input= " ".join(nc_files), output=outfile)
         
-        self.status.set(msg="cdo operator done", percentDone=90, propagate=True)
+        self.show_status("cdo operator done", 90)
         self.output.setValue( outfile )
 
 
@@ -107,7 +107,7 @@ class CDOInfo(malleefowl.process.WorkerProcess):
             )
 
     def execute(self):
-        self.status.set(msg="starting cdo sinfo", percentDone=10, propagate=True)
+        self.show_status("starting cdo sinfo", 10)
 
         logger.debug('running cdo sinfo')
 
@@ -124,7 +124,7 @@ class CDOInfo(malleefowl.process.WorkerProcess):
                     fp.write(line + '\n')
                 fp.write('\n\n')
 
-        self.status.set(msg="cdo sinfo done", percentDone=90, propagate=True)
+        self.show_status("cdo sinfo done", 90)
 
         logger.debug("cdo sinfo done")
 

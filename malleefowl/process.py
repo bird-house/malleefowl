@@ -70,6 +70,10 @@ class WPSProcess(PyWPSProcess):
         import time
         time.sleep(secs)
 
+    def show_status(self, msg, percent_done):
+        logger.info('STATUS (%d/100) - %s: %s', percent_done, self.identifier, msg)
+        self.status.set(msg=msg, percentDone=percent_done, propagate=True)
+
 class SourceProcess(WPSProcess):
      """This is the base class for all source processes."""
 

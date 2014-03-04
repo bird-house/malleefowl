@@ -20,6 +20,7 @@ os.environ['PATH'] = '%s:%s' % (
     os.environ['PATH'])
 
 NODES = None
+ESGF_NODES = None
 def setup_nodes():
     global NODES
     
@@ -40,6 +41,27 @@ def setup_nodes():
     # TODO: fix json encoding to unicode
     raw = yaml.dump(NODES)
     NODES = yaml.load(raw)
+
+def setup_esgf_nodes():
+    global ESGF_NODES
+    
+    source = dict(
+        service = service,
+        identifier = "org.malleefowl.esgf.wget.source",
+        input = ['openid=https://esgf-data.dkrz.de/esgf-idp/openid/pingutest', 'password='],
+        output = ['output'],
+        sources = [['http://bmbf-ipcc-ar5.dkrz.de/thredds/fileServer/cmip5/output1/MPI-M/MPI-ESM-LR/rcp26/mon/atmos/Amon/r1i1p1/v20120315/tas/tas_Amon_MPI-ESM-LR_rcp26_r1i1p1_200601-210012.nc']]
+        )
+    worker = dict(
+        service = service,
+        identifier = "de.dkrz.cdo.sinfo.worker",
+        input = [],
+        output = ['output'])
+    ESGF_NODES = dict(source=source, worker=worker)
+
+    # TODO: fix json encoding to unicode
+    raw = yaml.dump(ESGF_NODES)
+    ESGF_NODES = yaml.load(raw)
 
 @with_setup(setup_nodes)
 def test_generate_simple():
@@ -93,4 +115,31 @@ def test_run_simple_with_wps():
     fp = urllib.urlopen(result_url)
     content = fp.read()
     ok_('wpsoutputs' in content, content)
-    
+
+@attr('online')
+@with_setup(setup_esgf_nodes)
+def test_run_simple_esgf():
+    global ESGF_NODES
+    gen_result = wpsclient.execute(
+        service = service,
+        identifier = "org.malleefowl.restflow.generate",
+        inputs = [('nodes', yaml.dump(ESGF_NODES))],
+        outputs = [('output', True)]
+        )
+    wf_url = gen_result[0]['reference'].encode('ascii', 'ignore')
+    print wf_url
+
+    run_result = wpsclient.execute(
+        service = service,
+        identifier = "org.malleefowl.restflow.run",
+        inputs = [('workflow_description', wf_url)],
+        outputs = [('output', True)]
+        )
+    result_url = run_result[0]['reference']
+    ok_('wpsoutputs' in result_url, result_url)
+
+    import urllib
+    fp = urllib.urlopen(result_url)
+    content = fp.read()
+    ok_('wpsoutputs' in content, content)
+  
