@@ -7,10 +7,8 @@
 import sys
 import json
 
-import logging
-logging.basicConfig(format='%(message)s')
-log = logging.getLogger(__name__)
-log.setLevel(logging.INFO)
+from malleefowl import wpslogging as logging
+logger = logging.getLogger(__name__)
 
 class MyEncoder(json.JSONEncoder):
     
@@ -35,7 +33,7 @@ def get_caps(service, verbose=False):
     count = 0
     for process in wps.processes:
         count = count + 1
-        log.info("%3d. %s [%s]", count, process.title, process.identifier)
+        logger.info("%3d. %s [%s]", count, process.title, process.identifier)
 
     return to_json(wps.processes)
 
@@ -43,26 +41,26 @@ def describe_process(service, identifier, verbose=False):
     wps = WebProcessingService(service, verbose=verbose)
     process = wps.describeprocess(identifier)
 
-    log.info("Title            = %s", process.title)
-    log.info("Identifier       = %s", process.identifier)
-    log.info("Abstract         = %s", process.abstract)
-    log.info("Store Supported  = %s", process.storeSupported)
-    log.info("Status Supported = %s", process.statusSupported)
-    log.info("Data Inputs      = %s", reduce(lambda x,y: x + ', ' + y, map(lambda x: x.identifier, process.dataInputs)))
-    log.info("Process Outputs  = %s", reduce(lambda x,y: x + ', ' + y, map(lambda x: x.identifier, process.processOutputs)))
+    logger.info("Title            = %s", process.title)
+    logger.info("Identifier       = %s", process.identifier)
+    logger.info("Abstract         = %s", process.abstract)
+    logger.info("Store Supported  = %s", process.storeSupported)
+    logger.info("Status Supported = %s", process.statusSupported)
+    logger.info("Data Inputs      = %s", reduce(lambda x,y: x + ', ' + y, map(lambda x: x.identifier, process.dataInputs)))
+    logger.info("Process Outputs  = %s", reduce(lambda x,y: x + ', ' + y, map(lambda x: x.identifier, process.processOutputs)))
     
     return to_json(process)
 
 def execute(service, identifier, inputs=[], outputs=[], sleep_secs=1, verbose=False):
-    log.debug("inputs %s", inputs)
-    log.debug("outputs %s", outputs)
+    logger.debug("inputs %s", inputs)
+    logger.debug("outputs %s", outputs)
     
     wps = WebProcessingService(service, verbose=verbose)
     execution = wps.execute(identifier, inputs=inputs, output=outputs)
     monitorExecution(execution, sleepSecs=sleep_secs)
 
     for process in execution.processOutputs:
-        log.info("%s: %s", process.identifier, process.reference)
+        logger.info("%s: %s", process.identifier, process.reference)
 
     return to_json(execution.processOutputs)
     
@@ -117,15 +115,15 @@ def main():
 
     options, command = parser.parse_args()
     
-    if options.verbose:
-        log.setLevel(logging.DEBUG)
+    #if options.verbose:
+    #    logger.setLevel(logging.DEBUG)
         
-    log.debug("SERVICE    = %s", options.service)
-    log.debug("IDENTIFIER = %s", options.identifier)
-    log.debug("INPUTS     = %s", options.inputs)
-    log.debug("OUTPUTS    = %s", options.outputs)
-    log.debug("SLEEP      = %s", options.sleep_secs)
-    log.debug("COMMAND    = %s", command)
+    logger.debug("SERVICE    = %s", options.service)
+    logger.debug("IDENTIFIER = %s", options.identifier)
+    logger.debug("INPUTS     = %s", options.inputs)
+    logger.debug("OUTPUTS    = %s", options.outputs)
+    logger.debug("SLEEP      = %s", options.sleep_secs)
+    logger.debug("COMMAND    = %s", command)
 
     inputs = []
     for param in options.inputs:
@@ -155,7 +153,7 @@ def main():
             sleep_secs = options.sleep_secs,
             verbose = options.verbose)
     else:
-        log.error("Unknown command %s", command)
+        logger.error("Unknown command %s", command)
         exit(1)
 
     if options.outfile:

@@ -33,6 +33,7 @@ def run(filename, basedir=None, verbose=False):
     from subprocess import PIPE
     p = subprocess.Popen(cmd, stdout=PIPE, stderr=PIPE, cwd=basedir)
 
+    logger.debug("before process call")
     (stdoutdata, stderrdata) = p.communicate()
     logger.debug("after process call")
     #logger.debug("stdoutdata: %s", stdoutdata)

@@ -87,5 +87,10 @@ def test_run_simple_with_wps():
         outputs = [('output', True)]
         )
     result_url = run_result[0]['reference']
-    ok_('wpsoutput' in result_url, result_url)
+    ok_('wpsoutputs' in result_url, result_url)
+
+    import urllib
+    fp = urllib.urlopen(result_url)
+    content = fp.read()
+    ok_('wpsoutputs' in content, content)
     
