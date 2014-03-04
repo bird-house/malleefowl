@@ -48,23 +48,17 @@
           cmd.add('' + item.value)
       }
      
-      if (verbose) {
-          println cmd
-      }
-
       proc = cmd.execute()
       proc.waitFor()
-
-      if (verbose) {
-          println proc.text
-      }
 
       import org.yaml.snakeyaml.Yaml
       yaml = new Yaml()
       wps_result = yaml.load(new FileInputStream(new File(outfile)))
-      result = 'failed'
+      result = identifier + ' ... failed'
+      status = result
       for (item in wps_result) {
          result = item.reference
+         status = identifier + ' ... done'
       }
     inputs:
       identifier: 
@@ -85,18 +79,16 @@
         type: Bool
     outputs:
       result:
+      status:
 
 - id: FileWriter
   type: GroovyActor
   properties:
     step: |
-      file = new File(filename)
-      file.withWriter { Writer writer ->
-          writer << result
-          writer << '\n'
-      }
+      f = new File(filename)
+      f.write(message)
     inputs:
       filename:
         type: String
-      result:
+      message:
         type: String

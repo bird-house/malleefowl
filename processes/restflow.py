@@ -127,13 +127,12 @@ class Run(WPSProcess):
             )
 
     def execute(self):
-        self.status.set(msg="Starting Workflow", percentDone=5, propagate=True)
-
         filename = os.path.abspath(self.workflow_description.getValue(asFile=False))
         logger.debug("filename = %s", filename)
 
-        result_file = restflow.run(filename, verbose=False)
-
-        self.status.set(msg="Workflow done", percentDone=90, propagate=True)
+        status = lambda msg, percent: self.status.set(msg=msg, percentDone=percent, propagate=True)
+        result_file = restflow.run(filename, status_callback=status, verbose=False)
 
         self.output.setValue( result_file )
+
+

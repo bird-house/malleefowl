@@ -20,6 +20,7 @@ components:
     - !ref WaitForSources
     - !ref RunWorker
     - !ref WriteResult
+    - !ref WriteStatus
 
 - id: GetSource
   type: Node
@@ -35,6 +36,7 @@ components:
       sources: ${nodes['source'].get('sources')}
     outflows:
       result: /source/
+      status: /status/
 
 - id: WaitForSources
   type: Node
@@ -60,7 +62,8 @@ components:
     inflows:
       sources: /sources/
     outflows:
-      result: /worker/  
+      result: /worker/
+      status: /status/
  
 - id: WriteResult
   type: Node
@@ -69,6 +72,16 @@ components:
     constants:
       filename: restflow_output.txt
     inflows:
-      result: /worker/
+      message: /worker/
+
+- id: WriteStatus
+  type: Node
+  properties:
+    actor: !ref FileWriter
+    constants:
+      filename: restflow_status.txt
+    inflows:
+      message: /status/
+
 
 

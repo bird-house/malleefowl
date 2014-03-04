@@ -96,6 +96,10 @@ def main():
                       dest="outfile",
                       action="store",
                       help="output file for results")
+    parser.add_option('--status',
+                      dest="statusfile",
+                      action="store",
+                      help="output file for status")
 
     execute_opts = optparse.OptionGroup(
         parser, 'Execute Options',
@@ -162,6 +166,9 @@ def main():
         exit(1)
 
     if options.outfile:
+        logger.debug('writing result %s', options.outfile)
         with open(options.outfile, "w") as fp:
             json.dump(result, fp, sort_keys=True, indent=2)
+            
 
+    logger.info('done')
