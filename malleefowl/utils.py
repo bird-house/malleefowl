@@ -117,7 +117,7 @@ def filter_timesteps(timesteps, aggregation="monthly", start=None, end=None):
     
 
 def database():
-    dburi = config.getConfigValue("server", "mongodbUrl")
+    dburi = config.getConfigValue("malleefowl", "mongodbUrl")
     conn = pymongo.Connection(dburi)
     return conn.malleefowl_db
 

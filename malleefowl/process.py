@@ -44,15 +44,15 @@ class WPSProcess(PyWPSProcess):
 
     @property
     def cache_path(self):
-        return config.getConfigValue("server","cachePath")
+        return config.getConfigValue("malleefowl","cachePath")
 
     @property
     def files_path(self):
-        return config.getConfigValue("server","filesPath")
+        return config.getConfigValue("malleefowl","filesPath")
 
     @property
     def files_url(self):
-        return config.getConfigValue("server","filesUrl")
+        return config.getConfigValue("malleefowl","filesUrl")
 
     @property
     def working_dir(self):
@@ -60,7 +60,7 @@ class WPSProcess(PyWPSProcess):
 
     @property
     def thredds_url(self):
-        return config.getConfigValue("server","threddsUrl")
+        return config.getConfigValue("malleefowl","threddsUrl")
 
     def mktempfile(self, suffix='.txt'):
         (_, filename) = tempfile.mkstemp(dir=self.working_dir, suffix=suffix)
