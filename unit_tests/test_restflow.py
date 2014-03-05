@@ -116,6 +116,7 @@ def test_run_simple_with_wps():
     content = fp.read()
     ok_('wpsoutputs' in content, content)
 
+@attr('esgf')
 @attr('online')
 @with_setup(setup_esgf_nodes)
 def test_run_simple_esgf():
