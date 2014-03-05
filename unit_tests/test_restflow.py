@@ -4,21 +4,21 @@ from nose.plugins.attrib import attr
 
 import os
 import tempfile
+import yaml
 
 from malleefowl import (
     restflow,
     wpsclient,
     )
 
-import yaml
-
-service="http://localhost:8090/wps"
+from pywps import config
 
 # set path to buildout/bin to have access to restflow binary
 os.environ['PATH'] = '%s:%s' % (
     os.path.join(os.path.dirname(restflow.__file__), '..', '..', '..', 'bin'),
     os.environ['PATH'])
 
+service="http://localhost:8090/wps"
 NODES = None
 ESGF_NODES = None
 def setup_nodes():
@@ -48,7 +48,7 @@ def setup_esgf_nodes():
     source = dict(
         service = service,
         identifier = "org.malleefowl.esgf.wget.source",
-        input = ['openid=https://esgf-data.dkrz.de/esgf-idp/openid/pingutest', 'password='],
+        input = ['openid=' + config.getConfigValue("tests", "user"), 'password=' + config.getConfigValue("tests", "password")],
         output = ['output'],
         sources = [['http://bmbf-ipcc-ar5.dkrz.de/thredds/fileServer/cmip5/output1/MPI-M/MPI-ESM-LR/rcp26/mon/atmos/Amon/r1i1p1/v20120315/tas/tas_Amon_MPI-ESM-LR_rcp26_r1i1p1_200601-210012.nc']]
         )
