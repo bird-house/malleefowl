@@ -93,12 +93,12 @@ class PIDManagerFileProcess(malleefowl.process.WPSProcess):
 
     def execute(self):
         self.pidmanager = pidmanager.PIDManager(
-                self.database_location, 
-                self.additional_identifier_element.getValue(),
-                self.port.getValue(),
-                self.prefix.getValue(),
-                self.path.getValue(),
-                self.with_first_run)
+                database_location = self.database_location,
+                additional_identifier_element = self.additional_identifier_element.getValue(),
+                port = self.port.getValue(),
+                prefix = self.prefix.getValue(),
+                path = self.path.getValue(),
+                with_first_run = self.with_first_run)
         server_filename = self.server_filename.getValue()
         local_filename = self.local_filename.getValue()
         output = self.pidmanager.get_pid_file(local_filename, server_filename)
@@ -134,6 +134,7 @@ class PIDManagerDatasetProcess(malleefowl.process.WPSProcess):
                 abstract = "The PIDs in the dataset",
                 type = types.StringType,
                 )
+
         self.database_location = DATABASE_LOCATION
         self.additional_identifier_element = self.addLiteralInput(
                 identifier = "additional_identifier_element",
@@ -172,12 +173,12 @@ class PIDManagerDatasetProcess(malleefowl.process.WPSProcess):
 
     def execute(self):
         self.pidmanager = pidmanager.PIDManager(
-                self.database_location, 
-                self.additional_identifier_element.getValue(),
-                self.port.getValue(),
-                self.prefix.getValue(),
-                self.path.getValue(),
-                self.with_first_run)
+                database_location = self.database_location,
+                additional_identifier_element = self.additional_identifier_element.getValue(),
+                port = self.port.getValue(),
+                prefix = self.prefix.getValue(),
+                path = self.path.getValue(),
+                with_first_run = self.with_first_run)
         ds_title  = self.ds_title.getValue()
         logger.debug("DSTITLE:"+ds_title)
         #the string of comma separated pids must be converted to a list
@@ -263,8 +264,9 @@ class DirectoryValidatorProcess(malleefowl.process.WPSProcess):
         data_path = self.data_path.getValue()
         def statmethod(cur,end):
             statusmethod("Running",cur,end,self)
+        logger.debug(self.username)
 
-        qcp = qcprocesses.QCProcesses(DATABASE_LOCATION,
+        qcp = qcprocesses.QCProcesses(
                                       username = self.username,
                                       statusmethod = statmethod,
                                       parallel_id = self.parallel_id.getValue(),
@@ -292,7 +294,6 @@ class DirectoryValidatorProcess(malleefowl.process.WPSProcess):
 class QualityCheckProcess(malleefowl.process.WPSProcess):
     def __init__(self):
 
-        self.database_location = DATABASE_LOCATION
 
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_Quality_Check",
@@ -386,7 +387,7 @@ class QualityCheckProcess(malleefowl.process.WPSProcess):
 
         def statmethod(cur,end):
             statusmethod("Running",cur,end,self)
-        qcp = qcprocesses.QCProcesses(self.database_location,
+        qcp = qcprocesses.QCProcesses(
                                       username = self.username,
                                       parallel_id = self.parallel_id.getValue(),
                                       statusmethod = statmethod,
@@ -425,7 +426,6 @@ class EvaluateQualityCheckProcess(malleefowl.process.WPSProcess):
     def __init__(self):
 
         logger.debug("qp: eval init ")
-        self.database_location = DATABASE_LOCATION
 
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_Evaluate_Quality_Check",
@@ -547,7 +547,7 @@ class EvaluateQualityCheckProcess(malleefowl.process.WPSProcess):
         logger.debug("qp: eval init qcp")
         def statmethod(cur,end):
             statusmethod("Running",cur,end,self)
-        qcp = qcprocesses.QCProcesses(self.database_location,
+        qcp = qcprocesses.QCProcesses(
                                       username = self.username,
                                       parallel_id = self.parallel_id.getValue(),
                                       statusmethod = statmethod,
@@ -577,7 +577,6 @@ class EvaluateQualityCheckProcess(malleefowl.process.WPSProcess):
 
 class QualityPublisherProcess(malleefowl.process.WPSProcess):
     def __init__(self):
-        self.database_location = DATABASE_LOCATION
         abstract_ml = ("Read trough a file containing one filename per line and publish it.")
 
         malleefowl.process.WPSProcess.__init__(self,
@@ -613,7 +612,7 @@ class QualityPublisherProcess(malleefowl.process.WPSProcess):
         def statmethod(cur,end):
             statusmethod("Running",cur,end,self)
 
-        qcp = qcprocesses.QCProcesses(self.database_location,
+        qcp = qcprocesses.QCProcesses(
                                       username = self.username,
                                       statusmethod = statmethod,
                                       work_dir = WORK_DIR,
@@ -628,7 +627,6 @@ class QualityPublisherProcess(malleefowl.process.WPSProcess):
 
 class MetaPublisherProcess(malleefowl.process.WPSProcess):
     def __init__(self):
-        self.database_location = DATABASE_LOCATION
         abstract_ml = ("Read trough a file containing one filename per line and publish it.")
 
         malleefowl.process.WPSProcess.__init__(self,
@@ -665,7 +663,7 @@ class MetaPublisherProcess(malleefowl.process.WPSProcess):
         def statmethod(cur,end):
             statusmethod("Running",cur,end,self)
 
-        qcp = qcprocesses.QCProcesses(self.database_location,
+        qcp = qcprocesses.QCProcesses(
                                       username = self.username,
                                       statusmethod = statmethod,
                                       work_dir = WORK_DIR,
@@ -680,7 +678,6 @@ class MetaPublisherProcess(malleefowl.process.WPSProcess):
 
 class RemoveDataProcess(malleefowl.process.WPSProcess):
     def __init__(self):
-        self.database_location = DATABASE_LOCATION
 
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_RemoveData", 
@@ -718,7 +715,7 @@ class RemoveDataProcess(malleefowl.process.WPSProcess):
 
         remove_all = self.remove_user_dir.getValue()
         if remove_all:
-            qcp = qcprocesses.QCProcesses(self.database_location,
+            qcp = qcprocesses.QCProcesses(
                                       username = self.username,
                                       statusmethod = statmethod,
                                       work_dir = WORK_DIR,
@@ -732,7 +729,7 @@ class RemoveDataProcess(malleefowl.process.WPSProcess):
             cur = 0
             end = len(parallel_ids)
             for par_id in parallel_ids:
-                qcp = qcprocesses.QCProcesses(self.database_location,
+                qcp = qcprocesses.QCProcesses(
                                           username = self.username,
                                           statusmethod = statmethod,
                                           work_dir = WORK_DIR,
