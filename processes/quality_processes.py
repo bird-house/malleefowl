@@ -43,7 +43,9 @@ class PIDManagerFileProcess(malleefowl.process.WPSProcess):
                 title = "Local filename",
                 minOccurs = 1,
                 maxOccurs = 1,
-                default = climdapsabs + "/examples/data/CORDEX/AFR-44/CLMcom/MPI-ESM-LR/historical/r0i0p0/CCLM4-8-17/v1/fx/orog/orog_AFR-44_MPI-ESM-LR_historical_r1i1p1_CCLM_4-8-17_fx.nc",
+                default = (climdapsabs + "/examples/data/CORDEX/AFR-44/CLMcom/MPI-ESM-LR/historical/" +
+                           "r0i0p0/CCLM4-8-17/v1/fx/orog/orog_AFR-44_MPI-ESM-" + 
+                           "LR_historical_r1i1p1_CCLM_4-8-17_fx.nc"),
                 type = types.StringType,
                 )
 
@@ -52,7 +54,9 @@ class PIDManagerFileProcess(malleefowl.process.WPSProcess):
                 title = "Server filename",
                 minOccurs = 1,
                 maxOccurs = 1,
-                default = "ipcc-ar5.dkrz.de/thredds/fileServer/cordex/AFR-44/CLMcom/MPI-ESM-LR/historical/r0i0p0/CCLM4-8-17/v1/fx/orog/orog_AFR-44_MPI-ESM-LR_historical_r1i1p1_CCLM_4-8-17_fx.nc",
+                default = ("ipcc-ar5.dkrz.de/thredds/fileServer/cordex/AFR-44/CLMcom/MPI-ESM-LR/" + 
+                           "historical/r0i0p0/CCLM4-8-17/v1/fx/orog/orog_AFR-44_MPI-ESM-LR_historical" +
+                           "_r1i1p1_CCLM_4-8-17_fx.nc"),
                 type = types.StringType,
                 )
         self.database_location = DATABASE_LOCATION
