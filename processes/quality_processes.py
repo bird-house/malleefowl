@@ -7,9 +7,10 @@ Creation date: 21.01.2014
 import types
 import malleefowl.process 
 import qc_processes.qcprocesses as qcprocesses
+import qc_processes.pidmanager as pidmanager
 
 import os
-import logging
+from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
 curdir = os.path.dirname(__file__)
@@ -24,6 +25,171 @@ fn = os.path.join(os.path.dirname(__file__),"quality_processes.conf")
 logger.debug("qp: Loading data from file: "+fn)
 execfile(fn,DATA)
 logger.debug("qp: Loaded file to DATA variable")
+
+class PIDManagerFileProcess(malleefowl.process.WPSProcess):
+    """
+    The process provides a PID for a given local file name and server file name. 
+    """
+    def __init__(self):
+        malleefowl.process.WPSProcess.__init__(self,
+            identifier = "PID_for_file",
+            title = "Get a PID for a file",
+            version = "2014.03.06",
+            metadata = [],
+            abstract = "Get a PID for a given local file and the url it will be available at.")
+
+        self.local_filename = self.addLiteralInput(
+                identifier = "local_filename",
+                title = "Local filename",
+                minOccurs = 1,
+                maxOccurs = 1,
+                default = climdapsabs + "/examples/data/CORDEX/AFR-44/CLMcom/MPI-ESM-LR/historical/r0i0p0/CCLM4-8-17/v1/fx/orog/orog_AFR-44_MPI-ESM-LR_historical_r1i1p1_CCLM_4-8-17_fx.nc",
+                type = types.StringType,
+                )
+
+        self.server_filename = self.addLiteralInput(
+                identifier = "server_filename",
+                title = "Server filename",
+                minOccurs = 1,
+                maxOccurs = 1,
+                default = "ipcc-ar5.dkrz.de/thredds/fileServer/cordex/AFR-44/CLMcom/MPI-ESM-LR/historical/r0i0p0/CCLM4-8-17/v1/fx/orog/orog_AFR-44_MPI-ESM-LR_historical_r1i1p1_CCLM_4-8-17_fx.nc",
+                type = types.StringType,
+                )
+        self.database_location = DATABASE_LOCATION
+        self.additional_identifier_element = self.addLiteralInput(
+                identifier = "additional_identifier_element",
+                title = "Additional identifier element",
+                default = "SQL-CORDEX-",
+                type = types.StringType,
+                abstract = "Allows to add a string to the PID, to make it distinguishable",
+                )
+        self.port = self.addLiteralInput(
+                identifier = "port",
+                title = "Handle server port",
+                default = "8090",
+                type = types.StringType,
+                )
+        self.prefix = self.addLiteralInput(
+                identifier = "prefix",
+                title = "Handle server prefix",
+                default = "10876",
+                type = types.StringType,
+                )
+
+        self.path = self.addLiteralInput(
+                identifier = "path",
+                title = "Handle server path",
+                default =  "/handle-rest-0.1.1/",
+                type = types.StringType,
+                )
+
+        self.with_first_run = True
+        self.pid = self.addComplexOutput(
+                identifier = "pid",
+                title = "Found PID",
+                formats=[{"mimeType":"text/plain"}],
+                asReference = True,
+                )
+
+    def execute(self):
+        self.pidmanager = pidmanager.PIDManager(
+                self.database_location, 
+                self.additional_identifier_element.getValue(),
+                self.port.getValue(),
+                self.prefix.getValue(),
+                self.path.getValue(),
+                self.with_first_run)
+        server_filename = self.server_filename.getValue()
+        local_filename = self.local_filename.getValue()
+        output = self.pidmanager.get_pid_file(local_filename, server_filename)
+        outputfile = open(self.mktempfile(),"w")
+        outputfile.write(output)
+        outputfile.close()
+        self.pid.setValue(outputfile)
+
+class PIDManagerDatasetProcess(malleefowl.process.WPSProcess):
+    def __init__(self):
+        malleefowl.process.WPSProcess.__init__(self,
+            identifier = "PID_for_dataset",
+            title = "Get a PID for a dataset",
+            version = "2014.03.06",
+            metadata = [],
+            abstract = "Get a PID for a dataset title and the comma separated list of PIDs in it.")
+
+        self.ds_title = self.addLiteralInput(
+                identifier = "ds_title",
+                title = "Dataset title",
+                minOccurs = 1,
+                maxOccurs = 1,
+                default = "cordex.AFR-44.CLMcom.MPI-ESM-LR.historical.r0i0p0.CCLM4-8-17-v1.fx.orog",
+                type = types.StringType,
+                )
+
+        self.dataset_pids = self.addLiteralInput(
+                identifier = "dataset_pids",
+                title = "Dataset file PIDs list",
+                minOccurs = 1,
+                maxOccurs = 1,
+                default = "10876/SQL-CORDEX-5p8d-09bx-u4qg-xhhx",
+                abstract = "The PIDs in the dataset",
+                type = types.StringType,
+                )
+        self.database_location = DATABASE_LOCATION
+        self.additional_identifier_element = self.addLiteralInput(
+                identifier = "additional_identifier_element",
+                title = "Additional identifier element",
+                default = "SQL-CORDEX-",
+                type = types.StringType,
+                abstract = "Allows to add a string to the PID, to make it distinguishable",
+                )
+        self.port = self.addLiteralInput(
+                identifier = "port",
+                title = "Handle server port",
+                default = "8090",
+                type = types.StringType,
+                )
+        self.prefix = self.addLiteralInput(
+                identifier = "prefix",
+                title = "Handle server prefix",
+                default = "10876",
+                type = types.StringType,
+                )
+
+        self.path = self.addLiteralInput(
+                identifier = "path",
+                title = "Handle server path",
+                default =  "/handle-rest-0.1.1/",
+                type = types.StringType,
+                )
+
+        self.with_first_run = True
+        self.pid = self.addComplexOutput(
+                identifier = "pid",
+                title = "Found PID",
+                formats=[{"mimeType":"text/plain"}],
+                asReference = True,
+                )
+
+    def execute(self):
+        self.pidmanager = pidmanager.PIDManager(
+                self.database_location, 
+                self.additional_identifier_element.getValue(),
+                self.port.getValue(),
+                self.prefix.getValue(),
+                self.path.getValue(),
+                self.with_first_run)
+        ds_title  = self.ds_title.getValue()
+        logger.debug("DSTITLE:"+ds_title)
+        #the string of comma separated pids must be converted to a list
+        dataset_pids = self.dataset_pids.getValue()
+        dspids = dataset_pids.split(",")
+        logger.debug("DSPIDS:"+str(dspids))
+        dataset_file_pids = [x.strip() for x in dspids]
+        output = self.pidmanager.get_pid_dataset(ds_title, dataset_file_pids)
+        outputfile = open(self.mktempfile(),"w")
+        outputfile.write(output)
+        outputfile.close()
+        self.pid.setValue(outputfile)
 
 class DirectoryValidatorProcess(malleefowl.process.WPSProcess):
     """
