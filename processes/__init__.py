@@ -1,6 +1,7 @@
 __all__ = ["base",
-           "restflow",
            "publish",
+           "tokenmgr",
+           "restflow",
            "cdo_worker",
            "ensembles",
            "esgf",

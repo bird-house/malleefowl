@@ -19,23 +19,22 @@ class ListLocalFiles(malleefowl.process.WPSProcess):
     def __init__(self):
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "org.malleefowl.listfiles",
-            title = "List local files",
-            version = "0.1",
+            title = "List Files in Malleefowl Storage",
+            version = "0.2",
             metadata=[
-                {"title":"ESGF","href":"http://esgf.org"},
                 ],
-            abstract="List local files")
+            abstract="List Files in Malleefowl Storage")
 
-        self.openid_in = self.addLiteralInput(
-            identifier = "openid",
-            title = "ESGF OpenID",
-            abstract = "Enter ESGF OpenID",
+        self.token = self.addLiteralInput(
+            identifier = "token",
+            title = "Token",
+            abstract = "Your unique token to recieve data",
             minOccurs = 1,
             maxOccurs = 1,
             type = type('')
             )
 
-        self.filter_in = self.addLiteralInput(
+        self.filter = self.addLiteralInput(
             identifier = "filter",
             title = "Filter",
             abstract = "Filter for file selection",
@@ -44,7 +43,7 @@ class ListLocalFiles(malleefowl.process.WPSProcess):
             type = type(''),
             )
 
-        self.filelist_out = self.addLiteralOutput(
+        self.output = self.addLiteralOutput(
             identifier="output",
             title="Filelist as json",
             abstract="This is a filelist as json",
@@ -54,17 +53,17 @@ class ListLocalFiles(malleefowl.process.WPSProcess):
     def execute(self):
         self.show_status("starting ...", 5)
 
-        user_id = utils.user_id(self.openid_in.getValue())
+        user_id = self.token.getValue()
         files_path = os.path.join(self.files_path, user_id)
         utils.mkdir(files_path)
 
-        filter = self.filter_in.getValue()
+        search_filter = self.filter.getValue()
 
-        files = [f for f in os.listdir(files_path) if filter in f]
+        files = [f for f in os.listdir(files_path) if search_filter in f]
 
         self.show_status("retrieved file list", 90)
         
-        self.filelist_out.setValue(json.dumps(files))
+        self.output.setValue(json.dumps(files))
 
 class GetFileFromFilesystem(malleefowl.process.SourceProcess):
     """This process retrieves files from local filesystem."""
@@ -73,16 +72,15 @@ class GetFileFromFilesystem(malleefowl.process.SourceProcess):
         malleefowl.process.SourceProcess.__init__(self,
             identifier = "org.malleefowl.storage.filesystem",
             title = "Get files from filesystem storage",
-            version = "0.1",
+            version = "0.2",
             metadata=[
-                {"title":"ESGF","href":"http://esgf.org"},
                 ],
             abstract="Get file from filesystem storage")
 
-        self.openid_in = self.addLiteralInput(
-            identifier = "openid",
-            title = "ESGF OpenID",
-            abstract = "Enter ESGF OpenID",
+        self.token = self.addLiteralInput(
+            identifier = "token",
+            title = "Token",
+            abstract = "Your unique token to recieve data",
             minOccurs = 1,
             maxOccurs = 1,
             type = type('')
@@ -91,7 +89,7 @@ class GetFileFromFilesystem(malleefowl.process.SourceProcess):
     def execute(self):
         self.show_status("starting ...", 5)
 
-        user_id = utils.user_id(self.openid_in.getValue())
+        user_id = self.token.getValue()
         files_path = os.path.join(self.files_path, user_id)
         utils.mkdir(files_path)
 

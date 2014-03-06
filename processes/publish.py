@@ -12,33 +12,23 @@ class Publish(malleefowl.process.WorkerProcess):
     def __init__(self):
         malleefowl.process.WorkerProcess.__init__(
             self,
-            identifier = "de.dkrz.publish",
+            identifier = "org.malleefowl.publish",
             title = "Publish NetCDF Files to Thredds Server",
-            version = "0.1",
+            version = "0.2",
             metadata=[
-                {"title":"ClimDaPs","href":"https://redmine.dkrz.de/collaboration/projects/climdaps"},
                 ],
             abstract="Publish netcdf files to Thredds server...",
             )
 
-        self.openid_in = self.addLiteralInput(
-            identifier = "openid",
-            title = "ESGF OpenID",
-            abstract = "Enter ESGF OpenID",
+        self.token = self.addLiteralInput(
+            identifier = "token",
+            title = "Token",
+            abstract = "Your unique token to publish data",
             minOccurs = 1,
             maxOccurs = 1,
             type = type('')
             )
 
-        self.password_in = self.addLiteralInput(
-            identifier = "password",
-            title = "OpenID Password",
-            abstract = "Enter your Password",
-            minOccurs = 1,
-            maxOccurs = 1,
-            type = type('')
-            )
-        
         self.basename = self.addLiteralInput(
             identifier="basename",
             title="Basename",
@@ -60,18 +50,14 @@ class Publish(malleefowl.process.WorkerProcess):
     def execute(self):
         self.status.set(msg="starting publisher", percentDone=10, propagate=True)
 
-        esgf_credentials = utils.logon(
-            openid=self.openid_in.getValue(), 
-            password=self.password_in.getValue())
-        
-        self.status.set(msg="logon successful", percentDone=20, propagate=True)
-
-        user_id = utils.user_id(self.openid_in.getValue())
-
+        token = self.token.getValue()
         nc_files = self.get_nc_files()
 
         result = "Published files to thredds server\n"
 
+        # TODO get user id for token
+        user_id = token
+        
         outdir = os.path.join(self.files_path, user_id)
         utils.mkdir(outdir)
         
