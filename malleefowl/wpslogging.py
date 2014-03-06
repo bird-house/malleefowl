@@ -1,5 +1,9 @@
 import logging
 
+@property
+def DEBUG():
+    return logging.DEBUG
+
 def getLogger(name):
     from pywps import config
     log_path = config.getConfigValue("malleefowl", "logPath")
@@ -30,7 +34,8 @@ def getLogger(name):
     # warn
     fh = logging.FileHandler(os.path.join(log_path, 'malleefowl_warn.log'))
     fh.setLevel(logging.WARN)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    #formatter = logging.Formatter('%(asctime)-15s %(name)-5s %(levelname)-8s IP: %(ip)-15s User: %(user)-8s %(message)s')
+    formatter = logging.Formatter('%(asctime)-15s - %(name)-5s - %(levelname)-8s %(message)s')
     fh.setFormatter(formatter)
     logger.addHandler(fh)
 

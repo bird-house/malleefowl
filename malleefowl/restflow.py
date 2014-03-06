@@ -21,13 +21,14 @@ def write(filename, workflow):
 def status(msg, percent_done):
     logger.info('STATUS - percent done: %d, status: %s', percent_done, msg)
 
-def run(filename, basedir=None, timeout=300, status_callback=status, verbose=False):
-    logger.debug("filename = %s", filename)
+def run(filename, basedir=None, timeout=0, status_callback=status):
+    logger.info("starting workflow ...")
+    logger.debug("run wf: filename=%s, timeout=%d" % (filename, timeout))
 
     basedir = basedir if basedir is not None else os.curdir
     
     cmd = ["restflow", "-f", filename, "--run", "restflow"]
-    if verbose:
+    if logger.isEnabledFor(logging.DEBUG):
         cmd.append('-t')
     cmd.append('--base')
     cmd.append(basedir)
@@ -71,7 +72,8 @@ def run(filename, basedir=None, timeout=300, status_callback=status, verbose=Fal
     #logger.debug("stdoutdata: %s", stdoutdata)
     #logger.debug("stderrdata: %s", stderrdata)
 
-    logger.debug("workflow done, output=%s", result_file)
+    logger.debug("output=%s", result_file)
+    logger.info("workflow ... done")
 
     return result_file
     

@@ -128,10 +128,10 @@ class Run(WPSProcess):
 
     def execute(self):
         filename = os.path.abspath(self.workflow_description.getValue(asFile=False))
-        logger.debug("filename = %s", filename)
+        logger.debug("filename = %s, timeout= %d" % (filename, self.timeout))
 
         status = lambda msg, percent: self.show_status(msg, percent)
-        result_file = restflow.run(filename, status_callback=status, verbose=False)
+        result_file = restflow.run(filename, timeout=self.timeout, status_callback=status)
 
         self.output.setValue( result_file )
 

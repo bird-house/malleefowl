@@ -60,7 +60,18 @@ class WPSProcess(PyWPSProcess):
 
     @property
     def thredds_url(self):
-        return config.getConfigValue("malleefowl","threddsUrl")
+        return config.getConfigValue("malleefowl", "threddsUrl")
+
+    @property
+    def timeout(self):
+        timeout = 0
+        try:
+            value = config.getConfigValue("malleefowl", "timeout")
+            logger.debug("timeout = %s" % (value))
+            timeout = int(value)
+        except:
+            logger.warn('invalid malleefowl:timeout parameter in pywps config')
+        return timeout
 
     def mktempfile(self, suffix='.txt'):
         (_, filename) = tempfile.mkstemp(dir=self.working_dir, suffix=suffix)
