@@ -3,8 +3,9 @@ from nose import SkipTest
 from nose.plugins.attrib import attr
 
 from malleefowl import database
+from malleefowl import tokenmgr
 
-TEST_TOKEN = 'test_abc'
+TEST_TOKEN = tokenmgr.get_uuid()
 TEST_USERID = 'test_malleefowl.org'
 
 def test_add_token():
