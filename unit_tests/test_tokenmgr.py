@@ -24,12 +24,12 @@ def test_is_sys_token():
     ok_(not tokenmgr._is_sys_token('abc'))
 
 def test_gen_token_for_userid():
-    token = tokenmgr.gen_token_for_userid(tokenmgr.sys_token(), 'adelie@somewhere.org')
+    token = tokenmgr.gen_token_for_userid(tokenmgr.sys_token(), 'adelie@malleefowl.org')
     ok_(token is not None)
 
 @raises(AccessDeniedError)
 def test_gen_token_with_exception():
-    token = tokenmgr.gen_token_for_userid(TEST_TOKEN, 'adelie@somewhere.org')
+    token = tokenmgr.gen_token_for_userid(TEST_TOKEN, 'adelie@malleefowl.org')
 
 def test_get_token():
     token = tokenmgr.get_token(tokenmgr.sys_token(), 'amelie@montematre.org')

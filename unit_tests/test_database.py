@@ -6,7 +6,7 @@ from malleefowl import database
 from malleefowl import tokenmgr
 
 TEST_TOKEN = tokenmgr.get_uuid()
-TEST_USERID = 'test_malleefowl.org'
+TEST_USERID = 'test@malleefowl.org'
 
 def test_add_token():
     database.add_token(token=TEST_TOKEN, userid=TEST_USERID)
