@@ -8,7 +8,7 @@ import os
 import json
 
 import malleefowl
-from malleefowl import utils
+from malleefowl import utils, tokenmgr
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
@@ -53,8 +53,10 @@ class ListLocalFiles(malleefowl.process.WPSProcess):
     def execute(self):
         self.show_status("starting ...", 5)
 
-        user_id = self.token.getValue()
-        files_path = os.path.join(self.files_path, user_id)
+        token = self.token.getValue()
+        userid = tokenmgr.get_userid(tokenmgr.sys_token, token)
+        
+        files_path = os.path.join(self.files_path, userid)
         utils.mkdir(files_path)
 
         search_filter = self.filter.getValue()
@@ -89,8 +91,10 @@ class GetFileFromFilesystem(malleefowl.process.SourceProcess):
     def execute(self):
         self.show_status("starting ...", 5)
 
-        user_id = self.token.getValue()
-        files_path = os.path.join(self.files_path, user_id)
+        token = self.token.getValue()
+        userid = tokenmgr.get_userid(tokenmgr.sys_token, token)
+        
+        files_path = os.path.join(self.files_path, userid)
         utils.mkdir(files_path)
 
         file_id = self.file_identifier.getValue()
@@ -118,7 +122,11 @@ class GetTestFiles(malleefowl.process.SourceProcess):
     def execute(self):
         self.show_status("starting ...", 5)
 
-        file_path = os.path.join(self.files_path, self.file_identifier.getValue())
+        # TODO: configure user id
+        userid = "test@malleefowl.org"
+        logger.warn('TODO: configure test user %s' % (userid))
+        
+        file_path = os.path.join(self.files_path, userid, self.file_identifier.getValue())
         logger.debug('test file: %s', file_path)
 
         self.show_status("retrieved file", 90)
