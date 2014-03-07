@@ -30,6 +30,7 @@ def retrieve_process_metadata(identifier):
         metadata = json.loads(process_metadata.get('metadata'))
     return metadata
 
+# TODO: maybe move these methods to tokenmgr or model ...
 def add_token(token, userid):
     db = database()
     db.token.update(

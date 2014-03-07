@@ -4,6 +4,7 @@
 ##
 ## TODO: use a standard python module ... maybe for oauth2?
 
+from pywps import config
 from malleefowl import database
 
 from malleefowl import wpslogging as logging
@@ -30,10 +31,10 @@ class checkAccess(object):
         return self.f(access_token, other)
 
 def sys_userid():
-    return 'sys_malleefowl.org'
+    return config.getConfigValue("malleefowl", "sysUserID")
 
 def sys_token():
-    return 'abc'
+    return config.getConfigValue("malleefowl", "sysToken")
 
 def init():
     _add(sys_token(), sys_userid())
