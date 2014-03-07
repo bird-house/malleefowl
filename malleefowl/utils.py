@@ -3,17 +3,13 @@ Utility functions for WPS processes.
 """
 
 import json
-import pymongo
 from netCDF4 import Dataset
 from datetime import datetime
 from dateutil import parser as date_parser
 import os
 
-from pywps import config
-
-import logging
-
-log = logging.getLogger(__file__)
+from malleefowl import wpslogging as logging
+logger = logging.getLogger(__name__)
 
 def logon(openid, password):
     from pyesgf.logon import LogonManager
@@ -81,7 +77,7 @@ def within_date_range(timesteps, start=None, end=None):
     return new_timesteps
     
 def filter_timesteps(timesteps, aggregation="monthly", start=None, end=None):
-    log.debug("aggregation: %s", aggregation)
+    logger.debug("aggregation: %s", aggregation)
     
     if (timesteps == None or len(timesteps) == 0):
         return []
@@ -115,29 +111,6 @@ def filter_timesteps(timesteps, aggregation="monthly", start=None, end=None):
             continue
     return new_timesteps
     
-
-def database():
-    dburi = config.getConfigValue("malleefowl", "mongodbUrl")
-    conn = pymongo.Connection(dburi)
-    return conn.malleefowl_db
-
-def register_process_metadata(identifier, metadata):
-    if identifier != None and metadata != None:
-        db = database()
-        process_metadata = { 'identifier': identifier, 'metadata': json.dumps(metadata) }
-        db.metadata.update(
-            {'identifier': process_metadata['identifier']},
-            process_metadata,
-            True)
-
-def retrieve_process_metadata(identifier):
-    db = database()
-    process_metadata = db.metadata.find_one({'identifier': identifier})
-    metadata = {}
-    if process_metadata != None:
-        metadata = json.loads(process_metadata.get('metadata'))
-    return metadata
-
 def nc_copy(source, target, overwrite=True, time_dimname='time', nchunk=10, istart=0, istop=-1, format='NETCDF3_64BIT'):
     """copy netcdf file from opendap to netcdf3 file
 
@@ -174,22 +147,22 @@ def nc_copy(source, target, overwrite=True, time_dimname='time', nchunk=10, ista
     unlimdim = None
 
     # create global attributes.
-    log.info('copying global attributes ...')
+    logger.info('copying global attributes ...')
     nc_out.setncatts(nc_in.__dict__) 
-    log.info('copying dimensions ...')
+    logger.info('copying dimensions ...')
     for dimname, dim in nc_in.dimensions.items():
         if dim.isunlimited() or dimname == time_dimname:
             unlimdimname = dimname
             unlimdim = dim
             if istop == -1: istop=len(unlimdim)
             nc_out.createDimension(dimname, istop-istart)
-            log.debug('unlimited dimension = %s, length = %d', unlimdimname, len(unlimdim))
+            logger.debug('unlimited dimension = %s, length = %d', unlimdimname, len(unlimdim))
         else:
             nc_out.createDimension(dimname, len(dim))
 
     # create variables.
     for varname, ncvar in nc_in.variables.items():
-        log.info('copying variable %s', varname)
+        logger.info('copying variable %s', varname)
         # is there an unlimited dimension?
         if unlimdimname and unlimdimname in ncvar.dimensions:
             hasunlimdim = True
@@ -212,7 +185,7 @@ def nc_copy(source, target, overwrite=True, time_dimname='time', nchunk=10, ista
                 for n in range(start, stop, step):
                     nmax = n+nchunk
                     if nmax > istop: nmax=istop
-                    log.debug('copy chunk [%d:%d]', n, nmax)
+                    logger.debug('copy chunk [%d:%d]', n, nmax)
                     try:
                         var[n-istart:nmax-istart] = ncvar[n:nmax]
                     except:

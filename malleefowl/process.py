@@ -11,7 +11,7 @@ import tempfile
 from pywps.Process import WPSProcess as PyWPSProcess
 from pywps import config
 
-import utils
+from malleefowl import database
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
@@ -143,7 +143,7 @@ class WorkerProcess(WPSProcess):
 
         #logger.debug("init worker process %s", wf_identifier)
 
-        utils.register_process_metadata(wf_identifier, extra_metadata)
+        database.register_process_metadata(wf_identifier, extra_metadata)
         
         WPSProcess.__init__(
             self,
