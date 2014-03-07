@@ -39,9 +39,12 @@ def add_token(token, userid):
         True)
 
 def get_token_by_userid(userid):
+    token = None
     db = database()
     entry = db.token.find_one(dict(userid=userid))
-    return entry.get('token', None)
+    if entry is not None:
+        token = entry.get('token', None)
+    return token
 
 def get_userid_by_token(token):
     db=database()
