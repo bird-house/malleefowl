@@ -4,7 +4,7 @@ from nose.plugins.attrib import attr
 
 from malleefowl import database
 
-TEST_TOKEN = 'abc'
+TEST_TOKEN = 'test_abc'
 TEST_USERID = 'test_malleefowl.org'
 
 def test_add_token():

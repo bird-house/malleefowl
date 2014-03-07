@@ -4,6 +4,8 @@
 ##
 ## TODO: use a standard python module ... maybe for oauth2?
 
+from malleefowl import database
+
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
@@ -16,9 +18,6 @@ class UnknownUserIDError(Exception):
 class UnknownTokenError(Exception):
     pass
 
-TOKEN_MAP = {}
-USERID_MAP = {}
-
 class checkAccess(object):
 
     def __init__(self, f):
@@ -30,16 +29,18 @@ class checkAccess(object):
             raise AccessDeniedError
         return self.f(access_token, other)
 
-@property
-def sys_user():
-    return 'malleefowl'
+def sys_userid():
+    return 'sys_malleefowl.org'
 
-def init(token):
-    _add(token, sys_user)
+def sys_token():
+    return 'abc'
+
+def init():
+    _add(sys_token(), sys_userid())
 
 @checkAccess
 def get_token(access_token, userid):
-    token = USERID_MAP.get(userid, None)
+    token = database.get_token_by_userid(userid)
     if token is None:
         raise UnknownUserIDError
     return token
@@ -52,21 +53,32 @@ def gen_token(access_token, userid):
 
 @checkAccess
 def get_userid(access_token, token):
-    userid= TOKEN_MAP.get(token, None)
+    userid = database.get_userid_by_token(token)
     if userid is None:
         raise UnknownTokenError
     return userid
 
 @checkAccess
 def is_token_valid(access_token, token):
-    return TOKEN_MAP.has_key(token)
+    valid = False
+    try:
+        userid = database.get_userid_by_token(token)
+        valid = userid is not None
+    except Exception as e:
+        logger.warn("is_token_valid raised exception. err msg=%s" % (e.message))
+    return valid
 
 def _is_sys_token(token):
-    return TOKEN_MAP.get(token, None) == sys_user
+    valid = False
+    try:
+        userid = database.get_userid_by_token(token)
+        valid = userid == sys_userid()
+    except Exception as e:
+        logger.warn("is_sys_token raised exception. err msg=%s" % (e.message))
+    return valid
 
 def _add(token, userid):
-    global TOKEN_MAP, USERID_MAP
-    TOKEN_MAP[token] = userid
-    USERID_MAP[userid] = token
+    database.add_token(token=token, userid=userid)
+
 
 

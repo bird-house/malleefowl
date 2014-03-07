@@ -6,7 +6,7 @@ from malleefowl import tokenmgr
 from malleefowl.tokenmgr import AccessDeniedError
 
 def setup():
-    tokenmgr.init('abc')
+    tokenmgr.init()
     tokenmgr._add('abc123', 'amelie@montematre.org')
     
 def test_token_valid():
