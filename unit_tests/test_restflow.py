@@ -12,27 +12,27 @@ from malleefowl import (
     )
 
 from pywps import config
+import __init__ as base
 
 # set path to buildout/bin to have access to restflow binary
 os.environ['PATH'] = '%s:%s' % (
     os.path.join(os.path.dirname(restflow.__file__), '..', '..', '..', 'bin'),
     os.environ['PATH'])
 
-service="http://localhost:8090/wps"
 NODES = None
 ESGF_NODES = None
 def setup_nodes():
     global NODES
     
     source = dict(
-        service = service,
+        service = base.SERVICE,
         identifier = "org.malleefowl.storage.testfiles.source",
         input = [],
         output = ['output'],
         sources = [['test1.nc'], ['test2.nc']]
         )
     worker = dict(
-        service = service,
+        service = base.SERVICE,
         identifier = "de.dkrz.cdo.sinfo.worker",
         input = [],
         output = ['output'])
@@ -46,14 +46,14 @@ def setup_esgf_nodes():
     global ESGF_NODES
     
     source = dict(
-        service = service,
+        service = base.SERVICE,
         identifier = "org.malleefowl.esgf.wget.source",
         input = ['openid=' + config.getConfigValue("tests", "user"), 'password=' + config.getConfigValue("tests", "password")],
         output = ['output'],
         sources = [['http://bmbf-ipcc-ar5.dkrz.de/thredds/fileServer/cmip5/output1/MPI-M/MPI-ESM-LR/rcp26/mon/atmos/Amon/r1i1p1/v20120315/tas/tas_Amon_MPI-ESM-LR_rcp26_r1i1p1_200601-210012.nc']]
         )
     worker = dict(
-        service = service,
+        service = base.SERVICE,
         identifier = "de.dkrz.cdo.sinfo.worker",
         input = [],
         output = ['output'])
@@ -69,7 +69,7 @@ def test_generate_simple():
     
     wf = restflow.generate("simpleWorkflow", NODES)
     ok_("WpsExecute" in wf, wf)
-    ok_(service in wf, wf)
+    ok_(base.SERVICE in wf, wf)
     ok_('output' in wf, wf)
 
 @attr('online')
@@ -92,7 +92,7 @@ def test_run_simple():
 def test_run_simple_with_wps():
     global NODES
     gen_result = wpsclient.execute(
-        service = service,
+        service = base.SERVICE,
         identifier = "org.malleefowl.restflow.generate",
         inputs = [('nodes', yaml.dump(NODES))],
         outputs = [('output', True)]
@@ -103,7 +103,7 @@ def test_run_simple_with_wps():
     print wf_url
 
     run_result = wpsclient.execute(
-        service = service,
+        service = base.SERVICE,
         identifier = "org.malleefowl.restflow.run",
         inputs = [('workflow_description', wf_url)],
         outputs = [('output', True)]
@@ -122,7 +122,7 @@ def test_run_simple_with_wps():
 def test_run_simple_esgf():
     global ESGF_NODES
     gen_result = wpsclient.execute(
-        service = service,
+        service = base.SERVICE,
         identifier = "org.malleefowl.restflow.generate",
         inputs = [('nodes', yaml.dump(ESGF_NODES))],
         outputs = [('output', True)]
@@ -131,7 +131,7 @@ def test_run_simple_esgf():
     print wf_url
 
     run_result = wpsclient.execute(
-        service = service,
+        service = base.SERVICE,
         identifier = "org.malleefowl.restflow.run",
         inputs = [('workflow_description', wf_url)],
         outputs = [('output', True)]

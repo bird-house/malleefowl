@@ -123,7 +123,7 @@ class GetTestFiles(malleefowl.process.SourceProcess):
         self.show_status("starting ...", 5)
 
         # TODO: configure user id
-        userid = "test@malleefowl.org"
+        userid = "test_malleefowl.org"
         logger.warn('TODO: configure test user %s' % (userid))
         
         file_path = os.path.join(self.files_path, userid, self.file_identifier.getValue())
