@@ -8,6 +8,7 @@ import types
 import malleefowl.process 
 import qc_processes.qcprocesses as qcprocesses
 import qc_processes.pidmanager as pidmanager
+import qc_processes.directory2datasetyaml as directory2datasetyaml
 
 import os
 from malleefowl import wpslogging as logging
@@ -195,6 +196,38 @@ class PIDManagerDatasetProcess(malleefowl.process.WPSProcess):
         outputfile.write(output)
         outputfile.close()
         self.pid.setValue(outputfile)
+
+class PIDManagerPathCORDEXProcess(malleefowl.process.WPSProcess):
+    def __init__(self):
+        malleefowl.process.WPSProcess.__init__(self,
+            identifier = "PIDManager_Path_CORDEX",
+            title = "Get PIDs for datasets and files in the given path",
+            version = "2014.03.10",
+            metadata = [],
+            )
+        
+        self.path = self.addLiteralInput(
+                identifier = "path",
+                title = "Root project data path",
+                default = os.path.join(climdapsabs,"examples/data/CORDEX"),
+                type = types.StringType,
+                minOccurs = 1,
+                maxOccurs = 1,
+                )
+        self.pids = self.addLiteralOutput(
+                identifier = "pids",
+                title = "Found PIDs for the path",
+                type = types.StringType,
+                )
+
+    def execute(self):
+        d2dy = directory2datasetyaml.Directory2DatasetYaml()#defaults are good for CORDEX
+        tempfile = self.mktempfile()
+        d2dy.create_yaml(path = self.path.getValue(), yaml_fn = tempfile)
+        pm = pidmanager.PIDManager(DATABASE_LOCATION)
+        pids = pm.get_pids_from_yaml_file(tempfile)
+        self.pids.setValue(str(pids))
+
 
 class DirectoryValidatorProcess(malleefowl.process.WPSProcess):
     """
