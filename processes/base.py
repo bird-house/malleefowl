@@ -3,7 +3,7 @@ from pywps import config
 
 import tempfile
 import json
-from malleefowl import utils
+from malleefowl import database
 
 class ProcessMetadata(PyWPSProcess):
     """This process provides additional metadata for workflow processes."""
@@ -54,7 +54,7 @@ class ProcessMetadata(PyWPSProcess):
     def execute(self):
         self.status.set(msg="starting to retrieve process metadata", percentDone=10, propagate=True)
         
-        metadata = utils.retrieve_process_metadata(self.processid.getValue())
+        metadata = database.retrieve_process_metadata(self.processid.getValue())
 
         self.status.set(msg="metadata retrieved", percentDone=90, propagate=True)
 
