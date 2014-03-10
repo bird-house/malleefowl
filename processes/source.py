@@ -4,20 +4,19 @@ Processes for data source access
 Author: Carsten Ehbrecht (ehbrecht@dkrz.de)
 """
 
-import os
 import json
 
-import malleefowl
-from malleefowl import utils, tokenmgr
+from malleefowl.process import WPSProcess, SourceProcess
+from malleefowl import source
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
-class ListLocalFiles(malleefowl.process.WPSProcess):
+class ListLocalFiles(WPSProcess):
     """This process lists files from local filesystem."""
 
     def __init__(self):
-        malleefowl.process.WPSProcess.__init__(self,
+        WPSProcess.__init__(self,
             identifier = "org.malleefowl.listfiles",
             title = "List Files in Malleefowl Storage",
             version = "0.2",
@@ -51,33 +50,28 @@ class ListLocalFiles(malleefowl.process.WPSProcess):
             )
 
     def execute(self):
-        self.show_status("starting ...", 5)
+        self.show_status("list files ...", 5)
 
         token = self.token.getValue()
-        userid = tokenmgr.get_userid(tokenmgr.sys_token, token)
-        
-        files_path = os.path.join(self.files_path, userid)
-        utils.mkdir(files_path)
+        filter = self.filter.getValue()
 
-        search_filter = self.filter.getValue()
-
-        files = [f for f in os.listdir(files_path) if search_filter in f]
-
-        self.show_status("retrieved file list", 90)
+        files = source.list_files(token, filter)
         
         self.output.setValue(json.dumps(files))
 
-class GetFileFromFilesystem(malleefowl.process.SourceProcess):
-    """This process retrieves files from local filesystem."""
+        self.show_status("list files ... done", 90)
+
+class GetLocalFiles(SourceProcess):
+    """This process retrieves files from malleefowl storage."""
 
     def __init__(self):
-        malleefowl.process.SourceProcess.__init__(self,
+        SourceProcess.__init__(self,
             identifier = "org.malleefowl.storage.filesystem",
-            title = "Get files from filesystem storage",
+            title = "Get files from malleefowl storage",
             version = "0.2",
             metadata=[
                 ],
-            abstract="Get file from filesystem storage")
+            abstract="Get file from malleefowl storage")
 
         self.token = self.addLiteralInput(
             identifier = "token",
@@ -89,48 +83,16 @@ class GetFileFromFilesystem(malleefowl.process.SourceProcess):
             )
 
     def execute(self):
-        self.show_status("starting ...", 5)
+        self.show_status("get file ...", 5)
 
         token = self.token.getValue()
-        userid = tokenmgr.get_userid(tokenmgr.sys_token, token)
-        
-        files_path = os.path.join(self.files_path, userid)
-        utils.mkdir(files_path)
-
         file_id = self.file_identifier.getValue()
-
-        files = [f for f in os.listdir(files_path) if file_id in f]
-        file_path = os.path.join(files_path, files[0])
-
-        self.show_status("retrieved file", 90)
         
-        self.output.setValue(file_path)
+        self.output.setValue( source.get_files(token, file_id) )
+
+        self.show_status("get file ... done", 90)
 
 
-class GetTestFiles(malleefowl.process.SourceProcess):
-    """This process retrieves test files."""
 
-    def __init__(self):
-        malleefowl.process.SourceProcess.__init__(self,
-            identifier = "org.malleefowl.storage.testfiles",
-            title = "Get files for testing",
-            version = "0.1",
-            metadata=[
-                ],
-            abstract="Get files for testing")
-
-    def execute(self):
-        self.show_status("starting ...", 5)
-
-        # TODO: configure user id
-        userid = "test_malleefowl.org"
-        logger.warn('TODO: configure test user %s' % (userid))
-        
-        file_path = os.path.join(self.files_path, userid, self.file_identifier.getValue())
-        logger.debug('test file: %s', file_path)
-
-        self.show_status("retrieved file", 90)
-        
-        self.output.setValue(file_path)
 
 

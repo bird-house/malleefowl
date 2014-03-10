@@ -9,6 +9,7 @@ import yaml
 from malleefowl import (
     restflow,
     wpsclient,
+    tokenmgr,
     )
 
 from pywps import config
@@ -26,8 +27,8 @@ def setup_nodes():
     
     source = dict(
         service = base.SERVICE,
-        identifier = "org.malleefowl.storage.testfiles.source",
-        input = [],
+        identifier = "org.malleefowl.storage.filesystem.source",
+        input = ['token=' + tokenmgr.test_token()],
         output = ['output'],
         sources = [['test1.nc'], ['test2.nc']]
         )

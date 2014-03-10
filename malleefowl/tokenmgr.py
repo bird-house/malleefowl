@@ -36,8 +36,15 @@ def sys_userid():
 def sys_token():
     return config.getConfigValue("malleefowl", "sysToken")
 
+def test_userid():
+    return config.getConfigValue("tests", "testUserID")
+
+def test_token():
+    return config.getConfigValue("tests", "testToken")
+
 def init():
     _add(sys_token(), sys_userid())
+    _add(test_token(), test_userid())
 
 @checkAccess
 def get_token(access_token, userid):

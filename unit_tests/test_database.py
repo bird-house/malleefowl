@@ -8,7 +8,7 @@ from malleefowl import tokenmgr
 TEST_TOKEN = tokenmgr.get_uuid()
 TEST_USERID = 'test@malleefowl.org'
 
-def test_add_token():
+def setup():
     database.add_token(token=TEST_TOKEN, userid=TEST_USERID)
 
 def test_get_token_by_userid():
