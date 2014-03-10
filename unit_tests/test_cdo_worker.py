@@ -4,15 +4,15 @@ from nose.plugins.attrib import attr
 
 from malleefowl import wpsclient
 
-service = "http://localhost:8090/wps"
+import __init__ as base
 
 @attr('online')
 def test_cdo_sinfo():
     result = wpsclient.execute(
-        service = service,
+        service = base.SERVICE,
         identifier = "de.dkrz.cdo.sinfo.worker",
-        inputs = [('file_identifier', 'http://localhost:8090/files/test1.nc'),
-                  ('file_identifier', 'http://localhost:8090/files/test2.nc')],
+        inputs = [('file_identifier', base.TEST1_NC),
+                  ('file_identifier', base.TEST2_NC)],
         outputs = [('output', True)]
         )
     nose.tools.ok_(len(result) == 1, result)
@@ -21,10 +21,10 @@ def test_cdo_sinfo():
 @attr('online')
 def test_cdo_merge():
     result = wpsclient.execute(
-        service = service,
+        service = base.SERVICE,
         identifier = "de.dkrz.cdo.operation.worker",
-        inputs = [('file_identifier', 'http://localhost:8090/files/test1.nc'),
-                  ('file_identifier', 'http://localhost:8090/files/test2.nc'),
+        inputs = [('file_identifier', base.TEST1_NC),
+                  ('file_identifier', base.TEST2_NC),
                   ('operator', 'merge')],
         outputs = [('output', True)]
         )

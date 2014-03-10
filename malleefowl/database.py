@@ -2,6 +2,8 @@
 ## This module manages the mongo database used by malleefowl
 ##
 
+import json
+
 import pymongo
 from pywps import config
 
