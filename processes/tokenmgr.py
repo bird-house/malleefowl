@@ -10,58 +10,6 @@ from malleefowl import tokenmgr
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
-class GetToken(WPSProcess):
-    """Gets token for userid"""
-
-    def __init__(self):
-        WPSProcess.__init__(self,
-            identifier = "org.malleefowl.token.get",
-            title = "Get token for userid",
-            version = "0.1",
-            metadata=[
-                ],
-            abstract="Get token for userid")
-
-        self.sys_token = self.addLiteralInput(
-            identifier = "sys_token",
-            title = "System token",
-            abstract = "System User Token",
-            minOccurs = 1,
-            maxOccurs = 1,
-            type = type('')
-            )
-
-        self.userid = self.addLiteralInput(
-            identifier = "userid",
-            title = "User ID",
-            abstract = "Your User ID",
-            minOccurs = 1,
-            maxOccurs = 1,
-            type = type('')
-            )
-
-        self.output = self.addLiteralOutput(
-            identifier="output",
-            title="Token",
-            abstract="Token for your user id",
-            type=type('')
-            )
-
-    def execute(self):
-        self.show_status("get token ...", 10)
-
-        userid = self.userid.getValue()
-        sys_token = self.sys_token.getValue()
-
-        logger.debug("get token for userid=%s" % (userid))
-        
-        token = tokenmgr.get_token(sys_token, userid)
-
-        self.output.setValue(token)
-
-        self.show_status("get token ... done", 90)
-
-
 class GenerateToken(WPSProcess):
     """Generates token for userid"""
 
