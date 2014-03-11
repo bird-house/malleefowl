@@ -10,6 +10,8 @@ import types
 import os
 import shutil
 
+from malleefowl import wpslogging as logging
+logger = logging.getLogger(__name__)
 
 class GetWMSLayers(WPSProcess):
     """Retrieve layers from thredds ncwms service."""
@@ -24,16 +26,16 @@ class GetWMSLayers(WPSProcess):
             abstract = "Get all Layers from Thredds ncWMS Service",
             )
 
-        self.openid_in = self.addLiteralInput(
-            identifier = "openid",
-            title = "ESGF OpenID",
-            abstract = "Enter ESGF OpenID",
+        self.userid = self.addLiteralInput(
+            identifier = "userid",
+            title = "User ID",
+            abstract = "Enter User ID (email)",
             minOccurs = 1,
             maxOccurs = 1,
             type = type('')
             )
 
-        self.start_in = self.addLiteralInput(
+        self.start = self.addLiteralInput(
             identifier="start",
             title="Start Date",
             abstract="Start Date: 2006-01-01",
@@ -43,7 +45,7 @@ class GetWMSLayers(WPSProcess):
             maxOccurs=1,
             )
 
-        self.end_in = self.addLiteralInput(
+        self.end = self.addLiteralInput(
             identifier="end",
             title="End Date",
             abstract="End Date: 2006-12-31",
@@ -63,10 +65,11 @@ class GetWMSLayers(WPSProcess):
             )
 
     def execute(self):
-        self.status.set(msg="starting ...", percentDone=10, propagate=True)
+        # TODO: needs to be protected by token
+        self.show_status("starting ...", 10)
 
-        user_id = utils.user_id(self.openid_in.getValue())
-        files_path = os.path.join(self.files_path, user_id)
+        userid = self.userid.getValue()
+        files_path = os.path.join(self.files_path, userid)
         utils.mkdir(files_path)
 
         files = [f for f in os.listdir(files_path) if f.endswith(".nc")]
@@ -75,11 +78,11 @@ class GetWMSLayers(WPSProcess):
         count = 0
         percent_done = 10
         for file_name in files:
-            service_url = self.thredds_url + '/wms/test/' + user_id + '/' +file_name
+            service_url = self.thredds_url + '/wms/test/' + userid + '/' +file_name
             try:
                 wms = WebMapService(service_url, version='1.1.1')
             except:
-                self.message("could not access wms %s" % (service_url))
+                logger.warn("could not access wms %s" % (service_url))
                 continue
 
             for layerid,layer in wms.items():
@@ -95,9 +98,9 @@ class GetWMSLayers(WPSProcess):
                                    timesteps=timesteps))
             count = count + 1
             percent_done = int(percent_done + count * 80 / len(files))
-            self.status.set(msg="adding layer ...", percentDone=percent_done, propagate=True)
+            self.show_status("adding layer ...", percent_done)
 
-        self.status.set(msg="done", percentDone=90, propagate=True)
+        self.show_status("done", 90)
         
         out_filename = self.mktempfile(suffix='.txt')
         with open(out_filename, 'w') as fp:
