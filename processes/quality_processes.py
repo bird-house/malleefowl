@@ -223,6 +223,11 @@ class PIDManagerPathCORDEXProcess(malleefowl.process.WPSProcess):
                             "textual dot. (e.g. */fx/*.nc includes all .nc files in a fx directory")
                 )
 
+        self.file_regexp_out = self.addLiteralOutput(
+                identifier = "file_regexp_out",
+                title = "Used regular expression in re format",
+                type = types.StringType,
+                )
 
         self.pids = self.addLiteralOutput(
                 identifier = "pids",
@@ -236,6 +241,7 @@ class PIDManagerPathCORDEXProcess(malleefowl.process.WPSProcess):
         regexp_raw = self.file_regexp.getValue()
         #. has to be escaped and * has to be replaced by .*
         regexp = regexp_raw.replace(".","\.").replace("*",".*")
+        self.file_regexp_out.setValue(regexp)
         d2dy.create_yaml(path = self.path.getValue(), yaml_fn = tempfile, 
                 file_regexp = regexp)
         pm = pidmanager.PIDManager(DATABASE_LOCATION)
