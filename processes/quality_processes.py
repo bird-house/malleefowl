@@ -201,8 +201,8 @@ class PIDManagerPathCORDEXProcess(malleefowl.process.WPSProcess):
     def __init__(self):
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "PIDManager_Path_CORDEX",
-            title = "Get PIDs for datasets and files in the given path",
-            version = "2014.03.10",
+            title = "Get PIDs for datasets and files in the given path using the CORDEX specification.",
+            version = "2014.03.11",
             metadata = [],
             )
         
