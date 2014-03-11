@@ -54,7 +54,8 @@ class GenerateToken(WPSProcess):
         sys_token = self.sys_token.getValue()
 
         logger.debug("generate token for userid=%s" % (userid))
-        
+
+        tokenmgr.init()
         token = tokenmgr.gen_token_for_userid(sys_token, userid)
 
         self.output.setValue(token)

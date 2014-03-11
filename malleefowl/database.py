@@ -49,6 +49,9 @@ def get_token_by_userid(userid):
     return token
 
 def get_userid_by_token(token):
+    userid = None
     db=database()
     entry = db.token.find_one(dict(token=token))
-    return entry.get('userid', None)
+    if entry is not None:
+        userid = entry.get('userid', None)
+    return userid
