@@ -214,6 +214,16 @@ class PIDManagerPathCORDEXProcess(malleefowl.process.WPSProcess):
                 minOccurs = 1,
                 maxOccurs = 1,
                 )
+        self.file_regexp = self.addLiteralInput(
+                identifier = "file_regexp",
+                title = "Regular expression to filter files",
+                default = "*.nc",
+                type = types.StringType,
+                abstract = ("The syntax is '*' for any number of random characters. '.' is the normal" +
+                            "textual dot. (e.g. */fx/*.nc includes all .nc files in a fx directory")
+                )
+
+
         self.pids = self.addLiteralOutput(
                 identifier = "pids",
                 title = "Found PIDs for the path",
@@ -223,7 +233,11 @@ class PIDManagerPathCORDEXProcess(malleefowl.process.WPSProcess):
     def execute(self):
         d2dy = directory2datasetyaml.Directory2DatasetYaml()#defaults are good for CORDEX
         tempfile = self.mktempfile()
-        d2dy.create_yaml(path = self.path.getValue(), yaml_fn = tempfile)
+        regexp_raw = self.file_regexp.getValue()
+        #. has to be escaped and * has to be replaced by .*
+        regexp = regexp_raw.replace(".","\.").replace("*",".*")
+        d2dy.create_yaml(path = self.path.getValue(), yaml_fn = tempfile, 
+                file_regexp = regexp)
         pm = pidmanager.PIDManager(DATABASE_LOCATION)
         pids = pm.get_pids_from_yaml_file(tempfile)
         self.pids.setValue(str(pids))
