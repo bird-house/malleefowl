@@ -201,8 +201,8 @@ class PIDManagerPathCORDEXProcess(malleefowl.process.WPSProcess):
     def __init__(self):
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "PIDManager_Path_CORDEX",
-            title = "Get PIDs for datasets and files in the given path",
-            version = "2014.03.10",
+            title = "Get PIDs for a path using the CORDEX specification.",
+            version = "2014.03.11",
             metadata = [],
             )
         
@@ -214,6 +214,21 @@ class PIDManagerPathCORDEXProcess(malleefowl.process.WPSProcess):
                 minOccurs = 1,
                 maxOccurs = 1,
                 )
+        self.file_regexp = self.addLiteralInput(
+                identifier = "file_regexp",
+                title = "Regular expression to filter files",
+                default = "*.nc",
+                type = types.StringType,
+                abstract = ("The syntax is '*' for any number of random characters. '.' is the normal" +
+                            "textual dot. (e.g. */fx/*.nc includes all .nc files in a fx directory")
+                )
+
+        self.file_regexp_out = self.addLiteralOutput(
+                identifier = "file_regexp_out",
+                title = "Used regular expression in re format",
+                type = types.StringType,
+                )
+
         self.pids = self.addLiteralOutput(
                 identifier = "pids",
                 title = "Found PIDs for the path",
@@ -223,10 +238,93 @@ class PIDManagerPathCORDEXProcess(malleefowl.process.WPSProcess):
     def execute(self):
         d2dy = directory2datasetyaml.Directory2DatasetYaml()#defaults are good for CORDEX
         tempfile = self.mktempfile()
-        d2dy.create_yaml(path = self.path.getValue(), yaml_fn = tempfile)
+        regexp_raw = self.file_regexp.getValue()
+        #. has to be escaped and * has to be replaced by .*
+        regexp = regexp_raw.replace(".","\.").replace("*",".*")
+        self.file_regexp_out.setValue(regexp)
+        d2dy.create_yaml(path = self.path.getValue(), yaml_fn = tempfile, 
+                file_regexp = regexp)
         pm = pidmanager.PIDManager(DATABASE_LOCATION)
         pids = pm.get_pids_from_yaml_file(tempfile)
         self.pids.setValue(str(pids))
+
+#class PIDManagerPathSimpleProcess(malleefowl.process.WPSProcess):
+#    def __init__(self):
+#        malleefowl.process.WPSProcess.__init__(self,
+#            identifier = "PIDManager_Path_simple",
+#            title = "Get PIDs for a path using a generic pattern.",
+#            version = "2014.03.11",
+#            metadata = [],
+#            )
+#        
+#        self.path = self.addLiteralInput(
+#                identifier = "path",
+#                title = "Root project data path",
+#                default = os.path.join(climdapsabs,"examples/no_nc_files_pids"),
+#                type = types.StringType,
+#                minOccurs = 1,
+#                maxOccurs = 1,
+#                )
+#        self.dataset_depth = self.addLiteralInput(
+#                identifier = "dataset_depth",
+#                title = "datset_depth",
+#                default = 0,
+#                type = types.IntType,
+#                abstract = ("The depth of directories that form a dataset. (e.g. There are " +
+#                            " three directories a, b and c in the tree /x/y/z/{a,b,c}. With " +
+#                            " depth = 0 the datasets are x.y.z.a , x.y.z.b and x.y.z.c." +
+#                            " For depth = 3 the only dataset is x)"),
+#                )
+#
+#        self.file_regexp = self.addLiteralInput(
+#                identifier = "file_regexp",
+#                title = "Regular expression to filter files",
+#                default = "*.document",
+#                type = types.StringType,
+#                abstract = ("The syntax is '*' for any number of random characters. '.' is the normal" +
+#                            "textual dot. (e.g. */fx/*.nc includes all .nc files in a fx directory")
+#                )
+#
+#        self.additional_identifier_element = self.addLiteralInput(
+#                identifier = "additional_identifier_element",
+#                title = "additional_identifier_element",
+#                type = types.StringType,
+#                default = "SQL-CORDEX-SIMPLE-",
+#                abstract = ("The generated PIDS consist of prefix/additional_identifier_element" +
+#                            " random string")
+#                )
+#
+#        self.file_regexp_out = self.addLiteralOutput(
+#                identifier = "file_regexp_out",
+#                title = "Used regular expression in re format",
+#                type = types.StringType,
+#                )
+#
+#        self.pids = self.addLiteralOutput(
+#                identifier = "pids",
+#                title = "Found PIDs for the path",
+#                type = types.StringType,
+#                )
+#
+#    def execute(self):
+#        def _dataset_directory_to_title_simple(data_root, path):
+#            from qc_processes.stringmethods import lremove
+#            sub_path = lremove(path, data_root + "/")
+#            return sub_path.replace("/",".")
+#        d2dy = directory2datasetyaml.Directory2DatasetYaml(
+#                dataset_directory_to_title = _dataset_directory_to_title_simple,
+#                dataset_depth = self.dataset_depth.getValue())
+#        tempfile = self.mktempfile()
+#        regexp_raw = self.file_regexp.getValue()
+#        #. has to be escaped and * has to be replaced by .*
+#        regexp = regexp_raw.replace(".","\.").replace("*",".*")
+#        self.file_regexp_out.setValue(regexp)
+#        d2dy.create_yaml(path = self.path.getValue(), yaml_fn = tempfile, 
+#                file_regexp = regexp)
+#        pm = pidmanager.PIDManager(DATABASE_LOCATION, 
+#                additional_identifier_element = self.additional_identifier_element.getValue())
+#        pids = pm.get_pids_from_yaml_file(tempfile)
+#        self.pids.setValue(str(pids))
 
 
 class DirectoryValidatorProcess(malleefowl.process.WPSProcess):
