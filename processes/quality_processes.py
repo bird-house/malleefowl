@@ -11,6 +11,7 @@ import qc_processes.pidmanager as pidmanager
 import qc_processes.directory2datasetyaml as directory2datasetyaml
 
 import os
+from malleefowl import tokenmgr, utils
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
@@ -26,6 +27,38 @@ fn = os.path.join(os.path.dirname(__file__),"quality_processes.conf")
 logger.debug("qp: Loading data from file: "+fn)
 execfile(fn,DATA)
 logger.debug("qp: Loaded file to DATA variable")
+
+class UserDirectoryProcess(malleefowl.process.WPSProcess):
+    def __init__(self):
+        malleefowl.process.WPSProcess.__init__(self,
+            identifier = "UserDirectory",
+            title = "UserDirectory",
+            version = "2014.03.12",
+            metadata = [],
+            abstract = "Get a directory for the user.")
+
+        self.token = self.addLiteralInput(
+                identifier = "token",
+                title = "Token",
+                abstract = "The token that was generated for you",
+                type = types.StringType,
+                minOccurs = 1,
+                maxOccurs = 1,
+                )
+
+        self.userdir = self.addLiteralOutput(
+                identifier = "userdir",
+                title = "User directory",
+                type = types.StringType,
+                )
+
+
+    def execute(self):
+        token = self.token.getValue()
+        userid = tokenmgr.get_userid(tokenmgr.sys_token(), token)
+        userid = userid.replace('@', '_')
+        self.userdir.setValue(userid)
+
 
 class PIDManagerFileProcess(malleefowl.process.WPSProcess):
     """
@@ -345,7 +378,6 @@ class DirectoryValidatorProcess(malleefowl.process.WPSProcess):
             abstract = "If the given directory is valid included files and datasets receive a PID.")
 
         self.username = "defaultuser"
-
         selectable_parallelids = get_user_parallelids(self.username)
         self.parallel_id = self.addLiteralInput(
             identifier = "parallel_id",
@@ -394,8 +426,10 @@ class DirectoryValidatorProcess(malleefowl.process.WPSProcess):
             )
 
 
+
     def execute(self):
         self.status.set(msg = "Initiate process", percentDone = 0, propagate = True)
+
         data_path = self.data_path.getValue()
         def statmethod(cur,end):
             statusmethod("Running",cur,end,self)
@@ -847,7 +881,7 @@ class RemoveDataProcess(malleefowl.process.WPSProcess):
         self.status.set(msg = "Initiate process", percentDone = 0, propagate = True)
         def statmethod(cur,end):
             statusmethod("Running",cur,end,self)
-
+        
         remove_all = self.remove_user_dir.getValue()
         if remove_all:
             qcp = qcprocesses.QCProcesses(
