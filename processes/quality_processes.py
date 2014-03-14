@@ -951,3 +951,260 @@ def get_user_parallelids(user):
                 history.append(line.rstrip("\n"))
     existing_history = [x for x in history if os.path.isdir(os.path.join(path, x))] 
     return existing_history
+
+
+###########################
+# Processes with username #
+# Not intended for use    #
+# with the generic        #
+# interface               #
+###########################
+
+class UserInitProcess(malleefowl.process.WPSProcess):
+    """
+    The process is not intended for use with the generic tool
+    """
+    def __init__(self):
+
+       
+        malleefowl.process.WPSProcess.__init__(self,
+            identifier = "QC_Initialization_User",
+            title = "Quality Initialization_User",
+            version = "2014.02.27",
+            metadata = [],
+            abstract = "If the given directory is valid included files and datasets receive a PID.")
+
+        self.username = self.addLiteralInput(
+            identifier = "username",
+            title = "Username",
+            default = "defaultuser",
+            type = types.StringType,
+            )
+        self.token = self.addLiteralInput(
+            identifier = "token",
+            title = "Token",
+            type = types.StringType,
+            )
+
+        self.parallel_id = self.addLiteralInput(
+            identifier = "parallel_id",
+            title = "Parallel ID",
+            default = "web1",
+            type = types.StringType,
+            minOccurs = 1, 
+            maxOccurs = 1,
+            )
+                
+        self.data_path = self.addLiteralInput(
+            identifier = "data_path",
+            title = "Root path of the to check data",
+            default = os.path.join(climdapsabs,"examples/data/CORDEX"),
+            type = types.StringType,
+            minOccurs = 1,
+            maxOccurs = 1,
+            )
+           
+        self.all_okay = self.addLiteralOutput(
+            identifier = "all_okay",
+            title = "The path has a valid structure",
+            default = False,
+            type = types.BooleanType,
+            )
+
+        self.process_log = self.addComplexOutput(
+            identifier = "process_log",
+            title = "Log of this process",
+            metadata = [],
+            formats = [{"mimeType":"text/plain"}],
+            asReference = True,
+            )
+
+        self.project = self.addLiteralInput(
+            identifier = "project",
+            title = "Project",
+            abstract = "Currently only CORDEX is fully supported.",
+            default = "CORDEX",
+            allowedValues = ["CORDEX"],
+            type = types.StringType,
+            )
+        self.output = self.addComplexOutput(
+            identifier = "output",
+            title = "output",
+            abstract = "A summary of the output",
+            asReference = True,
+            formats = [{"mimeType":"text/plain"}],
+            metadata = [],
+            )
+
+
+
+
+    def execute(self):
+        self.status.set(msg = "Initiate process", percentDone = 0, propagate = True)
+
+        data_path = self.data_path.getValue()
+        def statmethod(cur,end):
+            statusmethod("Running",cur,end,self)
+        logger.debug(self.username)
+        username = self.username.getValue()
+        token = self.token.getValue()
+        userid = tokenmgr.get_userid(tokenmgr.sys_token(), token)
+        if username != userid:
+            username == "defaultuser"
+
+
+        qcp = qcprocesses.QCProcesses(
+                                      username = username,
+                                      statusmethod = statmethod,
+                                      parallel_id = self.parallel_id.getValue(),
+                                      work_dir = WORK_DIR
+                                      )
+        project = self.project.getValue()
+        #set the new data
+        output = qcp.validate_directory(data_path, project)
+
+        self.all_okay.setValue(output["all_okay"])
+        log = open(self.mktempfile(suffix = ".txt"),"w")
+        for messages in output["messages"]:
+            for message in messages:
+                log.write(str(message)+"\n")
+        log.close()
+        self.process_log.setValue(log)
+        #store the data_path
+        data_path_file = open(os.path.join(qcp.process_dir,"data_path"),"w") 
+        data_path_file.write(data_path)
+        data_path_file.close()
+        output_f = open(self.mktempfile(suffix = ".txt"),"w")
+        output_f.write(str(output))
+        output_f.close()
+        self.output.setValue(output_f)
+
+        return 
+
+
+class UserQualityCheckProcess(malleefowl.process.WPSProcess):
+    def __init__(self):
+
+
+        malleefowl.process.WPSProcess.__init__(self,
+            identifier = "QC_Quality_Check_User",
+            title = "Quality Check",
+            version = "2014.03.14",
+            metadata = [],
+            abstract = "Runs a quality check on a given folder.")
+
+        self.username = "defaultuser"
+
+        selectable_parallelids = get_user_parallelids(self.username)
+        self.parallel_id = self.addLiteralInput(
+            identifier = "parallel_id",
+            title = "Parallel ID",
+            abstract = ("An ID for the current process. Select the one matching to the directory "+
+                        "requirements check process."),
+            allowedValues = selectable_parallelids,
+            type = types.StringType,
+            )
+
+
+        self.select = self.addLiteralInput(
+            identifier = "select",
+            title = "QC SELECT",
+            abstract = ("Comma separated list of parts of the path." + 
+                        " If at least one of the elements in the list matches with a path in the data" +
+                        " directory, its nc files are added to the check." +
+                        " It is recommended to put variables into '/' to avoid accidental" +
+                        " matches with other path elements." +
+                        " The first element of the path does not start with a '/' and the" +
+                        " last element does not end with a '/'." +
+                        " The wildcard '.*'" +
+                        " should be used with care, as the handling of '/' is considered undefined." +
+                        " (Assuming the paths exist a valid example is:" +
+                        " AFR-44/.*/tas, EUR.*, /fx/)"),
+            minOccurs = 0,
+            maxOccurs = 1,
+            type = types.StringType,
+            )
+
+        self.lock = self.addLiteralInput(
+            identifier = "lock",
+            title = "QC LOCK",
+            abstract = ("Works similar to select, but prevents the given paths being added."+
+                        " Lock is stronger than select. (e.g. select tas and lock AFR-44 "+
+                        " checks all tas that are not in AFR-44.)"),
+            minOccurs = 0,
+            maxOccurs = 1,
+            type = types.StringType,
+            )
+
+        self.project = self.addLiteralInput(
+            identifier = "project",
+            title = "The project used.",
+            abstract = "Currently only CORDEX is fully supported.",
+            default = "CORDEX",
+            allowedValues = ["CORDEX"],
+            type = types.StringType,
+            )
+
+
+        
+        self.qc_call_exit_code = self.addLiteralOutput(
+            identifier = "qc_call_exit_code",
+            title = "qcManager exit code",
+            abstract = "Exit code of the quality control tool.",
+            type = types.StringType,
+            )
+
+        self.qc_call = self.addLiteralOutput(
+            identifier = "qc_call",
+            title = "qc_call",
+            type = types.StringType,
+            )
+
+        self.qc_svn_version = self.addLiteralOutput(
+            identifier = "qc_svn_version",
+            title = "QC_SVN_Version",
+            type = types.StringType,
+            )
+
+        self.error_messages = self.addLiteralOutput(
+            identifier = "error_messages",
+            title = "Errors",
+            type = types.StringType,
+            )
+
+    def execute(self):
+
+        self.status.set(msg = "Initiate process", percentDone = 0, propagate = True)
+
+        def statmethod(cur,end):
+            statusmethod("Running",cur,end,self)
+        qcp = qcprocesses.QCProcesses(
+                                      username = self.username,
+                                      parallel_id = self.parallel_id.getValue(),
+                                      statusmethod = statmethod,
+                                      work_dir = WORK_DIR
+                                      )
+        #load the data_path
+        data_path_file = open(os.path.join(qcp.process_dir,"data_path"),"r") 
+        data_path = data_path_file.readline()
+        data_path_file.close()
+        selects = self.select.getValue()
+        if selects == '<colander.null>':
+            selects =  ""
+        locks = self.lock.getValue()
+        if locks == '<colander.null>':
+            locks =  ""
+        
+        output = qcp.quality_check(
+                               project_data_dir = data_path,
+                               selects = selects,
+                               locks = locks,
+                               project = self.project.getValue(),
+                               )
+        self.qc_call_exit_code.setValue(output["qc_call_exit_code"])
+        self.qc_call.setValue(output["qc_call"])
+        self.qc_svn_version.setValue(output["QC_SVN_Version"])
+        self.error_messages.setValue(str(output["stderr"]))
+
+
+        return
