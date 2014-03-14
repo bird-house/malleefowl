@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog name="THREDDS Server Default Catalog : You must change this to fit your server!"
+         xmlns="http://www.unidata.ucar.edu/namespaces/thredds/InvCatalog/v1.0"
+         xmlns:xlink="http://www.w3.org/1999/xlink" >
+
+    <service name="all" serviceType="Compound" base="" >
+        <service name="service4" serviceType="HTTPServer" base="/thredds/fileServer/" />
+        <service name="odap" serviceType="OpenDAP" base="/thredds/dodsC/" />
+        <service name="wcs" serviceType="WCS" base="/thredds/wcs/" />
+        <service name="wms" serviceType="WMS" base="/thredds/wms/" />
+    </service>
+    
+    <datasetScan name="Test all files in a directory" ID="testDatasetScan"
+        path="test" location="${location}">
+        <metadata inherited="true">
+            <serviceName>all</serviceName>
+            <serviceName>wms</serviceName>
+        </metadata>
+
+        <filter>
+            <include wildcard="*.nc" />
+        </filter>
+
+    </datasetScan>
+
+</catalog>

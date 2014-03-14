@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -e
+
+export PATH=/usr/bin:$PATH # use system python because restflow does not like anaconda python
+
+RESTFLOW_JAR="${restflow.jar}"
+
+/usr/bin/java -jar $RESTFLOW_JAR $*
