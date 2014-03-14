@@ -1,16 +1,15 @@
-#from malleefowl.process import WorkerProcess
-import malleefowl.process
-from malleefowl import utils
+from malleefowl.process import WorkerProcess
+from malleefowl import utils, tokenmgr
 
 import os
 
-import logging
-log = logging.getLogger(__name__)
+from malleefowl import wpslogging as logging
+logger = logging.getLogger(__name__)
 
-class Publish(malleefowl.process.WorkerProcess):
+class Publish(WorkerProcess):
     """Publish netcdf files to thredds server"""
     def __init__(self):
-        malleefowl.process.WorkerProcess.__init__(
+        WorkerProcess.__init__(
             self,
             identifier = "org.malleefowl.publish",
             title = "Publish NetCDF Files to Thredds Server",
@@ -48,17 +47,16 @@ class Publish(malleefowl.process.WorkerProcess):
             )
         
     def execute(self):
-        self.status.set(msg="starting publisher", percentDone=10, propagate=True)
+        self.show_status("starting publisher", 10)
 
         token = self.token.getValue()
         nc_files = self.get_nc_files()
 
         result = "Published files to thredds server\n"
 
-        # TODO get user id for token
-        user_id = token
+        userid = tokenmgr.get_userid(tokenmgr.sys_token(), token)
         
-        outdir = os.path.join(self.files_path, user_id)
+        outdir = os.path.join(self.files_path, userid)
         utils.mkdir(outdir)
         
         count = 0
@@ -71,17 +69,15 @@ class Publish(malleefowl.process.WorkerProcess):
                 os.link(os.path.abspath(nc_file), outfile)
                 result = result + "success\n"
             except:
-                log.error("publishing of %s failed", nc_file)
+                logger.error("publishing of %s failed", nc_file)
                 result = result + "failed\n"
             count = count + 1
             percent_done = int(20 + 70.0 / len(nc_files) * count)
-            self.status.set(msg="%d file(s) published" % count,
-                            percentDone=percent_done, propagate=True)
-
+            self.show_status("%d file(s) published" % count, percent_done)
         out_filename = self.mktempfile(suffix='.txt')
         with open(out_filename, 'w') as fp:
             fp.write(result)
             fp.close()
             self.output.setValue( out_filename )
 
-        self.status.set(msg="publisher done", percentDone=90, propagate=True)
+        self.show_status("publisher done", 90)

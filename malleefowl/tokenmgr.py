@@ -55,6 +55,7 @@ def get_token(access_token, userid):
 
 @checkAccess
 def gen_token_for_userid(access_token, userid):
+    userid = userid.replace('@', '_')
     token = get_uuid()
     _add(token, userid)
     return token

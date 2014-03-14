@@ -9,7 +9,6 @@ root_path = config.getConfigValue("malleefowl", "filesPath")
 
 def list_files(token, filter):
     userid = tokenmgr.get_userid(tokenmgr.sys_token(), token)
-    userid = userid.replace('@', '_')
         
     files_path = os.path.join(root_path, userid)
     utils.mkdir(files_path)
@@ -20,7 +19,6 @@ def list_files(token, filter):
 
 def get_files(token, file_id):
     userid = tokenmgr.get_userid(tokenmgr.sys_token(), token)
-    userid = userid.replace('@', '_')
 
     logger.debug('get files for userid=%s' % (userid))
         
