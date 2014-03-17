@@ -16,7 +16,7 @@ from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
 curdir = os.path.dirname(__file__)
-climdapsabs = os.path.abspath(os.path.join(curdir,"../../.."))
+climdapsabs = os.path.abspath(os.path.join(curdir,".."))
 
 DATABASE_LOCATION = os.path.join(climdapsabs,"examples/pidinfo.db")
 WORK_DIR = os.path.join(climdapsabs,"var/qc_cache/")
@@ -24,9 +24,9 @@ WORK_DIR = os.path.join(climdapsabs,"var/qc_cache/")
 
 DATA = {}
 fn = os.path.join(os.path.dirname(__file__),"quality_processes.conf")
-logger.debug("qp: Loading data from file: "+fn)
+#logger.debug("qp: Loading data from file: "+fn)
 execfile(fn,DATA)
-logger.debug("qp: Loaded file to DATA variable")
+#logger.debug("qp: Loaded file to DATA variable")
 
 class UserDirectoryProcess(malleefowl.process.WPSProcess):
     def __init__(self):
@@ -218,11 +218,11 @@ class PIDManagerDatasetProcess(malleefowl.process.WPSProcess):
                 path = self.path.getValue(),
                 with_first_run = self.with_first_run)
         ds_title  = self.ds_title.getValue()
-        logger.debug("DSTITLE:"+ds_title)
+        #logger.debug("DSTITLE:"+ds_title)
         #the string of comma separated pids must be converted to a list
         dataset_pids = self.dataset_pids.getValue()
         dspids = dataset_pids.split(",")
-        logger.debug("DSPIDS:"+str(dspids))
+        #logger.debug("DSPIDS:"+str(dspids))
         dataset_file_pids = [x.strip() for x in dspids]
         output = self.pidmanager.get_pid_dataset(ds_title, dataset_file_pids)
         outputfile = open(self.mktempfile(),"w")
@@ -433,7 +433,7 @@ class DirectoryValidatorProcess(malleefowl.process.WPSProcess):
         data_path = self.data_path.getValue()
         def statmethod(cur,end):
             statusmethod("Running",cur,end,self)
-        logger.debug(self.username)
+        #logger.debug(self.username)
 
         qcp = qcprocesses.QCProcesses(
                                       username = self.username,
@@ -594,7 +594,6 @@ class EvaluateQualityCheckProcess(malleefowl.process.WPSProcess):
     """
     def __init__(self):
 
-        logger.debug("qp: eval init ")
 
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_Evaluate_Quality_Check",
@@ -615,14 +614,12 @@ class EvaluateQualityCheckProcess(malleefowl.process.WPSProcess):
             )
 
 
-        logger.debug("qp: eval Loading DATA parameters")
         self.data_node = DATA.get("data_node")
 
         self.index_node = DATA.get("index_node")
 
         self.access = DATA.get("access")
         self.metadata_format = DATA.get("metadata_format")
-        logger.debug("qp: eval loading DATA parameters as default")
         self.replica = self.addLiteralInput(
             identifier = "replica",
             title = "Replica",
@@ -640,7 +637,6 @@ class EvaluateQualityCheckProcess(malleefowl.process.WPSProcess):
             type = types.BooleanType,
             )
 
-        logger.debug("qp: eval define outputs")
         
         self.found_tags = self.addLiteralOutput(
             identifier = "found_tags",
@@ -698,7 +694,6 @@ class EvaluateQualityCheckProcess(malleefowl.process.WPSProcess):
             asReference = True,
             )
 
-        logger.debug("qp: eval finished init")
 
 
     def execute(self):
@@ -959,6 +954,31 @@ def get_user_parallelids(user):
 # with the generic        #
 # interface               #
 ###########################
+class RestflowLocalFile(malleefowl.process.WPSProcess):
+    def __init__(self):
+        malleefowl.process.WPSProcess.__init__(self,
+            identifier = "RestflowLocalFile",
+            title = "RestflowLocalFile",
+            version = "2014.03.17",
+            metadata = [],
+            )
+
+        self.filename = self.addLiteralInput(
+            identifier = "filename",
+            title = "filename",
+            type = types.StringType,
+            minOccurs = 1,
+            maxOccurs = 1,
+            )
+        
+    
+    
+    def execute(self):
+        from malleefowl import restflow
+        status = lambda msg, percent: self.show_status(msg, percent)
+        filename = self.filename.getValue()
+        restflow.run(filename, timeout=20000, status_callback=status)
+
 
 class UserInitProcess(malleefowl.process.WPSProcess):
     """
