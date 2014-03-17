@@ -980,6 +980,14 @@ class RestflowLocalFile(malleefowl.process.WPSProcess):
         restflow.run(filename, timeout=20000, status_callback=status)
 
 
+def get_username(obj):
+    username = obj.username.getValue().replace("(at)","@")
+    token = obj.token.getValue()
+    userid = tokenmgr.get_userid(tokenmgr.sys_token(), token)
+    if username != userid:
+        username == "defaultuser"
+    return username
+
 class UserInitProcess(malleefowl.process.WPSProcess):
     """
     The process is not intended for use with the generic tool
@@ -988,9 +996,9 @@ class UserInitProcess(malleefowl.process.WPSProcess):
 
        
         malleefowl.process.WPSProcess.__init__(self,
-            identifier = "QC_Initialization_User",
-            title = "Quality Initialization_User",
-            version = "2014.02.27",
+            identifier = "QC_Init_User",
+            title = "QualityProcesses initialization with username",
+            version = "2014.03.17",
             metadata = [],
             abstract = "If the given directory is valid included files and datasets receive a PID.")
 
@@ -1023,6 +1031,14 @@ class UserInitProcess(malleefowl.process.WPSProcess):
             minOccurs = 1,
             maxOccurs = 1,
             )
+        self.project = self.addLiteralInput(
+            identifier = "project",
+            title = "Project",
+            abstract = "Currently only CORDEX is fully supported.",
+            default = "CORDEX",
+            allowedValues = ["CORDEX"],
+            type = types.StringType,
+            )
            
         self.all_okay = self.addLiteralOutput(
             identifier = "all_okay",
@@ -1039,14 +1055,6 @@ class UserInitProcess(malleefowl.process.WPSProcess):
             asReference = True,
             )
 
-        self.project = self.addLiteralInput(
-            identifier = "project",
-            title = "Project",
-            abstract = "Currently only CORDEX is fully supported.",
-            default = "CORDEX",
-            allowedValues = ["CORDEX"],
-            type = types.StringType,
-            )
         self.output = self.addComplexOutput(
             identifier = "output",
             title = "output",
@@ -1061,16 +1069,11 @@ class UserInitProcess(malleefowl.process.WPSProcess):
 
     def execute(self):
         self.status.set(msg = "Initiate process", percentDone = 0, propagate = True)
-
         data_path = self.data_path.getValue()
         def statmethod(cur,end):
             statusmethod("Running",cur,end,self)
-        logger.debug(self.username)
-        username = self.username.getValue()
-        token = self.token.getValue()
-        userid = tokenmgr.get_userid(tokenmgr.sys_token(), token)
-        if username != userid:
-            username == "defaultuser"
+
+        username = get_username(self)
 
 
         qcp = qcprocesses.QCProcesses(
@@ -1107,21 +1110,29 @@ class UserQualityCheckProcess(malleefowl.process.WPSProcess):
 
 
         malleefowl.process.WPSProcess.__init__(self,
-            identifier = "QC_Quality_Check_User",
+            identifier = "QC_Check_User",
             title = "Quality Check",
-            version = "2014.03.14",
+            version = "2014.03.17",
             metadata = [],
             abstract = "Runs a quality check on a given folder.")
 
-        self.username = "defaultuser"
+        self.username = self.addLiteralInput(
+            identifier = "username",
+            title = "Username",
+            default = "defaultuser",
+            type = types.StringType,
+            )
+        self.token = self.addLiteralInput(
+            identifier = "token",
+            title = "Token",
+            type = types.StringType,
+            )
 
-        selectable_parallelids = get_user_parallelids(self.username)
         self.parallel_id = self.addLiteralInput(
             identifier = "parallel_id",
             title = "Parallel ID",
             abstract = ("An ID for the current process. Select the one matching to the directory "+
                         "requirements check process."),
-            allowedValues = selectable_parallelids,
             type = types.StringType,
             )
 
@@ -1196,10 +1207,12 @@ class UserQualityCheckProcess(malleefowl.process.WPSProcess):
 
         self.status.set(msg = "Initiate process", percentDone = 0, propagate = True)
 
+        username = get_username(self)
+        logger.debug("USERNAME = " + str(username))
         def statmethod(cur,end):
             statusmethod("Running",cur,end,self)
         qcp = qcprocesses.QCProcesses(
-                                      username = self.username,
+                                      username = username,
                                       parallel_id = self.parallel_id.getValue(),
                                       statusmethod = statmethod,
                                       work_dir = WORK_DIR
@@ -1209,10 +1222,10 @@ class UserQualityCheckProcess(malleefowl.process.WPSProcess):
         data_path = data_path_file.readline()
         data_path_file.close()
         selects = self.select.getValue()
-        if selects == '<colander.null>':
+        if selects == '<colander.null>' or selects == None:
             selects =  ""
         locks = self.lock.getValue()
-        if locks == '<colander.null>':
+        if locks == '<colander.null>' or locks == None:
             locks =  ""
         
         output = qcp.quality_check(
@@ -1221,6 +1234,7 @@ class UserQualityCheckProcess(malleefowl.process.WPSProcess):
                                locks = locks,
                                project = self.project.getValue(),
                                )
+
         self.qc_call_exit_code.setValue(output["qc_call_exit_code"])
         self.qc_call.setValue(output["qc_call"])
         self.qc_svn_version.setValue(output["QC_SVN_Version"])
