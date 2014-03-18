@@ -1,6 +1,9 @@
 #from malleefowl.process import WorkerProcess
 import malleefowl.process 
 import subprocess
+from malleefowl import wpslogging as logging
+logger = logging.getLogger(__name__)
+
 
 
 class IndicesProcess(malleefowl.process.WorkerProcess):
@@ -145,6 +148,9 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
 
         cdo = Cdo()
         
+        self.show_status('starting species distribution model ...', 5)
+        
+        
         # get the appropriate files
         nc_files = self.get_nc_files()
         for nc_file in nc_files: 
@@ -155,6 +161,9 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
                 prFilePath = nc_file
             else:
                 raise Exception("input netcdf file has not variable tas|pr")
+        
+        self.show_status('get files ...', 7)
+        
 
         #tasFilePath = '/home/main/sandbox/climdaps/parts/files/tas_AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_20060101_20101231.nc'       
         #prFilePath = '/home/main/sandbox/climdaps/parts/files/pr_AFR-44_MPI-ESM-LR_rcp85_r1i1p1_MPI-RCSM-v2012_v1_day_20060101_20101231.nc'        
@@ -162,6 +171,8 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
         tasFile = Dataset(tasFilePath , 'r')        
         prFile = Dataset(prFilePath ,'r')
         output_files = list()
+        
+        self.show_status('open files ...', 10)
         
         # get the dimensions
         # dimNames = tasFile.dimensions.keys()
@@ -171,33 +182,37 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
             tas_yearmean_filename = self.mktempfile(suffix='_tas_yearmean.nc')
             output_files.append(tas_yearmean_filename)
             cdo.yearmean(input= tasFilePath, options='-f nc', output = tas_yearmean_filename)
-            self.status.set(msg="tas_yearmean done", percentDone=50, propagate=True)
+            self.show_status("tas_yearmean done", 50)
         
         if self.pr_yearsum.getValue() == True :
             pr_yearsum_filename = self.mktempfile(suffix='_pr_yearsum.nc')
             output_files.append(pr_yearsum_filename)
             cdo.yearsum(input= prFilePath, options='-f nc', output = pr_yearsum_filename )
-            self.status.set(msg="pr_yearsum done", percentDone=50, propagate=True)
+            self.show_status("pr_yearsum done", 50)
             
         if self.tas_5to9mean.getValue() == True :
             tas_5to9mean_filename = self.mktempfile(suffix='_tas_5to9mean.nc')
             output_files.append(tas_5to9mean_filename)
             cdo.setname('tas_5to9mean',input = "-yearmean -selmon,5,6,7,8,9 "+ tasFilePath , output = tas_5to9mean_filename, options =  '-f nc')  #python
+            self.show_status("tas_5to9mean done", 50)
             
         if self.tas_6to8mean.getValue() == True :
             tas_6to8mean_filename = self.mktempfile(suffix='_tas_6to8mean.nc')
             output_files.append(tas_6to8mean_filename)
             cdo.setname('tas_6to8mean',input = "-yearmean -selmon,6,7,8 "+ tasFilePath , output = tas_6to8mean_filename, options =  '-f nc')  #python
+            self.show_status("tas_6to8mean done", 50)
             
         if self.pr_5to9sum.getValue() == True :
             pr_5to9sum_filename = self.mktempfile(suffix='_pr_5to9sum.nc')
             output_files.append(pr_5to9sum_filename)
             cdo.setname('pr_5to9sum',input = "-yearsum -selmon,5,6,7,8,9 "+ prFilePath , output = pr_5to9sum_filename, options =  '-f nc')  #python
+            self.show_status("pr_5to9sum done", 50)
             
         if self.pr_6to8sum.getValue() == True :
             pr_6to8sum_filename = self.mktempfile(suffix='_pr_6to8sum.nc')
             output_files.append(pr_6to8sum_filename)
             cdo.setname('pr_6to8sum',input = "-yearsum -selmon,6,7,8 "+ prFilePath , output = pr_6to8sum_filename, options =  '-f nc')  #python
+            self.show_status("pr_6to8sum done", 50)
 
         if self.heavyprecip.getValue() == True :  
             prThreshold_filename = self.mktempfile(suffix='_prThreshold.nc')
@@ -205,9 +220,8 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
             output_files.append(days_heavyprecip_filename)
             cdo.gtc(str(self.prThreshold.getValue() / 60 / 60 / 24), input = prFilePath, options='-f nc', output = prThreshold_filename)
             cdo.yearsum(input = prThreshold_filename, options='-f nc', output = days_heavyprecip_filename)
-            self.status.set(msg="heavy precipitation days done", percentDone=50, propagate=True)
-    
-            
+            self.show_status("heavy precipitation days done", 50)
+
             #pr_6to8sum = np.squeeze(cdo.yearsum(input  =  " ".join([cdo.selmon('6,7,8',input  =  prFilePath)] ), options='-f nc', returnMaArray='pr'))  #python
             #pr_6to8sum = pr_6to8sum * 60 * 60 * 24 # convert flux to amount            
             #pr_6to8sumFile = Dataset(pr_6to8sum_filename , 'w')
@@ -238,6 +252,8 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
         # close inFiles
         tasFile.close()
         prFile.close() 
+        
+        self.show_status("input files closed", 50)
 
         # make tar archive
         tar_archive = self.mktempfile(suffix='.tar')
@@ -246,8 +262,12 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
             tar.add(name, arcname = name.replace(self.working_dir, ""))
         tar.close()
         
+        self.show_status("make tar archive ... done", 50)
+        
+        
         #mystring.replace('\r\n', '')
         
         # output
-        self.status.set(msg="processing done", percentDone=90, propagate=True)
+        self.show_status("processing done", 52)
         self.output.setValue( tar_archive )
+        logger.debug('tar archive = %s' %(tar_archive))
