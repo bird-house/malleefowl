@@ -4,27 +4,27 @@ from nose.plugins.attrib import attr
 
 from malleefowl import wpsclient
 
-service = "http://localhost:8090/wps"
+import __init__ as base
 
 import json
 import tempfile
 
 @attr('online')
 def test_get_caps():
-    result = wpsclient.get_caps(service=service)
+    result = wpsclient.get_caps(service=base.SERVICE)
     nose.tools.ok_(len(result) > 1, result)
 
 @attr('online')
 def test_describe():
     result = wpsclient.describe_process(
-        service = service,
+        service = base.SERVICE,
         identifier = "org.malleefowl.test.dummyprocess")
     nose.tools.ok_(result['identifier'] == "org.malleefowl.test.dummyprocess", result)
 
 @attr('online')
 def test_execute():
     result = wpsclient.execute(
-        service = service,
+        service = base.SERVICE,
         identifier = "org.malleefowl.test.dummyprocess",
         inputs = [('input1', '2'), ('input2', '3')],
         outputs = [('output1', True), ('output2', True)]
