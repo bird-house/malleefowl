@@ -10,6 +10,9 @@ import subprocess
 #from malleefowl.process import WorkerProcess
 import malleefowl.process 
 
+from malleefowl import wpslogging as logging
+logger = logging.getLogger(__name__)
+
 class AnophelesProcess(malleefowl.process.WorkerProcess):
     """This process calculates the evapotranspiration following the Pennan Monteith equation"""
 
@@ -59,6 +62,8 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
         import datetime 
         from math import *
 
+        self.show_status('starting anopholes ...', 5)
+        
         cdo = Cdo()
 
         # guess var names of files
@@ -77,7 +82,9 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
                 file_evspsblpot = nc_file                          # Dataset(nc_file , 'r')   
             else:
                 raise Exception("input netcdf file has not variable tas|hurs|pr|evspsbl")
-            
+
+        logger.debug('guess var names ... done')
+        
         file_land_sea_mask = self.land_sea_mask.getValue()
 
         # build the n4 out variable based on pr
@@ -133,9 +140,13 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
         #else:
         b = 0.88
 
+        logger.debug('start main loop ...')
+
         for x in range(0,tas.shape[1],1): #tas.shape[1]
             for y in range(0,tas.shape[2],1): #tas.shape[2]
                 if (land_sea_mask[x,y] == 100):
+
+                    logger.debug('working on x=%s, y=%s' % (x, y))
 
                     ## get the appropriate values 
                     #RH = hurs[:,x,y] * 100
@@ -254,6 +265,6 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
         # write values into file
         var_n4.assignValue(n4)
 
-        self.status.set(msg="anopheles done", percentDone=90, propagate=True)
+        self.show_status("anopheles done", 90)
         self.output.setValue( file_n4 )
         
