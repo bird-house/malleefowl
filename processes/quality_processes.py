@@ -1008,6 +1008,7 @@ class UserInitProcess(malleefowl.process.WPSProcess):
             default = "defaultuser",
             type = types.StringType,
             )
+
         self.token = self.addLiteralInput(
             identifier = "token",
             title = "Token",
@@ -1031,6 +1032,7 @@ class UserInitProcess(malleefowl.process.WPSProcess):
             minOccurs = 1,
             maxOccurs = 1,
             )
+
         self.project = self.addLiteralInput(
             identifier = "project",
             title = "Project",
@@ -1063,9 +1065,6 @@ class UserInitProcess(malleefowl.process.WPSProcess):
             formats = [{"mimeType":"text/plain"}],
             metadata = [],
             )
-
-
-
 
     def execute(self):
         self.status.set(msg = "Initiate process", percentDone = 0, propagate = True)
@@ -1105,9 +1104,8 @@ class UserInitProcess(malleefowl.process.WPSProcess):
         return 
 
 
-class UserQualityCheckProcess(malleefowl.process.WPSProcess):
+class UserCheckProcess(malleefowl.process.WPSProcess):
     def __init__(self):
-
 
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_Check_User",
@@ -1122,6 +1120,7 @@ class UserQualityCheckProcess(malleefowl.process.WPSProcess):
             default = "defaultuser",
             type = types.StringType,
             )
+
         self.token = self.addLiteralInput(
             identifier = "token",
             title = "Token",
@@ -1135,7 +1134,6 @@ class UserQualityCheckProcess(malleefowl.process.WPSProcess):
                         "requirements check process."),
             type = types.StringType,
             )
-
 
         self.select = self.addLiteralInput(
             identifier = "select",
@@ -1175,8 +1173,6 @@ class UserQualityCheckProcess(malleefowl.process.WPSProcess):
             allowedValues = ["CORDEX"],
             type = types.StringType,
             )
-
-
         
         self.qc_call_exit_code = self.addLiteralOutput(
             identifier = "qc_call_exit_code",
@@ -1208,7 +1204,6 @@ class UserQualityCheckProcess(malleefowl.process.WPSProcess):
         self.status.set(msg = "Initiate process", percentDone = 0, propagate = True)
 
         username = get_username(self)
-        logger.debug("USERNAME = " + str(username))
         def statmethod(cur,end):
             statusmethod("Running",cur,end,self)
         qcp = qcprocesses.QCProcesses(
@@ -1241,4 +1236,354 @@ class UserQualityCheckProcess(malleefowl.process.WPSProcess):
         self.error_messages.setValue(str(output["stderr"]))
 
 
+        return
+
+class UserEvalProcess(malleefowl.process.WPSProcess):
+    """
+    The process runs the qc_processes QualityControl method and 
+    handles the progress bar depending on the output of the method.
+    """
+    def __init__(self):
+
+
+        malleefowl.process.WPSProcess.__init__(self,
+            identifier = "QC_Eval_User",
+            title = "Quality Evaluate with username",
+            version = "2014.03.17",
+            metadata = [],
+            abstract = "Evaluates the quality check and generates metadata and quality files")
+
+
+        self.username = self.addLiteralInput(
+            identifier = "username",
+            title = "Username",
+            default = "defaultuser",
+            type = types.StringType,
+            )
+
+        self.token = self.addLiteralInput(
+            identifier = "token",
+            title = "Token",
+            type = types.StringType,
+            )
+
+        self.parallel_id = self.addLiteralInput(
+            identifier = "parallel_id",
+            title = "Parallel ID",
+            abstract = "An ID for the current process. Select the one matching to the quality check.",
+            type = types.StringType,
+            )
+
+
+        self.data_node = DATA.get("data_node")
+
+        self.index_node = DATA.get("index_node")
+
+        self.access = DATA.get("access")
+        self.metadata_format = DATA.get("metadata_format")
+        self.replica = self.addLiteralInput(
+            identifier = "replica",
+            title = "Replica",
+            minOccurs=0,
+            maxOccurs=1,
+            type = types.BooleanType,
+            )
+            
+        self.latest = self.addLiteralInput(
+            identifier = "latest",
+            title = "Latest",
+            minOccurs=0,
+            maxOccurs=1,
+            default = True,
+            type = types.BooleanType,
+            )
+
+        
+        self.found_tags = self.addLiteralOutput(
+            identifier = "found_tags",
+            title = "found_tags",
+            type = types.StringType,
+            )
+        self.fail_count = self.addLiteralOutput(
+            identifier = "fail_count",
+            title = "Fail count",
+            type = types.IntType,
+            )
+        self.omit_count = self.addLiteralOutput(
+            identifier = "omit_count",
+            title = "Omit count",
+            type = types.IntType,
+            )
+        self.pass_count = self.addLiteralOutput(
+            identifier = "pass_count",
+            title = "Pass count",
+            type = types.IntType,
+            )
+        self.fixed_count = self.addLiteralOutput(
+            identifier = "fixed_count",
+            title = "Fixed count",
+            type = types.IntType,
+            )
+
+        self.has_issues = self.addLiteralOutput(
+            identifier = "has_issues",
+            title = "There is something wrong with the checked files.",
+            type = types.BooleanType,
+            )
+
+        self.process_log = self.addComplexOutput(
+            identifier = "process_log",
+            title = "Log of this process.",
+            metadata = [],
+            formats = [{"mimeType":"text/plain"}],
+            asReference = True,
+            )
+
+        self.to_publish_qc_files = self.addComplexOutput(
+            identifier = "to_publish_qc_files",
+            title = "QC files that can be published",
+            metadata = [],
+            formats = [{"mimeType":"text/plain"}],
+            asReference = True,
+            )
+
+        self.to_publish_metadata_files = self.addComplexOutput(
+            identifier = "to_publish_metadata_files",
+            title = "Metadata files that can be published",
+            metadata = [],
+            formats = [{"mimeType":"text/plain"}],
+            asReference = True,
+            )
+
+
+
+    def execute(self):
+        logger.debug("QC_EVAL_USER:0")
+        self.status.set(msg = "Initiate process", percentDone = 0, propagate = True)
+
+        username = get_username(self) 
+
+        logger.debug("QC_EVAL_USER: username =" + username)
+        logger.debug("QC_EVAL_USER: parallel_id =" + self.parallel_id.getValue())
+        logger.debug("QC_EVAL_USER: work_dir =" + WORK_DIR)
+        def statmethod(cur,end):
+            statusmethod("Running",cur,end,self)
+        qcp = qcprocesses.QCProcesses(
+                                      username = username,
+                                      parallel_id = self.parallel_id.getValue(),
+                                      statusmethod = statmethod,
+                                      work_dir = WORK_DIR
+                                      )
+
+        logger.debug("QC_EVAL_USER:2")
+        output = qcp.evaluate_quality_check(
+                          data_node = self.data_node,
+                          index_node = self.index_node,
+                          access = self.access,
+                          metadata_format = self.metadata_format,
+                          replica = self.replica.getValue(),
+                          latest = self.latest.getValue(),
+                          )
+
+        logger.debug("QC_EVAL_USER:3")
+        self.fail_count.setValue(output["fail_count"])
+        self.pass_count.setValue(output["pass_count"])
+        self.omit_count.setValue(output["omit_count"])
+        self.fixed_count.setValue(output["fixed_count"])
+        self.has_issues.setValue(output["has_issues"])
+        self.found_tags.setValue(output["found_tags"])
+
+        logger.debug("QC_EVAL_USER:4")
+        process_log = _create_server_copy_of_file(output["process_log"],self)
+        self.process_log.setValue(process_log)
+        to_publish_qc_files_log = _create_server_copy_of_file(output["to_publish_qc_files_log"],self)
+        self.to_publish_qc_files.setValue(to_publish_qc_files_log)
+        to_publish_metadata_files_log = _create_server_copy_of_file(
+            output["to_publish_metadata_files_log"],self)
+        self.to_publish_metadata_files.setValue(to_publish_metadata_files_log)
+        logger.debug("QC_EVAL_USER:5")
+        return
+
+class UserQualityPublishPublish(malleefowl.process.WPSProcess):
+    def __init__(self):
+        abstract_ml = ("Read trough a file containing one filename per line and publish it.")
+
+        malleefowl.process.WPSProcess.__init__(self,
+            identifier = "QC_QualityPublisher_User", 
+            title = "Publish Quality-XML",
+            version = "2014.03.18",
+            metadata = [],
+            abstract = abstract_ml)
+           
+        self.username = self.addLiteralInput(
+            identifier = "username",
+            title = "Username",
+            default = "defaultuser",
+            type = types.StringType,
+            )
+
+        self.token = self.addLiteralInput(
+            identifier = "token",
+            title = "Token",
+            type = types.StringType,
+            )
+
+        self.parallel_id = self.addLiteralInput(
+            identifier = "parallel_id",
+            title = "Parallel ID",
+            abstract = ("An ID for the current process. Select the one matching to the evaluation."),
+            type = types.StringType,
+            )
+
+        self.process_log = self.addComplexOutput(
+            identifier = "process_log",
+            title = "Log of the process containing system calls that equal the actions performed.",
+            formats = [{"mimeType":"text/plain"}],
+            asReference = True,
+            )
+    def execute(self):
+        self.status.set(msg = "Initiate process", percentDone = 0, propagate = True)
+        def statmethod(cur,end):
+            statusmethod("Running",cur,end,self)
+        username = get_username(self)
+        qcp = qcprocesses.QCProcesses(
+                                      username = username,
+                                      statusmethod = statmethod,
+                                      work_dir = WORK_DIR,
+                                      parallel_id = self.parallel_id.getValue(),
+                                      )
+        output = qcp.qualitypublisher(
+                          publish_method="swift",
+                          subdir = "qualityxml",
+                          keyfile = os.path.join(climdapsabs,"stvariables.conf")
+                         )
+
+        process_log = _create_server_copy_of_file(output["process_log_name"],self)
+        self.process_log.setValue(process_log)
+
+        return
+
+class MetaPublisherUserProcess(malleefowl.process.WPSProcess):
+    def __init__(self):
+        abstract_ml = ("Read trough a file containing one filename per line and publish it.")
+
+        malleefowl.process.WPSProcess.__init__(self,
+            identifier = "QC_MetaPublisher_User", 
+            title = "Quality Publish Metadata-XML",
+            version = "2014.03.18",
+            metadata = [],
+            abstract = abstract_ml)
+           
+        self.username = self.addLiteralInput(
+            identifier = "username",
+            title = "Username",
+            default = "defaultuser",
+            type = types.StringType,
+            )
+
+        self.token = self.addLiteralInput(
+            identifier = "token",
+            title = "Token",
+            type = types.StringType,
+            )
+
+
+        self.parallel_id = self.addLiteralInput(
+            identifier = "parallel_id",
+            title = "Parallel ID",
+            abstract = ("An ID for the current process. Select the one matching to the evaluation."),
+            type = types.StringType,
+            )
+
+        self.process_log = self.addComplexOutput(
+            identifier = "process_log",
+            title = "Log of the process containing system calls that equal the actions performed.",
+            formats = [{"mimeType":"text/plain"}],
+            asReference = True,
+            )
+
+    def execute(self):
+        self.status.set(msg = "Initiate process", percentDone = 0, propagate = True)
+        def statmethod(cur,end):
+            statusmethod("Running",cur,end,self)
+
+        username = get_username(self)
+        logger.debug("QC_META_PUBLISHER:" + username)
+        qcp = qcprocesses.QCProcesses(
+                                      username = username,
+                                      statusmethod = statmethod,
+                                      work_dir = WORK_DIR,
+                                      parallel_id = self.parallel_id.getValue(),
+                                      )
+        output = qcp.metadatapublisher(
+                          publish_method="swift",
+                          subdir = "metaxml",
+                          keyfile = os.path.join(climdapsabs,"stvariables.conf")
+                         )
+
+        process_log = _create_server_copy_of_file(output["process_log_name"],self)
+        self.process_log.setValue(process_log)
+
+        return
+
+class RemoveDataUserProcess(malleefowl.process.WPSProcess):
+    def __init__(self):
+
+        malleefowl.process.WPSProcess.__init__(self,
+            identifier = "QC_RemoveData_User", 
+            title = "Quality Clean up",
+            version = "2014.03.18",
+            metadata = [],
+            abstract = "Remove data by Parallel ID or your complete work data.")
+           
+        self.username = self.addLiteralInput(
+            identifier = "username",
+            title = "Username",
+            default = "defaultuser",
+            type = types.StringType,
+            )
+
+        self.token = self.addLiteralInput(
+            identifier = "token",
+            title = "Token",
+            type = types.StringType,
+            )
+
+
+        self.parallel_ids = self.addLiteralInput(
+            identifier = "parallel_ids",
+            title = "Parallel IDs",
+            abstract = ("IDs for the to remove work data."),
+            minOccurs = 0,
+            type = types.StringType,
+            )
+        
+
+    def execute(self):
+        self.status.set(msg = "Initiate process", percentDone = 0, propagate = True)
+        def statmethod(cur,end):
+            statusmethod("Running",cur,end,self)
+        
+        username = get_username(self)
+        parallel_ids = self.parallel_ids.getValue()
+        if parallel_ids == None:
+            parallel_ids = []
+        if isinstance(parallel_ids, str):
+            parallel_ids = parallel_ids.split(",")
+        cur = 0
+        end = len(parallel_ids)
+
+        for par_id in parallel_ids:
+            logger.debug("Removing " + par_id)
+            qcp = qcprocesses.QCProcesses(
+                                      username = username,
+                                      statusmethod = statmethod,
+                                      work_dir = WORK_DIR,
+                                      parallel_id = par_id,
+                                      )
+            qcp.remove_process_dir()
+            percent = cur*100.0/end#end is not 0, as there is at least one element in parallel_ids
+            self.status.set(msg = "Finished", percentDone = percent, propagate = True)
+            cur += 1
+        self.status.set(msg = "Finished", percentDone = 100, propagate = True)
         return
