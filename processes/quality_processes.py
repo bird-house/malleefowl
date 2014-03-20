@@ -18,15 +18,20 @@ logger = logging.getLogger(__name__)
 curdir = os.path.dirname(__file__)
 climdapsabs = os.path.abspath(os.path.join(curdir,".."))
 
-DATABASE_LOCATION = os.path.join(climdapsabs,"examples/pidinfo.db")
-WORK_DIR = os.path.join(climdapsabs,"var/qc_cache/")
+#DATABASE_LOCATION = os.path.join(climdapsabs,"examples/pidinfo.db")
 
 
 DATA = {}
 fn = os.path.join(os.path.dirname(__file__),"quality_processes.conf")
+
 #logger.debug("qp: Loading data from file: "+fn)
 execfile(fn,DATA)
 #logger.debug("qp: Loaded file to DATA variable")
+
+DATABASE_LOCATION = DATA["database_location"]
+# "climdaps"
+WORK_DIR = DATA["work_directory"]
+#os.path.join(climdapsabs,"var/qc_cache/")
 
 class UserDirectoryProcess(malleefowl.process.WPSProcess):
     def __init__(self):
@@ -97,7 +102,7 @@ class PIDManagerFileProcess(malleefowl.process.WPSProcess):
         self.additional_identifier_element = self.addLiteralInput(
                 identifier = "additional_identifier_element",
                 title = "Additional identifier element",
-                default = "SQL-CORDEX-",
+                default = "CORDEX-",
                 type = types.StringType,
                 abstract = "Allows to add a string to the PID, to make it distinguishable",
                 )
@@ -168,7 +173,7 @@ class PIDManagerDatasetProcess(malleefowl.process.WPSProcess):
                 title = "Dataset file PIDs list",
                 minOccurs = 1,
                 maxOccurs = 1,
-                default = "10876/SQL-CORDEX-5p8d-09bx-u4qg-xhhx",
+                default = "10876/CORDEX-5p8d-09bx-u4qg-xhhx",
                 abstract = "The PIDs in the dataset",
                 type = types.StringType,
                 )
@@ -177,7 +182,7 @@ class PIDManagerDatasetProcess(malleefowl.process.WPSProcess):
         self.additional_identifier_element = self.addLiteralInput(
                 identifier = "additional_identifier_element",
                 title = "Additional identifier element",
-                default = "SQL-CORDEX-",
+                default = "CORDEX-",
                 type = types.StringType,
                 abstract = "Allows to add a string to the PID, to make it distinguishable",
                 )
@@ -322,7 +327,7 @@ class PIDManagerPathCORDEXProcess(malleefowl.process.WPSProcess):
 #                identifier = "additional_identifier_element",
 #                title = "additional_identifier_element",
 #                type = types.StringType,
-#                default = "SQL-CORDEX-SIMPLE-",
+#                default = "CORDEX-SIMPLE-",
 #                abstract = ("The generated PIDS consist of prefix/additional_identifier_element" +
 #                            " random string")
 #                )
