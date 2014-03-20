@@ -12,17 +12,62 @@ import StringIO
 
 from netCDF4 import Dataset
 
-import malleefowl.process 
+from malleefowl.process import WPSProcess, SourceProcess, WorkerProcess
 from malleefowl import utils
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
-class Wget(malleefowl.process.SourceProcess):
+
+class Login(WPSProcess):
+    def __init__(self):
+        WPSProcess.__init__(
+            self,
+            identifier = "org.malleefowl.esgf.login",
+            title = "Login to esgf node with openid",
+            version = "1.0",
+            metadata=[
+                {"title":"ESGF","href":"http://esgf.org"},
+                ],
+            abstract="Login to esgf node")
+
+        self.openid = self.addLiteralInput(
+            identifier = "openid",
+            title = "ESGF OpenID",
+            abstract = "Enter ESGF OpenID",
+            minOccurs = 1,
+            maxOccurs = 1,
+            type = type('')
+            )
+
+        self.password = self.addLiteralInput(
+            identifier = "password",
+            title = "OpenID Password",
+            abstract = "Enter your Password",
+            minOccurs = 1,
+            maxOccurs = 1,
+            type = type('')
+            )
+
+    def execute(self):
+        self.show_status("login to esgf", 5)
+
+        try:
+            esgf_credentials = utils.logon(
+                openid=self.openid.getValue(), 
+                password=self.password.getValue())
+        except Exception, err:
+            raise RuntimeError("logon failed (%s)." % (err.message))
+        
+        self.show_status("logon successful", 90)
+
+        
+
+class Wget(SourceProcess):
     """This process downloads files form esgf data node via wget and http"""
 
     def __init__(self):
-        malleefowl.process.SourceProcess.__init__(self,
+        SourceProcess.__init__(self,
             identifier = "org.malleefowl.esgf.wget",
             title = "Download files from esgf data node via wget",
             version = "0.1",
@@ -87,11 +132,11 @@ class Wget(malleefowl.process.SourceProcess):
         self.output.setValue(outfile)
 
 
-class OpenDAP(malleefowl.process.SourceProcess):
+class OpenDAP(SourceProcess):
     """This process downloads files form esgf data node via opendap"""
 
     def __init__(self):
-        malleefowl.process.SourceProcess.__init__(self,
+        SourceProcess.__init__(self,
             identifier = "org.malleefowl.esgf.opendap",
             title = "Download files from esgf data node via OpenDAP",
             version = "0.1",
@@ -137,13 +182,13 @@ class OpenDAP(malleefowl.process.SourceProcess):
             )
 
     def execute(self):
-        self.status.set(msg="starting esgf download", percentDone=5, propagate=True)
+        self.show_status("starting esgf download", 5)
 
         utils.logon(
             openid=self.openid_in.getValue(), 
             password=self.password_in.getValue())
 
-        self.status.set(msg="logon successful", percentDone=10, propagate=True)
+        self.show_status("logon successful", 10)
 
         opendap_url = self.file_identifier.getValue()
         
@@ -153,15 +198,15 @@ class OpenDAP(malleefowl.process.SourceProcess):
         istop = self.endindex_in.getValue()
         utils.nc_copy(source=opendap_url, target=nc_filename, istart=istart, istop=istop)
         
-        self.status.set(msg="retrieved netcdf file", percentDone=90, propagate=True)
+        self.show_status("retrieved netcdf file", 90)
 
         self.output.setValue(nc_filename)
         
-class Metadata(malleefowl.process.WorkerProcess):
+class Metadata(WorkerProcess):
     """This process downloads files form esgf data node via opendap"""
 
     def __init__(self):
-        malleefowl.process.WorkerProcess.__init__(self,
+        WorkerProcess.__init__(self,
             identifier = "org.malleefowl.esgf.metadata",
             title = "Retrieve Metadata of NetCDF File",
             version = "0.1",
@@ -183,7 +228,7 @@ class Metadata(malleefowl.process.WorkerProcess):
             )
 
     def execute(self):
-        self.status.set(msg="starting netcdf metadata retrieval", percentDone=5, propagate=True)
+        self.show_status("starting netcdf metadata retrieval", 5)
 
         nc_file = self.get_nc_files()[0]
 
@@ -201,7 +246,7 @@ class Metadata(malleefowl.process.WorkerProcess):
                 if hasattr(ds.variables[var_name], att_name):
                     metadata['variables'][var_name][att_name] = getattr(ds.variables[var_name], att_name)
         
-        self.status.set(msg="retrieved netcdf metadata", percentDone=80, propagate=True)
+        self.show_status("retrieved netcdf metadata", 80)
 
         out_filename = self.mktempfile(suffix='.json')
         with open(out_filename, 'w') as fp:
@@ -209,7 +254,7 @@ class Metadata(malleefowl.process.WorkerProcess):
             fp.close()
             self.output.setValue( out_filename )
         
-        self.status.set(msg="netcdf metadata written", percentDone=90, propagate=True)
+        self.show_status("netcdf metadata written", 90)
 
 
         
