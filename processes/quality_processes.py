@@ -1358,14 +1358,10 @@ class UserEvalProcess(malleefowl.process.WPSProcess):
 
 
     def execute(self):
-        logger.debug("QC_EVAL_USER:0")
         self.status.set(msg = "Initiate process", percentDone = 0, propagate = True)
 
         username = get_username(self) 
 
-        logger.debug("QC_EVAL_USER: username =" + username)
-        logger.debug("QC_EVAL_USER: parallel_id =" + self.parallel_id.getValue())
-        logger.debug("QC_EVAL_USER: work_dir =" + WORK_DIR)
         def statmethod(cur,end):
             statusmethod("Running",cur,end,self)
         qcp = qcprocesses.QCProcesses(
@@ -1375,7 +1371,6 @@ class UserEvalProcess(malleefowl.process.WPSProcess):
                                       work_dir = WORK_DIR
                                       )
 
-        logger.debug("QC_EVAL_USER:2")
         output = qcp.evaluate_quality_check(
                           data_node = self.data_node,
                           index_node = self.index_node,
@@ -1385,7 +1380,6 @@ class UserEvalProcess(malleefowl.process.WPSProcess):
                           latest = self.latest.getValue(),
                           )
 
-        logger.debug("QC_EVAL_USER:3")
         self.fail_count.setValue(output["fail_count"])
         self.pass_count.setValue(output["pass_count"])
         self.omit_count.setValue(output["omit_count"])
@@ -1393,7 +1387,6 @@ class UserEvalProcess(malleefowl.process.WPSProcess):
         self.has_issues.setValue(output["has_issues"])
         self.found_tags.setValue(output["found_tags"])
 
-        logger.debug("QC_EVAL_USER:4")
         process_log = _create_server_copy_of_file(output["process_log"],self)
         self.process_log.setValue(process_log)
         to_publish_qc_files_log = _create_server_copy_of_file(output["to_publish_qc_files_log"],self)
@@ -1401,7 +1394,6 @@ class UserEvalProcess(malleefowl.process.WPSProcess):
         to_publish_metadata_files_log = _create_server_copy_of_file(
             output["to_publish_metadata_files_log"],self)
         self.to_publish_metadata_files.setValue(to_publish_metadata_files_log)
-        logger.debug("QC_EVAL_USER:5")
         return
 
 class UserQualityPublishPublish(malleefowl.process.WPSProcess):
@@ -1410,7 +1402,7 @@ class UserQualityPublishPublish(malleefowl.process.WPSProcess):
 
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_QualityPublisher_User", 
-            title = "Publish Quality-XML",
+            title = "Publish Quality-XML User",
             version = "2014.03.18",
             metadata = [],
             abstract = abstract_ml)
@@ -1469,7 +1461,7 @@ class MetaPublisherUserProcess(malleefowl.process.WPSProcess):
 
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_MetaPublisher_User", 
-            title = "Quality Publish Metadata-XML",
+            title = "Quality Publish Metadata-XML User",
             version = "2014.03.18",
             metadata = [],
             abstract = abstract_ml)
@@ -1531,7 +1523,7 @@ class RemoveDataUserProcess(malleefowl.process.WPSProcess):
 
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_RemoveData_User", 
-            title = "Quality Clean up",
+            title = "Quality Clean up User",
             version = "2014.03.18",
             metadata = [],
             abstract = "Remove data by Parallel ID or your complete work data.")
