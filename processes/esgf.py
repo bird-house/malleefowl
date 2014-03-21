@@ -69,8 +69,6 @@ class Logon(WPSProcess):
         
         self.show_status("logon successful", 90)
 
-        self.sleep(30)
-
         self.output.setValue( credentials )
         
 
@@ -206,8 +204,6 @@ HTTP.SSL.CAPATH=./
            ))
 
         self.show_status("prepared opendap access", 7)
-
-        self.sleep(30)
 
         opendap_url = self.file_identifier.getValue()        
         nc_filename = self.mktempfile(suffix='.nc')
