@@ -78,67 +78,68 @@ class Wget(SourceProcess):
     def __init__(self):
         SourceProcess.__init__(self,
             identifier = "org.malleefowl.esgf.wget",
-            title = "Download files from esgf data node via wget",
+            title = "ESGF wget download",
             version = "0.1",
             metadata=[
                 {"title":"ESGF","href":"http://esgf.org"},
                 ],
-            abstract="Download files from esgf data node via wget")
+            abstract="Download files from esgf data node with wget")
 
-        # openid
-        # -----------
-
-        self.openid_in = self.addLiteralInput(
-            identifier = "openid",
-            title = "ESGF OpenID",
-            abstract = "Enter ESGF OpenID",
-            minOccurs = 1,
-            maxOccurs = 1,
-            type = type('')
+        self.credentials = self.addComplexInput(
+            identifier = "credentials",
+            title = "X509 Certificate",
+            abstract = "X509 Proxy Certificate",
+            metadata=[],
+            minOccurs=1,
+            maxOccurs=1,
+            maxmegabites=1,
+            formats=[{"mimeType":"application/x-pkcs7-mime"}],
             )
 
-        self.password_in = self.addLiteralInput(
-            identifier = "password",
-            title = "OpenID Password",
-            abstract = "Enter your Password",
-            minOccurs = 1,
-            maxOccurs = 1,
-            type = type('')
+        self.sidecar = self.addComplexOutput(
+            identifier="sidecar",
+            title="Metadata",
+            abstract="Metadata of downloaded files",
+            metadata=[],
+            formats=[{"mimeType":"application/json"}],
+            asReference=True,
             )
 
     def execute(self):
-        self.show_status("starting esgf download", 5)
+        self.show_status("starting esgf wget ...", 5)
 
-        try:
-            esgf_credentials = utils.logon(
-                openid=self.openid_in.getValue(), 
-                password=self.password_in.getValue())
-        except Exception as e:
-            raise RuntimeError("logon failed (%s)." % (e.message))
-        
-        self.show_status("logon successful", 10)
+        credentials = self.credentials.getValue()
+        logger.debug('credentials = %s', credentials)
+        file_url = self.file_identifier.getValue()
+        filename = os.path.basename(file_url)
+        logger.debug('file url = %s', file_url)
 
-        netcdf_url = self.file_identifier.getValue()
+        self.show_status("download %s" % (filename), 10)
 
         try:
             cmd = ["wget",
-                   "--certificate", esgf_credentials, 
-                   "--private-key", esgf_credentials, 
+                   "--certificate", credentials, 
+                   "--private-key", credentials, 
                    "--no-check-certificate", 
                    "-N",
                    "-P", self.cache_path,
                    "--progress", "dot:mega",
-                   netcdf_url]
+                   file_url]
             self.cmd(cmd, stdout=True)
         except Exception as e:
-            raise RuntimeError("wget failed (%s)." % (err.message))
+            raise RuntimeError("wget failed (%s)." % (e.message))
 
-        outfile = os.path.join(self.cache_path, os.path.basename(netcdf_url))
+        outfile = os.path.join(self.cache_path, filename)
         logger.debug('result file=%s', outfile)
         
-        self.show_status("retrieved netcdf file", 90)
-
         self.output.setValue(outfile)
+        self.show_status("esgf wget ... done", 90)
+        
+        metadata = dict(url=file_url, filename=filename)
+        sidecar_file = self.mktempfile(suffix='.json')
+        with open(sidecar_file, 'w') as fp:
+            json.dump(obj=metadata, fp=fp, indent=4, sort_keys=True)
+        self.sidecar.setValue(sidecar_file)
 
 
 class OpenDAP(SourceProcess):
@@ -260,8 +261,7 @@ class Metadata(WorkerProcess):
         out_filename = self.mktempfile(suffix='.json')
         with open(out_filename, 'w') as fp:
             json.dump(obj=metadata, fp=fp, indent=4, sort_keys=True)
-            fp.close()
-            self.output.setValue( out_filename )
+        self.output.setValue( out_filename )
         
         self.show_status("netcdf metadata written", 90)
 
