@@ -69,6 +69,8 @@ class Logon(WPSProcess):
         
         self.show_status("logon successful", 90)
 
+        self.sleep(30)
+
         self.output.setValue( credentials )
         
 
@@ -79,7 +81,7 @@ class Wget(SourceProcess):
         SourceProcess.__init__(self,
             identifier = "org.malleefowl.esgf.wget",
             title = "ESGF wget download",
-            version = "0.1",
+            version = "0.2",
             metadata=[
                 {"title":"ESGF","href":"http://esgf.org"},
                 ],
@@ -148,32 +150,26 @@ class OpenDAP(SourceProcess):
     def __init__(self):
         SourceProcess.__init__(self,
             identifier = "org.malleefowl.esgf.opendap",
-            title = "Download files from esgf data node via OpenDAP",
-            version = "0.1",
+            title = "ESGF OpenDAP download",
+            version = "0.2",
             metadata=[
                 {"title":"ESGF","href":"http://esgf.org"},
                 ],
             abstract="Download files from esgf data node via OpenDAP")
 
-        self.openid_in = self.addLiteralInput(
-            identifier = "openid",
-            title = "ESGF OpenID",
-            abstract = "Enter ESGF OpenID",
-            minOccurs = 1,
-            maxOccurs = 1,
-            type = type('')
+
+        self.credentials = self.addComplexInput(
+            identifier = "credentials",
+            title = "X509 Certificate",
+            abstract = "X509 Proxy Certificate",
+            metadata=[],
+            minOccurs=1,
+            maxOccurs=1,
+            maxmegabites=1,
+            formats=[{"mimeType":"application/x-pkcs7-mime"}],
             )
 
-        self.password_in = self.addLiteralInput(
-            identifier = "password",
-            title = "OpenID Password",
-            abstract = "Enter your Password",
-            minOccurs = 1,
-            maxOccurs = 1,
-            type = type('')
-            )
-
-        self.startindex_in = self.addLiteralInput(
+        self.startindex = self.addLiteralInput(
             identifier = "startindex",
             title = "Start Index",
             minOccurs = 1,
@@ -182,7 +178,7 @@ class OpenDAP(SourceProcess):
             type=type(1)
             )
 
-        self.endindex_in = self.addLiteralInput(
+        self.endindex = self.addLiteralInput(
             identifier = "endindex",
             title = "End Index",
             minOccurs = 1,
@@ -192,20 +188,32 @@ class OpenDAP(SourceProcess):
             )
 
     def execute(self):
-        self.show_status("starting esgf download", 5)
+        self.show_status("starting esgf opendap ...", 5)
 
-        utils.logon(
-            openid=self.openid_in.getValue(), 
-            password=self.password_in.getValue())
+        credentials = self.credentials.getValue()
+        logger.debug('credentials = %s', credentials)
+        dap_config = '.dodsrc'
 
-        self.show_status("logon successful", 10)
+        with open(dap_config, 'w') as fp:
+            fp.write("""\
+HTTP.VERBOSE=0
+HTTP.COOKIEJAR=./.dods_cookies
+HTTP.SSL.VALIDATE=0
+HTTP.SSL.CERTIFICATE={credentials_pem}
+HTTP.SSL.KEY={credentials_pem}
+HTTP.SSL.CAPATH=./
+""".format(credentials_pem=credentials,
+           ))
 
-        opendap_url = self.file_identifier.getValue()
-        
+        self.show_status("prepared opendap access", 7)
+
+        self.sleep(30)
+
+        opendap_url = self.file_identifier.getValue()        
         nc_filename = self.mktempfile(suffix='.nc')
 
-        istart = self.startindex_in.getValue() - 1
-        istop = self.endindex_in.getValue()
+        istart = self.startindex.getValue() - 1
+        istop = self.endindex.getValue()
         utils.nc_copy(source=opendap_url, target=nc_filename, istart=istart, istop=istop)
         
         self.show_status("retrieved netcdf file", 90)
