@@ -49,18 +49,35 @@ class Login(WPSProcess):
             type = type('')
             )
 
+        self.cert = self.addComplexOutput(
+            identifier="cert",
+            title="X509 Certificate",
+            abstract="X509 Proxy Certificate",
+            metadata=[],
+            formats=[{"mimeType":"application/x-pkcs7-mime"}],
+            asReference=True,
+            )
+
+
     def execute(self):
-        self.show_status("login to esgf", 5)
+        self.show_status("start logon ...", 5)
+
+        cert = None
+        openid=self.openid.getValue()
+        password=self.password.getValue()
+        
+        logger.debug('openid=%s' % (openid))
 
         try:
-            esgf_credentials = utils.logon(
-                openid=self.openid.getValue(), 
-                password=self.password.getValue())
-        except Exception, err:
-            raise RuntimeError("logon failed (%s)." % (err.message))
+            cert = utils.logon(openid=openid, password=password)
+        except Exception as e:
+            msg = "Logon failed with error: %s" % (e.message)
+            logger.error(msg)
+            raise RuntimeError(msg)
         
         self.show_status("logon successful", 90)
 
+        self.cert.setValue(cert)
         
 
 class Wget(SourceProcess):
@@ -104,8 +121,8 @@ class Wget(SourceProcess):
             esgf_credentials = utils.logon(
                 openid=self.openid_in.getValue(), 
                 password=self.password_in.getValue())
-        except Exception, err:
-            raise RuntimeError("logon failed (%s)." % (err.message))
+        except Exception as e:
+            raise RuntimeError("logon failed (%s)." % (e.message))
         
         self.show_status("logon successful", 10)
 
@@ -121,7 +138,7 @@ class Wget(SourceProcess):
                    "--progress", "dot:mega",
                    netcdf_url]
             self.cmd(cmd, stdout=True)
-        except Exception, err:
+        except Exception as e:
             raise RuntimeError("wget failed (%s)." % (err.message))
 
         outfile = os.path.join(self.cache_path, os.path.basename(netcdf_url))
