@@ -11,27 +11,20 @@ import qc_processes.pidmanager as pidmanager
 import qc_processes.directory2datasetyaml as directory2datasetyaml
 
 import os
-from malleefowl import tokenmgr, utils
+from malleefowl import tokenmgr
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
 curdir = os.path.dirname(__file__)
 climdapsabs = os.path.abspath(os.path.join(curdir,".."))
 
-#DATABASE_LOCATION = os.path.join(climdapsabs,"examples/pidinfo.db")
-
-
 DATA = {}
 fn = os.path.join(os.path.dirname(__file__),"quality_processes.conf")
 
-#logger.debug("qp: Loading data from file: "+fn)
 execfile(fn,DATA)
-#logger.debug("qp: Loaded file to DATA variable")
 
 DATABASE_LOCATION = DATA["database_location"]
-# "climdaps"
 WORK_DIR = DATA["work_directory"]
-#os.path.join(climdapsabs,"var/qc_cache/")
 
 class UserDirectoryProcess(malleefowl.process.WPSProcess):
     def __init__(self):
