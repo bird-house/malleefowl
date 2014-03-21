@@ -17,12 +17,13 @@ def logon(openid, password):
     #del os.environ['X509_CERT_DIR']
     #del os.environ['X509_USER_PROXY']
     
-    esgf_dir = os.path.abspath(os.curdir)
     # NetCDF DAP support looks in CWD for configuration
-    dap_config = os.path.join(esgf_dir, '.dodsrc')
-    esgf_credentials = os.path.join(esgf_dir, 'credentials.pem')
-        
-    lm = LogonManager(esgf_dir, dap_config=dap_config)
+    dap_config = '.dodsrc'
+    cert = 'credentials.pem'
+    # TODO: where are my cookies?
+    #dap_cookies = '.dods_cookies'
+
+    lm = LogonManager(os.curdir, dap_config=dap_config)
     lm.logoff()
     
     lm.logon_with_openid(
@@ -33,9 +34,9 @@ def logon(openid, password):
         interactive=False)
 
     if not lm.is_logged_on():
-        raise Exception("Logon failed")
+        raise Exception("Logon with openid %s failed" % (openid))
 
-    return esgf_credentials
+    return dict(cert=cert, dap_config=dap_config) 
 
 def user_id(openid):
     """generate user_id from openid"""

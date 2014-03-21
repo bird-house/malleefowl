@@ -18,18 +18,17 @@ from malleefowl import utils
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
-
-class Login(WPSProcess):
+class Logon(WPSProcess):
     def __init__(self):
         WPSProcess.__init__(
             self,
-            identifier = "org.malleefowl.esgf.login",
-            title = "Login to esgf node with openid",
+            identifier = "org.malleefowl.esgf.logon",
+            title = "Logon with ESGF OpenID",
             version = "1.0",
             metadata=[
                 {"title":"ESGF","href":"http://esgf.org"},
                 ],
-            abstract="Login to esgf node")
+            abstract="Logon with ESGF OpenID")
 
         self.openid = self.addLiteralInput(
             identifier = "openid",
@@ -49,8 +48,8 @@ class Login(WPSProcess):
             type = type('')
             )
 
-        self.cert = self.addComplexOutput(
-            identifier="cert",
+        self.output = self.addComplexOutput(
+            identifier="output",
             title="X509 Certificate",
             abstract="X509 Proxy Certificate",
             metadata=[],
@@ -58,26 +57,29 @@ class Login(WPSProcess):
             asReference=True,
             )
 
+        self.dap_config = self.addComplexOutput(
+            identifier="dap_config",
+            title="OpenDAP Config",
+            abstract="OpenDAP Config",
+            metadata=[],
+            formats=[{"mimeType":"text/plain"}],
+            asReference=True,
+            )
 
     def execute(self):
         self.show_status("start logon ...", 5)
 
-        cert = None
         openid=self.openid.getValue()
         password=self.password.getValue()
         
         logger.debug('openid=%s' % (openid))
 
-        try:
-            cert = utils.logon(openid=openid, password=password)
-        except Exception as e:
-            msg = "Logon failed with error: %s" % (e.message)
-            logger.error(msg)
-            raise RuntimeError(msg)
+        result = utils.logon(openid=openid, password=password)
         
         self.show_status("logon successful", 90)
 
-        self.cert.setValue(cert)
+        self.output.setValue(result.get('cert'))
+        self.dap_config.setValue(result.get('dap_config'))
         
 
 class Wget(SourceProcess):
