@@ -57,15 +57,6 @@ class Logon(WPSProcess):
             asReference=True,
             )
 
-        self.dap_config = self.addComplexOutput(
-            identifier="dap_config",
-            title="OpenDAP Config",
-            abstract="OpenDAP Config",
-            metadata=[],
-            formats=[{"mimeType":"text/plain"}],
-            asReference=True,
-            )
-
     def execute(self):
         self.show_status("start logon ...", 5)
 
@@ -74,12 +65,11 @@ class Logon(WPSProcess):
         
         logger.debug('openid=%s' % (openid))
 
-        result = utils.logon(openid=openid, password=password)
+        credentials = utils.logon(openid=openid, password=password)
         
         self.show_status("logon successful", 90)
 
-        self.output.setValue(result.get('cert'))
-        self.dap_config.setValue(result.get('dap_config'))
+        self.output.setValue( credentials )
         
 
 class Wget(SourceProcess):
