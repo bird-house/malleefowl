@@ -1,6 +1,7 @@
 import json
 
 from malleefowl.process import WPSProcess
+from malleefowl import irods
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
@@ -31,6 +32,7 @@ class ListFiles(WPSProcess):
             abstract = "Filter for file selection",
             minOccurs = 1,
             maxOccurs = 1,
+            default = 'nc',
             type = type(''),
             )
         self.folder = self.addLiteralInput(
@@ -39,6 +41,7 @@ class ListFiles(WPSProcess):
             abstract = "iRods Folder with Files",
             minOccurs = 1,
             maxOccurs = 1,
+            default = '/DKRZ_CORDEX_Zone/home/public/wps/test1',
             type = type(''),
             )
         self.output = self.addLiteralOutput(
@@ -55,8 +58,7 @@ class ListFiles(WPSProcess):
         filter = self.filter.getValue()
         folder = self.folder.getValue()
 
-        #files = source.list_files(token, filter)
-        files = ['a.nc', 'b.nc']
+        files = irods.list_files(token, filter, folder)
         
         self.output.setValue(json.dumps(files))
 
