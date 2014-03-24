@@ -393,104 +393,104 @@ class PIDManagerPIDsFromYamlDocumentProcess(malleefowl.process.WPSProcess):
 #        self.pids.setValue(str(pids))
 
 
-class DirectoryValidatorProcess(malleefowl.process.WPSProcess):
-    """
-    The process checks a path to be valid for processing and generates a PID
-    for each new found .nc file and for each dataset that differs from the 
-    previously found ones. This relies on the local database storing the previously
-    found files and datasets.
-    """
-    def __init__(self):
-
-       
-        malleefowl.process.WPSProcess.__init__(self,
-            identifier = "QC_DirectoryValidator",
-            title = "Quality Initialization",
-            version = "2014.02.27",
-            metadata = [],
-            abstract = "If the given directory is valid included files and datasets receive a PID.")
-
-        self.username = "defaultuser"
-        selectable_parallelids = get_user_parallelids(self.username)
-        self.parallel_id = self.addLiteralInput(
-            identifier = "parallel_id",
-            title = "Parallel ID",
-            default = "web1",
-            abstract = ("An identifier used to avoid processes running on the same directory." +
-                        "Using an existing one will remove all data inside its work directory."+
-                        "The existing Parallel IDs are: "+", ".join(sorted(selectable_parallelids))
-                        ),
-            type = types.StringType,
-            minOccurs = 1, 
-            maxOccurs = 1,
-            )
-                
-        self.data_path = self.addLiteralInput(
-            identifier = "data_path",
-            title = "Root path of the to check data",
-            default = os.path.join(climdapsabs,"examples/data/CORDEX"),
-            type = types.StringType,
-            minOccurs = 1,
-            maxOccurs = 1,
-            )
-           
-        self.all_okay = self.addLiteralOutput(
-            identifier = "all_okay",
-            title = "The path has a valid structure",
-            default = False,
-            type = types.BooleanType,
-            )
-
-        self.process_log = self.addComplexOutput(
-            identifier = "process_log",
-            title = "Log of this process",
-            metadata = [],
-            formats = [{"mimeType":"text/plain"}],
-            asReference = True,
-            )
-
-        self.project = self.addLiteralInput(
-            identifier = "project",
-            title = "Project",
-            abstract = "Currently only CORDEX is fully supported.",
-            default = "CORDEX",
-            allowedValues = ["CORDEX"],
-            type = types.StringType,
-            )
-
-
-
-    def execute(self):
-        self.status.set(msg = "Initiate process", percentDone = 0, propagate = True)
-
-        data_path = self.data_path.getValue()
-        def statmethod(cur,end):
-            statusmethod("Running",cur,end,self)
-        #logger.debug(self.username)
-
-        qcp = qcprocesses.QCProcesses(
-                                      username = self.username,
-                                      statusmethod = statmethod,
-                                      parallel_id = self.parallel_id.getValue(),
-                                      work_dir = WORK_DIR
-                                      )
-        project = self.project.getValue()
-        #set the new data
-        output = qcp.validate_directory(data_path, project)
-
-        self.all_okay.setValue(output["all_okay"])
-        log = open(self.mktempfile(suffix = ".txt"),"w")
-        for messages in output["messages"]:
-            for message in messages:
-                log.write(str(message)+"\n")
-        log.close()
-        self.process_log.setValue(log)
-        #store the data_path
-        data_path_file = open(os.path.join(qcp.process_dir,"data_path"),"w") 
-        data_path_file.write(data_path)
-        data_path_file.close()
-
-        return 
+#class DirectoryValidatorProcess(malleefowl.process.WPSProcess):
+#    """
+#    The process checks a path to be valid for processing and generates a PID
+#    for each new found .nc file and for each dataset that differs from the 
+#    previously found ones. This relies on the local database storing the previously
+#    found files and datasets.
+#    """
+#    def __init__(self):
+#
+#       
+#        malleefowl.process.WPSProcess.__init__(self,
+#            identifier = "QC_DirectoryValidator",
+#            title = "Quality Initialization",
+#            version = "2014.02.27",
+#            metadata = [],
+#            abstract = "If the given directory is valid included files and datasets receive a PID.")
+#
+#        self.username = "defaultuser"
+#        selectable_parallelids = get_user_parallelids(self.username)
+#        self.parallel_id = self.addLiteralInput(
+#            identifier = "parallel_id",
+#            title = "Parallel ID",
+#            default = "web1",
+#            abstract = ("An identifier used to avoid processes running on the same directory." +
+#                        "Using an existing one will remove all data inside its work directory."+
+#                        "The existing Parallel IDs are: "+", ".join(sorted(selectable_parallelids))
+#                        ),
+#            type = types.StringType,
+#            minOccurs = 1, 
+#            maxOccurs = 1,
+#            )
+#                
+#        self.data_path = self.addLiteralInput(
+#            identifier = "data_path",
+#            title = "Root path of the to check data",
+#            default = os.path.join(climdapsabs,"examples/data/CORDEX"),
+#            type = types.StringType,
+#            minOccurs = 1,
+#            maxOccurs = 1,
+#            )
+#           
+#        self.all_okay = self.addLiteralOutput(
+#            identifier = "all_okay",
+#            title = "The path has a valid structure",
+#            default = False,
+#            type = types.BooleanType,
+#            )
+#
+#        self.process_log = self.addComplexOutput(
+#            identifier = "process_log",
+#            title = "Log of this process",
+#            metadata = [],
+#            formats = [{"mimeType":"text/plain"}],
+#            asReference = True,
+#            )
+#
+#        self.project = self.addLiteralInput(
+#            identifier = "project",
+#            title = "Project",
+#            abstract = "Currently only CORDEX is fully supported.",
+#            default = "CORDEX",
+#            allowedValues = ["CORDEX"],
+#            type = types.StringType,
+#            )
+#
+#
+#
+#    def execute(self):
+#        self.status.set(msg = "Initiate process", percentDone = 0, propagate = True)
+#
+#        data_path = self.data_path.getValue()
+#        def statmethod(cur,end):
+#            statusmethod("Running",cur,end,self)
+#        #logger.debug(self.username)
+#
+#        qcp = qcprocesses.QCProcesses(
+#                                      username = self.username,
+#                                      statusmethod = statmethod,
+#                                      parallel_id = self.parallel_id.getValue(),
+#                                      work_dir = WORK_DIR
+#                                      )
+#        project = self.project.getValue()
+#        #set the new data
+#        output = qcp.validate_directory(data_path, project)
+#
+#        self.all_okay.setValue(output["all_okay"])
+#        log = open(self.mktempfile(suffix = ".txt"),"w")
+#        for messages in output["messages"]:
+#            for message in messages:
+#                log.write(str(message)+"\n")
+#        log.close()
+#        self.process_log.setValue(log)
+#        #store the data_path
+#        data_path_file = open(os.path.join(qcp.process_dir,"data_path"),"w") 
+#        data_path_file.write(data_path)
+#        data_path_file.close()
+#
+#        return 
 
 
 class QualityCheckProcess(malleefowl.process.WPSProcess):
@@ -1034,10 +1034,13 @@ class RestflowLocalFile(malleefowl.process.WPSProcess):
 def get_username(obj):
     username = obj.username.getValue().replace("(at)","@")
     token = obj.token.getValue()
-    userid = tokenmgr.get_userid(tokenmgr.sys_token(), token)
+    try:#If the token matches to any userid the userid is returned
+        userid = tokenmgr.get_userid(tokenmgr.sys_token(), token)
+    except:#If no userid is known by the token an exception is thrown. Use defaultuser then.
+        userid = "defaultuser"   
     if username != userid:
-        username == "defaultuser"
-    return username
+        userid = "defaultuser"
+    return userid
 
 class UserInitProcess(malleefowl.process.WPSProcess):
     """
@@ -1048,8 +1051,8 @@ class UserInitProcess(malleefowl.process.WPSProcess):
        
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_Init_User",
-            title = "QualityProcesses initialization with username",
-            version = "2014.03.17",
+            title = "QC_INIT_2",
+            version = "2014.03.24",
             metadata = [],
             abstract = "If the given directory is valid included files and datasets receive a PID.")
 
@@ -1058,12 +1061,15 @@ class UserInitProcess(malleefowl.process.WPSProcess):
             title = "Username",
             default = "defaultuser",
             type = types.StringType,
+            abstract = ("Name to access your own processing directory.")
             )
 
         self.token = self.addLiteralInput(
             identifier = "token",
             title = "Token",
+            default = "Needed_if_not_defaultuser",
             type = types.StringType,
+            abstract = "The token authenticates you as the user. defaultuser accepts any token."
             )
 
         self.parallel_id = self.addLiteralInput(
@@ -1071,6 +1077,9 @@ class UserInitProcess(malleefowl.process.WPSProcess):
             title = "Parallel ID",
             default = "web1",
             type = types.StringType,
+            abstract = ("To run multiple processes in parallel each requires its own directory." +
+                        "The directory is placed in your user directory. If defaultuser is choosen, " +
+                        "collisions with names are more likely. Be careful when choosing a name."),
             minOccurs = 1, 
             maxOccurs = 1,
             )
@@ -1124,8 +1133,6 @@ class UserInitProcess(malleefowl.process.WPSProcess):
             statusmethod("Running",cur,end,self)
 
         username = get_username(self)
-
-
         qcp = qcprocesses.QCProcesses(
                                       username = username,
                                       statusmethod = statmethod,
