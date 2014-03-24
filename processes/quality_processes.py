@@ -279,6 +279,41 @@ class PIDManagerPathCORDEXProcess(malleefowl.process.WPSProcess):
         pids = pm.get_pids_from_yaml_file(tempfile)
         self.pids.setValue(str(pids))
 
+class PIDManagerPIDsFromYamlDocumentProcess(malleefowl.process.WPSProcess):
+    def __init__(self):
+        malleefowl.process.WPSProcess.__init__(self,
+            identifier = "PIDs_from_yaml_document",
+            title = "Get PIDs from a string representation of a yaml file",
+            version = "2014.03.24",
+            metadata = [],
+            )
+        
+        self.yaml_document = self.addComplexInput(
+                identifier = "yaml_document",
+                title = "yaml_document",
+                minOccurs = 1,
+                maxOccurs = 1,
+                metadata=[],
+                maxmegabites=2,
+                formats=[{"mimeType":"text/yaml"}],
+                )
+
+        self.pids = self.addLiteralOutput(
+                identifier = "pids",
+                title = "Found PIDs for the path",
+                type = types.StringType,
+                )
+
+    def execute(self):
+        import yaml
+        pm = pidmanager.PIDManager(database_location = DATABASE_LOCATION)
+        filename = self.yaml_document.getValue(asFile=False)
+        g = open(filename, "r")
+        filecontent = g.read()
+        yaml_content = yaml.safe_load(filecontent)
+        pids = pm.get_pids_dict_from_yaml_content(yaml_content)
+        self.pids.setValue(str(pids))
+        
 #class PIDManagerPathSimpleProcess(malleefowl.process.WPSProcess):
 #    def __init__(self):
 #        malleefowl.process.WPSProcess.__init__(self,
@@ -697,14 +732,6 @@ class EvaluateQualityCheckProcess(malleefowl.process.WPSProcess):
     def execute(self):
         logger.debug("qp: execute EvaluateQualityCheckProcess")
         self.status.set(msg = "Initiate process", percentDone = 0, propagate = True)
-        param_dict = dict(
-                          data_node = self.data_node,
-                          index_node = self.index_node,
-                          access = self.access,
-                          metadata_format = self.metadata_format,
-                          replica = self.replica.getValue(),
-                          latest = self.latest.getValue(),
-                          )
 
         logger.debug("qp: eval init qcp")
         def statmethod(cur,end):
@@ -717,7 +744,33 @@ class EvaluateQualityCheckProcess(malleefowl.process.WPSProcess):
                                       )
 
         logger.debug("qp: eval run evaluate")
-        output = qcp.evaluate_quality_check(**param_dict)
+        import urllib
+        def _get_pid_file(full_filename, global_filename):
+            url = ("http://localhost:8090/wps?service=WPS&request=Execute&version=1.0.0" +
+                   "&identifier=PID_for_file&DataInputs=local_filename=" + full_filename +
+                   ";server_filename=" + global_filename + "&rawdataoutput=pid")
+            pid_file = urllib.urlopen(url)
+            line = pid_file.readline()
+            return line
+        
+        def _get_pid_dataset(ds_title, ds_pids):
+            url = ("http://localhost:8090/wps?service=WPS&request=Execute&version=1.0.0&identifier" +
+                   "=PID_for_dataset&DataInputs=ds_title="+ds_title+";dataset_pids=" +
+                   ",".join(ds_pids) + "&rawdataoutput=pid")
+            pid_file = urllib.urlopen(url)
+            line = pid_file.readline()
+            return line
+
+        output = qcp.evaluate_quality_check(
+                          data_node = self.data_node,
+                          index_node = self.index_node,
+                          access = self.access,
+                          metadata_format = self.metadata_format,
+                          replica = self.replica.getValue(),
+                          latest = self.latest.getValue(),
+                          get_pid_file = _get_pid_file,
+                          get_pid_dataset = _get_pid_dataset,
+                          )
 
         logger.debug("qp: eval setting outputs")
         self.fail_count.setValue(output["fail_count"])
@@ -1369,6 +1422,15 @@ class UserEvalProcess(malleefowl.process.WPSProcess):
                                       work_dir = WORK_DIR
                                       )
 
+        def _gather_pids_from_yaml_document(yaml_document):
+            import urllib
+            url = ("http://localhost:8090/wps?service=WPS&request=Execute&version=1.0.0" +
+                   "&identifier=PIDs_from_yaml_document&DataInputs=yaml_document=" +
+                   str(yaml_document) + "&rawdataoutput=pids")
+            pid_file = urllib.urlopen(url)
+            content = pid_file.read()
+            return content
+
         output = qcp.evaluate_quality_check(
                           data_node = self.data_node,
                           index_node = self.index_node,
@@ -1376,6 +1438,7 @@ class UserEvalProcess(malleefowl.process.WPSProcess):
                           metadata_format = self.metadata_format,
                           replica = self.replica.getValue(),
                           latest = self.latest.getValue(),
+                          gather_pids_from_yaml_document = _gather_pids_from_yaml_document
                           )
 
         self.fail_count.setValue(output["fail_count"])
