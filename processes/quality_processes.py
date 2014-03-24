@@ -26,348 +26,6 @@ execfile(fn,DATA)
 DATABASE_LOCATION = DATA["database_location"]
 WORK_DIR = DATA["work_directory"]
 
-
-
-class PIDManagerFileProcess(malleefowl.process.WPSProcess):
-    """
-    The process provides a PID for a given local file name and server file name. 
-    """
-    def __init__(self):
-        malleefowl.process.WPSProcess.__init__(self,
-            identifier = "PID_for_file",
-            title = "Get a PID for a file",
-            version = "2014.03.06",
-            metadata = [],
-            abstract = "Get a PID for a given local file and the url it will be available at.")
-
-        self.local_filename = self.addLiteralInput(
-                identifier = "local_filename",
-                title = "Local filename",
-                minOccurs = 1,
-                maxOccurs = 1,
-                default = (climdapsabs + "/examples/data/CORDEX/AFR-44/CLMcom/MPI-ESM-LR/historical/" +
-                           "r0i0p0/CCLM4-8-17/v1/fx/orog/orog_AFR-44_MPI-ESM-" + 
-                           "LR_historical_r1i1p1_CCLM_4-8-17_fx.nc"),
-                type = types.StringType,
-                )
-
-        self.server_filename = self.addLiteralInput(
-                identifier = "server_filename",
-                title = "Server filename",
-                minOccurs = 1,
-                maxOccurs = 1,
-                default = ("ipcc-ar5.dkrz.de/thredds/fileServer/cordex/AFR-44/CLMcom/MPI-ESM-LR/" + 
-                           "historical/r0i0p0/CCLM4-8-17/v1/fx/orog/orog_AFR-44_MPI-ESM-LR_historical" +
-                           "_r1i1p1_CCLM_4-8-17_fx.nc"),
-                type = types.StringType,
-                )
-        self.database_location = DATABASE_LOCATION
-        self.additional_identifier_element = self.addLiteralInput(
-                identifier = "additional_identifier_element",
-                title = "Additional identifier element",
-                default = "CORDEX-",
-                type = types.StringType,
-                abstract = "Allows to add a string to the PID, to make it distinguishable",
-                )
-        self.port = self.addLiteralInput(
-                identifier = "port",
-                title = "Handle server port",
-                default = "8090",
-                type = types.StringType,
-                )
-        self.prefix = self.addLiteralInput(
-                identifier = "prefix",
-                title = "Handle server prefix",
-                default = "10876",
-                type = types.StringType,
-                )
-
-        self.path = self.addLiteralInput(
-                identifier = "path",
-                title = "Handle server path",
-                default =  "/handle-rest-0.1.1/",
-                type = types.StringType,
-                )
-
-        self.with_first_run = True
-        self.pid = self.addComplexOutput(
-                identifier = "pid",
-                title = "Found PID",
-                formats=[{"mimeType":"text/plain"}],
-                asReference = True,
-                )
-
-    def execute(self):
-        self.pidmanager = pidmanager.PIDManager(
-                database_location = self.database_location,
-                additional_identifier_element = self.additional_identifier_element.getValue(),
-                port = self.port.getValue(),
-                prefix = self.prefix.getValue(),
-                path = self.path.getValue(),
-                with_first_run = self.with_first_run)
-        server_filename = self.server_filename.getValue()
-        local_filename = self.local_filename.getValue()
-        output = self.pidmanager.get_pid_file(local_filename, server_filename)
-        outputfile = open(self.mktempfile(),"w")
-        outputfile.write(output)
-        outputfile.close()
-        self.pid.setValue(outputfile)
-
-class PIDManagerDatasetProcess(malleefowl.process.WPSProcess):
-    def __init__(self):
-        malleefowl.process.WPSProcess.__init__(self,
-            identifier = "PID_for_dataset",
-            title = "Get a PID for a dataset",
-            version = "2014.03.06",
-            metadata = [],
-            abstract = "Get a PID for a dataset title and the comma separated list of PIDs in it.")
-
-        self.ds_title = self.addLiteralInput(
-                identifier = "ds_title",
-                title = "Dataset title",
-                minOccurs = 1,
-                maxOccurs = 1,
-                default = "cordex.AFR-44.CLMcom.MPI-ESM-LR.historical.r0i0p0.CCLM4-8-17-v1.fx.orog",
-                type = types.StringType,
-                )
-
-        self.dataset_pids = self.addLiteralInput(
-                identifier = "dataset_pids",
-                title = "Dataset file PIDs list",
-                minOccurs = 1,
-                maxOccurs = 1,
-                default = "10876/CORDEX-5p8d-09bx-u4qg-xhhx",
-                abstract = "The PIDs in the dataset",
-                type = types.StringType,
-                )
-
-        self.database_location = DATABASE_LOCATION
-        self.additional_identifier_element = self.addLiteralInput(
-                identifier = "additional_identifier_element",
-                title = "Additional identifier element",
-                default = "CORDEX-",
-                type = types.StringType,
-                abstract = "Allows to add a string to the PID, to make it distinguishable",
-                )
-        self.port = self.addLiteralInput(
-                identifier = "port",
-                title = "Handle server port",
-                default = "8090",
-                type = types.StringType,
-                )
-        self.prefix = self.addLiteralInput(
-                identifier = "prefix",
-                title = "Handle server prefix",
-                default = "10876",
-                type = types.StringType,
-                )
-
-        self.path = self.addLiteralInput(
-                identifier = "path",
-                title = "Handle server path",
-                default =  "/handle-rest-0.1.1/",
-                type = types.StringType,
-                )
-
-        self.with_first_run = True
-        self.pid = self.addComplexOutput(
-                identifier = "pid",
-                title = "Found PID",
-                formats=[{"mimeType":"text/plain"}],
-                asReference = True,
-                )
-
-    def execute(self):
-        self.pidmanager = pidmanager.PIDManager(
-                database_location = self.database_location,
-                additional_identifier_element = self.additional_identifier_element.getValue(),
-                port = self.port.getValue(),
-                prefix = self.prefix.getValue(),
-                path = self.path.getValue(),
-                with_first_run = self.with_first_run)
-        ds_title  = self.ds_title.getValue()
-        #the string of comma separated pids must be converted to a list
-        dataset_pids = self.dataset_pids.getValue()
-        dspids = dataset_pids.split(",")
-        dataset_file_pids = [x.strip() for x in dspids]
-        output = self.pidmanager.get_pid_dataset(ds_title, dataset_file_pids)
-        outputfile = open(self.mktempfile(),"w")
-        outputfile.write(output)
-        outputfile.close()
-        self.pid.setValue(outputfile)
-
-class PIDManagerPathCORDEXProcess(malleefowl.process.WPSProcess):
-    def __init__(self):
-        malleefowl.process.WPSProcess.__init__(self,
-            identifier = "PIDManager_Path_CORDEX",
-            title = "Get PIDs for a path using the CORDEX specification.",
-            version = "2014.03.11",
-            metadata = [],
-            )
-        
-        self.path = self.addLiteralInput(
-                identifier = "path",
-                title = "Root project data path",
-                default = os.path.join(climdapsabs,"examples/data/CORDEX"),
-                type = types.StringType,
-                minOccurs = 1,
-                maxOccurs = 1,
-                )
-        self.file_regexp = self.addLiteralInput(
-                identifier = "file_regexp",
-                title = "Regular expression to filter files",
-                default = "*.nc",
-                type = types.StringType,
-                abstract = ("The syntax is '*' for any number of random characters. '.' is the normal" +
-                            "textual dot. (e.g. */fx/*.nc includes all .nc files in a fx directory")
-                )
-
-        self.file_regexp_out = self.addLiteralOutput(
-                identifier = "file_regexp_out",
-                title = "Used regular expression in re format",
-                type = types.StringType,
-                )
-
-        self.pids = self.addLiteralOutput(
-                identifier = "pids",
-                title = "Found PIDs for the path",
-                type = types.StringType,
-                )
-
-    def execute(self):
-        d2dy = directory2datasetyaml.Directory2DatasetYaml()#defaults are good for CORDEX
-        tempfile = self.mktempfile()
-        regexp_raw = self.file_regexp.getValue()
-        #. has to be escaped and * has to be replaced by .*
-        regexp = regexp_raw.replace(".","\.").replace("*",".*")
-        self.file_regexp_out.setValue(regexp)
-        d2dy.create_yaml(path = self.path.getValue(), yaml_fn = tempfile, 
-                file_regexp = regexp)
-        pm = pidmanager.PIDManager(DATABASE_LOCATION)
-        pids = pm.get_pids_from_yaml_file(tempfile)
-        self.pids.setValue(str(pids))
-
-class PIDManagerPIDsFromYamlDocumentProcess(malleefowl.process.WPSProcess):
-    def __init__(self):
-        malleefowl.process.WPSProcess.__init__(self,
-            identifier = "PIDs_from_yaml_document",
-            title = "Get PIDs from a string representation of a yaml file",
-            version = "2014.03.24",
-            metadata = [],
-            )
-        
-        self.yaml_document = self.addComplexInput(
-                identifier = "yaml_document",
-                title = "yaml_document",
-                minOccurs = 1,
-                maxOccurs = 1,
-                metadata=[],
-                maxmegabites=2,
-                formats=[{"mimeType":"text/yaml"}],
-                )
-
-        self.pids = self.addLiteralOutput(
-                identifier = "pids",
-                title = "Found PIDs for the path",
-                type = types.StringType,
-                )
-
-    def execute(self):
-        import yaml
-        pm = pidmanager.PIDManager(database_location = DATABASE_LOCATION)
-        filename = self.yaml_document.getValue(asFile=False)
-        g = open(filename, "r")
-        filecontent = g.read()
-        yaml_content = yaml.safe_load(filecontent)
-        pids = pm.get_pids_dict_from_yaml_content(yaml_content)
-        self.pids.setValue(str(pids))
-        
-##################
-# Helper methods #
-##################
-
-def statusmethod(msg, current, end, wpsprocess):
-    """
-    :param current: The current counter
-    :param end: The end counter
-    :param wpsprocess: The process that needs to update the statusbar.
-    """
-    #workaround division 0
-    if int(end) == 0:
-        end = 1
-    wpsprocess.status.set(msg = msg, percentDone = float(current)*100.0/float(end), propagate = True)
-
-def _create_server_copy_of_file(filename, wpsprocess):
-    serverfile = open(wpsprocess.mktempfile(suffix = ".txt"), "w")
-    localfile = open(filename, "r")
-    serverfile.write(localfile.read())
-    localfile.close()
-    serverfile.close()
-    return serverfile
-
-def get_user_dir(user):
-    return os.path.join(climdapsabs, "var", "qc_cache", user)
-
-def get_user_parallelids(user):
-    """
-    It is assumed that no processing directories are moved into the work directory by hand or
-    other tools than the qc-processes.
-    """
-    path = get_user_dir(user)
-    history_fn = os.path.join(path, "parallel_id.history")
-    history = []
-    if os.path.isfile(history_fn):
-        with open(history_fn, "r") as hist:
-            lines = hist.readlines()
-            for line in lines:
-                history.append(line.rstrip("\n"))
-    existing_history = [x for x in history if os.path.isdir(os.path.join(path, x))] 
-    return existing_history
-
-
-###########################
-# Processes with username #
-# Not intended for use    #
-# with the generic        #
-# interface               #
-###########################
-class RestflowLocalFile(malleefowl.process.WPSProcess):
-    def __init__(self):
-        malleefowl.process.WPSProcess.__init__(self,
-            identifier = "RestflowLocalFile",
-            title = "RestflowLocalFile",
-            version = "2014.03.17",
-            metadata = [],
-            )
-
-        self.filename = self.addLiteralInput(
-            identifier = "filename",
-            title = "filename",
-            type = types.StringType,
-            minOccurs = 1,
-            maxOccurs = 1,
-            )
-        
-    
-    
-    def execute(self):
-        from malleefowl import restflow
-        status = lambda msg, percent: self.show_status(msg, percent)
-        filename = self.filename.getValue()
-        restflow.run(filename, timeout=20000, status_callback=status)
-
-
-def get_username(obj):
-    username = obj.username.getValue().replace("(at)","@")
-    token = obj.token.getValue()
-    try:#If the token matches to any userid the userid is returned
-        userid = tokenmgr.get_userid(tokenmgr.sys_token(), token)
-    except:#If no userid is known by the token an exception is thrown. Use defaultuser then.
-        userid = "defaultuser"   
-    if username != userid:
-        userid = "defaultuser"
-    return userid
-
 class UserInitProcess(malleefowl.process.WPSProcess):
     """
     The process is not intended for use with the generic tool
@@ -983,3 +641,312 @@ class UserRemoveDataProcess(malleefowl.process.WPSProcess):
             cur += 1
         self.status.set(msg = "Finished", percentDone = 100, propagate = True)
         return
+
+
+class PIDManagerFileProcess(malleefowl.process.WPSProcess):
+    """
+    The process provides a PID for a given local file name and server file name. 
+    """
+    def __init__(self):
+        malleefowl.process.WPSProcess.__init__(self,
+            identifier = "PID_for_file",
+            title = "Get a PID for a file",
+            version = "2014.03.06",
+            metadata = [],
+            abstract = "Get a PID for a given local file and the url it will be available at.")
+
+        self.local_filename = self.addLiteralInput(
+                identifier = "local_filename",
+                title = "Local filename",
+                minOccurs = 1,
+                maxOccurs = 1,
+                default = (climdapsabs + "/examples/data/CORDEX/AFR-44/CLMcom/MPI-ESM-LR/historical/" +
+                           "r0i0p0/CCLM4-8-17/v1/fx/orog/orog_AFR-44_MPI-ESM-" + 
+                           "LR_historical_r1i1p1_CCLM_4-8-17_fx.nc"),
+                type = types.StringType,
+                )
+
+        self.server_filename = self.addLiteralInput(
+                identifier = "server_filename",
+                title = "Server filename",
+                minOccurs = 1,
+                maxOccurs = 1,
+                default = ("ipcc-ar5.dkrz.de/thredds/fileServer/cordex/AFR-44/CLMcom/MPI-ESM-LR/" + 
+                           "historical/r0i0p0/CCLM4-8-17/v1/fx/orog/orog_AFR-44_MPI-ESM-LR_historical" +
+                           "_r1i1p1_CCLM_4-8-17_fx.nc"),
+                type = types.StringType,
+                )
+        self.database_location = DATABASE_LOCATION
+        self.additional_identifier_element = self.addLiteralInput(
+                identifier = "additional_identifier_element",
+                title = "Additional identifier element",
+                default = "CORDEX-",
+                type = types.StringType,
+                abstract = "Allows to add a string to the PID, to make it distinguishable",
+                )
+        self.port = self.addLiteralInput(
+                identifier = "port",
+                title = "Handle server port",
+                default = "8090",
+                type = types.StringType,
+                )
+        self.prefix = self.addLiteralInput(
+                identifier = "prefix",
+                title = "Handle server prefix",
+                default = "10876",
+                type = types.StringType,
+                )
+
+        self.path = self.addLiteralInput(
+                identifier = "path",
+                title = "Handle server path",
+                default =  "/handle-rest-0.1.1/",
+                type = types.StringType,
+                )
+
+        self.with_first_run = True
+        self.pid = self.addComplexOutput(
+                identifier = "pid",
+                title = "Found PID",
+                formats=[{"mimeType":"text/plain"}],
+                asReference = True,
+                )
+
+    def execute(self):
+        self.pidmanager = pidmanager.PIDManager(
+                database_location = self.database_location,
+                additional_identifier_element = self.additional_identifier_element.getValue(),
+                port = self.port.getValue(),
+                prefix = self.prefix.getValue(),
+                path = self.path.getValue(),
+                with_first_run = self.with_first_run)
+        server_filename = self.server_filename.getValue()
+        local_filename = self.local_filename.getValue()
+        output = self.pidmanager.get_pid_file(local_filename, server_filename)
+        outputfile = open(self.mktempfile(),"w")
+        outputfile.write(output)
+        outputfile.close()
+        self.pid.setValue(outputfile)
+
+class PIDManagerDatasetProcess(malleefowl.process.WPSProcess):
+    def __init__(self):
+        malleefowl.process.WPSProcess.__init__(self,
+            identifier = "PID_for_dataset",
+            title = "Get a PID for a dataset",
+            version = "2014.03.06",
+            metadata = [],
+            abstract = "Get a PID for a dataset title and the comma separated list of PIDs in it.")
+
+        self.ds_title = self.addLiteralInput(
+                identifier = "ds_title",
+                title = "Dataset title",
+                minOccurs = 1,
+                maxOccurs = 1,
+                default = "cordex.AFR-44.CLMcom.MPI-ESM-LR.historical.r0i0p0.CCLM4-8-17-v1.fx.orog",
+                type = types.StringType,
+                )
+
+        self.dataset_pids = self.addLiteralInput(
+                identifier = "dataset_pids",
+                title = "Dataset file PIDs list",
+                minOccurs = 1,
+                maxOccurs = 1,
+                default = "10876/CORDEX-5p8d-09bx-u4qg-xhhx",
+                abstract = "The PIDs in the dataset",
+                type = types.StringType,
+                )
+
+        self.database_location = DATABASE_LOCATION
+        self.additional_identifier_element = self.addLiteralInput(
+                identifier = "additional_identifier_element",
+                title = "Additional identifier element",
+                default = "CORDEX-",
+                type = types.StringType,
+                abstract = "Allows to add a string to the PID, to make it distinguishable",
+                )
+        self.port = self.addLiteralInput(
+                identifier = "port",
+                title = "Handle server port",
+                default = "8090",
+                type = types.StringType,
+                )
+        self.prefix = self.addLiteralInput(
+                identifier = "prefix",
+                title = "Handle server prefix",
+                default = "10876",
+                type = types.StringType,
+                )
+
+        self.path = self.addLiteralInput(
+                identifier = "path",
+                title = "Handle server path",
+                default =  "/handle-rest-0.1.1/",
+                type = types.StringType,
+                )
+
+        self.with_first_run = True
+        self.pid = self.addComplexOutput(
+                identifier = "pid",
+                title = "Found PID",
+                formats=[{"mimeType":"text/plain"}],
+                asReference = True,
+                )
+
+    def execute(self):
+        self.pidmanager = pidmanager.PIDManager(
+                database_location = self.database_location,
+                additional_identifier_element = self.additional_identifier_element.getValue(),
+                port = self.port.getValue(),
+                prefix = self.prefix.getValue(),
+                path = self.path.getValue(),
+                with_first_run = self.with_first_run)
+        ds_title  = self.ds_title.getValue()
+        #the string of comma separated pids must be converted to a list
+        dataset_pids = self.dataset_pids.getValue()
+        dspids = dataset_pids.split(",")
+        dataset_file_pids = [x.strip() for x in dspids]
+        output = self.pidmanager.get_pid_dataset(ds_title, dataset_file_pids)
+        outputfile = open(self.mktempfile(),"w")
+        outputfile.write(output)
+        outputfile.close()
+        self.pid.setValue(outputfile)
+
+class PIDManagerPathCORDEXProcess(malleefowl.process.WPSProcess):
+    def __init__(self):
+        malleefowl.process.WPSProcess.__init__(self,
+            identifier = "PIDManager_Path_CORDEX",
+            title = "Get PIDs for a path using the CORDEX specification.",
+            version = "2014.03.11",
+            metadata = [],
+            )
+        
+        self.path = self.addLiteralInput(
+                identifier = "path",
+                title = "Root project data path",
+                default = os.path.join(climdapsabs,"examples/data/CORDEX"),
+                type = types.StringType,
+                minOccurs = 1,
+                maxOccurs = 1,
+                )
+        self.file_regexp = self.addLiteralInput(
+                identifier = "file_regexp",
+                title = "Regular expression to filter files",
+                default = "*.nc",
+                type = types.StringType,
+                abstract = ("The syntax is '*' for any number of random characters. '.' is the normal" +
+                            "textual dot. (e.g. */fx/*.nc includes all .nc files in a fx directory")
+                )
+
+        self.file_regexp_out = self.addLiteralOutput(
+                identifier = "file_regexp_out",
+                title = "Used regular expression in re format",
+                type = types.StringType,
+                )
+
+        self.pids = self.addLiteralOutput(
+                identifier = "pids",
+                title = "Found PIDs for the path",
+                type = types.StringType,
+                )
+
+    def execute(self):
+        d2dy = directory2datasetyaml.Directory2DatasetYaml()#defaults are good for CORDEX
+        tempfile = self.mktempfile()
+        regexp_raw = self.file_regexp.getValue()
+        #. has to be escaped and * has to be replaced by .*
+        regexp = regexp_raw.replace(".","\.").replace("*",".*")
+        self.file_regexp_out.setValue(regexp)
+        d2dy.create_yaml(path = self.path.getValue(), yaml_fn = tempfile, 
+                file_regexp = regexp)
+        pm = pidmanager.PIDManager(DATABASE_LOCATION)
+        pids = pm.get_pids_from_yaml_file(tempfile)
+        self.pids.setValue(str(pids))
+
+class PIDManagerPIDsFromYamlDocumentProcess(malleefowl.process.WPSProcess):
+    def __init__(self):
+        malleefowl.process.WPSProcess.__init__(self,
+            identifier = "PIDs_from_yaml_document",
+            title = "Get PIDs from a string representation of a yaml file",
+            version = "2014.03.24",
+            metadata = [],
+            )
+        
+        self.yaml_document = self.addComplexInput(
+                identifier = "yaml_document",
+                title = "yaml_document",
+                minOccurs = 1,
+                maxOccurs = 1,
+                metadata=[],
+                maxmegabites=2,
+                formats=[{"mimeType":"text/yaml"}],
+                )
+
+        self.pids = self.addLiteralOutput(
+                identifier = "pids",
+                title = "Found PIDs for the path",
+                type = types.StringType,
+                )
+
+    def execute(self):
+        import yaml
+        pm = pidmanager.PIDManager(database_location = DATABASE_LOCATION)
+        filename = self.yaml_document.getValue(asFile=False)
+        g = open(filename, "r")
+        filecontent = g.read()
+        yaml_content = yaml.safe_load(filecontent)
+        pids = pm.get_pids_dict_from_yaml_content(yaml_content)
+        self.pids.setValue(str(pids))
+        
+##################
+# Helper methods #
+##################
+
+def statusmethod(msg, current, end, wpsprocess):
+    """
+    :param current: The current counter
+    :param end: The end counter
+    :param wpsprocess: The process that needs to update the statusbar.
+    """
+    #workaround division 0
+    if int(end) == 0:
+        end = 1
+    wpsprocess.status.set(msg = msg, percentDone = float(current)*100.0/float(end), propagate = True)
+
+def _create_server_copy_of_file(filename, wpsprocess):
+    serverfile = open(wpsprocess.mktempfile(suffix = ".txt"), "w")
+    localfile = open(filename, "r")
+    serverfile.write(localfile.read())
+    localfile.close()
+    serverfile.close()
+    return serverfile
+
+def get_user_dir(user):
+    return os.path.join(climdapsabs, "var", "qc_cache", user)
+
+def get_user_parallelids(user):
+    """
+    It is assumed that no processing directories are moved into the work directory by hand or
+    other tools than the qc-processes.
+    """
+    path = get_user_dir(user)
+    history_fn = os.path.join(path, "parallel_id.history")
+    history = []
+    if os.path.isfile(history_fn):
+        with open(history_fn, "r") as hist:
+            lines = hist.readlines()
+            for line in lines:
+                history.append(line.rstrip("\n"))
+    existing_history = [x for x in history if os.path.isdir(os.path.join(path, x))] 
+    return existing_history
+
+def get_username(obj):
+    username = obj.username.getValue().replace("(at)","@")
+    token = obj.token.getValue()
+    try:#If the token matches to any userid the userid is returned
+        userid = tokenmgr.get_userid(tokenmgr.sys_token(), token)
+    except:#If no userid is known by the token an exception is thrown. Use defaultuser then.
+        userid = "defaultuser"   
+    if username != userid:
+        userid = "defaultuser"
+    return userid
+
