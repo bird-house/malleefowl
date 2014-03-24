@@ -1300,7 +1300,7 @@ class UserEvalProcess(malleefowl.process.WPSProcess):
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_Eval_User",
             title = "Quality Evaluate with username",
-            version = "2014.03.17",
+            version = "2014.03.24",
             metadata = [],
             abstract = "Evaluates the quality check and generates metadata and quality files")
 
@@ -1406,6 +1406,14 @@ class UserEvalProcess(malleefowl.process.WPSProcess):
             asReference = True,
             )
 
+        self.found_pids = self.addComplexOutput(
+            identifier = "found_pids",
+            title = "The pids found",
+            metadata = [],
+            formats = [{"mimeType": "text/plain"}],
+            asReference = True,
+            )
+
 
 
     def execute(self):
@@ -1447,6 +1455,9 @@ class UserEvalProcess(malleefowl.process.WPSProcess):
         self.fixed_count.setValue(output["fixed_count"])
         self.has_issues.setValue(output["has_issues"])
         self.found_tags.setValue(output["found_tags"])
+        found_pids = open(self.mktempfile(),"w")
+        found_pids.write(output["found_pids"])
+        self.found_pids.setValue(found_pids)
 
         process_log = _create_server_copy_of_file(output["process_log"],self)
         self.process_log.setValue(process_log)
