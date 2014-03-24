@@ -34,7 +34,7 @@ class UserInitProcess(malleefowl.process.WPSProcess):
 
        
         malleefowl.process.WPSProcess.__init__(self,
-            identifier = "QC_Init_User",
+            identifier = "QC_Init",
             title = "Quality Init",
             version = "2014.03.24",
             metadata = [],
