@@ -946,7 +946,11 @@ def get_username(obj):
         userid = tokenmgr.get_userid(tokenmgr.sys_token(), token)
     except:#If no userid is known by the token an exception is thrown. Use defaultuser then.
         userid = "defaultuser"   
-    if username != userid:
-        userid = "defaultuser"
-    return userid
+    #workaround
+    username1 = username.replace("@","_")
+    userid1 = username.replace("@","_")
+    if username1 != userid1:
+        username = "defaultuser"
+    logger.debug("For username " + username + " returning " + userid)
+    return username
 
