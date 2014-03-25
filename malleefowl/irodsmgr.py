@@ -1,22 +1,28 @@
+from irods import *
+
 from pywps import config
 from malleefowl import tokenmgr, utils
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
-def list_files(token, filter, folder):
+def list_files(token, filter, collection):
     userid = tokenmgr.get_userid(tokenmgr.sys_token(), token)
 
-    logger.debug('userid=%s, filter=%s, folder=%s' % (userid, filter, folder))
+    logger.debug('userid=%s, filter=%s, collection=%s' % (userid, filter, collection))
 
-    from subprocess import Popen, PIPE
-    p = Popen(['/home/pingu/opt/iRODS/clients/icommands/bin/ils', folder], stdout=PIPE, stderr=PIPE)
-    (stdoutdata, stderrdata) = p.communicate()
+    status, myEnv = getRodsEnv()
+    conn, errMsg = rcConnect(myEnv.rodsHost, myEnv.rodsPort, myEnv.rodsUserName, myEnv.rodsZone)
+    status = clientLogin(conn)
 
-    logger.debug("stdout=%s, stderr=%s", stdoutdata, stderrdata)
-    files = []
-    for line in stdoutdata.splitlines():
-        line = line.strip()
-        if line.endswith('.nc'):
-            files.append(line)
+    # Open the current working directory
+    col = irodsCollection(conn)
+    col.openCollection(collection)
+
+    logger.debug('collection name=%s, num objs=%s', col.getCollName(), col.getLenObjects())
+    
+    objects = col.getObjects()
+    conn.disconnect()
+
+    files = [obj[0] for obj in objects]
     return files

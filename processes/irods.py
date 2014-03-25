@@ -35,10 +35,10 @@ class ListFiles(WPSProcess):
             default = 'nc',
             type = type(''),
             )
-        self.folder = self.addLiteralInput(
-            identifier = "folder",
-            title = "Folder",
-            abstract = "iRods Folder with Files",
+        self.collection = self.addLiteralInput(
+            identifier = "collection",
+            title = "Collection",
+            abstract = "iRods Collection containing your Files",
             minOccurs = 1,
             maxOccurs = 1,
             default = '/DKRZ_CORDEX_Zone/home/public/wps/test1',
@@ -54,11 +54,10 @@ class ListFiles(WPSProcess):
     def execute(self):
         self.show_status("list files ...", 5)
 
-        token = self.token.getValue()
-        filter = self.filter.getValue()
-        folder = self.folder.getValue()
-
-        files = irodsmgr.list_files(token, filter, folder)
+        files = irodsmgr.list_files(
+            token=self.token.getValue(),
+            filter=self.filter.getValue(),
+            collection=self.collection.getValue())
         
         self.output.setValue(json.dumps(files))
 
