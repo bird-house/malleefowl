@@ -1,7 +1,7 @@
 import json
 
 from malleefowl.process import WPSProcess
-from malleefowl import irods
+from malleefowl import irodsmgr
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
@@ -58,7 +58,7 @@ class ListFiles(WPSProcess):
         filter = self.filter.getValue()
         folder = self.folder.getValue()
 
-        files = irods.list_files(token, filter, folder)
+        files = irodsmgr.list_files(token, filter, folder)
         
         self.output.setValue(json.dumps(files))
 
