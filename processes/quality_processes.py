@@ -281,6 +281,113 @@ class UserCheckProcess(malleefowl.process.WPSProcess):
 
         return
 
+class UserInitWithYamlLogsProcess(malleefowl.process.WPSProcess):
+    def __init__(self):
+        malleefowl.process.WPSProcess.__init__(self,
+        identifier = "QC_Init_With_Yamllogs",
+        title = "Quality Initialize with YAML log files of checks",
+        version = "2014.03.25",
+        metadata = [],
+        )
+
+        self.username = self.addLiteralInput(
+            identifier = "username",
+            title = "Username",
+            default = "defaultuser",
+            type = types.StringType,
+            )
+
+        self.token = self.addLiteralInput(
+            identifier = "token",
+            title = "Token",
+            type = types.StringType,
+            default = "Needed_if_not_defaultuser",
+            )
+
+        self.parallel_id = self.addLiteralInput(
+            identifier = "parallel_id",
+            title = "Parallel ID",
+            default = "checkdone",
+            abstract = "An ID for the current process. Select the one matching to the quality check.",
+            type = types.StringType,
+            )
+
+        self.yamllogs = self.addLiteralInput(
+            identifier = "yamllogs",
+            title = "YAML log files from the quality check",
+            abstract = "The locations of the YAML log files.",
+            minOccurs = 1,
+            maxOccurs = 200,#just as arbitrary limit
+            type = types.StringType,
+            )
+
+        self.prefix_old = self.addLiteralInput(
+            identifier = "prefix_old",
+            title = "Old data path prefix",
+            abstract = "The prefix of the data path in the provided YAML logfiles.",
+            minOccurs = 0,
+            default = "",
+            type = types.StringType,
+            )
+
+        self.prefix_new = self.addLiteralInput(
+            identifier = "prefix_new",
+            title = "New data path prefix",
+            abstract = "The prefix of the data path on this machine.",
+            default = "",
+            minOccurs = 0,
+            type = types.StringType,
+            )
+
+        self.all_okay = self.addLiteralOutput(
+            identifier = "all_okay",
+            title = "No rule violations",
+            type = types.BooleanType,
+            )
+
+        self.process_log = self.addComplexOutput(
+            identifier = "process_log",
+            title = "Log of this process.",
+            metadata = [],
+            formats = [{"mimeType":"text/plain"}],
+            asReference = True,
+            )
+
+    def execute(self):
+        self.status.set(msg = "Initiate process", percentDone = 0, propagate = True)
+        #load inputs
+        username = get_username(self) 
+        def statmethod(cur,end):
+            statusmethod("Running",cur,end,self)
+        qcp = qcprocesses.QCProcesses(
+                username = username,
+                parallel_id = self.parallel_id.getValue(),
+                statusmethod = statmethod,
+                work_dir = WORK_DIR
+                )
+        logger.debug(username)
+        yamllogs = self.yamllogs.getValue() #yamllogs is a list by definition
+        prefix_old = self.prefix_old.getValue()
+        prefix_new = self.prefix_new.getValue()
+        if prefix_old == '<colander.null>' or prefix_old == None:
+            prefix_old =  ""
+        if prefix_new == '<colander.null>' or prefix_new == None:
+            prefix_new =  ""
+        #Create a clean directory to work in
+        qcp.remove_process_dir()
+        #run the method
+        output = qcp.init_with_yamllogs(yamllogs, prefix_old, prefix_new)
+        #write outputs
+        self.all_okay.setValue(output["all_okay"])
+        process_log_file = open(self.mktempfile(),"w")
+        process_log_file.write(output["process_log"])
+        process_log_file.close()
+        self.process_log.setValue(process_log_file)
+
+
+
+
+
 class UserEvalProcess(malleefowl.process.WPSProcess):
     """
     The process runs the qc_processes QualityControl method and 
