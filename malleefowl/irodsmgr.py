@@ -11,9 +11,17 @@ def list_files(token, filter, collection):
 
     logger.debug('userid=%s, filter=%s, collection=%s' % (userid, filter, collection))
 
-    status, myEnv = getRodsEnv()
-    conn, errMsg = rcConnect(myEnv.rodsHost, myEnv.rodsPort, myEnv.rodsUserName, myEnv.rodsZone)
+    import os
+    logger.debug("home=%s", os.environ['HOME'])
+
+    status, my_env = getRodsEnv()
+    logger.debug('host=%s', my_env.rodsHost)
+    conn, errMsg = rcConnect(my_env.rodsHost, my_env.rodsPort, my_env.rodsUserName, my_env.rodsZone)
+    
+    logger.debug("got connection, errMsg=%s", err_msg)
     status = clientLogin(conn)
+
+    logger.debug("client login, status=%s", status)
 
     # Open the current working directory
     col = irodsCollection(conn)
