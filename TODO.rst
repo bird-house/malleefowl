@@ -5,6 +5,7 @@ TODO list  ....
 Common
 ------
 
+* integrate icclim
 * integrate ipython notebook
 * handle exceptions, write own ones
 * refactor tokenmgr access methods
