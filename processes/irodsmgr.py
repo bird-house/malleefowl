@@ -44,11 +44,13 @@ class ListFiles(WPSProcess):
             default = '/DKRZ_CORDEX_Zone/home/public/wps/test1',
             type = type(''),
             )
-        self.output = self.addLiteralOutput(
+        self.output = self.addComplexOutput(
             identifier="output",
-            title="Filelist as json",
-            abstract="This is a filelist as json",
-            type=type('')
+            title="Files in iRods Collection",
+            abstract="Files in iRods Collection as JSON",
+            metadata=[],
+            formats=[{"mimeType":"application/json"}],
+            asReference=True,
             )
 
     def execute(self):
@@ -58,7 +60,10 @@ class ListFiles(WPSProcess):
             token=self.token.getValue(),
             filter=self.filter.getValue(),
             collection=self.collection.getValue())
-        
-        self.output.setValue(json.dumps(files))
+
+        outfile = self.mktempfile(suffix='.json')
+        with open(outfile, 'w') as fp:
+            json.dump(obj=files, fp=fp, indent=4, sort_keys=True)
+        self.output.setValue( outfile )
 
         self.show_status("list files ... done", 90)

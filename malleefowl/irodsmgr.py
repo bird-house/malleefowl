@@ -16,9 +16,9 @@ def list_files(token, filter, collection):
 
     status, my_env = getRodsEnv()
     logger.debug('host=%s', my_env.rodsHost)
-    conn, errMsg = rcConnect(my_env.rodsHost, my_env.rodsPort, my_env.rodsUserName, my_env.rodsZone)
+    conn, err_msg = rcConnect(my_env.rodsHost, my_env.rodsPort, my_env.rodsUserName, my_env.rodsZone)
     
-    logger.debug("got connection, errMsg=%s", err_msg)
+    logger.debug("got connection, error msg=%s", err_msg)
     status = clientLogin(conn)
 
     logger.debug("client login, status=%s", status)
