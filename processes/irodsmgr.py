@@ -82,24 +82,18 @@ class Rsync(WPSProcess):
             maxOccurs = 1,
             type = type('')
             )
-        self.src = self.addLiteralInput(
-            identifier = "src",
+        self.collection = self.addLiteralInput(
+            identifier = "collection",
             title = "Source Collection",
             abstract = "iRods Source Collection",
             minOccurs = 1,
             maxOccurs = 1,
-            default = 'i:/DKRZ_CORDEX_Zone/home/public/wps/test1',
+            default = '/DKRZ_CORDEX_Zone/home/public/wps/test1',
             type = type(''),
             )
-        self.dest = self.addLiteralInput(
-            identifier = "dest",
-            title = "Destination Collection",
-            abstract = "iRods Destination Collection",
-            minOccurs = 1,
-            maxOccurs = 1,
-            default = 'i:/tmp/test1',
-            type = type(''),
-            )
+        self.output = self.addLiteralOutput(
+            identifier="output", 
+            title="Path to Destination Collection")
 
     def execute(self):
         self.show_status("start rsync ...", 5)
@@ -107,9 +101,17 @@ class Rsync(WPSProcess):
         userid = tokenmgr.get_userid(
             tokenmgr.sys_token(),
             self.token.getValue())
+        
+        src = self.collection.getValue()
+        # TODO: return dest path
+        import os
+        dest = os.path.join('/tmp', userid, os.path.basename(src))
+        if not os.path.exists(dest):
+            os.makedirs(dest)
 
         irodsmgr.rsync(
-            src=self.src.getValue(),
-            dest=self.dest.getValue())
+            src="i:%s" % (src),
+            dest=dest)
 
+        self.output.setValue(dest)
         self.show_status("rsync ... done", 90)

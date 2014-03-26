@@ -5,6 +5,7 @@ TODO list  ....
 Common
 ------
 
+* integrate ipython notebook
 * handle exceptions, write own ones
 * refactor tokenmgr access methods
 * download multiple files (wget, opendap, ...), using python threads ...
