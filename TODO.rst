@@ -5,6 +5,7 @@ TODO list  ....
 Common
 ------
 
+* handle exceptions, write own ones
 * refactor tokenmgr access methods
 * download multiple files (wget, opendap, ...), using python threads ...
 * need a tough little helpful bird module:

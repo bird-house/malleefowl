@@ -33,11 +33,14 @@ def list_files(collection):
 def rsync(src, dest):
     logger.debug('rsync src=%s dest=%s', src, dest)
 
+    from subprocess import check_output, STDOUT, CalledProcessError
     try:
-        import subprocess
-        subprocess.check_output(["irsync", "-r", src, dest], stderr=subprocess.STDOUT)
+        check_output(["irsync", "-r", src, dest], stderr=STDOUT)
+    except CalledProcessError as e:
+        logger.error('irods rsync failed. Ouput=%s', e.output )
+        raise
     except Exception as e:
-        logger.error('irods rsync failed. Ouput=%s', e.output)
+        logger.error('irods rsync failed. Message=%s', e.message )
         raise
 
     
