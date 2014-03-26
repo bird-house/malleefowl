@@ -5,6 +5,7 @@ TODO list  ....
 Common
 ------
 
+* refactor tokenmgr access methods
 * download multiple files (wget, opendap, ...), using python threads ...
 * need a tough little helpful bird module:
   http://toughlittlebirds.com/support-research/

@@ -1,7 +1,7 @@
 import json
 
 from malleefowl.process import WPSProcess
-from malleefowl import irodsmgr
+from malleefowl import irodsmgr, tokenmgr
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
@@ -11,7 +11,7 @@ class ListFiles(WPSProcess):
 
     def __init__(self):
         WPSProcess.__init__(self,
-            identifier = "org.malleefowl.irods.list",
+            identifier = "org.malleefowl.irods.ls",
             title = "List Files in iRods",
             version = "0.1",
             metadata=[
@@ -25,15 +25,6 @@ class ListFiles(WPSProcess):
             minOccurs = 1,
             maxOccurs = 1,
             type = type('')
-            )
-        self.filter = self.addLiteralInput(
-            identifier = "filter",
-            title = "Filter",
-            abstract = "Filter for file selection",
-            minOccurs = 1,
-            maxOccurs = 1,
-            default = 'nc',
-            type = type(''),
             )
         self.collection = self.addLiteralInput(
             identifier = "collection",
@@ -56,9 +47,11 @@ class ListFiles(WPSProcess):
     def execute(self):
         self.show_status("list files ...", 5)
 
+        userid = tokenmgr.get_userid(
+            tokenmgr.sys_token(),
+            self.token.getValue())
+
         files = irodsmgr.list_files(
-            token=self.token.getValue(),
-            filter=self.filter.getValue(),
             collection=self.collection.getValue())
 
         outfile = self.mktempfile(suffix='.json')

@@ -1,15 +1,10 @@
 from irods import *
 
-from pywps import config
-from malleefowl import tokenmgr, utils
-
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
-def list_files(token, filter, collection):
-    userid = tokenmgr.get_userid(tokenmgr.sys_token(), token)
-
-    logger.debug('userid=%s, filter=%s, collection=%s' % (userid, filter, collection))
+def list_files(collection):
+    logger.debug('irods collection=%s' % (collection))
 
     import os
     logger.debug("home=%s", os.environ['HOME'])
@@ -34,3 +29,18 @@ def list_files(token, filter, collection):
 
     files = [obj[0] for obj in objects]
     return files
+
+def rsync(src, dest):
+    logger.debug('rsync src=%s dest=%s', src, dest)
+
+    try:
+        import subprocess
+        subprocess.check_output(["irsync", "-r", src, dest], stderr=subprocess.STDOUT)
+    except Exception as e:
+        logger.error('irods rsync failed. Ouput=%s', e.output)
+        raise
+
+    
+    
+
+    
