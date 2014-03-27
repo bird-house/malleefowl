@@ -10,10 +10,10 @@ def list_files(collection):
     logger.debug("home=%s", os.environ['HOME'])
 
     status, my_env = getRodsEnv()
-    logger.debug('host=%s', my_env.rodsHost)
+    logger.debug('host=%s, status=%s', my_env.rodsHost, status)
     conn, err_msg = rcConnect(my_env.rodsHost, my_env.rodsPort, my_env.rodsUserName, my_env.rodsZone)
     
-    logger.debug("got connection, error msg=%s", err_msg)
+    logger.debug("got connection, conn=%s, error msg=%s", conn, err_msg)
     status = clientLogin(conn)
 
     logger.debug("client login, status=%s", status)
