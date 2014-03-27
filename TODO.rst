@@ -1,10 +1,16 @@
 TODO list  ....
 ===============
 
+Bugs
+----
+
+* fix external url config for pywps (behind proxy)
+
 
 Common
 ------
 
+* irods: choose root collection (dkrz or kit)
 * configure datasets scan for thredds
 http://fe4.sic.rm.cnr.it:8080/thredds/docs/datasetScan/index.html
 * integrate icclim
