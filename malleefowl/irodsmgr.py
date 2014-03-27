@@ -1,3 +1,5 @@
+import os
+
 from irods import *
 
 from malleefowl import wpslogging as logging
@@ -6,7 +8,6 @@ logger = logging.getLogger(__name__)
 def ls(collection):
     logger.debug('irods collection=%s' % (collection))
 
-    import os
     logger.debug("home=%s", os.environ['HOME'])
 
     status, my_env = getRodsEnv()
@@ -36,15 +37,24 @@ def ls(collection):
 def rsync(src, dest):
     logger.debug('rsync src=%s dest=%s', src, dest)
 
+    # TODO: show files that have been synced (option -l)
+
     from subprocess import check_output, STDOUT, CalledProcessError
     try:
-        check_output(["irsync", "-r", src, dest], stderr=STDOUT)
+        check_output(["irsync", "-rvs", src, dest], stderr=STDOUT)
     except CalledProcessError as e:
         logger.error('irods rsync failed. Ouput=%s', e.output )
         raise
     except Exception as e:
         logger.error('irods rsync failed. Message=%s', e.message )
         raise
+
+    # TODO: fix permissions
+    os.chmod(dest , 0o755)
+    for root,dirs,_ in os.walk(dest):
+        for d in dirs:
+            logger.debug('fix permission: dir=%s', d)
+            os.chmod(os.path.join(root,d) , 0o755)
 
     
     

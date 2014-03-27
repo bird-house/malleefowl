@@ -5,6 +5,8 @@ TODO list  ....
 Common
 ------
 
+* configure datasets scan for thredds
+http://fe4.sic.rm.cnr.it:8080/thredds/docs/datasetScan/index.html
 * integrate icclim
 * integrate ipython notebook
 * handle exceptions, write own ones
