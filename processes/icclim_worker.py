@@ -40,7 +40,7 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
         self.icclim_SU = self.addLiteralInput(
             identifier="icclim_SU",
             title="summer days",
-            abstract="number of summer days",
+            abstract="input data is a datafile with daily tasmax",
             type=type(False),
             minOccurs=1,
             maxOccurs=0,
@@ -93,10 +93,12 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
 
         # simple precesses realized by cdo commands:
         if self.icclim_SU.getValue() == True :
-            rd = ocgis.RequestDataset(tasmaxFilePath, 'tasmax')
+            #dt1 = datetime.datetime(2077,01,01)
+            #dt2 = datetime.datetime(2078,12,31)
+            rd = ocgis.RequestDataset(tasmaxFilePath, 'tasmax') # time_range=[dt1, dt2]
             group = ['year']
             calc_icclim = [{'func':'icclim_SU','name':'SU'}]
-            res = ocgis.OcgOperations(dataset=rd, calc=calc_icclim, calc_grouping=group, prefix='my_test_SU', output_format='nc', add_auxiliary_files=False).execute()
+            SU_file = ocgis.OcgOperations(dataset=rd, calc=calc_icclim, calc_grouping=group, prefix='my_test_SU', output_format='nc', add_auxiliary_files=False).execute()
         
         print res 
         
@@ -117,5 +119,5 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
         
         # output
         self.show_status("processing done", 52)
-        self.icclim_output.setValue(   res )
+        self.icclim_output.setValue( SU_file )
         logger.debug('tar archive = %s' %( tas_yearmean_filename))
