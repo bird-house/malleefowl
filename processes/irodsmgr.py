@@ -33,7 +33,7 @@ class List(WPSProcess):
             abstract = "Enter Collection in iRods Home " + self.irods_home,
             minOccurs = 1,
             maxOccurs = 1,
-            default = "test1",
+            default = "/",
             type = type(''),
             )
         self.output = self.addComplexOutput(
@@ -56,11 +56,11 @@ class List(WPSProcess):
         if os.path.isabs(collection):
             collection = collection[1:]
         collection = os.path.join(self.irods_home, collection)
-        files = irodsmgr.list_files(collection)
+        (files, subcolls) = irodsmgr.ls(collection)
 
         outfile = self.mktempfile(suffix='.json')
         with open(outfile, 'w') as fp:
-            json.dump(obj=files, fp=fp, indent=4, sort_keys=True)
+            json.dump(obj=dict(files=files, subcolls=subcolls), fp=fp, indent=4, sort_keys=True)
         self.output.setValue( outfile )
 
         self.show_status("irods ls ... done", 90)

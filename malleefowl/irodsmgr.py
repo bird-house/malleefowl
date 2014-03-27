@@ -3,7 +3,7 @@ from irods import *
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
-def list_files(collection):
+def ls(collection):
     logger.debug('irods collection=%s' % (collection))
 
     import os
@@ -19,16 +19,19 @@ def list_files(collection):
     logger.debug("client login, status=%s", status)
 
     # Open the current working directory
-    col = irodsCollection(conn)
-    col.openCollection(collection)
+    c = irodsCollection(conn)
+    c.openCollection(collection)
 
-    logger.debug('collection name=%s, num objs=%s', col.getCollName(), col.getLenObjects())
+    logger.debug('collection name=%s, num objs=%s, num sub coll=%s',
+                 c.getCollName(),
+                 c.getLenObjects(),
+                 c.getLenSubCollections())
     
-    objects = col.getObjects()
+    files = [obj[0] for obj in c.getObjects()]
+    subcolls = [c for c in c.getSubCollections()]
     conn.disconnect()
-
-    files = [obj[0] for obj in objects]
-    return files
+  
+    return (files, subcolls)
 
 def rsync(src, dest):
     logger.debug('rsync src=%s dest=%s', src, dest)
