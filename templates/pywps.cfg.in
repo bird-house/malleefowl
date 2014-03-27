@@ -49,6 +49,9 @@ timeout = ${service:timeout}
 sysToken = ${security:sys_token} 
 sysUserID = ${security:sys_userid}
 
+[irods]
+home = ${irods_config:home}
+
 [tests]
 user = ${tests:user}
 password = ${tests:password}

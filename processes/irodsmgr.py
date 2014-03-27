@@ -1,4 +1,5 @@
 import json
+import os
 
 from malleefowl.process import WPSProcess
 from malleefowl import irodsmgr, tokenmgr
@@ -6,13 +7,13 @@ from malleefowl import irodsmgr, tokenmgr
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
-class ListFiles(WPSProcess):
+class List(WPSProcess):
     """This process calls irods ils command."""
 
     def __init__(self):
         WPSProcess.__init__(self,
             identifier = "org.malleefowl.irods.ls",
-            title = "List Files in iRods",
+            title = "iRods ls",
             version = "0.1",
             metadata=[
                 ],
@@ -29,10 +30,10 @@ class ListFiles(WPSProcess):
         self.collection = self.addLiteralInput(
             identifier = "collection",
             title = "Collection",
-            abstract = "iRods Collection containing your Files",
+            abstract = "Enter Collection in iRods Home " + self.irods_home,
             minOccurs = 1,
             maxOccurs = 1,
-            default = '/DKRZ_CORDEX_Zone/home/public/wps/test1',
+            default = "test1",
             type = type(''),
             )
         self.output = self.addComplexOutput(
@@ -45,21 +46,24 @@ class ListFiles(WPSProcess):
             )
 
     def execute(self):
-        self.show_status("list files ...", 5)
+        self.show_status("start irods ls ...", 5)
 
         userid = tokenmgr.get_userid(
             tokenmgr.sys_token(),
             self.token.getValue())
 
-        files = irodsmgr.list_files(
-            collection=self.collection.getValue())
+        collection = self.collection.getValue().strip()
+        if os.path.isabs(collection):
+            collection = collection[1:]
+        collection = os.path.join(self.irods_home, collection)
+        files = irodsmgr.list_files(collection)
 
         outfile = self.mktempfile(suffix='.json')
         with open(outfile, 'w') as fp:
             json.dump(obj=files, fp=fp, indent=4, sort_keys=True)
         self.output.setValue( outfile )
 
-        self.show_status("list files ... done", 90)
+        self.show_status("irods ls ... done", 90)
 
 
 class Rsync(WPSProcess):
@@ -68,11 +72,11 @@ class Rsync(WPSProcess):
     def __init__(self):
         WPSProcess.__init__(self,
             identifier = "org.malleefowl.irods.rsync",
-            title = "Rsync irods collections",
+            title = "iRods rsync",
             version = "0.1",
             metadata=[
                 ],
-            abstract="Rsync irods collections")
+            abstract="Rsync irods collection")
 
         self.token = self.addLiteralInput(
             identifier = "token",
@@ -85,10 +89,10 @@ class Rsync(WPSProcess):
         self.collection = self.addLiteralInput(
             identifier = "collection",
             title = "Source Collection",
-            abstract = "iRods Source Collection",
+            abstract = "Enter Collection in iRods home %s" % (self.irods_home),
             minOccurs = 1,
             maxOccurs = 1,
-            default = '/DKRZ_CORDEX_Zone/home/public/wps/test1',
+            default = 'test1',
             type = type(''),
             )
         self.output = self.addLiteralOutput(
@@ -102,10 +106,11 @@ class Rsync(WPSProcess):
             tokenmgr.sys_token(),
             self.token.getValue())
         
-        src = self.collection.getValue()
-        # TODO: return dest path
-        import os
-        dest = os.path.join('/tmp', userid, os.path.basename(src))
+        src = self.collection.getValue().strip()
+        if os.path.isabs(src):
+            src = src[1:]
+        src = os.path.join(self.irods_home, src)
+        dest = os.path.join(self.files_path, userid, 'irods', os.path.basename(src))
         if not os.path.exists(dest):
             os.makedirs(dest)
 

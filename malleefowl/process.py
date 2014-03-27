@@ -63,6 +63,10 @@ class WPSProcess(PyWPSProcess):
         return config.getConfigValue("malleefowl", "threddsUrl")
 
     @property
+    def irods_home(self):
+        return config.getConfigValue("irods", "home")
+
+    @property
     def timeout(self):
         timeout = 0
         try:
