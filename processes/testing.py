@@ -208,7 +208,7 @@ class InOutProcess(WPSProcess):
             default="one",
             type=type(''),
             minOccurs=0,
-            maxOccurs=1,
+            maxOccurs=3,
             allowedValues=['one', 'two', 'three']
             )
 
