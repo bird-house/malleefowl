@@ -121,7 +121,6 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
             maxOccurs=0,
             )
             
-            
         # defined in WorkflowProcess ...
 
         # complex output
@@ -135,7 +134,6 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
             formats=[{"mimeType":"application/x-tar"}],
             asReference=True,
             )
-            
             
     def execute(self):
         
@@ -263,11 +261,13 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
         tar.close()
         
         self.show_status("make tar archive ... done", 50)
-        
+        logger.debug('tar archive = %s' %(tar_archive))
         
         #mystring.replace('\r\n', '')
         
         # output
         self.show_status("processing done", 52)
         self.output.setValue( tar_archive )
-        logger.debug('tar archive = %s' %(tar_archive))
+        
+        self.show_status("result published", 100)
+        

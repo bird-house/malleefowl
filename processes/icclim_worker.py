@@ -62,10 +62,14 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
             
     def execute(self):
         
-       from malleefowl import cscenv
-        
+        from malleefowl import cscenv, utils
+        import os
+
         self.show_status('starting calcualtion of icclim indices', 5)        
-  
+
         self.output.setValue( cscenv.indices(self.get_nc_files(), self.icclim_SU.getValue()) )
- 
+
         self.show_status("processing done", 72)
+        
+        outdir = os.path.join(self.files_path, userid)
+        utils.mkdir(outdir)

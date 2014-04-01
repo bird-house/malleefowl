@@ -1,6 +1,5 @@
 from malleefowl.process import WorkerProcess
 from malleefowl import utils, tokenmgr
-
 import os
 
 from malleefowl import wpslogging as logging

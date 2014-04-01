@@ -54,7 +54,6 @@ def test_icclim():
         )
 
     nose.tools.ok_('nc' in result[0]['reference'], result)
-
     
 def test_icclim2():
     from malleefowl import cscenv

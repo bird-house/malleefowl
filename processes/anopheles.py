@@ -2,7 +2,6 @@
 Processes for Anopheles Gambiae population dynamics 
 Author: Nils Hempelmann (nils.hempelmann@hzg)
 """
-
 from datetime import datetime, date
 import tempfile
 import subprocess
@@ -20,12 +19,12 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
         # definition of this process
         malleefowl.process.WorkerProcess.__init__(self, 
             identifier = "de.csc.esgf.anopheles",
-            title="Population dynamics of Anopheles Gambiae",
+            title="Vector born diseases",
             version = "0.1",
             metadata= [
                        {"title": "Climate Service Center", "href": "http://www.climate-service-center.de/"}
                       ],
-            abstract="Just testing a nice script to calculate the Population dynamics of Anopheles Gambiae",
+            abstract="Collection of models to calculate variables related to vector born diseases",
             extra_metadata={ 
                   'esgquery': 'variable:tas OR variable:huss OR variable:ps OR variable:pr OR variable:evspsblpot OR variable:sftlf', #   
                   'esgfilter': 'project:CORDEX,domain:AFR-44,time_frequency:day'  # data_node:esg-dn1.nsc.liu.se
@@ -34,6 +33,25 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
             
         # Literal Input Data
         # ------------------
+        
+        self.tommymodel = self.addLiteralInput(
+            identifier="tommymodel",
+            title="Tommy Model",
+            abstract="Population dynamics model for Anopheles Gambiae select tas, huss, pr, evspsblpot and ps as input data",
+            type=type(False),
+            minOccurs=1,
+            maxOccurs=0,
+            )
+        
+        self.kamilmodel = self.addLiteralInput(
+            identifier="kamilmodel",
+            title="Kamil Model",
+            abstract="nothing is implemented here so far ... ",
+            type=type(False),
+            minOccurs=1,
+            maxOccurs=0,
+            )
+        
         
         self.land_sea_mask = self.addComplexInput(
             identifier="land_sea_mask",
