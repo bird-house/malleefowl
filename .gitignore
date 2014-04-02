@@ -47,15 +47,10 @@ docs/doctrees/
 docs/html/
 
 # External Sources
-src/pyramid-phoenix/
 src/c3meta/
-src/OWSLib/
 src/PyWPS/
-src/pycsw/
-src/esgf-pyclient/
-src/Phoenix/phoenix/static/godzi-webgl/
 src/qc-processes/
-src/QC-0.4/
+src/ocgis
 
 #local only file for upload permissions
 stvariables.conf
