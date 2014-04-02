@@ -10,6 +10,7 @@ Bugs
 Common
 ------
 
+* check java worklfow http://www.knime.org/
 * irods: choose root collection (dkrz or kit)
 * configure datasets scan for thredds
 http://fe4.sic.rm.cnr.it:8080/thredds/docs/datasetScan/index.html
