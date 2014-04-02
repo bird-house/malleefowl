@@ -47,10 +47,7 @@ docs/doctrees/
 docs/html/
 
 # External Sources
-src/c3meta/
-src/PyWPS/
-src/qc-processes/
-src/ocgis
+src/
 
 #local only file for upload permissions
 stvariables.conf
