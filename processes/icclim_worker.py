@@ -11,7 +11,7 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
     def __init__(self):
         # definition of this process
         malleefowl.process.WorkerProcess.__init__(self, 
-            identifier = "de.csc.icclim_worker",
+            identifier = "de.csc.icclim",
             title="Calculation of climate indices based on icclim",
             version = "0.1",
             #storeSupported = "true",   # async
@@ -40,7 +40,7 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
         self.icclim_SU = self.addLiteralInput(
             identifier="icclim_SU",
             title="summer days",
-            abstract="number of summer days",
+            abstract="input data is a datafile with daily tasmax",
             type=type(False),
             minOccurs=1,
             maxOccurs=0,
@@ -51,8 +51,8 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
         # complex output
         # -------------
 
-        self.icclim_output = self.addComplexOutput(
-            identifier="icclim_output",
+        self.output = self.addComplexOutput(
+            identifier="output",
             title="Indices Output tar",
             abstract="Indices Output file",
             metadata=[],
@@ -62,60 +62,14 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
             
     def execute(self):
         
-        from os import curdir, path
-        import datetime
-        import ocgis
-        import datetime
-        import icclim
+        from malleefowl import cscenv, utils
+        import os
 
-        self.show_status('starting calcualtion of icclim indices', 5)
-        
-        # get the appropriate files
-        nc_files = self.get_nc_files()
-        for nc_file in nc_files: 
-            ds = Dataset(nc_file)
-            if "tasmax" in ds.variables.keys():
-                tasmaxFilePath = nc_file
-            else:
-                raise Exception("input netcdf file has not variable tasmax")
-        
-        self.show_status('get files ...', 7)
-        
-        
-        def sel_path():
-            # result location
-            ocgis.env.DIR_OUTPUT = path.abspath(curdir)
-            ocgis.env.OVERWRITE = True
-        sel_path()
+        self.show_status('starting calcualtion of icclim indices', 5)        
 
-        
-        self.show_status('created output file initially', 7)
+        self.output.setValue( cscenv.indices(self.get_nc_files(), self.icclim_SU.getValue()) )
 
-        # simple precesses realized by cdo commands:
-        if self.icclim_SU.getValue() == True :
-            rd = ocgis.RequestDataset(tasmaxFilePath, 'tasmax')
-            group = ['year']
-            calc_icclim = [{'func':'icclim_SU','name':'SU'}]
-            res = ocgis.OcgOperations(dataset=rd, calc=calc_icclim, calc_grouping=group, prefix='my_test_SU', output_format='nc', add_auxiliary_files=False).execute()
+        self.show_status("processing done", 72)
         
-        print res 
-        
-        self.show_status("all indices has been calculated", 50)
-        self.show_status("current directory is %s" % path.abspath(curdir), 50)
-        
-        # make tar archive
-        #tar_archive = self.mktempfile(suffix='.tar')
-        #tar = tarfile.open(tar_archive, "w")
-        #for name in output_files:
-            #tar.add(name, arcname = name.replace(self.working_dir, ""))
-        #tar.close()
-        
-        self.show_status("make tar archive ... done", 50)
-        
-        
-        #mystring.replace('\r\n', '')
-        
-        # output
-        self.show_status("processing done", 52)
-        self.icclim_output.setValue(   res )
-        logger.debug('tar archive = %s' %( tas_yearmean_filename))
+        outdir = os.path.join(self.files_path, userid)
+        utils.mkdir(outdir)

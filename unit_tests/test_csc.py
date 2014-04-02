@@ -44,3 +44,21 @@ def test_indices():
         
     nose.tools.ok_('tar' in result[0]['reference'], result)
    
+def test_icclim():
+    result = wpsclient.execute(
+        service = base.SERVICE,
+        identifier = "de.csc.icclim.worker",
+        inputs = [('file_identifier', 'hhttp://localhost:8090/thredds/fileServer/test/nils.hempelmann_hzg.de/tasmax_day_MPI-ESM-LR_historical_r1i1p1_20000101-20051231.nc'),('icclim_SU','True')], #http://localhost:8090/thredds/fileServer/test/nils.hempelmann_hzg.de/tasmax_EUR11_test-pywpsInputbtel_q.nc
+        outputs = [('output', True)],
+        verbose=False
+        )
+
+    nose.tools.ok_('nc' in result[0]['reference'], result)
+    
+def test_icclim2():
+    from malleefowl import cscenv
+    files = ['/var/lib/pywps/files/nils.hempelmann_hzg.de/tasmax_day_MPI-ESM-LR_historical_r1i1p1_20000101-20051231.nc']
+    result = cscenv.indices( files, icclim_SU=True )
+    
+    nose.tools.ok_('nc' in result, result)
+    
