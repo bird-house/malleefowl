@@ -9,6 +9,7 @@ import malleefowl.process
 import qc_processes.qcprocesses as qcprocesses
 import qc_processes.pidmanager as pidmanager
 import qc_processes.directory2datasetyaml as directory2datasetyaml
+from pywps import config
 
 import os
 from malleefowl import tokenmgr
@@ -18,13 +19,11 @@ logger = logging.getLogger(__name__)
 curdir = os.path.dirname(__file__)
 climdapsabs = os.path.abspath(os.path.join(curdir,".."))
 
-DATA = {}
-fn = os.path.join(os.path.dirname(__file__),"quality_processes.conf")
-
-execfile(fn,DATA)
-
-DATABASE_LOCATION = DATA["database_location"]
-WORK_DIR = DATA["work_directory"]
+DATABASE_LOCATION = {"host": config.getConfigValue("malleefowl","database_location_host"),
+                    "port": int(config.getConfigValue("malleefowl","database_location_port")),
+                    "databasename": config.getConfigValue("malleefowl","database_location_databasename")
+                     }
+WORK_DIR = config.getConfigValue("malleefowl", "work_directory")
 
 class UserInitProcess(malleefowl.process.WPSProcess):
     """
@@ -426,12 +425,12 @@ class UserEvalProcess(malleefowl.process.WPSProcess):
             )
 
 
-        self.data_node = DATA.get("data_node")
+        self.data_node = config.getConfigValue("malleefowl", "data_node")
 
-        self.index_node = DATA.get("index_node")
+        self.index_node = config.getConfigValue("malleefowl", "index_node")
 
-        self.access = DATA.get("access")
-        self.metadata_format = DATA.get("metadata_format")
+        self.access = config.getConfigValue("malleefowl", "access")
+        self.metadata_format = config.getConfigValue("malleefowl", "metadata_format")
         self.replica = self.addLiteralInput(
             identifier = "replica",
             title = "Replica",

@@ -48,6 +48,16 @@ threddsUrl = http://${server:hostname}:${ports:tomcat}/thredds
 timeout = ${service:timeout}
 sysToken = ${security:sys_token} 
 sysUserID = ${security:sys_userid}
+data_node=bmbf-ipcc-ar5.dkrz.de
+index_node=esgf-data.dkrz.de
+access=HTTPServer
+metadata_format=THREDDS
+replica=false
+latest=true
+database_location_host=localhost
+database_location_port=27017
+database_location_databasename=climdaps
+work_directory=/home/tk/sandbox/climdaps/malleefowl/var/qc_cache
 
 [tests]
 user = ${tests:user}
