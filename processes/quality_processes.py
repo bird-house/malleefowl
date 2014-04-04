@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 curdir = os.path.dirname(__file__)
 climdapsabs = os.path.abspath(os.path.join(curdir,".."))
 
+#DATABASE_LOCATION for mongodb
 DATABASE_LOCATION = {"host": config.getConfigValue("malleefowl","database_location_host"),
                     "port": int(config.getConfigValue("malleefowl","database_location_port")),
                     "databasename": config.getConfigValue("malleefowl","database_location_databasename")
