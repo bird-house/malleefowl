@@ -28,8 +28,8 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
                   #'esgquery': 'data_node:esg-dn1.nsc.liu.se' 
                   #},
             extra_metadata={
-                  'esgfilter': 'variable:tasmax',  #institute:MPI-M ,variable:pr,
-                  'esgquery': 'time_frequency:day AND project:CMIP5' # institute:MPI-M AND project:CMPI5
+                  'esgfilter': 'variable:tasmax , variable:tasmin , time_frequency:day project:CMIP5 , project:CORDEX', 
+                  'esgquery': '' 
                   },
             )
 
@@ -37,26 +37,35 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
         # ------------------
         
 
-        self.icclim_SU = self.addLiteralInput(
-            identifier="icclim_SU",
-            title="summer days",
-            abstract="input data is a datafile with daily tasmax",
+        self.SU = self.addLiteralInput(
+            identifier="SU",
+            title="Nr of summer days",
+            abstract="max day temperatur >= 25 C'\n'nput data is a datafile with daily tasmax",
             type=type(False),
-            minOccurs=1,
+            minOccurs=0,
             maxOccurs=0,
             )
+            
+        self.FD = self.addLiteralInput(
+            identifier="FD",
+            title="Nr of frost days",
+            abstract="min day temperatur > 0 C'\n'input data is a datafile with daily tasmin",
+            type=type(False),
+            minOccurs=0,
+            maxOccurs=0,
+            )
+            
             
         # defined in WorkflowProcess ...
 
         # complex output
         # -------------
-
         self.output = self.addComplexOutput(
             identifier="output",
-            title="Indices Output tar",
-            abstract="Indices Output file",
+            title="indice log",
+            abstract="indice log",
             metadata=[],
-            formats=[{"mimeType":"application/x-netcdf"}],
+            formats=[{"mimeType":"text/plain"}],
             asReference=True,
             )
             
@@ -66,10 +75,7 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
         import os
 
         self.show_status('starting calcualtion of icclim indices', 5)        
-
-        self.output.setValue( cscenv.indices(self.get_nc_files(), self.icclim_SU.getValue()) )
-
-        self.show_status("processing done", 72)
         
-        outdir = os.path.join(self.files_path, userid)
-        utils.mkdir(outdir)
+        self.output.setValue( cscenv.indices(self.get_nc_files(), self.SU.getValue())
+        
+        self.show_status("processing done", 100)
