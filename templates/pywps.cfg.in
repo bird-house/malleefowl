@@ -57,7 +57,8 @@ latest=true
 database_location_host=localhost
 database_location_port=27017
 database_location_databasename=climdaps
-work_directory=/home/tk/sandbox/climdaps/malleefowl/var/qc_cache
+work_directory=${install:prefix}/var/qc_cache
+example_directory=${malleefowl_path}/examples/data/CORDEX
 
 [tests]
 user = ${tests:user}
