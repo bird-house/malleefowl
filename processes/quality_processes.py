@@ -1004,6 +1004,42 @@ class PIDManagerPIDsFromYamlDocumentProcess(malleefowl.process.WPSProcess):
         pids = pm.get_pids_dict_from_yaml_content(yaml_content)
         self.pids.setValue(str(pids))
         
+class GetParallelIdsUser(malleefowl.process.WPSProcess):
+    def __init__(self):
+        malleefowl.process.WPSProcess.__init__(self,
+            identifier = "Get_Parallel_IDs",
+            title = "The users Parallel_IDs",
+            version =  "2014.04.07",
+            metadata = [],
+            )
+
+        self.username = self.addLiteralInput(
+            identifier = "username",
+            title = "Username",
+            default = "defaultuser",
+            type = types.StringType,
+            abstract = ("Name to access your own processing directory.")
+            )
+
+        self.token = self.addLiteralInput(
+            identifier = "token",
+            title = "Token",
+            default = "Needed_if_not_defaultuser",
+            type = types.StringType,
+            abstract = "The token authenticates you as the user. defaultuser accepts any token."
+            )
+
+        self.parallel_ids = self.addLiteralOutput(
+            identifier = "parallel_ids",
+            title = "Parallel IDs separated by '/'",
+            type = types.StringType,
+            )
+
+    def execute(self):
+        username = get_username(self)
+        parallel_ids = get_user_parallelids(username) 
+        self.parallel_ids.setValue("/".join(parallel_ids))
+       
 ##################
 # Helper methods #
 ##################
