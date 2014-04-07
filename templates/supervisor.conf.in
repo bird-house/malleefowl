@@ -7,4 +7,4 @@ group=${install:group}
 autostart=true
 autorestart=true
 redirect_stderr=true
-environment=${environment} 
+
