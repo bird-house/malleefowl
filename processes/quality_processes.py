@@ -1040,6 +1040,23 @@ class GetParallelIdsUser(malleefowl.process.WPSProcess):
         parallel_ids = get_user_parallelids(username) 
         self.parallel_ids.setValue("/".join(parallel_ids))
        
+class GetExampleDirectory(malleefowl.process.WPSProcess):
+    def __init__(self):
+        malleefowl.process.WPSProcess.__init__(self,
+            identifier = "Get_Example_Directory",
+            title = "Get example directory",
+            version =  "2014.04.07",
+            metadata = [],
+            )
+
+        self.example_directory = self.addLiteralOutput(
+            identifier = "example_directory",
+            title = "The example directory",
+            type = types.StringType,
+            )
+
+    def execute(self):
+        self.example_directory.setValue(config.getConfigValue("malleefowl", "example_directory"))
 ##################
 # Helper methods #
 ##################
