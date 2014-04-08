@@ -14,32 +14,29 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def indices( ncfile, SU ): # TG, TN, TX, SU, DTR, ETR , HI
+def indices( ncfile, TG, TN, TX, SU, DTR, ETR , HI ): # 
 
-    self.show_status('indices def call ', 15)
-    
-    #token = self.token.getValue()
-    #outlog = "Starting the indice calculation at: \n"
+    #self.show_status('indices def call ', 15)
+  #  token = self.token.getValue()
+    outlog = "Starting the indice calculation at: \n"
     
 ##    self.show_status('starting ECA indices ...', 5)
-##    logger.debug('starting ECA indices ... done')
+    logger.debug('starting ECA indices ... done')
             
-    #userid = tokenmgr.get_userid(tokenmgr.sys_token(), token)
-    #outdir = os.path.join(self.files_path, userid)
+    userid = tokenmgr.get_userid(tokenmgr.sys_token(), token)
+    outdir = '/var/lib/pywps/files/nils.hempelmann_hzg.de/' ## os.path.join(self.files_path, userid)
     #utils.mkdir(outdir)
     
+    
 #    self.show_status('got token and outdir ...', 5)
-    #logger.debug('got token and outdir ... done')
-
-    #userid = tokenmgr.get_userid(tokenmgr.sys_token(), token)
-    #ocgis.env.DIR_OUTPUT = os.path.join(self.files_path, userid)
-    #logger.debug('outdir ... : '+ outdir )
+    logger.debug('got token and outdir ... done')
+    logger.debug('outdir ... : '+ outdir )
     
     ocgis.env.OVERWRITE = True
-    ocgis.env.DIR_OUTPUT = '/var/lib/pywps/files/nils.hempelmann_hzg.de/' #outdir
+    ocgis.env.DIR_OUTPUT = outdir
     
     #self.show_status('Set ocgis outdir ...', 5)
-    #logger.debug('set ocgis outdir ... done')
+    logger.debug('set ocgis outdir ... done')
 
     outlog = outlog + "Set the output dir \n"
     
@@ -47,7 +44,8 @@ def indices( ncfile, SU ): # TG, TN, TX, SU, DTR, ETR , HI
     for nc in ncfile:
 
         #self.show_status('in the nc loop ...', 15)
-        #logger.debug('in the nc loop ... done')
+   
+        logger.debug('in the nc loop ... done')
  
         outlog = outlog + "Starting to process file:  " + nc + " \n"
     
@@ -74,46 +72,60 @@ def indices( ncfile, SU ): # TG, TN, TX, SU, DTR, ETR , HI
             filename = nc
 
         #self.show_status('filename created ...:'+ filename , 15)
-        #logger.debug('filename created ...:'+ filename)
+        logger.debug('filename created ...:'+ filename)
 
         outlog = outlog + "Create filename:  " + filename + " \n"
         
-        #if TG == True :
-            #TG_file = None
-            #rd = ocgis.RequestDataset(nc, 'tas') # time_range=[dt1, dt2]
-            #group = ['year']
-            #calc_icclim = [{'func':'icclim_TG','name':'TG'}]
-            #SU_file = ocgis.OcgOperations(dataset=rd, calc=calc_icclim, calc_grouping=group, prefix=str('TG_' + filename), output_format='nc', add_auxiliary_files=False).execute()
+        if TG == True :
+            TG_file = None
+            rd = ocgis.RequestDataset(nc, 'tas') # time_range=[dt1, dt2]
+            group = ['year']
+            calc_icclim = [{'func':'icclim_TG','name':'TG'}]
+            SU_file = ocgis.OcgOperations(dataset=rd, calc=calc_icclim, calc_grouping=group, prefix=str('TG_' + filename), output_format='nc', add_auxiliary_files=False).execute()
 
-        #if TX == True :
-            #TX_file = None
-            #rd = ocgis.RequestDataset(nc, 'tasmax') # time_range=[dt1, dt2]
-            #group = ['year']
-            #calc_icclim = [{'func':'icclim_TX','name':'TX'}]
-            #SU_file = ocgis.OcgOperations(dataset=rd, calc=calc_icclim, calc_grouping=group, prefix=str('TX_' + filename), output_format='nc', add_auxiliary_files=False).execute()
+        if TX == True :
+            TX_file = None
+            rd = ocgis.RequestDataset(nc, 'tasmax') # time_range=[dt1, dt2]
+            group = ['year']
+            calc_icclim = [{'func':'icclim_TX','name':'TX'}]
+            SU_file = ocgis.OcgOperations(dataset=rd, calc=calc_icclim, calc_grouping=group, prefix=str('TX_' + filename), output_format='nc', add_auxiliary_files=False).execute()
 
-        #if TN == True :
-            #TN_file = None
-            #rd = ocgis.RequestDataset(nc, 'tasmin') # time_range=[dt1, dt2]
-            #group = ['year']
-            #calc_icclim = [{'func':'icclim_TN','name':'TN'}]
-            #SU_file = ocgis.OcgOperations(dataset=rd, calc=calc_icclim, calc_grouping=group, prefix=str('TN_' + filename), output_format='nc', add_auxiliary_files=False).execute()
+        if TN == True :
+            TN_file = None
+            rd = ocgis.RequestDataset(nc, 'tasmin') # time_range=[dt1, dt2]
+            group = ['year']
+            calc_icclim = [{'func':'icclim_TN','name':'TN'}]
+            SU_file = ocgis.OcgOperations(dataset=rd, calc=calc_icclim, calc_grouping=group, prefix=str('TN_' + filename), output_format='nc', add_auxiliary_files=False).execute()
 
         if SU == True :
+            
+            logger.debug('In the SU loop')
+            
             SU_file = None
             rd = ocgis.RequestDataset(nc, 'tasmax') # time_range=[dt1, dt2]
+            
             group = ['year']
             calc_icclim = [{'func':'icclim_SU','name':'SU'}]
             SU_file = ocgis.OcgOperations(dataset=rd, calc=calc_icclim, calc_grouping=group, prefix=str('SU_' + filename), output_format='nc', add_auxiliary_files=False).execute()
             
             #self.show_status('SU calculated ...:'+ filename , 15)
-            #logger.debug('SU calculated ...:'+ filename)
 
+            logger.debug('SU calculated ...:'+ filename)
             outlog = outlog + "SU indice processed sucessfully  \n"
 
             
-        #if ETR == True :
-            #ETR_file = None
+        if ETR == True :
+            ETR_file = None
+            
+            variables = ['tasmin', 'tasmax']
+            request_datasets = [ocgis.RequestDataset(uri,variable) for uri,variable in zip(uris,variables)]
+            rdc = ocgis.RequestDatasetCollection(request_datasets)
+            group = ['year']
+            calc_icclim = [{'func':'icclim_ETR','name':'ETR','kwds':{'tasmin':'tasmin','tasmax':'tasmax'}}]
+            ETR_file = ocgis.OcgOperations(dataset=rdc, calc=calc_icclim, calc_grouping=group, prefix=str('ETR_'), output_format='nc', add_auxiliary_files=False).execute()
+
+        if HI == True :
+            HI_file = None
             
             #variables = ['tasmin', 'tasmax']
             #request_datasets = [ocgis.RequestDataset(uri,variable) for uri,variable in zip(uris,variables)]
@@ -122,18 +134,6 @@ def indices( ncfile, SU ): # TG, TN, TX, SU, DTR, ETR , HI
             #calc_icclim = [{'func':'icclim_ETR','name':'ETR','kwds':{'tasmin':'tasmin','tasmax':'tasmax'}}]
             #ETR_file = ocgis.OcgOperations(dataset=rdc, calc=calc_icclim, calc_grouping=group, prefix=str('ETR_'), output_format='nc', add_auxiliary_files=False).execute()
 
-        #if HI == True :
-            #HI_file = None
-            
-            ##variables = ['tasmin', 'tasmax']
-            ##request_datasets = [ocgis.RequestDataset(uri,variable) for uri,variable in zip(uris,variables)]
-            ##rdc = ocgis.RequestDatasetCollection(request_datasets)
-            ##group = ['year']
-            ##calc_icclim = [{'func':'icclim_ETR','name':'ETR','kwds':{'tasmin':'tasmin','tasmax':'tasmax'}}]
-            ##ETR_file = ocgis.OcgOperations(dataset=rdc, calc=calc_icclim, calc_grouping=group, prefix=str('ETR_'), output_format='nc', add_auxiliary_files=False).execute()
-
-
-            
         outlog = outlog + "All indices processed sucessfully  \n"
     return outlog ;
     
