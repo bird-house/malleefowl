@@ -5,7 +5,7 @@ version=1.0.0
 abstract=See http://pywps.wald.intevation.org and http://www.opengeospatial.org/standards/wps
 fees=None
 constraints=none
-serveraddress=http://${server:hostname}:${ports:http}/wps
+serveraddress=http://${server:hostname}:${ports:http_proxy}/wps
 keywords=GRASS,GIS,WPS,ClimDaPs,Phoenix
 lang=en-CA
 
@@ -32,7 +32,7 @@ maxinputparamlength=2048
 maxfilesize=25gb
 tempPath=${temp_path}
 processesPath=${processes_path}
-outputUrl=http://${server:hostname}:${ports:http}/wpsoutputs
+outputUrl=http://${server:hostname}:${ports:http_proxy}/wpsoutputs
 outputPath=${output_path}
 logFile=${pywps:log_file}
 logLevel=${logging:log_level}
