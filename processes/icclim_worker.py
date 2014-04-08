@@ -29,8 +29,8 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
                   #'esgquery': 'data_node:esg-dn1.nsc.liu.se' 
                   #},
             extra_metadata={
-                  'esgfilter': 'variable:tasmax, time_frequency:day, project:CMIP5 , project:CORDEX', 
-                  'esgquery': '' 
+                  'esgfilter': 'variable:tasmax, variable:tasmin, variable:tas, project:CMIP5, project:CORDEX',  
+                  'esgquery': ' time_frequency:day' 
                   },
             )
 
