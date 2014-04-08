@@ -12,7 +12,7 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
         # definition of this process
         malleefowl.process.WorkerProcess.__init__(self, 
             identifier = "de.csc.icclim",
-            title="Calculation of climate indices based on icclim",
+            title="Calculation of climate indices (ECA)",
             version = "0.1",
             #storeSupported = "true",   # async
             #statusSupported = "true",  # retrieve status, needs to be true for async 
@@ -28,7 +28,7 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
                   #'esgquery': 'data_node:esg-dn1.nsc.liu.se' 
                   #},
             extra_metadata={
-                  'esgfilter': 'variable:tasmax , variable:tasmin , time_frequency:day project:CMIP5 , project:CORDEX', 
+                  'esgfilter': 'variable:tasmax, time_frequency:day, project:CMIP5 , project:CORDEX', 
                   'esgquery': '' 
                   },
             )
@@ -36,27 +36,72 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
         # Literal Input Data
         # ------------------
         
+    
+        self.TG = self.addLiteralInput(
+            identifier="TG",
+            title="TG",
+            abstract="Mean of mean temperatur (tas files as input files)",
+            type=type(False),
+            minOccurs=0,
+            maxOccurs=0,
+            )
+            
+        self.TX = self.addLiteralInput(
+            identifier="TX",
+            title="TX",
+            abstract="mean of max temperatur (tasmax files as input files)",
+            type=type(False),
+            minOccurs=0,
+            maxOccurs=0,
+            )
+            
+        self.TN = self.addLiteralInput(
+            identifier="TN",
+            title="TN",
+            abstract="Mean over min temperatur (tasmin files as input files)",
+            type=type(False),
+            minOccurs=0,
+            maxOccurs=0,
+            )
 
         self.SU = self.addLiteralInput(
             identifier="SU",
-            title="Nr of summer days",
-            abstract="max day temperatur >= 25 C'\n'nput data is a datafile with daily tasmax",
+            title="SU",
+            abstract="Nr of summer days (tasmax files as input files)",
+            type=type(False),
+            minOccurs=0,
+            maxOccurs=0,
+            )
+
+            
+        self.ETR = self.addLiteralInput(
+            identifier="ETR",
+            title="ETR",
+            abstract="Extrem temperture range (tasmax and tasmin as input files)",
+            type=type(False),
+            minOccurs=0,
+            maxOccurs=0,
+            )
+
+        self.DTR = self.addLiteralInput(
+            identifier="DTR",
+            title="DTR",
+            abstract="Mean of diurnal temperaure range (tasmax and tasmin as input files)",
+            type=type(False),
+            minOccurs=0,
+            maxOccurs=0,
+            )
+
+        self.HI = self.addLiteralInput(
+            identifier="HI",
+            title="HI",
+            abstract="Huglin Index (tas and tasmax as input files)",
             type=type(False),
             minOccurs=0,
             maxOccurs=0,
             )
             
-        self.FD = self.addLiteralInput(
-            identifier="FD",
-            title="Nr of frost days",
-            abstract="min day temperatur > 0 C'\n'input data is a datafile with daily tasmin",
-            type=type(False),
-            minOccurs=0,
-            maxOccurs=0,
-            )
-            
-            
-        # defined in WorkflowProcess ...
+            # defined in WorkflowProcess ...
 
         # complex output
         # -------------
@@ -76,6 +121,8 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
 
         self.show_status('starting calcualtion of icclim indices', 5)        
         
-        self.output.setValue( cscenv.indices(self.get_nc_files(), self.SU.getValue())
+        self.output.setValue( cscenv.indices(self.get_nc_files(), self.TG.getValue(), self.TN.getValue(), self.TX.getValue(), self.SU.getValue(), self.DTR.getValue(), self.ETR.getValue(), self.HI.getValue() )) 
+        
+        #  
         
         self.show_status("processing done", 100)
