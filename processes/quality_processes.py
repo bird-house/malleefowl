@@ -529,13 +529,11 @@ class UserEvalProcess(malleefowl.process.WPSProcess):
                                       )
 
         def _gather_pids_from_yaml_document(yaml_document):
-            import urllib
-            url = ("http://localhost:8090/wps?service=WPS&request=Execute&version=1.0.0" +
-                   "&identifier=PIDs_from_yaml_document&DataInputs=yaml_document=" +
-                   str(yaml_document) + "&rawdataoutput=pids")
-            pid_file = urllib.urlopen(url)
-            content = pid_file.read()
-            return content
+            import yaml
+            pm = pidmanager.PIDManager(database_location = DATABASE_LOCATION)
+            yaml_content = yaml.safe_load(yaml_document)
+            pids = pm.get_pids_dict_from_yaml_content(yaml_content)
+            return(str(pids))
 
         output = qcp.evaluate_quality_check(
                           data_node = self.data_node,
