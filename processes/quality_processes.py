@@ -9,6 +9,7 @@ import malleefowl.process
 import qc_processes.qcprocesses as qcprocesses
 import qc_processes.pidmanager as pidmanager
 import qc_processes.directory2datasetyaml as directory2datasetyaml
+from pywps import config
 
 import os
 from malleefowl import tokenmgr
@@ -18,13 +19,12 @@ logger = logging.getLogger(__name__)
 curdir = os.path.dirname(__file__)
 climdapsabs = os.path.abspath(os.path.join(curdir,".."))
 
-DATA = {}
-fn = os.path.join(os.path.dirname(__file__),"quality_processes.conf")
-
-execfile(fn,DATA)
-
-DATABASE_LOCATION = DATA["database_location"]
-WORK_DIR = DATA["work_directory"]
+#DATABASE_LOCATION for mongodb
+DATABASE_LOCATION = {"host": config.getConfigValue("malleefowl","database_location_host"),
+                    "port": int(config.getConfigValue("malleefowl","database_location_port")),
+                    "databasename": config.getConfigValue("malleefowl","database_location_databasename")
+                     }
+WORK_DIR = config.getConfigValue("malleefowl", "work_directory")
 
 class UserInitProcess(malleefowl.process.WPSProcess):
     """
@@ -426,12 +426,12 @@ class UserEvalProcess(malleefowl.process.WPSProcess):
             )
 
 
-        self.data_node = DATA.get("data_node")
+        self.data_node = config.getConfigValue("malleefowl", "data_node")
 
-        self.index_node = DATA.get("index_node")
+        self.index_node = config.getConfigValue("malleefowl", "index_node")
 
-        self.access = DATA.get("access")
-        self.metadata_format = DATA.get("metadata_format")
+        self.access = config.getConfigValue("malleefowl", "access")
+        self.metadata_format = config.getConfigValue("malleefowl", "metadata_format")
         self.replica = self.addLiteralInput(
             identifier = "replica",
             title = "Replica",
@@ -1004,6 +1004,59 @@ class PIDManagerPIDsFromYamlDocumentProcess(malleefowl.process.WPSProcess):
         pids = pm.get_pids_dict_from_yaml_content(yaml_content)
         self.pids.setValue(str(pids))
         
+class GetParallelIdsUser(malleefowl.process.WPSProcess):
+    def __init__(self):
+        malleefowl.process.WPSProcess.__init__(self,
+            identifier = "Get_Parallel_IDs",
+            title = "The users Parallel_IDs",
+            version =  "2014.04.07",
+            metadata = [],
+            )
+
+        self.username = self.addLiteralInput(
+            identifier = "username",
+            title = "Username",
+            default = "defaultuser",
+            type = types.StringType,
+            abstract = ("Name to access your own processing directory.")
+            )
+
+        self.token = self.addLiteralInput(
+            identifier = "token",
+            title = "Token",
+            default = "Needed_if_not_defaultuser",
+            type = types.StringType,
+            abstract = "The token authenticates you as the user. defaultuser accepts any token."
+            )
+
+        self.parallel_ids = self.addLiteralOutput(
+            identifier = "parallel_ids",
+            title = "Parallel IDs separated by '/'",
+            type = types.StringType,
+            )
+
+    def execute(self):
+        username = get_username(self)
+        parallel_ids = get_user_parallelids(username) 
+        self.parallel_ids.setValue("/".join(parallel_ids))
+       
+class GetExampleDirectory(malleefowl.process.WPSProcess):
+    def __init__(self):
+        malleefowl.process.WPSProcess.__init__(self,
+            identifier = "Get_Example_Directory",
+            title = "Get example directory",
+            version =  "2014.04.07",
+            metadata = [],
+            )
+
+        self.example_directory = self.addLiteralOutput(
+            identifier = "example_directory",
+            title = "The example directory",
+            type = types.StringType,
+            )
+
+    def execute(self):
+        self.example_directory.setValue(config.getConfigValue("malleefowl", "example_directory"))
 ##################
 # Helper methods #
 ##################
