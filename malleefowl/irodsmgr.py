@@ -1,6 +1,11 @@
 import os
 
-from irods import *
+from irods import (
+    getRodsEnv,
+    rcConnect,
+    clientLogin,
+    irodsCollection
+    )
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
