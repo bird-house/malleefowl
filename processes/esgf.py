@@ -57,6 +57,13 @@ class Logon(WPSProcess):
             asReference=True,
             )
 
+        self.expires = self.addLiteralOutput(
+            identifier="expires",
+            title="Expires",
+            abstract="Proxy Certificate will expire on given date",
+            type=type(date(2014,4,8)),
+            )
+
     def execute(self):
         self.show_status("start logon ...", 5)
 
@@ -70,6 +77,7 @@ class Logon(WPSProcess):
         self.show_status("logon successful", 90)
 
         self.output.setValue( credentials )
+        self.expires.setValue(utils.cert_infos(credentials)['expires'])
         
 
 class Wget(SourceProcess):

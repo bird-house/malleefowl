@@ -11,6 +11,15 @@ import os
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
+def cert_infos(filename):
+    import OpenSSL
+    import dateutil.parser
+    with open(filename) as fh:
+        data = fh.read()
+        cert = OpenSSL.crypto.load_certificate(OpenSSL.SSL.FILETYPE_PEM, data)
+    expires = dateutil.parser.parse(cert.get_notAfter())
+    return dict(expires=expires)
+
 def logon(openid, password):
     from pyesgf.logon import LogonManager
     # TODO: unset x509 env
