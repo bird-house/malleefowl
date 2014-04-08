@@ -9,6 +9,54 @@ import types
 
 from malleefowl.process import WPSProcess
 
+class OcgisProcess(WPSProcess):
+    def __init__(self):
+        WPSProcess.__init__(
+            self, 
+            identifier = "org.malleefowl.test.ocgis",
+            title="Try OCGIS",
+            version = "0.1",
+            metadata=[
+                {"title":"Literal process"},
+                ],
+            abstract="Try OCGIS",
+            )
+
+        self.resource = self.addComplexInput(
+            identifier="resource",
+            title="tas",
+            abstract="NetCDF File with tas variable",
+            metadata=[],
+            minOccurs=1,
+            maxOccurs=1,
+            maxmegabites=5000,
+            formats=[{"mimeType":"application/x-netcdf"}],
+            )
+
+        self.output = self.addComplexOutput(
+            identifier="output",
+            title="Result text file",
+            abstract="Text file with ocgis inspect result",
+            metadata=[],
+            formats=[{"mimeType":"text/plain"}],
+            asReference=True,
+            )
+        
+
+    def execute(self):
+        self.show_status("starting osgis ...", 10)
+
+        import ocgis
+        ncfile = self.resource.getValue()
+        rd = ocgis.RequestDataset(ncfile, 'tas')
+        result = rd.inspect()
+
+        outfile = self.mktempfile(suffix='.txt')
+        with open(outfile, 'w') as fp:
+            fp.write(str(result))
+            fp.close()
+        self.output.setValue( outfile )
+
 class WhoAreYou(WPSProcess):
     def __init__(self):
         WPSProcess.__init__(
