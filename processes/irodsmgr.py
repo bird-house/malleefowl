@@ -18,7 +18,7 @@ class List(WPSProcess):
             metadata=[
                 ],
             abstract="List Files in iRods")
-
+        
         self.token = self.addLiteralInput(
             identifier = "token",
             title = "Token",
@@ -27,10 +27,20 @@ class List(WPSProcess):
             maxOccurs = 1,
             type = type('')
             )
+        self.home = self.addLiteralInput(
+            identifier = "home",
+            title = "Home",
+            abstract = "Choose iRods Home",
+            minOccurs = 1,
+            maxOccurs = 1,
+            default = self.irods_home().keys()[0],
+            type = type(''),
+            allowedValues=self.irods_home().keys()
+            )
         self.collection = self.addLiteralInput(
             identifier = "collection",
             title = "Collection",
-            abstract = "Enter Collection in iRods Home " + self.irods_home,
+            abstract = "Enter Collection in iRods Home",
             minOccurs = 1,
             maxOccurs = 1,
             default = "/",
@@ -55,7 +65,8 @@ class List(WPSProcess):
         collection = self.collection.getValue().strip()
         if os.path.isabs(collection):
             collection = collection[1:]
-        collection = os.path.join(self.irods_home, collection)
+        root = self.irods_home().get(self.home.getValue())
+        collection = os.path.join(root, collection)
         (files, subcolls) = irodsmgr.ls(collection)
 
         outfile = self.mktempfile(suffix='.json')
