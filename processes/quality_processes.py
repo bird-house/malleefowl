@@ -317,7 +317,7 @@ class UserInitWithYamlLogsProcess(malleefowl.process.WPSProcess):
             title = "YAML log files from the quality check",
             abstract = "The locations of the YAML log files.",
             minOccurs = 1,
-            maxOccurs = 200,#just as arbitrary limit
+            maxOccurs = 200000,#just as arbitrary limit
             type = types.StringType,
             )
 
@@ -716,6 +716,7 @@ class UserRemoveDataProcess(malleefowl.process.WPSProcess):
             title = "Parallel IDs",
             abstract = ("IDs for the to remove work data."),
             minOccurs = 0,
+            maxOccurs = 2000000,
             type = types.StringType,
             )
         
