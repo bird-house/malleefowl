@@ -4,6 +4,6 @@ from nose.plugins.attrib import attr
 
 from malleefowl import publish
 
-def test_publish_local():
-    result = publish.publish_local()
+def test_to_local_store():
+    result = publish.to_local_store()
     nose.tools.ok_(result == [])

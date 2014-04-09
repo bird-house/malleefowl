@@ -1,6 +1,5 @@
 from malleefowl.process import WorkerProcess
-from malleefowl import utils, tokenmgr
-import os
+from malleefowl import publish, tokenmgr
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
@@ -46,37 +45,19 @@ class Publish(WorkerProcess):
             )
         
     def execute(self):
-        self.show_status("starting publisher", 10)
+        self.show_status("publishing ...", 10)
 
         token = self.token.getValue()
-        nc_files = self.get_nc_files()
-
-        result = "Published files to thredds server\n"
-
         userid = tokenmgr.get_userid(tokenmgr.sys_token(), token)
-        
-        outdir = os.path.join(self.files_path, userid)
-        utils.mkdir(outdir)
-        
-        count = 0
-        for nc_file in nc_files:
-            outfile = os.path.join(outdir,
-                                   self.basename.getValue() + "-" +
-                                   os.path.basename(nc_file) + ".nc")
-            result = result + outfile + "\n"
-            try:
-                os.link(os.path.abspath(nc_file), outfile)
-                result = result + "success\n"
-            except:
-                logger.error("publishing of %s failed", nc_file)
-                result = result + "failed\n"
-            count = count + 1
-            percent_done = int(20 + 70.0 / len(nc_files) * count)
-            self.show_status("%d file(s) published" % count, percent_done)
-        out_filename = self.mktempfile(suffix='.txt')
-        with open(out_filename, 'w') as fp:
-            fp.write(result)
-            fp.close()
-            self.output.setValue( out_filename )
 
-        self.show_status("publisher done", 90)
+        result = publish.to_local_store(files=self.get_nc_files(),
+                                        basename=self.basename.getValue(),
+                                        userid=userid)
+    
+        outfile = self.mktempfile(suffix='.txt')
+        with open(outfile, 'w') as fp:
+             import json
+             json.dump(result, fp, indent=True)
+        self.output.setValue( outfile )
+
+        self.show_status("publishing ... done", 90)
