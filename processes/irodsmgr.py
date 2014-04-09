@@ -33,9 +33,9 @@ class List(WPSProcess):
             abstract = "Choose iRods Home",
             minOccurs = 1,
             maxOccurs = 1,
-            default = self.irods_home().keys()[0],
+            default = 'DKRZ', #self.irods_home().keys()[0],
             type = type(''),
-            allowedValues=self.irods_home().keys()
+            allowedValues=['DKRZ'] #self.irods_home().keys()
             )
         self.collection = self.addLiteralInput(
             identifier = "collection",

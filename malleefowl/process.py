@@ -65,6 +65,7 @@ class WPSProcess(PyWPSProcess):
     def irods_home(self):
         import json
         value = config.getConfigValue("irods", "home")
+        logger.debug('config irods home %s', value)
         homes = json.loads(value)
         logger.debug('irods homes %s', homes)
         return homes
