@@ -4,7 +4,7 @@ TODO list  ....
 Bugs
 ----
 
-* unittests log to /var though prefix is different
+* DONE: unittests log to /var though prefix is different
 * DONE: fix external url config for pywps (behind proxy)
 
 
