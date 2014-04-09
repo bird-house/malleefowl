@@ -4,6 +4,7 @@ TODO list  ....
 Bugs
 ----
 
+* unittests log to /var though prefix is different
 * DONE: fix external url config for pywps (behind proxy)
 
 
@@ -11,7 +12,7 @@ Common
 ------
 
 * check java worklfow http://www.knime.org/
-* irods: choose root collection (dkrz or kit)
+* DONE: irods: choose root collection (dkrz or kit)
 * configure datasets scan for thredds
 http://fe4.sic.rm.cnr.it:8080/thredds/docs/datasetScan/index.html
 * DONE: integrate icclim
