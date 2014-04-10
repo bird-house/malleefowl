@@ -5,6 +5,12 @@ changes ....
 
 Tasks:
 
+* DONE: use esgf logon process to get cert
+* DONE: write restflow wps-actor
+* DONE: write process to generate workflow script for restflow with template
+* DONE: integrate ocgis/icclim
+https://earthsystemcog.org/projects/openclimategis/
+* DONE: irods: choose root collection (dkrz or kit)
 * DONE: remove pycsw.cfg from supervisor (not used)
 * DONE: malleefowl: configure default timeout of restflow process
 * DONE: malleefowl: need better logging
@@ -16,9 +22,13 @@ Tasks:
 
 Bugs:
 
+* DONE: fix publish process (token handling)
+* DONE: unittests log to /var though prefix is different
+* DONE: fix external url config for pywps (behind proxy)
 * DONE: supervisor does not kill pywps processes
 * DONE: at least on ubuntu 12.04 python-netcdf4 ubuntu package does not work
   using anaconda for netcdf deps
+
 
 
 release 22.12.2013

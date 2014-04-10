@@ -1,21 +1,23 @@
 TODO list  ....
 ===============
 
+Helsinki
+--------
+
+* use original filename in download process
+* publish with useful filename (guess from netcdf header, see icclim_worker process)
+
 Bugs
 ----
-
-* DONE: unittests log to /var though prefix is different
-* DONE: fix external url config for pywps (behind proxy)
 
 
 Common
 ------
 
+* split wps installer for common, c3meta, qc, csc, ...
 * check java worklfow http://www.knime.org/
-* DONE: irods: choose root collection (dkrz or kit)
 * configure datasets scan for thredds
 http://fe4.sic.rm.cnr.it:8080/thredds/docs/datasetScan/index.html
-* DONE: integrate icclim
 * integrate ipython notebook
 * handle exceptions, write own ones
 * refactor tokenmgr access methods
@@ -27,8 +29,7 @@ http://fe4.sic.rm.cnr.it:8080/thredds/docs/datasetScan/index.html
   http://www.buildout.org/en/latest/docs/recipelist.html
   https://github.com/hexagonit/hexagonit.recipe.download
   https://en.wikipedia.org/wiki/Hummingbird
-* malleefowl: fix publish process (token handling)
-* malleefowl: use esgf logon process to get cert and cookie
+* use esgf logon process to get cookie
 * configure service etc for unit tests ...
 * data: include example with opendap
   http://earthpy.org/smos_sea_ice_thickness.html
@@ -68,9 +69,6 @@ http://fe4.sic.rm.cnr.it:8080/thredds/docs/datasetScan/index.html
 * supervisor: show logs in monitor
 * update to buildout 2.x
 * use buildout config for bootstrap
-* DONE: write process to generate workflow script for restflow with template
-* add https://earthsystemcog.org/projects/openclimategis/
-* DONE: write restflow wps-actor
 * need testing environment
 * configure ncwms for more climate variables
 * add publisher to workflow (optional)
