@@ -12,14 +12,18 @@
     
     <datasetScan name="Test all files in a directory" ID="testDatasetScan"
         path="test" location="${location}">
-        <metadata inherited="true">
-            <serviceName>all</serviceName>
-            <serviceName>wms</serviceName>
-        </metadata>
+      <addDatasetSize />
+      <addTimeCoverage datasetNameMatchPattern="([0-9]{4})([0-9]{2})([0-9]{2})([0-9]{2})_gfs_211.nc$"
+                       startTimeSubstitutionPattern="$1-$2-$3T$4:00:00"
+                       duration="60 hours" />
+      <metadata inherited="true">
+        <serviceName>all</serviceName>
+        <serviceName>wms</serviceName>
+      </metadata>
 
-        <filter>
-            <include wildcard="*.nc" />
-        </filter>
+      <filter>
+        <include wildcard="*.nc" />
+      </filter>
 
     </datasetScan>
 

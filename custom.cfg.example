@@ -13,6 +13,7 @@ hostname = localhost
 
 [ports]
 http = 8091
+#http_proxy = 80
 tomcat = 8080
 supervisor = 9001
 

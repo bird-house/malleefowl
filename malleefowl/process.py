@@ -62,6 +62,16 @@ class WPSProcess(PyWPSProcess):
     def thredds_url(self):
         return config.getConfigValue("malleefowl", "threddsUrl")
 
+    def irods_home(self):
+        import yaml
+        value = config.getConfigValue("irods", "home")
+        logger.debug('config irods home %s', value)
+        homes = yaml.load(value)
+        logger.debug('irods homes %s', homes)
+        logger.debug('bla')
+        logger.debug('homes = %s', homes.keys())
+        return homes
+
     @property
     def timeout(self):
         timeout = 0

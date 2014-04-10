@@ -1,10 +1,24 @@
 TODO list  ....
 ===============
 
+Bugs
+----
+
+* DONE: unittests log to /var though prefix is different
+* DONE: fix external url config for pywps (behind proxy)
+
 
 Common
 ------
 
+* check java worklfow http://www.knime.org/
+* DONE: irods: choose root collection (dkrz or kit)
+* configure datasets scan for thredds
+http://fe4.sic.rm.cnr.it:8080/thredds/docs/datasetScan/index.html
+* DONE: integrate icclim
+* integrate ipython notebook
+* handle exceptions, write own ones
+* refactor tokenmgr access methods
 * download multiple files (wget, opendap, ...), using python threads ...
 * need a tough little helpful bird module:
   http://toughlittlebirds.com/support-research/
@@ -26,7 +40,7 @@ Common
 * buildout: integrate nosetests in install:
   https://nose.readthedocs.org/en/latest/setuptools_integration.html
 * pywps: get file name/url of complex input (input.inputs['value'])
-* malleefowl: rename file_identifier to source
+* malleefowl: rename file_identifier to source or resource
 * try kepler
 * pywps, phoenix: upload function for files
 * buildout: run processes with unpriviledged user
