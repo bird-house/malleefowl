@@ -69,11 +69,11 @@ function install_anaconda() {
         #echo -e "\n# Anaconda PATH added by climdaps installer" >> $HOME/.bashrc
         #echo "export PATH=$ANACONDA_HOME/bin:\$PATH" >> $HOME/.bashrc
     fi
-    #TODO: workaround for required packages
-    sudo $ANACONDA_HOME/bin/conda install --yes numpy
-    sudo $ANACONDA_HOME/bin/conda install --yes Fiona
-    sudo $ANACONDA_HOME/bin/conda install --yes netCDF4
-    sudo $ANACONDA_HOME/bin/conda install --yes shapely
+    ##TODO: workaround for required packages
+    #sudo $ANACONDA_HOME/bin/conda install --yes numpy
+    #sudo $ANACONDA_HOME/bin/conda install --yes Fiona
+    #sudo $ANACONDA_HOME/bin/conda install --yes netCDF4
+    #sudo $ANACONDA_HOME/bin/conda install --yes shapely
 
     # add anaconda to system path for all users
     #echo "export PATH=$ANACONDA_HOME/bin:\$PATH" | sudo tee /etc/profile.d/anaconda.sh > /dev/null
