@@ -2,12 +2,21 @@ import nose.tools
 from nose import SkipTest
 from nose.plugins.attrib import attr
 
-#from malleefowl import wpsclient
+from malleefowl import wpsclient
 
 import __init__ as base
 
 import json
 import tempfile
+
+from malleefowl import database
+from malleefowl import tokenmgr
+
+TEST_TOKEN = tokenmgr.get_uuid()
+TEST_USERID = 'test@malleefowl.org'
+
+def setup():
+    database.add_token(token=TEST_TOKEN, userid=TEST_USERID)
 
 @attr('online')
 def test_dummy():
@@ -15,7 +24,8 @@ def test_dummy():
         service = base.SERVICE,
         identifier = "org.malleefowl.test.dummyprocess",
         inputs = [('input1', '2'), ('input2', '3')],
-        outputs = [('output1', True), ('output2', True)]
+        outputs = [('output1', True), ('output2', True)],
+        verbose=True
         )
     nose.tools.ok_(len(result) == 2, result)
     nose.tools.ok_('http' in result[0]['reference'])
@@ -48,20 +58,22 @@ def test_icclim():
     result = wpsclient.execute(
         service = base.SERVICE,
         identifier = "de.csc.icclim.worker",
-        inputs = [('file_identifier', 'http://localhost:8090/thredds/fileServer/test/nils.hempelmann_hzg.de/tasmax_day_MPI-ESM-LR_historical_r1i1p1_20000101-20051231.nc'),('icclim_SU','True')], #http://localhost:8090/thredds/fileServer/test/nils.hempelmann_hzg.de/tasmax_EUR11_test-pywpsInputbtel_q.nc
+        inputs = [('file_identifier', 'http://localhost:8090/thredds/fileServer/test/nils.hempelmann_hzg.de/tasmax_day_MPI-ESM-LR_historical_r1i1p1_20000101-20051231.nc'),
+        ('SU','True'),
+        ('token', TEST_TOKEN)], #http://localhost:8090/thredds/fileServer/test/nils.hempelmann_hzg.de/tasmax_EUR11_test-pywpsInputbtel_q.nc
         outputs = [('output', True)],
-        verbose=False
+        verbose=True
         )
 
-    nose.tools.ok_('nc' in result[0]['reference'], result)
+    nose.tools.ok_('txt' in result[0]['reference'], result)
     
 def test_icclim2():
     
     from malleefowl import cscenv
     
-    files = ['/var/lib/pywps/files/nils.hempelmann_hzg.de/tasmax_day_MPI-ESM-LR_historical_r1i1p1_20040101-20051231.nc']
-    
-    result = cscenv.indices( files, TG=False, TN=False, TX=False, SU=True, DTR=False, ETR=False , HI=False )
+    files = ['/var/lib/pywps/outputs/output-200aa02c-c09f-11e3-b2e2-d4bed959f031.nc']
+    outdir = '/var/lib/pywps/files/nils.hempelmann_hzg.de/'
+    result = cscenv.indices( outdir, files, TG=False, TN=False, TX=False, SU=True, DTR=False, ETR=False , HI=False )
     # '/var/lib/pywps/files/nils.hempelmann_hzg.de/tasmax_day_MPI-ESM-LR_historical_r1i1p1_20000101-20051231.nc' ,   '/var/lib/pywps/files/nils.hempelmann_hzg.de/tasmax_EUR-11_ICHEC-EC-EARTH_historical_r3i1p1_DMI-HIRHAM5_v1_day_20010101-20051231.nc',
     
     nose.tools.ok_('nc' in result, result)

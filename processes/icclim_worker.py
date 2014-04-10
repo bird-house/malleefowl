@@ -1,6 +1,7 @@
 #from malleefowl.process import WorkerProcess
 import malleefowl.process 
 import subprocess
+from malleefowl import tokenmgr, utils
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
@@ -37,12 +38,21 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
         # Literal Input Data
         # ------------------
         
+        self.token = self.addLiteralInput(
+            identifier = "token",
+            title = "Token",
+            abstract = "Your unique token to publish data",
+            minOccurs = 1,
+            maxOccurs = 1,
+            type = type('')
+            )
     
         self.TG = self.addLiteralInput(
             identifier="TG",
             title="TG",
             abstract="Mean of mean temperatur (tas files as input files)",
             type=type(False),
+            default=False,
             minOccurs=0,
             maxOccurs=0,
             )
@@ -51,6 +61,7 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
             identifier="TX",
             title="TX",
             abstract="mean of max temperatur (tasmax files as input files)",
+            default=False,
             type=type(False),
             minOccurs=0,
             maxOccurs=0,
@@ -60,6 +71,7 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
             identifier="TN",
             title="TN",
             abstract="Mean over min temperatur (tasmin files as input files)",
+            default=False,
             type=type(False),
             minOccurs=0,
             maxOccurs=0,
@@ -69,6 +81,7 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
             identifier="SU",
             title="SU",
             abstract="Nr of summer days (tasmax files as input files)",
+            default=False,
             type=type(False),
             minOccurs=0,
             maxOccurs=0,
@@ -79,6 +92,7 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
             identifier="ETR",
             title="ETR",
             abstract="Extrem temperture range (tasmax and tasmin as input files)",
+            default=False,
             type=type(False),
             minOccurs=0,
             maxOccurs=0,
@@ -88,6 +102,7 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
             identifier="DTR",
             title="DTR",
             abstract="Mean of diurnal temperaure range (tasmax and tasmin as input files)",
+            default=False,
             type=type(False),
             minOccurs=0,
             maxOccurs=0,
@@ -97,6 +112,7 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
             identifier="HI",
             title="HI",
             abstract="Huglin Index (tas and tasmax as input files)",
+            default=False,
             type=type(False),
             minOccurs=0,
             maxOccurs=0,
@@ -120,10 +136,21 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
         from malleefowl import cscenv, utils
         import os
 
+        token = self.token.getValue()
+        userid = tokenmgr.get_userid(tokenmgr.sys_token(), token)
+        #result = publish.to_local_store(files=self.get_nc_files(),basename=self.basename.getValue(),userid=userid)
+        outdir = os.path.join(self.files_path, userid)
+        utils.mkdir(outdir)
+        
         self.show_status('starting calcualtion of icclim indices', 5)        
         
-        self.output.setValue( cscenv.indices(self.get_nc_files(), self.TG.getValue(), self.TN.getValue(), self.TX.getValue(), self.SU.getValue(), self.DTR.getValue(), self.ETR.getValue(), self.HI.getValue() )) 
         
-        #  
+        result = cscenv.indices(outdir, self.get_nc_files(), self.TG.getValue(), self.TN.getValue(), self.TX.getValue(), self.SU.getValue(), self.DTR.getValue(), self.ETR.getValue(), self.HI.getValue())
+
+        outfile = self.mktempfile(suffix='.txt')
+        with open(outfile, 'w') as fp:
+             fp.write(result)
+             
+        self.output.setValue( outfile )
         
         self.show_status("processing done", 100)

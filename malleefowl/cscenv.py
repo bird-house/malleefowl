@@ -14,21 +14,17 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def indices( ncfile, TG, TN, TX, SU, DTR, ETR , HI ): # 
+def indices( outdir, ncfile, TG, TN, TX, SU, DTR, ETR , HI ): # 
 
     #self.show_status('indices def call ', 15)
-  #  token = self.token.getValue()
+    #token = self.token.getValue()
     outlog = "Starting the indice calculation at: \n"
     
-##    self.show_status('starting ECA indices ...', 5)
+##  self.show_status('starting ECA indices ...', 5)
+    
     logger.debug('starting ECA indices ... done')
             
-    userid = tokenmgr.get_userid(tokenmgr.sys_token(), token)
-    outdir = '/var/lib/pywps/files/nils.hempelmann_hzg.de/' ## os.path.join(self.files_path, userid)
-    #utils.mkdir(outdir)
-    
-    
-#    self.show_status('got token and outdir ...', 5)
+     #self.show_status('got token and outdir ...', 5)
     logger.debug('got token and outdir ... done')
     logger.debug('outdir ... : '+ outdir )
     
@@ -135,5 +131,6 @@ def indices( ncfile, TG, TN, TX, SU, DTR, ETR , HI ): #
             #ETR_file = ocgis.OcgOperations(dataset=rdc, calc=calc_icclim, calc_grouping=group, prefix=str('ETR_'), output_format='nc', add_auxiliary_files=False).execute()
 
         outlog = outlog + "All indices processed sucessfully  \n"
+    
     return outlog ;
     
