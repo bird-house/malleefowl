@@ -11,6 +11,11 @@ from __init__ import SERVICE
 from malleefowl import wpsclient
 
 WORK_DIR = config.getConfigValue("malleefowl", "work_directory")
+"""
+IMPORTANT: This is not a unit_test. Instead it is the automization of the manual test
+using the phoenix GUI. It leads to generation PIDs if they do not exist in the database, and therefore 
+might alters other systems.
+"""
 
 @attr('slow')
 def test_chains():
@@ -87,4 +92,68 @@ def test_chains():
         outputs = []
         )
 
+#publish is not tested automatically because it needs a keyfile
+
+@attr('online')
+def test_PID_for_file():
+    #run it once to ensure it has a pid
+    results_1 = wpsclient.execute(
+        service = SERVICE,
+        identifier = "PID_for_file",
+        inputs = [],
+        outputs = [('pid',False)]
+        )
+    pid_1 = results_1[0]["data"][0]
+    results_2 = wpsclient.execute(
+        service = SERVICE,
+        identifier = "PID_for_file",
+        inputs = [],
+        outputs = [('pid',False)]
+        )
+    pid_2 = results_2[0]["data"][0]
+    #The pid in both cases should be the same
+    assert_equal(pid_1, pid_2) 
+
+
+@attr('online')
+def test_PID_for_dataset():
+    results_1 = wpsclient.execute(
+        service = SERVICE,
+        identifier = "PID_for_file",
+        inputs = [],
+        outputs = [('pid',False)]
+        )
+    pid = results_1[0]["data"][0]
+    #run it once to ensure it has a pid
+    results_1 = wpsclient.execute(
+        service = SERVICE,
+        identifier = "PID_for_dataset",
+        inputs = [('dataset_pids', pid)],
+        outputs = [('pid',False)]
+        )
+    pid_1 = results_1[0]["data"][0]
+    results_2 = wpsclient.execute(
+        service = SERVICE,
+        identifier = "PID_for_dataset",
+        inputs = [('dataset_pids', pid)],
+        outputs = [('pid',False)]
+        )
+    pid_2 = results_2[0]["data"][0]
+    #The pid in both cases should be the same
+    assert_equal(pid_1, pid_2) 
+
+
+def test_Get_Example_Directory():
+
+    results_1 = wpsclient.execute(
+        service = SERVICE,
+        identifier = "Get_Example_Directory",
+        inputs = [],
+        outputs = [('example_directory',False)]
+        )
+    example_directory = results_1[0]["data"][0]
+    #currently the example directory is examples/data/CORDEX and this test is in mallefowl/unit_tests
+    expected_dir = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "..", "examples", "data", "CORDEX"))
+    assert_equal(example_directory, expected_dir)
 
