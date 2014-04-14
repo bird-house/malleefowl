@@ -6,7 +6,7 @@ Helsinki
 
 * use original filename in download process
 * publish with useful filename (guess from netcdf header, see icclim_worker process)
-* hardlink downloaded files to user files store
+* DONE: hardlink downloaded files to user files store
 
 Bugs
 ----
