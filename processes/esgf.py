@@ -13,7 +13,7 @@ import StringIO
 from netCDF4 import Dataset
 
 from malleefowl.process import WPSProcess, SourceProcess, WorkerProcess
-from malleefowl import utils
+from malleefowl import utils, publish
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
@@ -93,6 +93,15 @@ class Wget(SourceProcess):
                 ],
             abstract="Download files from esgf data node with wget")
 
+        self.token = self.addLiteralInput(
+            identifier = "token",
+            title = "Token",
+            abstract = "Your unique token to publish data",
+            minOccurs = 1,
+            maxOccurs = 1,
+            type = type('')
+            )
+
         self.credentials = self.addComplexInput(
             identifier = "credentials",
             title = "X509 Certificate",
@@ -122,6 +131,11 @@ class Wget(SourceProcess):
         filename = os.path.basename(file_url)
         logger.debug('file url = %s', file_url)
 
+        token = self.token.getValue()
+
+        from malleefowl import tokenmgr
+        userid = tokenmgr.get_userid(tokenmgr.sys_token(), token)
+
         self.show_status("download %s" % (filename), 10)
 
         try:
@@ -139,6 +153,8 @@ class Wget(SourceProcess):
 
         outfile = os.path.join(self.cache_path, filename)
         logger.debug('result file=%s', outfile)
+
+        publish.link_to_local_store(files=[outfile], userid=userid)
         
         self.output.setValue(outfile)
         self.show_status("esgf wget ... done", 90)

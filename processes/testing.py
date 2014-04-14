@@ -44,7 +44,7 @@ class OcgisProcess(WPSProcess):
         
 
     def execute(self):
-        self.show_status("starting osgis ...", 10)
+        self.show_status("starting ocgis ...", 10)
 
         import ocgis
         ncfile = self.resource.getValue()
