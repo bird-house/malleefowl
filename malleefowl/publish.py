@@ -9,7 +9,8 @@ from malleefowl import utils
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
-def mv_to_local_store(files=[], basename='base', userid='test@malleefowl.org'):
+
+def link_to_local_store(files=[], basename=None, userid=None):
     logger.debug("publish to local store, userid=%s", userid)
     
     basedir = config.getConfigValue( "malleefowl", "filesPath" )
@@ -18,34 +19,14 @@ def mv_to_local_store(files=[], basename='base', userid='test@malleefowl.org'):
 
     results = []
     for f in files:
-        outfile = os.path.join(outdir,
-                               basename + "-" +
-                               os.path.basename(f) + ".nc")
+        outfile = os.path.basename(f)
+        if basename is not None:
+            outfile = basename + '-' + outfile
+        outfile = os.path.join(outdir, outfile)
         success = False
         try:
-            os.link(os.path.abspath(f), outfile)
-            success = True
-        except:
-            logger.error("publishing of %s failed", f)
-        results.append( (outfile, success) )
-    logger.debug("publish done, num results=%s", len(results))
-    return results
-    
-
-def link_to_local_store(files=[], userid='test@malleefowl.org'):
-    logger.debug("publish to local store, userid=%s", userid)
-    
-    basedir = config.getConfigValue( "malleefowl", "filesPath" )
-    outdir = os.path.join(basedir, userid)
-    utils.mkdir(outdir)
-
-    results = []
-    for f in files:
-        outfile = os.path.join(outdir, os.path.basename(f))
-        success = False
-        try:
-            if not os.path.lexists(outfile):
-                os.symlink(f, outfile)
+            if not os.path.exists(outfile):
+                os.link(f, outfile)
         except:
             logger.error("publishing of %s failed", f)
         results.append( (outfile, success) )

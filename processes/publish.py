@@ -50,9 +50,9 @@ class Publish(WorkerProcess):
         token = self.token.getValue()
         userid = tokenmgr.get_userid(tokenmgr.sys_token(), token)
 
-        result = publish.mv_to_local_store(files=self.get_nc_files(),
-                                           basename=self.basename.getValue(),
-                                           userid=userid)
+        result = publish.link_to_local_store(files=self.get_nc_files(),
+                                             basename=self.basename.getValue(),
+                                             userid=userid)
     
         outfile = self.mktempfile(suffix='.txt')
         with open(outfile, 'w') as fp:
