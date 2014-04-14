@@ -68,7 +68,6 @@ class WPSProcess(PyWPSProcess):
         logger.debug('config irods home %s', value)
         homes = yaml.load(value)
         logger.debug('irods homes %s', homes)
-        logger.debug('bla')
         logger.debug('homes = %s', homes.keys())
         return homes
 
