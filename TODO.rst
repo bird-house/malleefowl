@@ -4,6 +4,7 @@ TODO list  ....
 Helsinki
 --------
 
+* enable https
 * wizard: add warning to update certs and token
 * configure esgf search node
 * change permissions of published files
