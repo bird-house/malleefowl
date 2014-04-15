@@ -4,8 +4,13 @@ TODO list  ....
 Helsinki
 --------
 
+* enable https
+* wizard: add warning to update certs and token
+* configure esgf search node
+* change permissions of published files
 * use original filename in download process
 * publish with useful filename (guess from netcdf header, see icclim_worker process)
+* DONE: hardlink downloaded files to user files store
 
 Bugs
 ----

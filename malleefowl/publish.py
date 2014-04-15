@@ -1,5 +1,7 @@
 ## This modules handles publishing results
 
+import os
+
 from pywps import config
 
 from malleefowl import utils
@@ -7,9 +9,8 @@ from malleefowl import utils
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
-def to_local_store(files=[], basename='base', userid='test@malleefowl.org'):
-    import os
 
+def link_to_local_store(files=[], basename=None, userid=None):
     logger.debug("publish to local store, userid=%s", userid)
     
     basedir = config.getConfigValue( "malleefowl", "filesPath" )
@@ -18,16 +19,15 @@ def to_local_store(files=[], basename='base', userid='test@malleefowl.org'):
 
     results = []
     for f in files:
-        outfile = os.path.join(outdir,
-                               basename + "-" +
-                               os.path.basename(f) + ".nc")
+        outfile = os.path.basename(f)
+        if basename is not None:
+            outfile = basename + '-' + outfile
+        outfile = os.path.join(outdir, outfile)
         success = False
         try:
-            os.link(os.path.abspath(f), outfile)
-            success = True
+            if not os.path.exists(outfile):
+                os.link(f, outfile)
         except:
-            logger.error("publishing of %s failed", nc_file)
+            logger.error("publishing of %s failed", f)
         results.append( (outfile, success) )
-    logger.debug("publish done, num results=%s", len(results))
     return results
-    

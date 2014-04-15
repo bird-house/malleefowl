@@ -97,18 +97,28 @@ class Rsync(WPSProcess):
             maxOccurs = 1,
             type = type('')
             )
+        self.home = self.addLiteralInput(
+            identifier = "home",
+            title = "Home",
+            abstract = "Choose iRods Home",
+            minOccurs = 1,
+            maxOccurs = 1,
+            default = self.irods_home().keys()[0],
+            type = type(''),
+            allowedValues=self.irods_home().keys()
+            )
         self.collection = self.addLiteralInput(
             identifier = "collection",
             title = "Source Collection",
-            abstract = "Enter Collection in iRods home %s" % (self.irods_home),
+            abstract = "Enter Collection in iRods home",
             minOccurs = 1,
             maxOccurs = 1,
-            default = 'test1',
+            default = 'qc_test1',
             type = type(''),
             )
         self.output = self.addLiteralOutput(
             identifier="output", 
-            title="Path to Destination Collection")
+            title="Path to Destination Collection") 
 
     def execute(self):
         self.show_status("start rsync ...", 5)
@@ -120,7 +130,8 @@ class Rsync(WPSProcess):
         src = self.collection.getValue().strip()
         if os.path.isabs(src):
             src = src[1:]
-        src = os.path.join(self.irods_home, src)
+        home = self.irods_home().get(self.home.getValue())
+        src = os.path.join(home, src)
         dest = os.path.join(self.files_path, userid, 'irods', os.path.basename(src))
         if not os.path.exists(dest):
             os.makedirs(dest)

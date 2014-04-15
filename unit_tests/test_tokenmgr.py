@@ -2,7 +2,9 @@ from nose.tools import ok_, with_setup, raises
 from nose import SkipTest
 from nose.plugins.attrib import attr
 
-from malleefowl import tokenmgr
+import __init__ as base
+
+from malleefowl import tokenmgr, wpsclient
 from malleefowl.tokenmgr import AccessDeniedError
 
 TEST_TOKEN = tokenmgr.get_uuid()
@@ -38,4 +40,16 @@ def test_get_token():
 def test_get_uuid():
     uuid = tokenmgr.get_uuid()
     ok_(len(uuid) == 22, uuid)
+
+@attr('online')
+def test_gen_token_with_wps():
+    result = wpsclient.execute(
+        service = base.SERVICE,
+        identifier = "org.malleefowl.token.generate",
+        inputs = [('sys_token', tokenmgr.sys_token()), ('userid', 'amelie@montematre.org')],
+        outputs = [('output', False)],
+        )
+    ok_(len(result) == 1, result)
+    ok_(len(result[0]['data'][0]) == 22, result)
+
     
