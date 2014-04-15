@@ -241,6 +241,13 @@ class UserCheckProcess(malleefowl.process.WPSProcess):
             title = "Errors",
             type = types.StringType,
             )
+        self.process_log = self.addComplexOutput(
+            identifier = "process_log",
+            title = "Log of this process",
+            metadata = [],
+            formats = [{"mimeType":"text/plain"}],
+            asReference = True,
+            )
 
     def execute(self):
 
@@ -277,6 +284,15 @@ class UserCheckProcess(malleefowl.process.WPSProcess):
         self.qc_call.setValue(output["qc_call"])
         self.qc_svn_version.setValue(output["QC_SVN_Version"])
         self.error_messages.setValue(str(output["stderr"]))
+        #write logfile
+        log = open(self.mktempfile(suffix = ".txt"),"w")
+        log.write("Using QC tool with SVN version: "+ str(output["QC_SVN_Version"])+ "\n")
+        for message in output["stderr"]:
+            log.write(str(message)+"\n")
+        if len(output["stderr"]) == 0:
+            log.write("Finished without errors\n")
+        log.close()
+        self.process_log.setValue(log)
 
 
         return
@@ -379,7 +395,7 @@ class UserInitWithYamlLogsProcess(malleefowl.process.WPSProcess):
         output = qcp.init_with_yamllogs(yamllogs, prefix_old, prefix_new)
         #write outputs
         self.all_okay.setValue(output["all_okay"])
-        process_log_file = open(self.mktempfile(),"w")
+        process_log_file = open(self.mktempfile(suffix = ".txt"), "w")
         process_log_file.write(output["process_log"])
         process_log_file.close()
         self.process_log.setValue(process_log_file)
