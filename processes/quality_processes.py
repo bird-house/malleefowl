@@ -36,7 +36,7 @@ class UserInitProcess(malleefowl.process.WPSProcess):
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_Init",
             title = "Quality Init",
-            version = "2014.03.24",
+            version = "2014.04.15",
             metadata = [],
             abstract = "If the given directory is valid included files and datasets receive a PID.")
 
@@ -56,9 +56,9 @@ class UserInitProcess(malleefowl.process.WPSProcess):
             abstract = "The token authenticates you as the user. defaultuser accepts any token."
             )
 
-        self.parallel_id = self.addLiteralInput(
-            identifier = "parallel_id",
-            title = "Parallel ID",
+        self.session_id = self.addLiteralInput(
+            identifier = "session_id",
+            title = "Session ID",
             default = "web1",
             type = types.StringType,
             abstract = ("To run multiple processes in parallel each requires its own directory." +
@@ -120,7 +120,7 @@ class UserInitProcess(malleefowl.process.WPSProcess):
         qcp = qcprocesses.QCProcesses(
                                       username = username,
                                       statusmethod = statmethod,
-                                      parallel_id = self.parallel_id.getValue(),
+                                      session_id = self.session_id.getValue(),
                                       work_dir = WORK_DIR
                                       )
         project = self.project.getValue()
@@ -152,7 +152,7 @@ class UserCheckProcess(malleefowl.process.WPSProcess):
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_Check",
             title = "Quality Check",
-            version = "2014.03.24",
+            version = "2014.04.15",
             metadata = [],
             abstract = "Runs a quality check on a given folder.")
 
@@ -170,9 +170,9 @@ class UserCheckProcess(malleefowl.process.WPSProcess):
             type = types.StringType,
             )
 
-        self.parallel_id = self.addLiteralInput(
-            identifier = "parallel_id",
-            title = "Parallel ID",
+        self.session_id = self.addLiteralInput(
+            identifier = "session_id",
+            title = "Session ID",
             abstract = ("An ID for the current process. Select the one matching to the "+
                         "init process."),
             type = types.StringType,
@@ -251,7 +251,7 @@ class UserCheckProcess(malleefowl.process.WPSProcess):
             statusmethod("Running",cur,end,self)
         qcp = qcprocesses.QCProcesses(
                                       username = username,
-                                      parallel_id = self.parallel_id.getValue(),
+                                      session_id = self.session_id.getValue(),
                                       statusmethod = statmethod,
                                       work_dir = WORK_DIR
                                       )
@@ -286,7 +286,7 @@ class UserInitWithYamlLogsProcess(malleefowl.process.WPSProcess):
         malleefowl.process.WPSProcess.__init__(self,
         identifier = "QC_Init_With_Yamllogs",
         title = "Quality Initialize with YAML log files of checks",
-        version = "2014.03.25",
+        version = "2014.04.15",
         metadata = [],
         )
 
@@ -304,9 +304,9 @@ class UserInitWithYamlLogsProcess(malleefowl.process.WPSProcess):
             default = "Needed_if_not_defaultuser",
             )
 
-        self.parallel_id = self.addLiteralInput(
-            identifier = "parallel_id",
-            title = "Parallel ID",
+        self.session_id = self.addLiteralInput(
+            identifier = "session_id",
+            title = "Session ID",
             default = "checkdone",
             abstract = "An ID for the current process. Select the one matching to the quality check.",
             type = types.StringType,
@@ -361,7 +361,7 @@ class UserInitWithYamlLogsProcess(malleefowl.process.WPSProcess):
             statusmethod("Running",cur,end,self)
         qcp = qcprocesses.QCProcesses(
                 username = username,
-                parallel_id = self.parallel_id.getValue(),
+                session_id = self.session_id.getValue(),
                 statusmethod = statmethod,
                 work_dir = WORK_DIR
                 )
@@ -399,7 +399,7 @@ class UserEvalProcess(malleefowl.process.WPSProcess):
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_Evaluate",
             title = "Quality Evaluate",
-            version = "2014.03.24",
+            version = "2014.04.15",
             metadata = [],
             abstract = "Evaluates the quality check and generates metadata and quality files")
 
@@ -418,9 +418,9 @@ class UserEvalProcess(malleefowl.process.WPSProcess):
             default = "Needed_if_not_defaultuser",
             )
 
-        self.parallel_id = self.addLiteralInput(
-            identifier = "parallel_id",
-            title = "Parallel ID",
+        self.session_id = self.addLiteralInput(
+            identifier = "session_id",
+            title = "Session ID",
             abstract = "An ID for the current process. Select the one matching to the quality check.",
             type = types.StringType,
             )
@@ -523,7 +523,7 @@ class UserEvalProcess(malleefowl.process.WPSProcess):
             statusmethod("Running",cur,end,self)
         qcp = qcprocesses.QCProcesses(
                                       username = username,
-                                      parallel_id = self.parallel_id.getValue(),
+                                      session_id = self.session_id.getValue(),
                                       statusmethod = statmethod,
                                       work_dir = WORK_DIR
                                       )
@@ -571,7 +571,7 @@ class UserQualityPublishProcess(malleefowl.process.WPSProcess):
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_QualityPublisher", 
             title = "Quality Publish Quality-XML User",
-            version = "2014.03.24",
+            version = "2014.04.15",
             metadata = [],
             abstract = abstract_ml)
            
@@ -589,9 +589,9 @@ class UserQualityPublishProcess(malleefowl.process.WPSProcess):
             default = "Needed_if_not_defaultuser",
             )
 
-        self.parallel_id = self.addLiteralInput(
-            identifier = "parallel_id",
-            title = "Parallel ID",
+        self.session_id = self.addLiteralInput(
+            identifier = "session_id",
+            title = "Session ID",
             abstract = ("An ID for the current process. Select the one matching to the evaluation."),
             type = types.StringType,
             )
@@ -611,7 +611,7 @@ class UserQualityPublishProcess(malleefowl.process.WPSProcess):
                                       username = username,
                                       statusmethod = statmethod,
                                       work_dir = WORK_DIR,
-                                      parallel_id = self.parallel_id.getValue(),
+                                      session_id = self.session_id.getValue(),
                                       )
         output = qcp.qualitypublisher(
                           publish_method="swift",
@@ -631,7 +631,7 @@ class UserMetaPublisherProcess(malleefowl.process.WPSProcess):
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_MetaPublisher", 
             title = "Quality Publish Metadata-XML",
-            version = "2014.03.24",
+            version = "2014.04.15",
             metadata = [],
             abstract = abstract_ml)
            
@@ -650,9 +650,9 @@ class UserMetaPublisherProcess(malleefowl.process.WPSProcess):
             )
 
 
-        self.parallel_id = self.addLiteralInput(
-            identifier = "parallel_id",
-            title = "Parallel ID",
+        self.session_id = self.addLiteralInput(
+            identifier = "session_id",
+            title = "Session ID",
             abstract = ("An ID for the current process. Select the one matching to the evaluation."),
             type = types.StringType,
             )
@@ -674,7 +674,7 @@ class UserMetaPublisherProcess(malleefowl.process.WPSProcess):
                                       username = username,
                                       statusmethod = statmethod,
                                       work_dir = WORK_DIR,
-                                      parallel_id = self.parallel_id.getValue(),
+                                      session_id = self.session_id.getValue(),
                                       )
         output = qcp.metadatapublisher(
                           publish_method="swift",
@@ -693,9 +693,9 @@ class UserRemoveDataProcess(malleefowl.process.WPSProcess):
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_RemoveData", 
             title = "Quality Clean up",
-            version = "2014.03.24",
+            version = "2014.04.15",
             metadata = [],
-            abstract = "Remove data by Parallel ID or your complete work data.")
+            abstract = "Remove data by Session ID or your complete work data.")
            
         self.username = self.addLiteralInput(
             identifier = "username",
@@ -711,9 +711,9 @@ class UserRemoveDataProcess(malleefowl.process.WPSProcess):
             default = "Needed_if_not_defaultuser",
             )
 
-        self.parallel_ids = self.addLiteralInput(
-            identifier = "parallel_ids",
-            title = "Parallel IDs",
+        self.session_ids = self.addLiteralInput(
+            identifier = "session_ids",
+            title = "Session IDs",
             abstract = ("IDs for the to remove work data."),
             minOccurs = 0,
             type = types.StringType,
@@ -725,23 +725,23 @@ class UserRemoveDataProcess(malleefowl.process.WPSProcess):
             statusmethod("Running",cur,end,self)
         
         username = get_username(self)
-        parallel_ids = self.parallel_ids.getValue()
-        if parallel_ids == None:
-            parallel_ids = []
-        if isinstance(parallel_ids, str):
-            parallel_ids = parallel_ids.split(",")
+        session_ids = self.session_ids.getValue()
+        if session_ids == None:
+            session_ids = []
+        if isinstance(session_ids, str):
+            session_ids = session_ids.split(",")
         cur = 0
-        end = len(parallel_ids)
+        end = len(session_ids)
 
-        for par_id in parallel_ids:
+        for par_id in session_ids:
             qcp = qcprocesses.QCProcesses(
                                       username = username,
                                       statusmethod = statmethod,
                                       work_dir = WORK_DIR,
-                                      parallel_id = par_id,
+                                      session_id = par_id,
                                       )
             qcp.remove_process_dir()
-            percent = cur*100.0/end#end is not 0, as there is at least one element in parallel_ids
+            percent = cur*100.0/end#end is not 0, as there is at least one element in session_ids
             self.status.set(msg = "Finished", percentDone = percent, propagate = True)
             cur += 1
         self.status.set(msg = "Finished", percentDone = 100, propagate = True)
@@ -756,7 +756,7 @@ class PIDManagerFileProcess(malleefowl.process.WPSProcess):
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "PID_for_file",
             title = "Get a PID for a file",
-            version = "2014.04.11",
+            version = "2014.04.15",
             metadata = [],
             abstract = "Get a PID for a given local file and the url it will be available at.")
 
@@ -834,7 +834,7 @@ class PIDManagerDatasetProcess(malleefowl.process.WPSProcess):
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "PID_for_dataset",
             title = "Get a PID for a dataset",
-            version = "2014.03.06",
+            version = "2014.04.15",
             metadata = [],
             abstract = "Get a PID for a dataset title and the comma separated list of PIDs in it.")
 
@@ -996,12 +996,12 @@ class PIDManagerPIDsFromYamlDocumentProcess(malleefowl.process.WPSProcess):
         pids = pm.get_pids_dict_from_yaml_content(yaml_content)
         self.pids.setValue(str(pids))
         
-class GetParallelIdsUser(malleefowl.process.WPSProcess):
+class GetSessionIdsUser(malleefowl.process.WPSProcess):
     def __init__(self):
         malleefowl.process.WPSProcess.__init__(self,
-            identifier = "Get_Parallel_IDs",
-            title = "The users Parallel_IDs",
-            version =  "2014.04.07",
+            identifier = "Get_Session_IDs",
+            title = "Get users Session_IDs",
+            version =  "2014.04.15",
             metadata = [],
             )
 
@@ -1021,23 +1021,23 @@ class GetParallelIdsUser(malleefowl.process.WPSProcess):
             abstract = "The token authenticates you as the user. defaultuser accepts any token."
             )
 
-        self.parallel_ids = self.addLiteralOutput(
-            identifier = "parallel_ids",
-            title = "Parallel IDs separated by '/'",
+        self.session_ids = self.addLiteralOutput(
+            identifier = "session_ids",
+            title = "Session IDs separated by '/'",
             type = types.StringType,
             )
 
     def execute(self):
         username = get_username(self)
-        parallel_ids = get_user_parallelids(username) 
-        self.parallel_ids.setValue("/".join(parallel_ids))
+        session_ids = get_user_sessionids(username) 
+        self.session_ids.setValue("/".join(session_ids))
        
 class GetExampleDirectory(malleefowl.process.WPSProcess):
     def __init__(self):
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "Get_Example_Directory",
             title = "Get example directory",
-            version =  "2014.04.07",
+            version =  "2014.04.15",
             metadata = [],
             )
 
@@ -1075,13 +1075,13 @@ def _create_server_copy_of_file(filename, wpsprocess):
 def get_user_dir(user):
     return os.path.join(climdapsabs, "var", "qc_cache", user)
 
-def get_user_parallelids(user):
+def get_user_sessionids(user):
     """
     It is assumed that no processing directories are moved into the work directory by hand or
     other tools than the qc-processes.
     """
     path = get_user_dir(user)
-    history_fn = os.path.join(path, "parallel_id.history")
+    history_fn = os.path.join(path, "session_id.history")
     history = []
     if os.path.isfile(history_fn):
         with open(history_fn, "r") as hist:
