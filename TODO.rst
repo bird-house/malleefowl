@@ -4,6 +4,7 @@ TODO list  ....
 Helsinki
 --------
 
+* maybe publish results by default (need tokenized process)
 * enable https
 * wizard: add warning to update certs and token
 * configure esgf search node
