@@ -381,7 +381,6 @@ class UserInitWithYamlLogsProcess(malleefowl.process.WPSProcess):
                 statusmethod = statmethod,
                 work_dir = WORK_DIR
                 )
-        logger.debug(username)
         yamllogs = self.yamllogs.getValue() #yamllogs is a list by definition
         prefix_old = self.prefix_old.getValue()
         prefix_new = self.prefix_new.getValue()
@@ -1116,9 +1115,8 @@ def get_username(obj):
         userid = "defaultuser"   
     #workaround
     username1 = username.replace("@","_")
-    userid1 = username.replace("@","_")
+    userid1 = userid.replace("@","_")
     if username1 != userid1:
         username = "defaultuser"
-    logger.debug("For username " + username + " returning " + userid)
     return username
 
