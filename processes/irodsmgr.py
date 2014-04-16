@@ -113,7 +113,7 @@ class Rsync(WPSProcess):
             abstract = "Enter Collection in iRods home",
             minOccurs = 1,
             maxOccurs = 1,
-            default = 'qc_test1',
+            default = 'qc_test_20140416',
             type = type(''),
             )
         self.output = self.addLiteralOutput(
@@ -131,6 +131,7 @@ class Rsync(WPSProcess):
         if os.path.isabs(src):
             src = src[1:]
         home = self.irods_home().get(self.home.getValue())
+        logger.debug('selected irods home = %s', home)
         src = os.path.join(home, src)
         dest = os.path.join(self.files_path, userid, 'irods', os.path.basename(src))
         if not os.path.exists(dest):
