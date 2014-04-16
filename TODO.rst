@@ -4,6 +4,7 @@ TODO list  ....
 Helsinki
 --------
 
+* run with unpriviled user
 * publish to cloud
 * maybe publish results by default (need tokenized process)
 * enable https
@@ -15,7 +16,7 @@ Helsinki
 Bugs
 ----
 
-* wms layer process should use token
+* DONE: wms layer process should use token
 
 Common
 ------
