@@ -16,6 +16,7 @@ Helsinki
 Bugs
 ----
 
+* fix irods configuration (home, generate irodsEnv, irodsA)
 * DONE: wms layer process should use token
 
 Common
