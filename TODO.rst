@@ -15,10 +15,13 @@ Helsinki
 Bugs
 ----
 
+* wms layer process should use token
 
 Common
 ------
 
+* remove data on server: wpsoutput, files quota, cache, ... 
+maybe via wps service
 * split wps installer for common, c3meta, qc, csc, ...
 * check java worklfow http://www.knime.org/
 * configure datasets scan for thredds
