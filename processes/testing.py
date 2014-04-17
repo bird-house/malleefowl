@@ -479,7 +479,6 @@ class InOutProcess(WPSProcess):
         logger.debug('write input xml1')
         xml_filename = self.mktempfile(suffix='.xml')
         with open(xml_filename, 'w') as fp:
-            fp.write( "<result>" )
             xml1_in = self.xml1_in.getValue()
             if xml1_in is not None:
                 for xml1 in xml1_in:
@@ -487,7 +486,8 @@ class InOutProcess(WPSProcess):
                     with open(xml1, 'r') as fp2:
                         logger.debug('reading content')
                         fp.write( fp2.read() )
-            fp.write( "</result>" )
+            else:
+                fp.write( "<result>nothing</result>" )
             self.xml1_out.setValue( fp.name )
         return
         
