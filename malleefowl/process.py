@@ -38,6 +38,20 @@ class WPSProcess(PyWPSProcess):
             abstract=abstract,
             grassLocation = False)
 
+    def addComplexInput(self, identifier, title, abstract=None,
+                        metadata=[], minOccurs=1, maxOccurs=1,
+                        formats=[{"mimeType":None}], maxmegabites=None):
+        return PyWPSProcess.addComplexInput(
+            self,
+            identifier=identifier,
+            title=title,
+            abstract=abstract,
+            metadata=metadata,
+            minOccurs=minOccurs,
+            maxOccurs=maxOccurs,
+            formats=formats,
+            maxmegabites=maxmegabites)
+
     @property
     def cache_path(self):
         return config.getConfigValue("malleefowl","cachePath")
