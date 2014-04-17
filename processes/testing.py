@@ -196,7 +196,6 @@ class InOutProcess(WPSProcess):
                 {"title":"Barfoo","href":"http://bar/foo"},
                 ],
             abstract="Just testing data types like date, datetime etc ...",
-            extra_metadata=dict(uploads=['xml1'])
             )
 
         # Literal Input Data
@@ -297,7 +296,8 @@ class InOutProcess(WPSProcess):
             minOccurs=0,
             maxOccurs=2,
             formats=[{"mimeType":"text/xml"}],
-            maxmegabites=2
+            maxmegabites=2,
+            upload=True,
             )
 
         # zero or more bounding-boxes
