@@ -9,6 +9,9 @@ import types
 
 from malleefowl.process import WPSProcess
 
+from malleefowl import wpslogging as logging
+logger = logging.getLogger(__name__)
+
 class OcgisProcess(WPSProcess):
     def __init__(self):
         WPSProcess.__init__(
@@ -285,7 +288,7 @@ class InOutProcess(WPSProcess):
         # -------------
 
         # TODO: needs some work ...
-        self.xml1In = self.addComplexInput(
+        self.xml1_in = self.addComplexInput(
             identifier="xml1",
             title="XML 1",
             abstract="Load XML File",
@@ -403,7 +406,7 @@ class InOutProcess(WPSProcess):
             asReference=True,
             )
 
-        self.xml1Out = self.addComplexOutput(
+        self.xml1_out = self.addComplexOutput(
             identifier="xml1",
             title="XML File 1",
             abstract="xml file 1",
@@ -433,7 +436,7 @@ class InOutProcess(WPSProcess):
             )
        
     def execute(self):
-        self.message(msg='exec inout', force=True)
+        logger.debug('execute inout')
 
         # literals
         self.setOutputValue(
@@ -450,7 +453,7 @@ class InOutProcess(WPSProcess):
         # more than one
         # TODO: handle multiple values (fix in pywps)
         value = self.stringMoreThenOneIn.getValue()
-        self.message(msg='stringMoreThenOneIn =%s' % (value))
+        logger.debug('stringMoreThenOneIn = %s', value)
         if value != None:
             if type(value) == types.ListType:
                 values = value
@@ -464,7 +467,7 @@ class InOutProcess(WPSProcess):
 
         # complex
         # write my own
-        self.message(msg='write my own xml', force=True)
+        logger.debug('write my own xml')
         xml_filename = self.mktempfile(suffix='.xml')
         with open(xml_filename, 'w') as fp:
             fp.write('<xml>just testing</xml>')
@@ -472,22 +475,18 @@ class InOutProcess(WPSProcess):
             self.xmlFileOut.setValue( fp.name )
 
         # write file from input data
-        self.message(msg='write input xml1', force=True)
+        logger.debug('write input xml1')
         xml_filename = self.mktempfile(suffix='.xml')
         with open(xml_filename, 'w') as fp:
-            out_str = '<nothing>found</nothing>'
-            value = self.getInputValue(identifier='xml1In')
-            if value != None:
-                if type(value) == types.ListType:
-                    values = value
-                else:
-                    values = [value]
-                if len(values) > 0:
-                    in_fp = open(values[0], 'r')
-                    out_str = in_fp.read()
-                    in_fp.close()
-            fp.write(out_str)
-            fp.close()
-            self.xml1Out.setValue( fp.name )
+            fp.write( "<result>" )
+            xml1_in = self.xml1_in.getValue()
+            if xml1_in is not None:
+                for xml1 in xml1_in:
+                    logger.debug('read xml1')
+                    with open(xml1, 'r') as fp2:
+                        logger.debug('reading content')
+                        fp.write( fp2.read() )
+            fp.write( "</result>" )
+            self.xml1_out.setValue( fp.name )
         return
         
