@@ -287,11 +287,10 @@ class InOutProcess(WPSProcess):
         # complex input
         # -------------
 
-        # TODO: needs some work ...
-        self.xml1_in = self.addComplexInput(
-            identifier="xml1",
-            title="XML 1",
-            abstract="Load XML File",
+        self.xml_upload = self.addComplexInput(
+            identifier="xml_upload",
+            title="XML Upload",
+            abstract="Upoad XML File",
             metadata=[],
             minOccurs=0,
             maxOccurs=2,
@@ -407,10 +406,10 @@ class InOutProcess(WPSProcess):
             asReference=True,
             )
 
-        self.xml1_out = self.addComplexOutput(
-            identifier="xml1",
-            title="XML File 1",
-            abstract="xml file 1",
+        self.xml_upload_out = self.addComplexOutput(
+            identifier="xml_upload",
+            title="Uploaded XML File",
+            abstract="Uploaded XML File",
             metadata=[],
             formats=[{"mimeType":"text/xml"}],
             asReference=True,
@@ -479,15 +478,15 @@ class InOutProcess(WPSProcess):
         logger.debug('write input xml1')
         xml_filename = self.mktempfile(suffix='.xml')
         with open(xml_filename, 'w') as fp:
-            xml1_in = self.xml1_in.getValue()
-            if xml1_in is not None:
-                for xml1 in xml1_in:
-                    logger.debug('read xml1')
-                    with open(xml1, 'r') as fp2:
+            xml_upload = self.xml_upload.getValue()
+            if xml_upload is not None:
+                for xml in xml_upload:
+                    logger.debug('read xml')
+                    with open(xml, 'r') as fp2:
                         logger.debug('reading content')
                         fp.write( fp2.read() )
             else:
                 fp.write( "<result>nothing</result>" )
-            self.xml1_out.setValue( fp.name )
+            self.xml_upload_out.setValue( fp.name )
         return
         
