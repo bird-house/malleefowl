@@ -6,26 +6,18 @@ import json
 from malleefowl import database
 
 class ProcessMetadata(PyWPSProcess):
-    """This process provides additional metadata for workflow processes."""
+    """This process provides additional metadata for malleefowl processes."""
 
     def __init__(self):
-        metadata = []
-        metadata.append(
-            {"title":"ClimDaPs", "href":"http://www.dkrz.de"}
-            )
-        metadata.append(
-            {"title":"Hardworking Bird Malleefowl", "href":"http://en.wikipedia.org/wiki/Malleefowl"}
-            )
-        
         PyWPSProcess.__init__(
             self,
             identifier = "org.malleefowl.metadata",
-            title = "Additional Metadata for Workflow Processes",
+            title = "Additional Metadata for Malleefowl Processes",
             version = "0.1",
             storeSupported = "true",   # async
             statusSupported = "true",  # retrieve status, needs to be true for async 
-            metadata = metadata,
-            abstract="Additional Metadata for Workflow Processes.",
+            metadata = [],
+            abstract="Additional Metadata for Malleefowl Processes.",
             grassLocation = False)
 
         # input data

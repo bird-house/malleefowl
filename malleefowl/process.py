@@ -20,16 +20,12 @@ logger = logging.getLogger(__name__)
 class WPSProcess(PyWPSProcess):
     """This is the base class for all climdaps wps processes."""
 
-    def __init__(self, identifier, title, version, metadata=[], abstract=""):
-        metadata=[
-            {"title":"Literal process"},
-            ]
-        #metadata.append(
-        #    {"title":"ClimDaPs", "href":"http://www.dkrz.de"}
-        #    )
-        #metadata.append(
-        #    {"title":"Hardworking Bird Malleefowl", "href":"http://en.wikipedia.org/wiki/Malleefowl"}
-        #    )
+    def __init__(self, identifier, title, version, metadata=[], abstract="", extra_metadata={}):
+
+        database.register_process_metadata(identifier, extra_metadata)
+        metadata.append(
+            {"title":"Hardworking Bird Malleefowl", "href":"http://en.wikipedia.org/wiki/Malleefowl"}
+            )
 
         PyWPSProcess.__init__(
             self,
@@ -95,13 +91,8 @@ class WPSProcess(PyWPSProcess):
 class SourceProcess(WPSProcess):
      """This is the base class for all source processes."""
 
-     def __init__(self, identifier, title, version, metadata=[], abstract=""):
+     def __init__(self, identifier, title, version, metadata=[], abstract="", extra_metadata={}):
         wf_identifier = identifier + ".source"
-        #metadata.append(
-        #    {"title":"C3Grid", "href":"http://www.c3grid.de"},
-        #    )
-
-        #logger.debug("init source process %s", wf_identifier)
         
         WPSProcess.__init__(
             self,
@@ -109,7 +100,8 @@ class SourceProcess(WPSProcess):
             title = title,
             version = version,
             metadata = metadata,
-            abstract=abstract)
+            abstract = abstract,
+            extra_metadata = extra_metadata)
 
         # input: source filter
         # --------------------
@@ -144,13 +136,6 @@ class WorkerProcess(WPSProcess):
                      'esgfilter': '',
                      'esgquery': '*'}):
         wf_identifier = identifier + '.worker'
-        #metadata.append(
-        #    {"title":"C3Grid", "href":"http://www.c3grid.de"},
-        #    )
-
-        #logger.debug("init worker process %s", wf_identifier)
-
-        database.register_process_metadata(wf_identifier, extra_metadata)
         
         WPSProcess.__init__(
             self,
@@ -158,7 +143,8 @@ class WorkerProcess(WPSProcess):
             title = title,
             version = version,
             metadata = metadata,
-            abstract=abstract)
+            abstract = abstract,
+            extra_metadata = extra_metadata)
 
         
         # complex input

@@ -185,17 +185,18 @@ class InOutProcess(WPSProcess):
 
     def __init__(self):
         # definition of this process
-        WPSProcess.__init__(self, 
+        WPSProcess.__init__(
+            self, 
             identifier = "org.malleefowl.test.inout",
             title="Testing all Data Types",
-            version = "0.1",
+            version = "0.2",
             # TODO: what can i do with this?
             metadata=[
                 {"title":"Foobar","href":"http://foo/bar"},
                 {"title":"Barfoo","href":"http://bar/foo"},
-                {"title":"Literal process"},
-                {"href":"http://foobar/"}],
+                ],
             abstract="Just testing data types like date, datetime etc ...",
+            extra_metadata=dict(uploads=['xml1'])
             )
 
         # Literal Input Data
