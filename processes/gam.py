@@ -55,6 +55,7 @@ class GamProcess(malleefowl.process.WorkerProcess):
             maxOccurs=1,
             maxmegabites=10,
             formats=[{"mimeType":"text/csv"}],
+            upload=True,
             )
             
         self.climin1 = self.addLiteralInput(
