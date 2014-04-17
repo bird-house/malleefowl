@@ -299,6 +299,17 @@ class InOutProcess(WPSProcess):
             upload=True,
             )
 
+        self.xml_url = self.addComplexInput(
+            identifier="xml_url",
+            title="XML File",
+            abstract="URL of XML File",
+            metadata=[],
+            minOccurs=0,
+            maxOccurs=2,
+            formats=[{"mimeType":"text/xml"}],
+            maxmegabites=2,
+            )
+
         # zero or more bounding-boxes
         # --------------------------
 
@@ -415,6 +426,15 @@ class InOutProcess(WPSProcess):
             asReference=True,
             )
 
+        self.xml_url_out = self.addComplexOutput(
+            identifier="xml_url",
+            title="XML File",
+            abstract="XML File given by URL",
+            metadata=[],
+            formats=[{"mimeType":"text/xml"}],
+            asReference=True,
+            )
+
         # bounding-box
         # --------------------------
 
@@ -474,7 +494,7 @@ class InOutProcess(WPSProcess):
             fp.close()
             self.xmlFileOut.setValue( fp.name )
 
-        # write file from input data
+        # write uploaded file from input data
         logger.debug('write input xml1')
         xml_filename = self.mktempfile(suffix='.xml')
         with open(xml_filename, 'w') as fp:
@@ -488,5 +508,20 @@ class InOutProcess(WPSProcess):
             else:
                 fp.write( "<result>nothing</result>" )
             self.xml_upload_out.setValue( fp.name )
+            
+        # write file with url from input data
+        logger.debug('write input xml_upload')
+        xml_filename = self.mktempfile(suffix='.xml')
+        with open(xml_filename, 'w') as fp:
+            xml_url = self.xml_url.getValue()
+            if xml_url is not None:
+                for xml in xml_url:
+                    logger.debug('read xml')
+                    with open(xml, 'r') as fp2:
+                        logger.debug('reading content')
+                        fp.write( fp2.read() )
+            else:
+                fp.write( "<result>nothing</result>" )
+            self.xml_url_out.setValue( fp.name )
         return
         
