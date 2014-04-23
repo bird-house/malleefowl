@@ -124,6 +124,15 @@ Coding ...
 * need common module header
 * documentation style
 
+
+Investigation
+-------------
+
+plot libs based on matplotlib:
+
+* http://stanford.edu/~mwaskom/software/seaborn/
+* http://mpld3.github.io/ 
+
 Low Priority
 ------------
 

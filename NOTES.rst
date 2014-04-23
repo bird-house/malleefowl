@@ -209,8 +209,6 @@ openlayers
 openid
 ------
 
-* http://peterhudec.github.io/authomatic/index.html
-* http://authomatic-example.appspot.com/
 * https://github.com/cd34/apex
 * http://thesoftwarestudio.com/apex/
 * http://pieceofpy.com/blog/2011/07/24/pyramid-and-velruse-for-google-authentication/
