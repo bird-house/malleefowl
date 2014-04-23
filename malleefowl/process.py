@@ -82,6 +82,10 @@ class WPSProcess(PyWPSProcess):
     def thredds_url(self):
         return config.getConfigValue("malleefowl", "threddsUrl")
 
+    @property
+    def service_url(self):
+        return config.getConfigValue("wps", "serveraddress")
+
     def irods_home(self):
         import yaml
         value = config.getConfigValue("irods", "home")

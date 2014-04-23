@@ -414,7 +414,7 @@ class UserEvalProcess(malleefowl.process.WPSProcess):
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_Evaluate",
             title = "Quality Evaluate",
-            version = "2014.04.15",
+            version = "2014.04.23",
             metadata = [],
             abstract = "Evaluates the quality check and generates metadata and quality files")
 
@@ -544,12 +544,22 @@ class UserEvalProcess(malleefowl.process.WPSProcess):
                                       )
 
         def _gather_pids_from_yaml_document(yaml_document):
+            #from malleefowl import wpsclient
+            #result_init = wpsclient.execute(
+            #    service = self.service_url,
+            #    identifier = "PIDs_from_yaml_document",
+            #    inputs = [('yaml_document', yaml_document)],
+            #    outputs = [('pids', False)]
+            #    )
+            #logger.debug(str(result_init))
+            #return(str(result_init))
+
             import yaml
             pm = pidmanager.PIDManager(database_location = DATABASE_LOCATION)
             yaml_content = yaml.safe_load(yaml_document)
             pids = pm.get_pids_dict_from_yaml_content(yaml_content)
             return(str(pids))
-
+        
         output = qcp.evaluate_quality_check(
                           data_node = self.data_node,
                           index_node = self.index_node,
@@ -760,7 +770,7 @@ class PIDManagerFileProcess(malleefowl.process.WPSProcess):
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "PID_for_file",
             title = "Get a PID for a file",
-            version = "2014.04.15",
+            version = "2014.04.22",
             metadata = [],
             abstract = "Get a PID for a given local file and the url it will be available at.")
 
@@ -775,9 +785,9 @@ class PIDManagerFileProcess(malleefowl.process.WPSProcess):
                 type = types.StringType,
                 )
 
-        self.server_filename = self.addLiteralInput(
-                identifier = "server_filename",
-                title = "Server filename",
+        self.pid_resolver_url = self.addLiteralInput(
+                identifier = "pid_resolver_url",
+                title = "PID resolver url",
                 minOccurs = 1,
                 maxOccurs = 1,
                 default = ("ipcc-ar5.dkrz.de/thredds/fileServer/cordex/AFR-44/CLMcom/MPI-ESM-LR/" + 
@@ -828,9 +838,9 @@ class PIDManagerFileProcess(malleefowl.process.WPSProcess):
                 prefix = self.prefix.getValue(),
                 path = self.path.getValue(),
                 with_first_run = self.with_first_run)
-        server_filename = self.server_filename.getValue()
+        pid_resolver_url = self.pid_resolver_url.getValue()
         local_filename = self.local_filename.getValue()
-        pid, known = self.pidmanager.get_pid_file(local_filename, server_filename)
+        pid, known = self.pidmanager.get_pid_file(local_filename, pid_resolver_url)
         self.pid.setValue(pid)
 
 class PIDManagerDatasetProcess(malleefowl.process.WPSProcess):
@@ -838,7 +848,7 @@ class PIDManagerDatasetProcess(malleefowl.process.WPSProcess):
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "PID_for_dataset",
             title = "Get a PID for a dataset",
-            version = "2014.04.15",
+            version = "2014.04.22",
             metadata = [],
             abstract = "Get a PID for a dataset title and the comma separated list of PIDs in it.")
 
@@ -847,7 +857,7 @@ class PIDManagerDatasetProcess(malleefowl.process.WPSProcess):
                 title = "Dataset title",
                 minOccurs = 1,
                 maxOccurs = 1,
-                default = "cordex.AFR-44.CLMcom.MPI-ESM-LR.historical.r0i0p0.CCLM4-8-17-v1.fx.orog",
+                #default = "cordex.AFR-44.CLMcom.MPI-ESM-LR.historical.r0i0p0.CCLM4-8-17-v1.fx.orog",
                 type = types.StringType,
                 )
 
@@ -856,7 +866,7 @@ class PIDManagerDatasetProcess(malleefowl.process.WPSProcess):
                 title = "Dataset file PIDs list",
                 minOccurs = 1,
                 maxOccurs = 1,
-                default = "10876/CORDEX-5p8d-09bx-u4qg-xhhx",
+                #default = "10876/CORDEX-5p8d-09bx-u4qg-xhhx",
                 abstract = "The PIDs in the dataset",
                 type = types.StringType,
                 )
@@ -1169,7 +1179,7 @@ class QCProcessChain(malleefowl.process.WPSProcess):
             identifier = "service",
             title = "Service",
             abstract = "The address of the WPS server, where the used methods are available.",
-            default = "http://localhost:8090/wps",
+            default = self.service_url,
             type = types.StringType,
             )
        
