@@ -708,7 +708,7 @@ class UserCleanupProcess(malleefowl.process.WPSProcess):
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_Cleanup", 
             title = "Quality Cleanup",
-            version = "2014.04.22",
+            version = "2014.04.23",
             metadata = [],
             abstract = "Remove data by Session ID or your complete work data.")
            
@@ -726,11 +726,11 @@ class UserCleanupProcess(malleefowl.process.WPSProcess):
             default = "Needed_if_not_defaultuser",
             )
 
-        self.session_ids = self.addLiteralInput(
-            identifier = "session_ids",
-            title = "Session IDs",
+        self.session_id = self.addLiteralInput(
+            identifier = "session_id",
+            title = "Session ID",
             abstract = ("IDs for the to remove work data."),
-            minOccurs = 0,
+            minOccurs = 1,
             type = types.StringType,
             )
         
@@ -740,25 +740,14 @@ class UserCleanupProcess(malleefowl.process.WPSProcess):
             statusmethod("Running",cur,end,self)
         
         username = get_username(self)
-        session_ids = self.session_ids.getValue()
-        if session_ids == None:
-            session_ids = []
-        if isinstance(session_ids, str):
-            session_ids = session_ids.split(",")
-        cur = 0
-        end = len(session_ids)
-
-        for par_id in session_ids:
-            qcp = qcprocesses.QCProcesses(
-                                      username = username,
-                                      statusmethod = statmethod,
-                                      work_dir = WORK_DIR,
-                                      session_id = par_id,
-                                      )
-            qcp.remove_process_dir()
-            percent = cur*100.0/end#end is not 0, as there is at least one element in session_ids
-            self.status.set(msg = "Finished", percentDone = percent, propagate = True)
-            cur += 1
+        session_id = self.session_id.getValue()
+        qcp = qcprocesses.QCProcesses(
+                                  username = username,
+                                  statusmethod = statmethod,
+                                  work_dir = WORK_DIR,
+                                  session_id = session_id,
+                                  )
+        qcp.remove_process_dir()
         self.status.set(msg = "Finished", percentDone = 100, propagate = True)
         return
 
@@ -1146,7 +1135,6 @@ class QCProcessChain(malleefowl.process.WPSProcess):
             identifier = "replica",
             title = "Replica",
             type = types.BooleanType,
-            minOccurs = 0,
             )
         
         self.latest = self.addLiteralInput(
@@ -1154,7 +1142,6 @@ class QCProcessChain(malleefowl.process.WPSProcess):
             title = "Latest",
             type = types.BooleanType,
             default = True,
-            minOccurs = 0,
             )
 
         self.publish_metadata = self.addLiteralInput(
@@ -1162,15 +1149,13 @@ class QCProcessChain(malleefowl.process.WPSProcess):
             title = "Publish metadata",
             type = types.BooleanType,
             default = True,
-            minOccurs = 0,
             )
 
-        self.publish_qualitydata = self.addLiteralInput(
-            identifier = "publish_qualitydata",
+        self.publish_quality = self.addLiteralInput(
+            identifier = "publish_quality",
             title = "Publish quality data",
             type = types.BooleanType,
             default = True,
-            minOccurs = 0,
             )
 
         self.cleanup = self.addLiteralInput(
@@ -1178,7 +1163,6 @@ class QCProcessChain(malleefowl.process.WPSProcess):
             title = "Clean afterwards",
             abstract = "Removes the work data after the other steps have finished.",
             type = types.BooleanType,
-            minOccurs = 0,
             )
 
         self.service = self.addLiteralInput(
@@ -1224,21 +1208,22 @@ class QCProcessChain(malleefowl.process.WPSProcess):
         if lock == '<colander.null>' or lock == None:
             lock =  ""
         #Due to using minOccurs=0 the not checked will be treated as None
+        #If it is checked it will return boolean True.
         #Somehow strings are expected instead of booleans for the wps calls 
-        replica = self.replica.getValue() is not None
+        replica = self.replica.getValue() == True
         replica = str(replica)
-        latest = self.latest.getValue() is not None
+        latest = self.latest.getValue() == True
         latest = str(latest)
-        #the enable flags are fine with boolean
-        publish_qualitydata = self.publish_qualitydata.getValue is not None
-        publish_metadata = self.publish_metadata.getValue is not None
-        cleanup = self.cleanup.getValue() is not None
+        #the enable flags are fine with boolean. However if the datatype is another it will set False.
+        publish_quality = self.publish_quality.getValue() == True 
+        publish_metadata = self.publish_metadata.getValue() == True
+        cleanup = self.cleanup.getValue() == True
         #weighting of steps. Higher value is longer expected time to run.
         step_weights = { "irods_rsync": 5, "QC_Init" : 1, "QC_Check": 8, "QC_Evaluate": 3, 
                          "QC_Publish_Meta": 1, "QC_Publish_Quality": 1, "QC_Cleanup": 1}
         #which steps are used
         steps_used = ["irods_rsync", "QC_Init", "QC_Check", "QC_Evaluate"]
-        if publish_qualitydata:
+        if publish_quality:
             steps_used.append("QC_Publish_Quality")
         if publish_metadata:
             steps_used.append("QC_Publish_Meta")
@@ -1253,6 +1238,7 @@ class QCProcessChain(malleefowl.process.WPSProcess):
         wps = WebProcessingService(url = service)
 
         process_log = open(self.mktempfile(suffix = ".txt"), "w")
+
         #################
         #Run iRods rsync#
         #################
@@ -1368,7 +1354,7 @@ class QCProcessChain(malleefowl.process.WPSProcess):
         else:
             process_log.write("\n")
             process_log.write("QC_Publish_Meta was disabled.\n")
-        if publish_qualitydata:
+        if publish_quality:
             process_log.write("\n")
             process_log.write("Running QC_Publish_Quality\n")
             process_log.write("**************************\n")
@@ -1393,19 +1379,13 @@ class QCProcessChain(malleefowl.process.WPSProcess):
             process_log.write("\n")
             process_log.write("Running QC_Cleanup\n")
             process_log.write("******************\n")
-            identifier = "QC_Publish_Quality"
+            identifier = "QC_Cleanup"
             inputs = [("username", username), ("token", token), ("session_id", session_id)]
             outputs = []
             statusmethod("Running " + identifier, current, end, self) 
             execution = wps.execute(identifier = identifier, inputs = inputs, output = outputs)
             monitorExecution(execution, sleepSecs=1)
-            #outputsTrueIdentifier = [oid for (oid, ref) in outputs if ref]
-            #for item in execution.processOutputs:
-            #    if item.identifier in outputsTrueIdentifier:
-            #        data = item.reference
-            #    else:#For each item the data list will only have one element.
-            #        data = item.data[0] 
-            #    process_log.write(str(item.identifier)+" = " + data + "\n")
+            process_log.write("Finished QC_Cleanup")
             current += step_weights["QC_Cleanup"]
         else:
             process_log.write("\n")
