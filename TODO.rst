@@ -16,12 +16,14 @@ Helsinki
 Bugs
 ----
 
+* on update we get message "pywps is dirty". put generated files in gitignore
 * fix irods configuration (home, generate irodsEnv, irodsA)
 * DONE: wms layer process should use token
 
 Common
 ------
 
+* disable php-fpm
 * remove data on server: wpsoutput, files quota, cache, ... 
 maybe via wps service
 * split wps installer for common, c3meta, qc, csc, ...
