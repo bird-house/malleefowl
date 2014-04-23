@@ -1435,6 +1435,297 @@ class QCProcessChain(malleefowl.process.WPSProcess):
         process_log.close()
         self.process_log.setValue(process_log)
 
+class QCYamlProcessChain(malleefowl.process.WPSProcess):
+    def __init__(self):
+        malleefowl.process.WPSProcess.__init__(self,
+            identifier = "QC_Yaml_Chain",
+            title = "Run the QC chain starting with Yaml logs",
+            version =  "2014.04.23",
+            metadata = [],
+            )
+
+        self.username = self.addLiteralInput(
+            identifier = "username",
+            title = "Username",
+            default = "defaultuser",
+            type = types.StringType,
+            abstract = ("Name to access your own processing directory.")
+            )
+
+        self.token = self.addLiteralInput(
+            identifier = "token",
+            title = "Token",
+            default = "Needed_if_not_defaultuser",
+            type = types.StringType,
+            abstract = "The token authenticates you as the user. defaultuser accepts any token."
+            )
+
+        self.session_id = self.addLiteralInput(
+            identifier = "session_id",
+            title = "Session ID",
+            default = "web1",
+            type = types.StringType,
+            abstract = ("To run multiple processes in parallel each requires its own directory." +
+                        "The directory is placed in your user directory. If defaultuser is choosen, " +
+                        "collisions with names are more likely. Be careful when choosing a name."),
+            minOccurs = 1, 
+            maxOccurs = 1,
+            )
+
+        self.project = self.addLiteralInput(
+            identifier = "project",
+            title = "Project",
+            abstract = "Currently only CORDEX is fully supported.",
+            default = "CORDEX",
+            allowedValues = ["CORDEX"],
+            type = types.StringType,
+            )
+
+        self.yamllogs = self.addLiteralInput(
+            identifier = "yamllogs",
+            title = "Yaml logfiles list",
+            type = types.StringType,
+            )
+       
+        self.prefix_old = self.addLiteralInput(
+            identifier = "prefix_old",
+            title = "Old prefix",
+            type = types.StringType,
+            minOccurs = 0,
+            default = "",
+            )
+
+        self.prefix_new = self.addLiteralInput(
+            identifier = "prefix_new",
+            title = "New prefix",
+            type = types.StringType,
+            default = "",
+            minOccurs = 0,
+            )
+        
+        self.replica = self.addLiteralInput(
+            identifier = "replica",
+            title = "Replica",
+            type = types.BooleanType,
+            )
+        
+        self.latest = self.addLiteralInput(
+            identifier = "latest",
+            title = "Latest",
+            type = types.BooleanType,
+            default = True,
+            )
+
+        self.publish_metadata = self.addLiteralInput(
+            identifier = "publish_metadata",
+            title = "Publish metadata",
+            type = types.BooleanType,
+            default = True,
+            )
+
+        self.publish_quality = self.addLiteralInput(
+            identifier = "publish_quality",
+            title = "Publish quality data",
+            type = types.BooleanType,
+            default = True,
+            )
+
+        self.cleanup = self.addLiteralInput(
+            identifier = "cleanup",
+            title = "Clean afterwards",
+            abstract = "Removes the work data after the other steps have finished.",
+            type = types.BooleanType,
+            )
+
+        self.service = self.addLiteralInput(
+            identifier = "service",
+            title = "Service",
+            abstract = "The address of the WPS server, where the used methods are available.",
+            default = self.service_url,
+            type = types.StringType,
+            )
+       
+        self.process_log = self.addComplexOutput(
+            identifier = "process_log",
+            title = "Log of the process containing system calls that equal the actions performed.",
+            formats = [{"mimeType":"text/plain"}],
+            asReference = True,
+            )
+
+        
+
+    def execute(self):
+        from owslib.wps import WebProcessingService, monitorExecution 
+        #alternative : from malleefowl import wpsclient see unit_test.test_qualityprocesses.py
+        """
+        For each process an WPS call is made using the owslib. 
+
+        from the WebProcessingService SourceDoc:
+        execute(self, identifier, inputs, output=None, request=None, response=None):
+            identifier: the requested process identifier
+            inputs: list of process inputs as (key, value) tuples 
+            output: optional identifier for process output reference 
+        """
+        service = self.service.getValue()
+        username = get_username(self)
+        token = self.token.getValue()
+        project = self.project.getValue()
+        yamllogs = self.yamllogs.getValue()
+        prefix_old = self.prefix_old.getValue()
+        prefix_new = self.prefix_new.getValue()
+        session_id = self.session_id.getValue()
+        #Due to using minOccurs=0 the not checked will be treated as None
+        #If it is checked it will return boolean True.
+        #Somehow strings are expected instead of booleans for the wps calls 
+        replica = self.replica.getValue() == True
+        replica = str(replica)
+        latest = self.latest.getValue() == True
+        latest = str(latest)
+        #the enable flags are fine with boolean. However if the datatype is another it will set False.
+        publish_quality = self.publish_quality.getValue() == True 
+        publish_metadata = self.publish_metadata.getValue() == True
+        cleanup = self.cleanup.getValue() == True
+        #weighting of steps. Higher value is longer expected time to run.
+        step_weights = { "QC_Init_With_Yamllogs": 1, "QC_Evaluate": 3, 
+                         "QC_Publish_Meta": 1, "QC_Publish_Quality": 1, "QC_Cleanup": 1}
+        #which steps are used
+        steps_used = ["QC_Init_With_Yamllogs", "QC_Evaluate"]
+        if publish_quality:
+            steps_used.append("QC_Publish_Quality")
+        if publish_metadata:
+            steps_used.append("QC_Publish_Meta")
+        if cleanup:
+            steps_used.append("QC_Cleanup")
+        #set up the status 
+        current = 0
+        end = 0
+        for step in steps_used:
+            end += step_weights[step]
+        #get the wps
+        wps = WebProcessingService(url = service)
+
+        process_log = open(self.mktempfile(suffix = ".txt"), "w")
+
+        ###########################
+        #Run QC_Init_With_Yamllogs#
+        ###########################
+        process_log.write("\n")
+        process_log.write("Running QC_Init_With_Yamllogs\n")
+        process_log.write("*****************************\n")
+        yamllogs_list = yamllogs.split(",")
+        yamllogs_inputs = [("yamllogs", str(x.strip())) for x in yamllogs_list]
+        identifier = "QC_Init_With_Yamllogs"
+        inputs = [("username", username), ("token", token), ("session_id", session_id),
+                  ("prefix_old", prefix_old) , ("prefix_new", prefix_new),
+                  ("project", project)]
+        inputs += yamllogs_inputs
+        outputs = [("all_okay", False), ("process_log", True)]
+        statusmethod("Running " + identifier, current, end, self) 
+        execution = wps.execute(identifier = identifier, inputs = inputs, output = outputs)
+        monitorExecution(execution, sleepSecs=1)
+        for item in execution.processOutputs:
+            if item.identifier in ["process_log"]: 
+                data = item.reference
+            else:#all_okay only returns a single value. The data list will only have one element.
+                data = item.data[0]
+            process_log.write(str(item.identifier)+" = " + data + "\n")
+        current += step_weights["QC_Init_With_Yamllogs"]
+        #################
+        #Run QC_Evaluate#
+        #################
+        process_log.write("\n")
+        process_log.write("Running QC_Evaluate\n")
+        process_log.write("*******************\n")
+        identifier = "QC_Evaluate"
+        inputs = [("username", username), ("token", token), ("session_id", session_id),
+                  ("replica", replica), ("latest", latest)]
+        outputs = [("found_tags", False), ("fail_count", False), ("pass_count", False),
+                   ("omit_count", False), ("fixed_count", False), ("has_issues", False),
+                   ("found_pids", True),
+                   ("process_log", True), ("to_publish_metadata_files", True), 
+                   ("to_publish_qc_files", True), ]
+        statusmethod("Running " + identifier, current, end, self) 
+        execution = wps.execute(identifier = identifier, inputs = inputs, output = outputs)
+        monitorExecution(execution, sleepSecs=1)
+        outputsTrueIdentifier = [oid for (oid, ref) in outputs if ref]
+        for item in execution.processOutputs:
+            if item.identifier in outputsTrueIdentifier:
+                data = item.reference
+            else:#For each item the data list will only have one element.
+                data = item.data[0] 
+            process_log.write(str(item.identifier)+" = " + data + "\n")
+        current += step_weights["QC_Evaluate"]
+        #####################
+        #Run QC_Publish_Meta#
+        #####################
+        if publish_metadata:
+            process_log.write("\n")
+            process_log.write("Running QC_Publish_Meta\n")
+            process_log.write("***********************\n")
+            identifier = "QC_Publish_Meta"
+            inputs = [("username", username), ("token", token), ("session_id", session_id)]
+            outputs = [("process_log", True), ("wget_string", False)]
+            statusmethod("Running " + identifier, current, end, self) 
+            execution = wps.execute(identifier = identifier, inputs = inputs, output = outputs)
+            monitorExecution(execution, sleepSecs=1)
+            outputsTrueIdentifier = [oid for (oid, ref) in outputs if ref]
+            for item in execution.processOutputs:
+                if item.identifier in outputsTrueIdentifier:
+                    data = item.reference
+                else:#For each item the data list will only have one element.
+                    data = item.data[0] 
+                process_log.write(str(item.identifier)+" = " + data + "\n")
+            current += step_weights["QC_Publish_Meta"]
+        else:
+            process_log.write("\n")
+            process_log.write("QC_Publish_Meta was disabled.\n")
+        ########################
+        #Run QC_Publish_Quality#
+        ########################
+        if publish_quality:
+            process_log.write("\n")
+            process_log.write("Running QC_Publish_Quality\n")
+            process_log.write("**************************\n")
+            identifier = "QC_Publish_Quality"
+            inputs = [("username", username), ("token", token), ("session_id", session_id)]
+            outputs = [("process_log", True)]
+            statusmethod("Running " + identifier, current, end, self) 
+            execution = wps.execute(identifier = identifier, inputs = inputs, output = outputs)
+            monitorExecution(execution, sleepSecs=1)
+            outputsTrueIdentifier = [oid for (oid, ref) in outputs if ref]
+            for item in execution.processOutputs:
+                if item.identifier in outputsTrueIdentifier:
+                    data = item.reference
+                else:#For each item the data list will only have one element.
+                    data = item.data[0] 
+                process_log.write(str(item.identifier)+" = " + data + "\n")
+            current += step_weights["QC_Publish_Quality"]
+        else:
+            process_log.write("\n")
+            process_log.write("QC_Publish_Quality was disabled.\n")
+        ################
+        #Run QC_Cleanup#
+        ################
+        if cleanup:
+            process_log.write("\n")
+            process_log.write("Running QC_Cleanup\n")
+            process_log.write("******************\n")
+            identifier = "QC_Cleanup"
+            inputs = [("username", username), ("token", token), ("session_id", session_id)]
+            outputs = []
+            statusmethod("Running " + identifier, current, end, self) 
+            execution = wps.execute(identifier = identifier, inputs = inputs, output = outputs)
+            monitorExecution(execution, sleepSecs=1)
+            process_log.write("Finished QC_Cleanup\n")
+            current += step_weights["QC_Cleanup"]
+        else:
+            process_log.write("\n")
+            process_log.write("QC_Cleanup was disabled.\n")
+        #finish
+        process_log.write("\n")
+        process_log.write("Finished processing.\n")
+        process_log.close()
+        self.process_log.setValue(process_log)
 
 ##################
 # Helper methods #
