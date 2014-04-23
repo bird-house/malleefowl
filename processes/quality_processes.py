@@ -544,21 +544,19 @@ class UserEvalProcess(malleefowl.process.WPSProcess):
                                       )
 
         def _gather_pids_from_yaml_document(yaml_document):
-            #from malleefowl import wpsclient
-            #result_init = wpsclient.execute(
-            #    service = self.service_url,
-            #    identifier = "PIDs_from_yaml_document",
-            #    inputs = [('yaml_document', yaml_document)],
-            #    outputs = [('pids', False)]
-            #    )
-            #logger.debug(str(result_init))
-            #return(str(result_init))
-
-            import yaml
-            pm = pidmanager.PIDManager(database_location = DATABASE_LOCATION)
-            yaml_content = yaml.safe_load(yaml_document)
-            pids = pm.get_pids_dict_from_yaml_content(yaml_content)
-            return(str(pids))
+            from malleefowl import wpsclient
+            result_init = wpsclient.execute(
+                service = self.service_url,
+                identifier = "PIDs_from_yaml_document",
+                inputs = [('yaml_document', yaml_document)],
+                outputs = [('pids', False)]
+                )
+            return(result_init[0]["data"][0])
+            #import yaml
+            #pm = pidmanager.PIDManager(database_location = DATABASE_LOCATION)
+            #yaml_content = yaml.safe_load(yaml_document)
+            #pids = pm.get_pids_dict_from_yaml_content(yaml_content)
+            #return(str(pids))
         
         output = qcp.evaluate_quality_check(
                           data_node = self.data_node,
