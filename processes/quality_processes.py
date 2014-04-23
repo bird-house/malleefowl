@@ -7,8 +7,8 @@ Creation date: 21.01.2014
 import types
 import malleefowl.process 
 import qc_processes.qcprocesses as qcprocesses
-import qc_processes.pidmanager as pidmanager
-import qc_processes.directory2datasetyaml as directory2datasetyaml
+import pidmanager.pidmanager as pidmanager
+#import qc_processes.directory2datasetyaml as directory2datasetyaml
 from pywps import config
 
 import os
@@ -544,21 +544,19 @@ class UserEvalProcess(malleefowl.process.WPSProcess):
                                       )
 
         def _gather_pids_from_yaml_document(yaml_document):
-            #from malleefowl import wpsclient
-            #result_init = wpsclient.execute(
-            #    service = self.service_url,
-            #    identifier = "PIDs_from_yaml_document",
-            #    inputs = [('yaml_document', yaml_document)],
-            #    outputs = [('pids', False)]
-            #    )
-            #logger.debug(str(result_init))
-            #return(str(result_init))
-
-            import yaml
-            pm = pidmanager.PIDManager(database_location = DATABASE_LOCATION)
-            yaml_content = yaml.safe_load(yaml_document)
-            pids = pm.get_pids_dict_from_yaml_content(yaml_content)
-            return(str(pids))
+            from malleefowl import wpsclient
+            result = wpsclient.execute(
+                service = self.service_url,#assuming the PIDManager WPS processes run on the same WPS
+                identifier = "PIDs_from_yaml_document",
+                inputs = [('yaml_document', yaml_document)],
+                outputs = [('pids', False)]
+                )
+            return(result[0]["data"][0])
+            #import yaml
+            #pm = pidmanager.PIDManager(database_location = DATABASE_LOCATION)
+            #yaml_content = yaml.safe_load(yaml_document)
+            #pids = pm.get_pids_dict_from_yaml_content(yaml_content)
+            #return(str(pids))
         
         output = qcp.evaluate_quality_check(
                           data_node = self.data_node,
@@ -656,7 +654,7 @@ class UserMetaPublisherProcess(malleefowl.process.WPSProcess):
         malleefowl.process.WPSProcess.__init__(self,
             identifier = "QC_Publish_Meta", 
             title = "Quality Publish Metadata-XML",
-            version = "2014.04.22",
+            version = "2014.04.23",
             metadata = [],
             abstract = abstract_ml)
            
@@ -688,6 +686,13 @@ class UserMetaPublisherProcess(malleefowl.process.WPSProcess):
             formats = [{"mimeType":"text/plain"}],
             asReference = True,
             )
+        #currently only for use with switftclient
+        self.wget_string = self.addLiteralOutput(
+            identifier = "wget_string",
+            title = "wget download command",
+            type = types.StringType,
+            default = "Not set",
+            )
 
     def execute(self):
         self.status.set(msg = "Initiate process", percentDone = 0, propagate = True)
@@ -706,8 +711,23 @@ class UserMetaPublisherProcess(malleefowl.process.WPSProcess):
                           subdir = "metaxml",
                           keyfile = os.path.join(climdapsabs,"stvariables.conf")
                          )
-
+        #TODO: for testing implemented here
         process_log = _create_server_copy_of_file(output["process_log_name"],self)
+        to_publish_meta = os.path.join(qcp.process_dir,"to_publish_metadata_files.log")
+        swift_meta_url = ("https://cloud.dkrz.de/v1/dkrz_b35af79a-ed58-4431-bc04-b2d1395d2073/" +
+                          "QCResults/metaxml/")
+        wget_string = "wget --no-check-certificate -N "
+        f = open(to_publish_meta, "r")
+        lines = f.readlines()
+        for line in lines:
+            line = line.rstrip("\n")
+            basename = os.path.basename(line)
+            wget_string += swift_meta_url + basename + " "
+
+        self.wget_string.setValue(wget_string)
+        #end TODO
+
+
         self.process_log.setValue(process_log)
 
         return
@@ -1352,7 +1372,7 @@ class QCProcessChain(malleefowl.process.WPSProcess):
             process_log.write("***********************\n")
             identifier = "QC_Publish_Meta"
             inputs = [("username", username), ("token", token), ("session_id", session_id)]
-            outputs = [("process_log", True)]
+            outputs = [("process_log", True), ("wget_string", False)]
             statusmethod("Running " + identifier, current, end, self) 
             execution = wps.execute(identifier = identifier, inputs = inputs, output = outputs)
             monitorExecution(execution, sleepSecs=1)
