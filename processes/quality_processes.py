@@ -7,8 +7,8 @@ Creation date: 21.01.2014
 import types
 import malleefowl.process 
 import qc_processes.qcprocesses as qcprocesses
-import qc_processes.pidmanager as pidmanager
-import qc_processes.directory2datasetyaml as directory2datasetyaml
+import pidmanager.pidmanager as pidmanager
+#import qc_processes.directory2datasetyaml as directory2datasetyaml
 from pywps import config
 
 import os
@@ -545,13 +545,13 @@ class UserEvalProcess(malleefowl.process.WPSProcess):
 
         def _gather_pids_from_yaml_document(yaml_document):
             from malleefowl import wpsclient
-            result_init = wpsclient.execute(
-                service = self.service_url,
+            result = wpsclient.execute(
+                service = self.service_url,#assuming the PIDManager WPS processes run on the same WPS
                 identifier = "PIDs_from_yaml_document",
                 inputs = [('yaml_document', yaml_document)],
                 outputs = [('pids', False)]
                 )
-            return(result_init[0]["data"][0])
+            return(result[0]["data"][0])
             #import yaml
             #pm = pidmanager.PIDManager(database_location = DATABASE_LOCATION)
             #yaml_content = yaml.safe_load(yaml_document)
