@@ -1112,15 +1112,15 @@ class QCProcessChain(malleefowl.process.WPSProcess):
             type = types.StringType,
             )
 
-        self.iRods_home = self.addLiteralInput(
-            identifier = "iRods_home",
+        self.irods_home = self.addLiteralInput(
+            identifier = "irods_home",
             title = "iRods Home",
             type = types.StringType,
             default = "qc_dummy_DKRZ",#TODO remove after testing
             )
        
-        self.iRods_collection = self.addLiteralInput(
-            identifier = "iRods_collection",
+        self.irods_collection = self.addLiteralInput(
+            identifier = "irods_collection",
             title = "iRods collection",
             type = types.StringType,
             default = "qc_test_20140416",#TODO remove after testing
@@ -1214,8 +1214,8 @@ class QCProcessChain(malleefowl.process.WPSProcess):
         username = get_username(self)
         token = self.token.getValue()
         project = self.project.getValue()
-        iRods_home = self.iRods_home.getValue()
-        iRods_collection = self.iRods_collection.getValue()
+        irods_home = self.irods_home.getValue()
+        irods_collection = self.irods_collection.getValue()
         session_id = self.session_id.getValue()
         select = self.select.getValue()
         lock = self.lock.getValue()
@@ -1234,10 +1234,10 @@ class QCProcessChain(malleefowl.process.WPSProcess):
         publish_metadata = self.publish_metadata.getValue is not None
         cleanup = self.cleanup.getValue() is not None
         #weighting of steps. Higher value is longer expected time to run.
-        step_weights = { "iRods_rsync": 5, "QC_Init" : 1, "QC_Check": 8, "QC_Evaluate": 3, 
+        step_weights = { "irods_rsync": 5, "QC_Init" : 1, "QC_Check": 8, "QC_Evaluate": 3, 
                          "QC_Publish_Meta": 1, "QC_Publish_Quality": 1, "QC_Cleanup": 1}
         #which steps are used
-        steps_used = ["iRods_rsync", "QC_Init", "QC_Check", "QC_Evaluate"]
+        steps_used = ["irods_rsync", "QC_Init", "QC_Check", "QC_Evaluate"]
         if publish_qualitydata:
             steps_used.append("QC_Publish_Quality")
         if publish_metadata:
@@ -1260,7 +1260,7 @@ class QCProcessChain(malleefowl.process.WPSProcess):
         logger.debug("Running iRods rsync\n")
         process_log.write("*******************\n")
         identifier = "org.malleefowl.irods.rsync"
-        inputs = [("token", token), ("home", iRods_home), ("collection", iRods_collection)]
+        inputs = [("token", token), ("home", irods_home), ("collection", irods_collection)]
         outputs = [("output", False)]
         statusmethod("Running " + identifier, current, end, self) 
         execution = wps.execute(identifier = identifier, inputs = inputs, output = outputs)
@@ -1275,7 +1275,7 @@ class QCProcessChain(malleefowl.process.WPSProcess):
            if data_path[-len(path_end):] != path_end:
                data_path += "/CORDEX"
         process_log.write("data_path = " + data_path + "\n") 
-        current += step_weights["iRods_rsync"]
+        current += step_weights["irods_rsync"]
         #############
         #Run QC_Init#
         #############
@@ -1306,12 +1306,12 @@ class QCProcessChain(malleefowl.process.WPSProcess):
         identifier = "QC_Check"
         inputs = [("username", username), ("token", token), ("session_id", session_id),
                   ("project", project)]
+        if select != "":
+            inputs.append(("select", select))
+        if lock != "":
+            inputs.append(("lock", lock))
         outputs = [("qc_call", False), ("qc_call_exit_code", False), ("error_messages", False),
                    ("qc_svn_version", False), ("process_log", True)]
-        if select != "":
-            outputs.append(("select", select))
-        if lock != "":
-            outputs.append(("lock", lock))
         statusmethod("Running " + identifier, current, end, self) 
         execution = wps.execute(identifier = identifier, inputs = inputs, output = outputs)
         monitorExecution(execution, sleepSecs=1)
