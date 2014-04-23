@@ -1385,7 +1385,7 @@ class QCProcessChain(malleefowl.process.WPSProcess):
             statusmethod("Running " + identifier, current, end, self) 
             execution = wps.execute(identifier = identifier, inputs = inputs, output = outputs)
             monitorExecution(execution, sleepSecs=1)
-            process_log.write("Finished QC_Cleanup")
+            process_log.write("Finished QC_Cleanup\n")
             current += step_weights["QC_Cleanup"]
         else:
             process_log.write("\n")
