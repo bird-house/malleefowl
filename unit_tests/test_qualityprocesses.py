@@ -5,7 +5,7 @@ from processes.quality_processes import UserInitProcess
 from processes.quality_processes import UserCheckProcess
 from processes.quality_processes import UserEvalProcess
 from processes.quality_processes import UserInitWithYamlLogsProcess
-from processes.quality_processes import UserRemoveDataProcess
+from processes.quality_processes import UserCleanupProcess
 from nose.plugins.attrib import attr
 from __init__ import SERVICE
 from malleefowl import wpsclient
@@ -87,7 +87,7 @@ def test_chains():
     ##remove the test directories
     wpsclient.execute(
         service = SERVICE,
-        identifier = "QC_RemoveData",
+        identifier = "QC_Cleanup",
         inputs = [('parallel_ids', 'unittest'), ('parallel_ids', 'unittest2')],
         outputs = []
         )
