@@ -1333,6 +1333,9 @@ class QCProcessChain(malleefowl.process.WPSProcess):
                 data = item.data[0] 
             process_log.write(str(item.identifier)+" = " + data + "\n")
         current += step_weights["QC_Evaluate"]
+        #####################
+        #Run QC_Publish_Meta#
+        #####################
         if publish_metadata:
             process_log.write("\n")
             process_log.write("Running QC_Publish_Meta\n")
@@ -1354,6 +1357,9 @@ class QCProcessChain(malleefowl.process.WPSProcess):
         else:
             process_log.write("\n")
             process_log.write("QC_Publish_Meta was disabled.\n")
+        ########################
+        #Run QC_Publish_Quality#
+        ########################
         if publish_quality:
             process_log.write("\n")
             process_log.write("Running QC_Publish_Quality\n")
@@ -1375,6 +1381,9 @@ class QCProcessChain(malleefowl.process.WPSProcess):
         else:
             process_log.write("\n")
             process_log.write("QC_Publish_Quality was disabled.\n")
+        ################
+        #Run QC_Cleanup#
+        ################
         if cleanup:
             process_log.write("\n")
             process_log.write("Running QC_Cleanup\n")
@@ -1390,11 +1399,6 @@ class QCProcessChain(malleefowl.process.WPSProcess):
         else:
             process_log.write("\n")
             process_log.write("QC_Cleanup was disabled.\n")
-
-
-
-
-
         #finish
         process_log.write("\n")
         process_log.write("Finished processing.\n")
