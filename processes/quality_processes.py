@@ -1273,7 +1273,6 @@ class QCProcessChain(malleefowl.process.WPSProcess):
         #Run iRods rsync#
         #################
         process_log.write("Running iRods rsync\n")
-        logger.debug("Running iRods rsync\n")
         process_log.write("*******************\n")
         identifier = "org.malleefowl.irods.rsync"
         inputs = [("token", token), ("home", irods_home), ("collection", irods_collection)]
@@ -1297,7 +1296,6 @@ class QCProcessChain(malleefowl.process.WPSProcess):
         #############
         process_log.write("\n")
         process_log.write("Running QC_Init\n")
-        logger.debug("Running QC_Init\n")
         process_log.write("***************\n")
         identifier = "QC_Init"
         inputs = [("username", username), ("token", token), ("session_id", session_id),
@@ -1619,6 +1617,8 @@ class QCYamlProcessChain(malleefowl.process.WPSProcess):
                   ("prefix_old", prefix_old) , ("prefix_new", prefix_new),
                   ("project", project)]
         inputs += yamllogs_inputs
+        #filter empty values
+        inputs = [(x,y) for (x,y) in inputs if y!= ""]
         outputs = [("all_okay", False), ("process_log", True)]
         statusmethod("Running " + identifier, current, end, self) 
         execution = wps.execute(identifier = identifier, inputs = inputs, output = outputs)
