@@ -8,12 +8,13 @@ import types
 import malleefowl.process 
 import qc_processes.qcprocesses as qcprocesses
 import pidmanager.pidmanager as pidmanager
-#import qc_processes.directory2datasetyaml as directory2datasetyaml
 from pywps import config
 
 import os
+import yaml
 from malleefowl import tokenmgr
 from malleefowl import wpslogging as logging
+from owslib.wps import WebProcessingService, monitorExecution 
 logger = logging.getLogger(__name__)
 
 curdir = os.path.dirname(__file__)
@@ -552,11 +553,6 @@ class UserEvalProcess(malleefowl.process.WPSProcess):
                 outputs = [('pids', False)]
                 )
             return(result[0]["data"][0])
-            #import yaml
-            #pm = pidmanager.PIDManager(database_location = DATABASE_LOCATION)
-            #yaml_content = yaml.safe_load(yaml_document)
-            #pids = pm.get_pids_dict_from_yaml_content(yaml_content)
-            #return(str(pids))
         
         output = qcp.evaluate_quality_check(
                           data_node = self.data_node,
@@ -1021,7 +1017,6 @@ class PIDManagerPIDsFromYamlDocumentProcess(malleefowl.process.WPSProcess):
                 )
 
     def execute(self):
-        import yaml
         pm = pidmanager.PIDManager(database_location = DATABASE_LOCATION)
         filename = self.yaml_document.getValue(asFile=False)
         g = open(filename, "r")
@@ -1213,8 +1208,6 @@ class QCProcessChain(malleefowl.process.WPSProcess):
         
 
     def execute(self):
-        from owslib.wps import WebProcessingService, monitorExecution 
-        #alternative : from malleefowl import wpsclient see unit_test.test_qualityprocesses.py
         """
         For each process an WPS call is made using the owslib. 
 
@@ -1553,8 +1546,6 @@ class QCYamlProcessChain(malleefowl.process.WPSProcess):
         
 
     def execute(self):
-        from owslib.wps import WebProcessingService, monitorExecution 
-        #alternative : from malleefowl import wpsclient see unit_test.test_qualityprocesses.py
         """
         For each process an WPS call is made using the owslib. 
 
