@@ -116,6 +116,7 @@ class Run(WPSProcess):
             maxOccurs=1,
             maxmegabites=2,
             formats=[{"mimeType":"text/yaml"}],
+            upload=True,
             )
 
         self.output = self.addComplexOutput(

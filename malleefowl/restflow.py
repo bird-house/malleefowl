@@ -35,7 +35,7 @@ def run(filename, basedir=None, timeout=0, status_callback=status):
         
     import subprocess
     from subprocess import PIPE
-    p = subprocess.Popen(cmd, cwd=basedir)
+    p = subprocess.Popen(cmd, cwd=basedir, stdout=PIPE, stderr=PIPE)
 
     status_file = os.path.join(basedir, 'restflow_status.txt')
     result_file = os.path.join(basedir, 'restflow_output.txt')
@@ -44,7 +44,10 @@ def run(filename, basedir=None, timeout=0, status_callback=status):
     import time
     count = 0
     status_callback('workflow is started', 5)
+    #(out, err) = p.communicate()
+    #logger.debug('out=%s, err=%s', out, err)
     while p.poll() is None:
+        logger.debug('doing restflow ...')
         time.sleep(1)
         if os.path.exists(status_file):
             with open(status_file, 'r') as fp:
@@ -63,7 +66,10 @@ def run(filename, basedir=None, timeout=0, status_callback=status):
 
     if not os.path.exists(result_file):
         msg = "No result file found %s" % (result_file)
+        logger.error('returncode=%s, stdout=%s, stderr=%s',
+                     p.returncode, p.stdout.read(), p.stderr.read())
         logger.error(msg)
+        #time.sleep(30)
         raise Exception(msg)
 
     status_callback('workflow is done', 95)
