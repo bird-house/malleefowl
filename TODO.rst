@@ -16,6 +16,7 @@ Helsinki
 Bugs
 ----
 
+* fix permissions on /tmp/mako_cache
 * on update we get message "pywps is dirty". put generated files in gitignore
 * fix irods configuration (home, generate irodsEnv, irodsA)
 * DONE: wms layer process should use token
