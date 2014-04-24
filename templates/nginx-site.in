@@ -1,7 +1,7 @@
 # pywps web processing service
 upstream pywps_server {
     # socket connection
-    server unix://${parts.pywps.socket} fail_timeout=0;
+    server unix://${pywps:socket} fail_timeout=0;
 }
 
 # caching
@@ -9,7 +9,7 @@ upstream pywps_server {
 
 server 
 {
-    listen ${parts.ports.http};
+    listen ${ports:http};
     server_name _;
 
     root /usr/share/nginx/www;      
@@ -27,13 +27,13 @@ server
     # WPS Outputs
     location /wpsoutputs
     {
-        alias ${parts.pywps_config.output_path};
+        alias ${pywps_config:output_path};
     }
 
     # published data
     location /files
     {
-        alias ${parts.pywps_config.files_path};
+        alias ${pywps_config:files_path};
         autoindex on;
     }
 

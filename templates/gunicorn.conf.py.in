@@ -5,7 +5,7 @@ group = '${install:group}'
 
 # environment
 raw_env = ["HOME=${pywps:home}", 
-           "PYWPS_CFG=${pywps:cfg}", 
+           "PYWPS_CFG=${pywps_config:output}", 
            "PATH=${buildout:parts-directory}/irods/PyRods-3.3.4/clients/icommands/bin:/opt/anaconda/bin:${buildout:bin-directory}:/usr/bin:/bin", 
            "GDAL_DATA=${env:gdal_data}"]                                                                                                               
 
