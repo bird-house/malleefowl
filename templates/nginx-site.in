@@ -1,7 +1,7 @@
 # pywps web processing service
 upstream pywps_server {
     # socket connection
-    server ${parts.pywps.server} fail_timeout=0;
+    server unix://${parts.pywps.socket} fail_timeout=0;
 }
 
 # caching
