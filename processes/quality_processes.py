@@ -401,6 +401,94 @@ class UserInitWithYamlLogsProcess(malleefowl.process.WPSProcess):
         self.process_log.setValue(process_log_file)
 
 
+class UserInitWithYamlLogsSSHProcess(malleefowl.process.WPSProcess):
+    def __init__(self):
+        malleefowl.process.WPSProcess.__init__(self,
+        identifier = "QC_Init_With_Yamllogs_SSH",
+        title = "Quality Initialize with YAML and SSH",
+        version = "2014.04.25",
+        metadata = [],
+        )
+
+        self.username = self.addLiteralInput(
+            identifier = "username",
+            title = "Username",
+            default = "defaultuser",
+            type = types.StringType,
+            )
+
+        self.token = self.addLiteralInput(
+            identifier = "token",
+            title = "Token",
+            type = types.StringType,
+            default = "Needed_if_not_defaultuser",
+            )
+
+        self.session_id = self.addLiteralInput(
+            identifier = "session_id",
+            title = "Session ID",
+            default = "checkdone",
+            abstract = "An ID for the current process. Select the one matching to the quality check.",
+            type = types.StringType,
+            )
+
+        self.yamllogs = self.addLiteralInput(
+            identifier = "yamllogs",
+            title = "YAML log files from the quality check",
+            abstract = "The locations of the YAML log files.",
+            minOccurs = 1,
+            maxOccurs = 20000,#just as arbitrary limit
+            type = types.StringType,
+            )
+
+        self.ssh_name = self.addLiteralInput(
+            identifier = "ssh_name",
+            title = "Name of ssh connection",
+            abstract = "The identifier in the ~/.ssh/config leading to the server with gpfs.",
+            minOccurs = 1,
+            default = "cmip2",
+            type = types.StringType,
+            )
+
+        self.all_okay = self.addLiteralOutput(
+            identifier = "all_okay",
+            title = "No rule violations",
+            type = types.BooleanType,
+            )
+
+        self.process_log = self.addComplexOutput(
+            identifier = "process_log",
+            title = "Log of this process.",
+            metadata = [],
+            formats = [{"mimeType":"text/plain"}],
+            asReference = True,
+            )
+
+    def execute(self):
+        self.status.set(msg = "Initiate process", percentDone = 0, propagate = True)
+        #load inputs
+        username = get_username(self) 
+        def statmethod(cur,end):
+            statusmethod("Running",cur,end,self)
+        qcp = qcprocesses.QCProcesses(
+                username = username,
+                session_id = self.session_id.getValue(),
+                statusmethod = statmethod,
+                work_dir = WORK_DIR
+                )
+        yamllogs = self.yamllogs.getValue() #yamllogs is a list by definition
+        ssh_name = self.ssh_name.getValue() 
+        import paramiko
+        #Create a clean directory to work in
+        qcp.remove_process_dir()
+        #run the method
+        
+        #write outputs
+        #self.all_okay.setValue(output["all_okay"])
+        #process_log_file = open(self.mktempfile(suffix = ".txt"), "w")
+        #process_log_file.write(output["process_log"])
+        #process_log_file.close()
+        #self.process_log.setValue(process_log_file)
 
 
 
