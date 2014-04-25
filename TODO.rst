@@ -16,6 +16,11 @@ Helsinki
 Bugs
 ----
 
+* fix pywps install
+* set egg_cache:
+/home/dkrz/k204199/sandbox/malleefowl/eggs/setuptools-3.4.4-py2.7.egg/pkg_resources.py:1031: UserWarning: /home/dkrz/k
+204199/.python-eggs is writable by group/others and vulnerable to attack when used with get_resource_filename. Conside
+r a more secure location (set with .set_extraction_path or the PYTHON_EGG_CACHE environment variable).
 * fix permissions on /tmp/mako_cache
 * on update we get message "pywps is dirty". put generated files in gitignore
 * fix irods configuration (home, generate irodsEnv, irodsA)
