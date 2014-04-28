@@ -1,3 +1,4 @@
+
 __all__ = ["base",
            "publish",
            "download",
@@ -19,4 +20,6 @@ __all__ = ["base",
            "animate",
            "dummyprocess",
            "ultimatequestionprocess",
-           "quality_processes"]
+           "addons",
+           #"quality_processes",
+           ]
