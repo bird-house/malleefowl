@@ -60,6 +60,9 @@ database_location_databasename=climdaps
 work_directory=${install:prefix}/var/qc_cache
 example_directory=${malleefowl_path}/examples/data/CORDEX
 
+[ssh]
+config_file=${ssh:config_file}
+
 [irods]
 home = ${irods_config:home}
 
