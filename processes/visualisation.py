@@ -18,7 +18,7 @@ class VisualisationProcess(malleefowl.process.WorkerProcess):
     def __init__(self):
         # definition of this process
         malleefowl.process.WorkerProcess.__init__(self, 
-            identifier = "de.csc.esgf.visualisation",
+            identifier = "de.csc.visualisation",
             title="Simple visualisation tool",
             version = "0.1",
             metadata= [
@@ -62,10 +62,10 @@ class VisualisationProcess(malleefowl.process.WorkerProcess):
 
         output = output_file("stocks.html", title="Phoenix visualisation")
         
-        ncfile = '/var/lib/pywps/files/nils.hempelmann_hzg.de/tas_EUR-44_ICHEC-EC-EARTH_historical_r12i1p1_SMHI-RCA4_v1_day_20010101-20051231.nc'
+        ncfile = self.get_nc_files()
 
         var = self.variableIn.getValue()
-        dataFile=Dataset(ncFile)
+        dataFile=Dataset(ncfile)
         
         rawTime = dataFile.variables['time'][:]
         data = np.squeeze(dataFile.variables[var][:])

@@ -25,9 +25,9 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
                        {"title": "Climate Service Center", "href": "http://www.climate-service-center.de/"}
                       ],
             abstract="Collection of models to calculate variables related to vector born diseases",
-            extra_metadata={ 
-                  'esgquery': 'variable:tas OR variable:huss OR variable:ps OR variable:pr OR variable:evspsblpot OR variable:sftlf', #   
-                  'esgfilter': 'project:CORDEX,domain:AFR-44,time_frequency:day'  # data_node:esg-dn1.nsc.liu.se
+            extra_metadata={
+                  'esgfilter': 'variable:tas, variable:pr, variable:huss, variable:ps,variable:evspsblpot, domain:AFR-44, domain:AFR-44i',  
+                  'esgquery': ' time_frequency:day' 
                   },
             )
             
