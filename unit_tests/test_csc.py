@@ -36,6 +36,7 @@ def test_dummy():
     
 @attr('online')
 def test_indices():
+    
     result = wpsclient.execute(
         service = base.SERVICE,
         identifier = "de.csc.indices.worker",
@@ -81,4 +82,19 @@ def test_icclim2():
     # '/var/lib/pywps/files/nils.hempelmann_hzg.de/tasmax_day_MPI-ESM-LR_historical_r1i1p1_20000101-20051231.nc' ,   '/var/lib/pywps/files/nils.hempelmann_hzg.de/tasmax_EUR-11_ICHEC-EC-EARTH_historical_r3i1p1_DMI-HIRHAM5_v1_day_20010101-20051231.nc',
     
     nose.tools.ok_('nc' in result, result)
+    
+    
+def test_visualisation():
+    
+    result = wpsclient.execute(
+    service = base.SERVICE,
+    identifier = "de.csc.visualisation.worker",
+    inputs = [('file_identifier', 'http://localhost:8080/thredds/fileServer/test/nils.hempelmann_hzg.de/tas_MNA-44_ICHEC-EC-EARTH_historical_r12i1p1_SMHI-RCA4_v1_day_20010101-20051231.nc')],
+    outputs = [('output', True)],
+    verbose=True
+    ) 
+
+        
+    nose.tools.ok_('html' in result, result)
+    
         

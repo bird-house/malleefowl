@@ -22,5 +22,6 @@ __all__ = ["base",
            "dummyprocess",
            "ultimatequestionprocess",
            "addons",
+           "visualisation",
            #"quality_processes",
            ]

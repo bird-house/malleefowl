@@ -53,16 +53,16 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
             )
         
         
-        self.land_sea_mask = self.addComplexInput(
-            identifier="land_sea_mask",
-            title="land sea mask",
-            abstract="Load land Sea mask from other",
-            metadata=[],
-            minOccurs=1,
-            maxOccurs=1,
-            formats=[{"mimeType":"application/x-netcdf"}],
-            maxmegabites=100
-            )
+        #self.land_sea_mask = self.addComplexInput(
+            #identifier="land_sea_mask",
+            #title="land sea mask",
+            #abstract="Load land Sea mask from other",
+            #metadata=[],
+            #minOccurs=1,
+            #maxOccurs=1,
+            #formats=[{"mimeType":"application/x-netcdf"}],
+            #maxmegabites=100
+            #)
 
         self.output = self.addComplexOutput(
             identifier="output",
@@ -79,10 +79,21 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
         from cdo import *
         import datetime 
         from math import *
+        from ocgis.util.shp_process import ShpProcess
+        from ocgis.util.shp_cabinet import ShpCabinetIterator
+        import ocgis
 
         self.show_status('starting anopholes ...', 5)
         
-        cdo = Cdo()
+        ocgis.env.DIR_SHPCABINET = path.abspath(curdir)+'shapefiles'
+        ocgis.env.OVERWRITE = True  
+        sc = ocgis.ShpCabinet()
+        geoms = 'continents'
+        select_ugid = [1] # UGID for Africa
+
+
+        
+        #cdo = Cdo()
 
         # guess var names of files
         nc_files = self.get_nc_files()
@@ -103,13 +114,16 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
 
         logger.debug('guess var names ... done')
         
-        file_land_sea_mask = self.land_sea_mask.getValue()
-        
-        logger.debug('get landseamask ... done')
+        #file_land_sea_mask = self.land_sea_mask.getValue()
+        #logger.debug('get landseamask ... done')
         
         # build the n4 out variable based on pr
-        file_n4 = path.join(path.abspath(curdir), "n4.nc")       
-        cdo.setname('n4', input=file_pr, output=file_n4)
+        rd = ocgis.RequestDataset(file_pr, 'pr') # time_range=[dt1, dt2]
+        dir_output = tempfile.mkdtemp()
+        file_n4 = ocgis.OcgOperations(dataset=rd,  geom=geoms, prefix=str('n4_'), output_format='nc',select_ugid=select_ugid,dir_output=dir_output).execute()
+        
+        #file_n4 = path.join(path.abspath(curdir), "n4.nc")       
+        #cdo.setname('n4', input=file_pr, output=file_n4)
         
         logger.debug('create output file n4.nc ... done')
         
@@ -120,10 +134,9 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
         nc_evspsblpot = Dataset(file_evspsblpot,'r')
         nc_n4 = Dataset(file_n4,'a')
         
-        nc_land_sea_mask = Dataset(file_land_sea_mask,'r')
+        #nc_land_sea_mask = Dataset(file_land_sea_mask,'r')
         
         logger.debug('open all files ... done')
-        
         
         #change attributes und variable name here 
         # att.put.nc(nc_n4, "n4", "units", "NC_FLOAT", -9e+33)
@@ -135,7 +148,6 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
         huss = np.squeeze(nc_huss.variables["huss"])
         evspsblpot = np.squeeze(nc_evspsblpot.variables["evspsblpot"])
         
-        land_sea_mask = np.squeeze(nc_land_sea_mask.variables["sftlf"])
         
         logger.debug('read in all variables ... done')
         
@@ -173,7 +185,7 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
             for y in range(0,tas.shape[2],1): #tas.shape[2]
                 try:
                     logger.debug('working on x=%s, y=%s' % (x, y))
-                    if (land_sea_mask[x,y] == 100):
+                    if (var_n4[0,x,y] >= 0):
                         ## get the appropriate values 
                         #RH = hurs[:,x,y] * 100
                         Ta = tas[:,x,y] -273.15
