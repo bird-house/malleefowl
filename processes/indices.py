@@ -146,7 +146,7 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
 
         cdo = Cdo()
         
-        self.show_status('starting species distribution model ...', 5)
+        self.show_status('starting indices ...', 5)
         
         
         # get the appropriate files

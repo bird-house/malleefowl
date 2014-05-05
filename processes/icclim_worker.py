@@ -2,7 +2,6 @@
 import malleefowl.process 
 import subprocess
 from malleefowl import tokenmgr, utils
-
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
