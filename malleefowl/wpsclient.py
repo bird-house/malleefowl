@@ -52,11 +52,14 @@ def describe_process(service, identifier, verbose=False):
     return to_json(process)
 
 def execute(service, identifier, inputs=[], outputs=[], sleep_secs=1, verbose=False):
-    logger.debug("inputs %s", inputs)
-    logger.debug("outputs %s", outputs)
+    #logger.debug("inputs %s", inputs)
+    #logger.debug("outputs %s", outputs)
+    logger.debug("wpsclient.wps")
     
-    wps = WebProcessingService(service, verbose=verbose)
+    wps = WebProcessingService(service, verbose=verbose, skip_caps=True)
+    logger.debug("wpsclient.execution")
     execution = wps.execute(identifier, inputs=inputs, output=outputs)
+    logger.debug("wpsclient.monitor")
     monitorExecution(execution, sleepSecs=sleep_secs)
 
     logger.info("process %s results", identifier)
