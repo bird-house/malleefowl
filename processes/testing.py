@@ -34,6 +34,7 @@ class OcgisProcess(WPSProcess):
             maxOccurs=1,
             maxmegabites=5000,
             formats=[{"mimeType":"application/x-netcdf"}],
+            upload=False,
             )
 
         self.output = self.addComplexOutput(
@@ -457,6 +458,8 @@ class InOutProcess(WPSProcess):
        
     def execute(self):
         logger.debug('execute inout')
+
+        print 'start testing all data types'
 
         # literals
         self.setOutputValue(

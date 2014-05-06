@@ -44,12 +44,12 @@ class WPSProcess(PyWPSProcess):
                         formats=[{"mimeType":None}], maxmegabites=None,
                         upload=False):
         if upload:
-            logger.debug('update extra metadata for complex input: identifier=%s', identifier)
+            #logger.debug('update extra metadata for complex input: identifier=%s', identifier)
             uploads = self.extra_metadata.get('uploads', [])
             if not identifier in uploads:
                 uploads.append(identifier)
             self.extra_metadata['uploads'] = uploads
-            logger.debug('extra metadata = %s', uploads)
+            #logger.debug('extra metadata = %s', uploads)
             database.register_process_metadata(self.identifier, self.extra_metadata)
         return PyWPSProcess.addComplexInput(
             self,
@@ -90,7 +90,7 @@ class WPSProcess(PyWPSProcess):
         import yaml
         value = config.getConfigValue("irods", "home")
         homes = yaml.load(value)
-        logger.debug('homes = %s', homes.keys())
+        #logger.debug('homes = %s', homes.keys())
         return homes
 
     @property
