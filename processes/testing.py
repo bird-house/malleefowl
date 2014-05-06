@@ -1,7 +1,5 @@
 """
-Processes for testing wps data types
-
-Author: Carsten Ehbrecht (ehbrecht@dkrz.de)
+Processes for testing wps service
 """
 
 from datetime import datetime, date
@@ -12,177 +10,50 @@ from malleefowl.process import WPSProcess
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
-class OcgisProcess(WPSProcess):
+
+class UltimateQuestionProcess(WPSProcess):
+    """
+    The ultimate process to test the status and update capabilities of the server
+    The processes shoul be requested as follows:
+    ../wps.py?request=execute
+    &service=wps
+    &version=1.0.0
+    &identifier=ultimatequestionprocess
+    &status=true
+    &storeExecuteResponse=true
+
+    Done by Jorge de Jesus (jmdj@pml.ac.uk) as suggested by Kor de Jong
+    
+    """
     def __init__(self):
+        # init process
         WPSProcess.__init__(
-            self, 
-            identifier = "org.malleefowl.test.ocgis",
-            title="Try OCGIS",
-            version = "0.1",
-            metadata=[
-                {"title":"Literal process"},
-                ],
-            abstract="Try OCGIS",
+            self,
+            identifier="org.malleefowl.test.ultimatequestionprocess", #the same as the file name
+            title="Answer to Life, the Universe and Everything",
+            version = "2.0",
+            metadata = [],
+            abstract="Numerical solution that is the answer to Life, Universe and Everything. The process is an improvement to Deep Tought computer (therefore version 2.0) since it no longer takes 7.5 milion years, but only a few seconds to give a response, with an update of status every 10 seconds.",
             )
-
-        self.resource = self.addComplexInput(
-            identifier="resource",
-            title="tas",
-            abstract="NetCDF File with tas variable",
-            metadata=[],
-            minOccurs=1,
-            maxOccurs=1,
-            maxmegabites=5000,
-            formats=[{"mimeType":"application/x-netcdf"}],
-            upload=False,
-            )
-
-        self.output = self.addComplexOutput(
-            identifier="output",
-            title="Result text file",
-            abstract="Text file with ocgis inspect result",
-            metadata=[],
-            formats=[{"mimeType":"text/plain"}],
-            asReference=True,
-            )
-        
-
+            #No need for inputs since Execute will start the process
+        self.Answer = self.addLiteralOutput(
+            identifier = "answer",
+            title = "The numerical answer to Life, Universe and Everything")
+                                           
     def execute(self):
-        self.show_status("starting ocgis ...", 10)
-
-        import ocgis
-        ncfile = self.resource.getValue()
-        rd = ocgis.RequestDataset(ncfile, 'tas')
-        result = rd.inspect()
-
-        outfile = self.mktempfile(suffix='.txt')
-        with open(outfile, 'w') as fp:
-            fp.write(str(result))
-            fp.close()
-        self.output.setValue( outfile )
-
-class WhoAreYou(WPSProcess):
-    def __init__(self):
-        WPSProcess.__init__(
-            self, 
-            identifier = "org.malleefowl.test.whoareyou",
-            title="Process with username",
-            version = "0.1",
-            metadata=[
-                {"title":"Literal process"},
-                ],
-            abstract="Process with username",
-            )
-
-        self.username_in = self.addLiteralInput(
-            identifier="username",
-            title="Username",
-            abstract="Enter your email as username",
-            default="",
-            type=type(''),
-            minOccurs=1,
-            maxOccurs=1,
-            )
-
-        self.password_in = self.addLiteralInput(
-            identifier="password",
-            title="Password",
-            abstract="Enter your password",
-            default="",
-            type=type(''),
-            minOccurs=1,
-            maxOccurs=1,
-            )
-
-        self.notes_in = self.addLiteralInput(
-            identifier="notes",
-            title="Notes",
-            abstract="Notes",
-            default="",
-            type=type(''),
-            minOccurs=0,
-            maxOccurs=1,
-            )
-
-        self.output = self.addLiteralOutput(
-            identifier="output",
-            type=type(''),
-            title="Output")
-
-    def execute(self):
-        self.status.set(msg="starting ...", percentDone=10, propagate=True)
-
-        self.output.setValue('Hello %s' % (self.username_in.getValue()))
-
-
-class AddAndWait(WPSProcess):
-    """Adds two integers, waits and resturns a text file"""
-
-    def __init__(self):
-        WPSProcess.__init__(self, 
-            identifier = "org.malleefowl.test.add",
-            title="Add two numbers",
-            version = "0.1",
-            metadata=[
-                {"title":"Literal process"},
-                ],
-            abstract="Adds two numbers, waits and returns result as text file ...",
-            )
-        
-        self.float_a_in = self.addLiteralInput(
-            identifier="num_a",
-            title="Number A",
-            abstract="Enter a number",
-            default="3.1",
-            type=type(0.1),
-            minOccurs=1,
-            maxOccurs=1,
-            )
-
-        self.float_b_in = self.addLiteralInput(
-            identifier="num_b",
-            title="Number B",
-            abstract="Enter a number",
-            default="1.9",
-            type=type(0.1),
-            minOccurs=1,
-            maxOccurs=1,
-            )
-
-        self.output = self.addComplexOutput(
-            identifier="output",
-            title="Result text file",
-            abstract="Text file with result of calculation",
-            metadata=[],
-            formats=[{"mimeType":"text/plain"}],
-            asReference=True,
-            )
-
-    def execute(self):
-        self.status.set(msg="starting calculation", percentDone=10, propagate=True)
-
-        num_a = self.float_a_in.getValue()
-        num_b = self.float_b_in.getValue()
-        result = num_a + num_b
-        result_msg = "%f + %f = %f" % (num_a, num_b, result)
-
         import time
-
-        for count in range(20,80,10):
+        self.show_status("Preparing....", 0)
+        for i in xrange(1, 11):
             time.sleep(2)
-            self.status.set(msg="still calculating ...", percentDone=count, propagate=True)
-
-        self.status.set(msg="calculation done", percentDone=90, propagate=True)
-
-        out_filename = self.mktempfile(suffix='.txt')
-        with open(out_filename, 'w') as fp:
-            fp.write(result_msg)
-            fp.close()
-            self.output.setValue( out_filename )
+            self.show_status("Thinking.....", i*10) 
+        #The final answer    
+        self.Answer.setValue("42")
+        
 
 class InOutProcess(WPSProcess):
-    """This process defines several types of literal type of in- and
-    outputs"""
+    """
+    This process defines several types of literal type of in- and outputs.
+    """
 
     def __init__(self):
         # definition of this process
