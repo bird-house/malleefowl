@@ -11,6 +11,68 @@ from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
 
+class HelloWorldProcess(WPSProcess):
+    """
+    Say hello to user ...
+    """
+    def __init__(self):
+        WPSProcess.__init__(
+            self,
+            identifier="org.malleefowl.test.helloworld", 
+            title="Hello World",
+            version = "1.0",
+            metadata = [],
+            abstract="Welcome user and say hello ...",
+            )
+
+        self.user = self.addLiteralInput(
+            identifier = "user",
+            title = "Your name",
+            abstract = "Please enter your name",
+            type = type(''),
+            )
+        
+        self.output = self.addLiteralOutput(
+            identifier = "output",
+            title = "Welcome message",
+            type = type(''))
+                                           
+    def execute(self):
+        self.show_status("Starting ...", 5)
+        self.output.setValue("Hello %s and welcome to WPS :)" % (self.user.getValue()))
+        self.show_status("Done", 95)
+    
+class AddOneProcess(WPSProcess):
+    """
+    Add 1 to a given number ...
+    """
+    def __init__(self):
+        WPSProcess.__init__(
+            self,
+            identifier="org.malleefowl.test.addone", 
+            title="Add one",
+            version = "2.0",
+            metadata = [],
+            abstract="Add 1 to a given number ...",
+            )
+
+        self.input = self.addLiteralInput(
+            identifier = "input",
+            title = "Input Number",
+            type=type(1),
+            )
+        
+        self.output = self.addLiteralOutput(
+            identifier = "output",
+            title = "Result",
+            type=type(1))
+                                           
+    def execute(self):
+        self.show_status("Starting ...", 5)
+        self.output.setValue(self.input.getValue() + 1)
+        self.show_status("Starting ...", 95)
+        
+
 class UltimateQuestionProcess(WPSProcess):
     """
     The ultimate process to test the status and update capabilities of the server
@@ -328,7 +390,7 @@ class InOutProcess(WPSProcess):
             )
        
     def execute(self):
-        logger.debug('execute inout')
+        self.show_status('execute inout', 10)
 
         print 'start testing all data types'
 
@@ -397,5 +459,7 @@ class InOutProcess(WPSProcess):
             else:
                 fp.write( "<result>nothing</result>" )
             self.xml_url_out.setValue( fp.name )
+
+        self.show_status("inout process ... done", 95)
         return
         
