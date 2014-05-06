@@ -5,11 +5,15 @@ def DEBUG():
     return logging.DEBUG
 
 class TraceLogger(object):
-    def __init__(self, filename):
+    def __init__(self, filename="trace.log"):
         self.logger = open(filename, "a")
 
     def write(self, message):
-        self.logger.write("- TRACE - %s -" % (message))
+        import datetime 
+        log_message = '{asctime} - TRACE - {message}'.format(
+            asctime=str(datetime.datetime.now())[:19],
+            message=message)
+        self.logger.write(log_message + '\n')
 
 def getLogger(name):
     from pywps import config
@@ -22,12 +26,10 @@ def getLogger(name):
     else:
         logger.setLevel(logging.INFO)
 
-    import os.path
-
-    #formatter = logging.Formatter('%(asctime)-15s %(name)-5s %(levelname)-8s IP: %(ip)-15s User: %(user)-8s %(message)s')
     formatter = logging.Formatter('%(asctime)-15s - %(name)-5s - %(levelname)-8s %(message)s')
 
     # warn
+    import os.path
     fh = logging.FileHandler(os.path.join(log_path, 'malleefowl_warn.log'))
     fh.setLevel(logging.WARN)
     fh.setFormatter(formatter)

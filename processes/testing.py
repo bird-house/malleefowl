@@ -459,7 +459,7 @@ class InOutProcess(WPSProcess):
     def execute(self):
         logger.debug('execute inout')
 
-        print 'hello'
+        print 'start testing all data types'
 
         # literals
         self.setOutputValue(
