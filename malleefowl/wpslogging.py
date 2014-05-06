@@ -26,7 +26,7 @@ def getLogger(name):
     else:
         logger.setLevel(logging.INFO)
 
-    formatter = logging.Formatter('%(asctime)-15s - %(name)-5s - %(levelname)-8s %(message)s')
+    formatter = logging.Formatter('%(asctime)-15s - %(name)-20s - %(levelname)-8s %(message)s')
 
     # warn
     import os.path
