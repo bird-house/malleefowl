@@ -16,6 +16,7 @@ Helsinki
 Bugs
 ----
 
+* pywps key-value request does not work if data-input has an @ sign
 * fix pywps install
 * set egg_cache:
 /home/dkrz/k204199/sandbox/malleefowl/eggs/setuptools-3.4.4-py2.7.egg/pkg_resources.py:1031: UserWarning: /home/dkrz/k
@@ -29,6 +30,8 @@ r a more secure location (set with .set_extraction_path or the PYTHON_EGG_CACHE 
 Common
 ------
 
+* redirect stdout to log file
+http://stackoverflow.com/questions/4675728/redirect-stdout-to-a-file-in-python
 * disable php-fpm
 * remove data on server: wpsoutput, files quota, cache, ... 
 maybe via wps service

@@ -4,6 +4,13 @@ import logging
 def DEBUG():
     return logging.DEBUG
 
+class TraceLogger(object):
+    def __init__(self, filename):
+        self.logger = open(filename, "a")
+
+    def write(self, message):
+        self.logger.write("- TRACE - %s -" % (message))
+
 def getLogger(name):
     from pywps import config
     log_path = config.getConfigValue("malleefowl", "logPath")
@@ -17,27 +24,30 @@ def getLogger(name):
 
     import os.path
 
-    # debug
-    fh = logging.FileHandler(os.path.join(log_path, 'malleefowl_debug.log'))
-    fh.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    #formatter = logging.Formatter('%(asctime)-15s %(name)-5s %(levelname)-8s IP: %(ip)-15s User: %(user)-8s %(message)s')
+    formatter = logging.Formatter('%(asctime)-15s - %(name)-5s - %(levelname)-8s %(message)s')
+
+    # warn
+    fh = logging.FileHandler(os.path.join(log_path, 'malleefowl_warn.log'))
+    fh.setLevel(logging.WARN)
     fh.setFormatter(formatter)
     logger.addHandler(fh)
 
     # info
     fh = logging.FileHandler(os.path.join(log_path, 'malleefowl_info.log'))
     fh.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     fh.setFormatter(formatter)
     logger.addHandler(fh)
 
-    # warn
-    fh = logging.FileHandler(os.path.join(log_path, 'malleefowl_warn.log'))
-    fh.setLevel(logging.WARN)
-    #formatter = logging.Formatter('%(asctime)-15s %(name)-5s %(levelname)-8s IP: %(ip)-15s User: %(user)-8s %(message)s')
-    formatter = logging.Formatter('%(asctime)-15s - %(name)-5s - %(levelname)-8s %(message)s')
+    # debug
+    fh = logging.FileHandler(os.path.join(log_path, 'malleefowl_debug.log'))
+    fh.setLevel(logging.DEBUG)
     fh.setFormatter(formatter)
     logger.addHandler(fh)
+
+    # log stdout to trace
+    import sys
+    sys.stdout = TraceLogger(os.path.join(log_path, 'malleefowl_trace.log'))
 
     return logger
     
