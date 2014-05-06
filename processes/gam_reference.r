@@ -37,6 +37,7 @@ c_kappa <- vector()
 c_names <- vector()
 
 print(args)
+
 rworkspace <- args[1]
 PA  <- args[2]
 c_nr <- as.integer(args[3])
@@ -139,6 +140,7 @@ Trans <- function(x){exp(x)/(1+exp(x))}
 # set constants 
 set.seed(123)
 PValspecies <- length(PAS_Clima$Fsylv[PAS_Clima$Fsylv==1])/length(PAS_Clima$Fsylv)
+
 df <- as.data.frame(PAS_Clima[,c("Fsylv","KEY")])
 
 save.image(file=args[1])  
@@ -154,8 +156,7 @@ for (i in 2:length(c_names))
 temp <- paste("Fsylv ~ ",temp, sep="" )
 
 # calculate the modelprameter
-GamFsylv <- gam(eval(parse(text=(temp)))
-                ,data=PAS_Clima,family=binomial(),scale=-1)
+GamFsylv <- gam(eval(parse(text=(temp))),data=PAS_Clima,family=binomial(),scale=-1)
 
 save.image(file=args[1])  
 
@@ -174,6 +175,8 @@ save.image(file=args[1])
 }
   title("Response Curves", outer=T, line=-2)
 
+  
+  
 # ###########################################
 # spatial calculation 
 # ###########################################

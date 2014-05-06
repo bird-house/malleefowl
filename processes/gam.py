@@ -49,80 +49,172 @@ class GamProcess(malleefowl.process.WorkerProcess):
         self.R_in = self.addComplexInput(
             identifier="R_in",
             title="PA-Data or RData",
-            abstract="example: http://localhost:8090/files/ICP_DATA_Fsylv_Pabie_2.csv",
+            abstract="Files: PA-Data.csv for reverence and RData for projection (5MB max)",
             metadata=[],
             minOccurs=1,
             maxOccurs=1,
-            maxmegabites=10,
+            maxmegabites=5,
             formats=[{"mimeType":"text/csv"}],
             upload=True,
             )
-            
-        self.climin1 = self.addLiteralInput(
-            identifier="climin1",
-            title="mean temperature June to August",
-            abstract="Kappa Value (choose 0 if Indice should not be used)",
-            default="0",
-            type=type(''),
-            minOccurs=1,
-            maxOccurs=1,
-            allowedValues=['0','1','2','3','4','5','6','7','8','9','10','11','12']
+
+        self.TG = self.addLiteralInput(
+            identifier="TG",
+            title="TG",
+            abstract="Mean of mean temperatur (tas files as input files)",
+            type=type(1),
+            default="3",
+            minOccurs=0,
+            maxOccurs=0,
             )
             
-        self.climin2 = self.addLiteralInput(
-            identifier="climin2",
-            title="mean temperature May to September",
-            abstract="Kappa Value (choose 0 if indice should not be used)",
+        self.TX = self.addLiteralInput(
+            identifier="TX",
+            title="TX",
+            abstract="mean of max temperatur (tasmax files as input files)",
             default="0",
-            type=type(''),
-            minOccurs=1,
-            maxOccurs=1,
-            allowedValues=['0','1','2','3','4','5','6','7','8','9','10','11','12']
+            type=type(1),
+            minOccurs=0,
+            maxOccurs=0,
             )
             
-        self.climin3 = self.addLiteralInput(
-            identifier="climin3",
-            title="precipitation sum June to August",
-            abstract="Kappa Value (choose 0 if indice should not be used)",
+        self.TN = self.addLiteralInput(
+            identifier="TN",
+            title="TN",
+            abstract="Mean over min temperatur (tasmin files as input files)",
             default="0",
-            type=type(''),
-            minOccurs=1,
-            maxOccurs=1,
-            allowedValues=['0','1','2','3','4','5','6','7','8','9','10','11','12']
+            type=type(1),
+            minOccurs=0,
+            maxOccurs=0,
+            )
+        
+        self.RR = self.addLiteralInput(
+            identifier="RR",
+            title="RR",
+            abstract="precipitation sum (pr files as input files) ",
+            default="0",
+            type=type(1),
+            minOccurs=0,
+            maxOccurs=0,
             )
 
-        self.climin4 = self.addLiteralInput(
-            identifier="climin4",
-            title="precipitation sum May to September",
-            abstract="Kappa Value (choose 0 if indice should not be used)",
+        self.TG_5to9 = self.addLiteralInput(
+            identifier="TG_5to9",
+            title="TG_5to9",
+            abstract="mean temperature (K) form Mai to September",
             default="0",
-            type=type(''),
-            minOccurs=1,
-            maxOccurs=1,
-            allowedValues=['0','1','2','3','4','5','6','7','8','9','10','11','12']
+            type=type(1),
+            minOccurs=0,
+            maxOccurs=0,
+            )
+
+        self.TG_6to8 = self.addLiteralInput(
+            identifier="TG_6to8",
+            title="TG_6to8",
+            abstract="mean temperature (K) form Juni to August",
+            default="0",
+            type=type(1),
+            minOccurs=0,
+            maxOccurs=0,
             )
             
-        self.climin5 = self.addLiteralInput(
-            identifier="climin5",
-            title="mean temperature of coldest month",
-            abstract="Kappa Value (choose 0 if indice should not be used)",
+        self.RR_5to9 = self.addLiteralInput(
+            identifier="RR_5to9",
+            title="RR_5to9",
+            abstract="precipitation sum (mm) form Mai to September",
             default="0",
-            type=type(''),
-            minOccurs=1,
-            maxOccurs=1,
-            allowedValues=['0','1','2','3','4','5','6','7','8','9','10','11','12']
+            type=type(1),
+            minOccurs=0,
+            maxOccurs=0,
             )
             
-        self.climin6 = self.addLiteralInput(
-            identifier="climin6",
-            title="precipitation sum of dyest month",
-            abstract="Kappa Value (choose 0 if indice should not be used)",
+        self.RR_6to8 = self.addLiteralInput(
+            identifier="RR_6to8",
+            title="RR_6to8",
+            abstract="precipitation sum (mm) form Juni to August",
             default="0",
-            type=type(''),
-            minOccurs=1,
-            maxOccurs=1,
-            allowedValues=['0','1','2','3','4','5','6','7','8','9','10','11','12']
+            type=type(1),
+            minOccurs=0,
+            maxOccurs=0,
             )
+            
+            
+        self.SU = self.addLiteralInput(
+            identifier="SU",
+            title="SU",
+            abstract="Nr of summer days (tasmax files as input files)",
+            default="0",
+            type=type(1),
+            minOccurs=0,
+            maxOccurs=0,
+            )
+            
+            
+        #self.climin1 = self.addLiteralInput(
+            #identifier="climin1",
+            #title="mean temperature June to August",
+            #abstract="Kappa Value (choose 0 if Indice should not be used)",
+            #default="0",
+            #type=type(''),
+            #minOccurs=1,
+            #maxOccurs=1,
+            #allowedValues=['0','1','2','3','4','5','6','7','8','9','10','11','12']
+            #)
+            
+        #self.climin2 = self.addLiteralInput(
+            #identifier="climin2",
+            #title="mean temperature May to September",
+            #abstract="Kappa Value (choose 0 if indice should not be used)",
+            #default="0",
+            #type=type(''),
+            #minOccurs=1,
+            #maxOccurs=1,
+            #allowedValues=['0','1','2','3','4','5','6','7','8','9','10','11','12']
+            #)
+            
+        #self.climin3 = self.addLiteralInput(
+            #identifier="climin3",
+            #title="precipitation sum June to August",
+            #abstract="Kappa Value (choose 0 if indice should not be used)",
+            #default="0",
+            #type=type(''),
+            #minOccurs=1,
+            #maxOccurs=1,
+            #allowedValues=['0','1','2','3','4','5','6','7','8','9','10','11','12']
+            #)
+
+        #self.climin4 = self.addLiteralInput(
+            #identifier="climin4",
+            #title="precipitation sum May to September",
+            #abstract="Kappa Value (choose 0 if indice should not be used)",
+            #default="0",
+            #type=type(''),
+            #minOccurs=1,
+            #maxOccurs=1,
+            #allowedValues=['0','1','2','3','4','5','6','7','8','9','10','11','12']
+            #)
+            
+        #self.climin5 = self.addLiteralInput(
+            #identifier="climin5",
+            #title="mean temperature of coldest month",
+            #abstract="Kappa Value (choose 0 if indice should not be used)",
+            #default="0",
+            #type=type(''),
+            #minOccurs=1,
+            #maxOccurs=1,
+            #allowedValues=['0','1','2','3','4','5','6','7','8','9','10','11','12']
+            #)
+            
+        #self.climin6 = self.addLiteralInput(
+            #identifier="climin6",
+            #title="precipitation sum of dyest month",
+            #abstract="Kappa Value (choose 0 if indice should not be used)",
+            #default="0",
+            #type=type(''),
+            #minOccurs=1,
+            #maxOccurs=1,
+            #allowedValues=['0','1','2','3','4','5','6','7','8','9','10','11','12']
+            #)
   
         self.output = self.addComplexOutput(
             identifier="output",
