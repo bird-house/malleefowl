@@ -63,8 +63,8 @@ def execute(service, identifier, inputs=[], outputs=[], sleep_secs=1, verbose=Fa
     monitorExecution(execution, sleepSecs=sleep_secs)
 
     logger.info("process %s results", identifier)
-    for item in execution.processOutputs:
-        logger.info("%s: %s", item.identifier, item.reference)
+    #for item in execution.processOutputs:
+    #    logger.info("%s: %s", item.identifier, item.reference)
 
     return to_json(execution.processOutputs)
     
@@ -72,7 +72,7 @@ def to_json(result):
     # TODO fix json encoding (unicode, ascii)
     import yaml
     result_json = yaml.load( MyEncoder().encode(result) )
-    logger.debug("result as json: %s", result_json)
+    #logger.debug("result as json: %s", result_json)
     return result_json
 
 def main():
