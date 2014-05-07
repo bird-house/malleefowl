@@ -1,18 +1,13 @@
-#!/usr/bin/python
-
 """
 Processes for visualisation 
 Author: Nils Hempelmann (nils.hempelmann@hzg.de)
 """
-
 from datetime import datetime, date
 import tempfile
 import subprocess
 from malleefowl import tokenmgr, utils
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
-
-
 
 #from malleefowl.process import WorkerProcess
 import malleefowl.process
@@ -37,14 +32,6 @@ class VisualisationProcess(malleefowl.process.WorkerProcess):
             
         # Literal Input Data
         # ------------------
-        self.token = self.addLiteralInput(
-            identifier = "token",
-            title = "Token",
-            abstract = "Your unique token to publish data",
-            minOccurs = 1,
-            maxOccurs = 1,
-            type = type('')
-            )
 
         self.variableIn = self.addLiteralInput(
              identifier="variable",
@@ -70,21 +57,30 @@ class VisualisationProcess(malleefowl.process.WorkerProcess):
         from os import curdir, path
         from datetime import datetime
         import numpy as np
-        from cdo import showdate
+        import cdo 
         from bokeh.plotting import *
         
-        cdo = Cdo()
+        cdo = cdo.Cdo()
 
-        output = output_file("output.html")
+        output_file("output.html")
+        save()
+        
+        self.show_status('output_file created:' , 5)
         
         hold()
         figure(x_axis_type = "datetime", tools="pan,wheel_zoom,box_zoom,reset,previewsave")
         
+        
         ncfiles = self.get_nc_files()
         var = self.variableIn.getValue()
 
+        self.show_status('ncfiles and var : %s , %s ' % (ncfiles, var), 7)
+        
+        
         for nc in ncfiles:
             
+            self.show_status('looping files : %s ' % (nc), 10)
+        
             # get timestapms
             rawDate = cdo.showdate(input= nc) # ds.variables['time'][:]
             strDate = [elem.strip().split('  ') for elem in rawDate]
@@ -92,20 +88,26 @@ class VisualisationProcess(malleefowl.process.WorkerProcess):
             
             # get vaules
             ds=Dataset(nc)
-            data = np.squeeze(dataFile.variables[var][:])
+            data = np.squeeze(ds.variables[var][:])
             meanData = np.mean(data,axis=1)
             ts = np.mean(meanData,axis=1)
             
             # plot into current figure
-            line( dt,ts, legend= nc )
+            line( dt,ts ) # , legend= nc 
+            
+            save()
+        
+        self.show_status('timesseries lineplot done.' , 90)
         
         legend().orientation = "bottom_left"
-        curplot().title = "Field mean"
+        curplot().title = "Field mean of %s " % var  
         grid().grid_line_alpha=0.3
 
         window_size = 30
         window = np.ones(window_size)/float(window_size)
+        
+        save()
 
-        self.status.set(msg="visualisation done", percentDone=90, propagate=True)
-        self.output.setValue( output )
+        self.show_status('visualisation done', 99)
+        self.output.setValue( 'output.html' )
 
