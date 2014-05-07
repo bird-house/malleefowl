@@ -12,17 +12,17 @@ from malleefowl.process import WorkerProcess
 from malleefowl import utils, tokenmgr
 
 from malleefowl import wpslogging as logging
-import logging
 logger = logging.getLogger(__name__)
 
 
-def indices( outdir, ncfile, Coord, TG, TX, TN, RR, TG_5to9, TG_6to8, RR_5to9, RR_6to8, SU ): # 
+def indices( outdir, ncfile, TG, TX, TN, RR, TG_5to9, TG_6to8, RR_5to9, RR_6to8, SU ): # 
 
     #self.show_status('indices def call ', 15)
     #token = self.token.getValue()
+    
     outlog = "Starting the indice calculation at: \n"
     
-##  self.show_status('starting ECA indices ...', 5)
+#    self.show_status('starting ECA indices ...', 5)
     
     logger.debug('starting ECA indices ... done')
             
@@ -31,12 +31,8 @@ def indices( outdir, ncfile, Coord, TG, TX, TN, RR, TG_5to9, TG_6to8, RR_5to9, R
     logger.debug('outdir ... : %s' % ( outdir ))
     
     ocgis.env.OVERWRITE = True
-    ocgis.env.DIR_OUTPUT = outdir
-    
-    if Coord == 'WGS84':
-        output_crs = CFWGS84()
-    else 
-        output_crs = None
+    ocgis.env.DIR_OUTPUT = outdir    
+    output_crs = None
         
     #self.show_status('Set ocgis outdir ...', 5)
     logger.debug('set ocgis outdir ... done')
@@ -83,6 +79,8 @@ def indices( outdir, ncfile, Coord, TG, TX, TN, RR, TG_5to9, TG_6to8, RR_5to9, R
             logger.error(msg)
             outlog = outlog + msg + '\n'
 
+            
+            
         try :
             
             if TG == True :
@@ -179,20 +177,23 @@ def indices( outdir, ncfile, Coord, TG, TX, TN, RR, TG_5to9, TG_6to8, RR_5to9, R
                     logger.debug('RR_6to8 calculated ...:%s' % ( filename))
                     outlog = outlog + "RR_6to8 indice processed sucessfully  \n"
                 
-            if SU == True :
-                if "tasmax" in ds.variables.keys():
-                    logger.debug('In the SU loop')
-                    SU_file = None
-                    rd = ocgis.RequestDataset(nc, 'tasmax') # time_range=[dt1, dt2]
-                    group = ['year']
-                    calc_icclim = [{'func':'icclim_SU','name':'SU'}]
-                    SU_file = ocgis.OcgOperations(dataset=rd, calc=calc_icclim, calc_grouping=group, prefix=str('SU_' + filename), output_crs=output_crs,  output_format='nc', add_auxiliary_files=False).execute()
-                    
+            if SU == True and "tasmax" in ds.variables.keys():               
+                logger.debug('In the SU loop')
+                SU_file = None
+                rd = ocgis.RequestDataset(nc, 'tasmax') # time_range=[dt1, dt2]
+                logger.debug('ocgis.RequestDataset ... done')
+                group = ['year']
+                calc_icclim = [{'func':'icclim_SU','name':'SU'}]
+                try :
+                    SU_file = ocgis.OcgOperations(dataset=rd, calc=calc_icclim, calc_grouping=group, prefix=str('SU_' + filename),  output_format='nc', add_auxiliary_files=False).execute()
                     #self.show_status('SU calculated ...:'+ filename , 15)
                     logger.debug('SU calculated ...:%s' % ( filename))
                     outlog = outlog + "SU indice processed sucessfully  \n"
-
-                
+                    
+                except Exception as e: 
+                    logger.error('calc_icclim SU faild %s' , e.message)
+                    outlog = outlog + "SU indice processed faild for %s \n" % (filename)
+                        
             #if ETR == True :
                 #ETR_file = None
                 

@@ -36,27 +36,16 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
 
         # Literal Input Data
         # ------------------
-        
+                   
         self.token = self.addLiteralInput(
             identifier = "token",
             title = "Token",
-            abstract = "Your unique token to publish data",
+            abstract = "Your unique token to recieve data",
             minOccurs = 1,
             maxOccurs = 1,
             type = type('')
             )
-
-        self.Coord = self.addLiteralInput(
-            identifier="Coord",
-            title="Geo-Projection",
-            abstract="If 'None', original Geo-Projection will be kept",
-            default="None",
-            type=type(''),
-            minOccurs=1,
-            maxOccurs=1,
-            allowedValues=['None','WGS84']
-            )            
-            
+    
         self.TG = self.addLiteralInput(
             identifier="TG",
             title="TG",
@@ -171,7 +160,7 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
         
         self.show_status('starting calcualtion of icclim indices', 5)        
                 
-        result = cscenv.indices(outdir, self.get_nc_files(), self.Coord.getValue(), self.TG.getValue(), self.TX.getValue(), self.TN.getValue(), self.RR.getValue(), self.TG_5to9.getValue(), self.TG_6to8.getValue(), self.RR_5to9.getValue(), self.RR_6to8.getValue(), self.SU.getValue())
+        result = cscenv.indices(outdir, self.get_nc_files(), self.TG.getValue(), self.TX.getValue(), self.TN.getValue(), self.RR.getValue(), self.TG_5to9.getValue(), self.TG_6to8.getValue(), self.RR_5to9.getValue(), self.RR_6to8.getValue(), self.SU.getValue())
 
         outfile = self.mktempfile(suffix='.txt')
         
