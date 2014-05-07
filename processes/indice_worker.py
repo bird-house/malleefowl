@@ -149,14 +149,14 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
             )
     def execute(self):
         
-        from malleefowl import cscenv, utils
+        from malleefowl import cscenv
         import os
 
         token = self.token.getValue()
         userid = tokenmgr.get_userid(tokenmgr.sys_token(), token)
-        #result = publish.to_local_store(files=self.get_nc_files(),basename=self.basename.getValue(),userid=userid)
         outdir = os.path.join(self.files_path, userid)
         utils.mkdir(outdir)
+       #result = publish.to_local_store(files=self.get_nc_files(),basename=self.basename.getValue(),userid=userid)
         
         self.show_status('starting calcualtion of icclim indices', 5)        
                 

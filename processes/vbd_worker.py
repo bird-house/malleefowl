@@ -8,7 +8,7 @@ import subprocess
 
 #from malleefowl.process import WorkerProcess
 import malleefowl.process 
-
+from malleefowl import tokenmgr, utils
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
     def __init__(self):
         # definition of this process
         malleefowl.process.WorkerProcess.__init__(self, 
-            identifier = "de.csc.esgf.anopheles",
+            identifier = "de.csc.vbd",
             title="Vector born diseases",
             version = "0.1",
             metadata= [
@@ -34,23 +34,36 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
         # Literal Input Data
         # ------------------
         
+                           
+        self.token = self.addLiteralInput(
+            identifier = "token",
+            title = "Token",
+            abstract = "Your unique token to recieve data",
+            minOccurs = 1,
+            maxOccurs = 1,
+            type = type('')
+            )
+
+        
         self.tommymodel = self.addLiteralInput(
             identifier="tommymodel",
             title="Tommy Model",
             abstract="Population dynamics model for Anopheles Gambiae select tas, huss, pr, evspsblpot and ps as input data",
+            default=True,
             type=type(False),
-            minOccurs=1,
-            maxOccurs=0,
+            minOccurs=0,
+            maxOccurs=1,
             )
         
-        self.kamilmodel = self.addLiteralInput(
-            identifier="kamilmodel",
-            title="Kamil Model",
-            abstract="nothing is implemented here so far ... ",
-            type=type(False),
-            minOccurs=1,
-            maxOccurs=0,
-            )
+        #self.kamilmodel = self.addLiteralInput(
+            #identifier="kamilmodel",
+            #title="Kamil Model",
+            #abstract="nothing is implemented here so far ... ",
+            #default=False,
+            #type=type(False),
+            #minOccurs=0,
+            #maxOccurs=1,
+            #)
         
         
         #self.land_sea_mask = self.addComplexInput(
@@ -84,16 +97,23 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
         import ocgis
 
         self.show_status('starting anopholes ...', 5)
-        
-        ocgis.env.DIR_SHPCABINET = path.abspath(curdir)+'shapefiles'
+   
+        token = self.token.getValue()
+        userid = tokenmgr.get_userid(tokenmgr.sys_token(), token)
+        outdir = os.path.join(self.files_path, userid)
+        utils.mkdir(outdir)
+
+        self.show_status('got token and outdir : %s ...'% (outdir),  10)
+   
+        ocgis.env.DIR_SHPCABINET = path.join(path.dirname(__file__),'shapefiles')
+        ocgis.env.DIR_OUTPUT = outdir
         ocgis.env.OVERWRITE = True  
         sc = ocgis.ShpCabinet()
-        geoms = 'continents'
+        geoms = 'continent'
         select_ugid = [1] # UGID for Africa
-
-
         
-        #cdo = Cdo()
+        self.show_status('got ShapeCabinet selected ugid : %s ...'% (select_ugid),  12)
+        
 
         # guess var names of files
         nc_files = self.get_nc_files()
@@ -112,20 +132,26 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
             else:
                 raise Exception("input netcdf file has not variable tas|hurs|pr|evspsbl")
 
-        logger.debug('guess var names ... done')
+        logger.debug('get files of var names ... done')
         
         #file_land_sea_mask = self.land_sea_mask.getValue()
         #logger.debug('get landseamask ... done')
         
         # build the n4 out variable based on pr
         rd = ocgis.RequestDataset(file_pr, 'pr') # time_range=[dt1, dt2]
-        dir_output = tempfile.mkdtemp()
-        file_n4 = ocgis.OcgOperations(dataset=rd,  geom=geoms, prefix=str('n4_'), output_format='nc',select_ugid=select_ugid,dir_output=dir_output).execute()
         
+        file_n4 = None
+        
+        try : 
+            file_n4 = ocgis.OcgOperations(dataset=rd,  geom=geoms, prefix=str('n4_'), output_format='nc',select_ugid=select_ugid).execute()
+            self.show_status('created N4 outfile : %s ...'% (file_n4),  15)
+        except Exception as e: 
+            logger.exception("Something awful happened! Africa polygon subset failed")
+            
+
         #file_n4 = path.join(path.abspath(curdir), "n4.nc")       
         #cdo.setname('n4', input=file_pr, output=file_n4)
         
-        logger.debug('create output file n4.nc ... done')
         
         nc_tas = Dataset(file_tas,'r')
         nc_pr = Dataset(file_pr,'r')
