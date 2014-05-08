@@ -42,37 +42,6 @@ class HelloWorldProcess(WPSProcess):
         self.output.setValue("Hello %s and welcome to WPS :)" % (self.user.getValue()))
         self.show_status("Done", 95)
     
-class AddOneProcess(WPSProcess):
-    """
-    Add 1 to a given number ...
-    """
-    def __init__(self):
-        WPSProcess.__init__(
-            self,
-            identifier="org.malleefowl.test.addone", 
-            title="Add one",
-            version = "2.0",
-            metadata = [],
-            abstract="Add 1 to a given number ...",
-            )
-
-        self.input = self.addLiteralInput(
-            identifier = "input",
-            title = "Input Number",
-            type=type(1),
-            )
-        
-        self.output = self.addLiteralOutput(
-            identifier = "output",
-            title = "Result",
-            type=type(1))
-                                           
-    def execute(self):
-        self.show_status("Starting ...", 5)
-        self.output.setValue(self.input.getValue() + 1)
-        self.show_status("Starting ...", 95)
-        
-
 class UltimateQuestionProcess(WPSProcess):
     """
     The ultimate process to test the status and update capabilities of the server
@@ -106,7 +75,7 @@ class UltimateQuestionProcess(WPSProcess):
         import time
         self.show_status("Preparing....", 0)
         for i in xrange(1, 11):
-            time.sleep(2)
+            time.sleep(1)
             self.show_status("Thinking.....", i*10) 
         #The final answer    
         self.Answer.setValue("42")
