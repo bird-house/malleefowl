@@ -165,6 +165,16 @@ class ChomskyTextGeneratorProcess(WPSProcess):
             abstract=" Generates a random chomsky text ...",
             )
 
+        self.times = self.addLiteralInput(
+            identifier="times",
+            title="Times",
+            abstract="Number of sentences to generate.",
+            default="5",
+            type=type(1),
+            minOccurs=0,
+            maxOccurs=1,
+            )
+
         self.output = self.addComplexOutput(
             identifier = "output",
             title = "Chomsky text",
@@ -274,7 +284,7 @@ class ChomskyTextGeneratorProcess(WPSProcess):
         import textwrap, random
         from itertools import chain, islice, izip
 
-        def chomsky(times=1, line_length=72):
+        def chomsky(times=5, line_length=72):
             parts = []
             for part in (leadins, subjects, verbs, objects):
                 phraselist = map(str.strip, part.splitlines())
@@ -286,7 +296,7 @@ class ChomskyTextGeneratorProcess(WPSProcess):
         outfile = self.mktempfile(suffix='.txt')
         with open(outfile, 'w') as fout:
             logger.debug('writing to %s', outfile)
-            fout.write( chomsky(5) )
+            fout.write( chomsky(self.times.getValue()) )
             self.output.setValue( fout.name )
 
         self.show_status("Done", 95)
