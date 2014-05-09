@@ -126,16 +126,17 @@ class WordCountProcess(WPSProcess):
                 for word in wordre.findall(line):
                     yield word
 
-        from sets import Set
         text = self.text.getValue()
         logger.debug('input file = %s', text)
         with open(text, 'r') as fin:
-            words = Set(words(fin))
+            from collections import Counter
+            counts = Counter(words(fin))
+            sorted_counts = sorted([(v,k) for (k,v) in counts.items()], reverse=True)
             logger.debug('words counted')
             outfile = self.mktempfile(suffix='.txt')
             with open(outfile, 'w') as fout:
                 logger.debug('writing to %s', outfile)
-                fout.write( str(words) )
+                fout.write( str(sorted_counts) )
                 self.output.setValue( fout.name )
 
         self.show_status("Done", 95)
