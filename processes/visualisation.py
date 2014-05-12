@@ -183,11 +183,17 @@ class VisualisationProcess(malleefowl.process.WorkerProcess):
         #segment(dt , (ens_min-10) , dt, (ens_max+30) , color='grey' )
         #xs = np.arry[[dt],[ens_min]]
         #ys = np.arry[[dt],[ens_max]]
-        #patches(xs,xy, color=grey, alpha=0.8, line_color=None)
+        x = []
+        y = []
+        x = np.append(dt,dt)
+        y = np.append(ens_min,ens_max)
+
+        patch(x,y, color='grey', alpha=0.8, line_color=None)
         
-        line (dt, ens_min , color='grey')
+        
+        #line (dt, ens_min , color='grey')
         line (dt, ens_mean , color='red')
-        line (dt, ens_max , color='grey')
+        #line (dt, ens_max , color='grey')
         
         curplot().title = "Mean and Uncertainty of  %s " % var  
         save()
