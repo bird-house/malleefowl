@@ -26,7 +26,7 @@ class AnophelesProcess(malleefowl.process.WorkerProcess):
                       ],
             abstract="Collection of models to calculate variables related to vector born diseases",
             extra_metadata={
-                  'esgfilter': 'variable:tas, variable:pr, variable:huss, variable:ps,variable:evspsblpot, domain:AFR-44, domain:AFR-44i',  
+                  'esgfilter': 'variable:tas, variable:pr, variable:huss, variable:ps,variable:evspsbl, domain:AFR-44, domain:AFR-44i',  
                   'esgquery': ' time_frequency:day' 
                   },
             )
