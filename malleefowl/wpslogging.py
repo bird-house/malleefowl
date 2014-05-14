@@ -10,10 +10,11 @@ class TraceLogger(object):
 
     def write(self, message):
         import datetime 
-        log_message = '{asctime} - TRACE - {message}'.format(
-            asctime=str(datetime.datetime.now())[:19],
+        log_message = '{message}'.format(
+            #asctime=str(datetime.datetime.now())[:19],
             message=message)
         self.logger.write(log_message + '\n')
+        self.logger.flush()
 
 def getLogger(name):
     from pywps import config
@@ -28,28 +29,28 @@ def getLogger(name):
 
     formatter = logging.Formatter('%(asctime)-15s - %(name)-20s - %(levelname)-8s %(message)s')
 
-    # warn
+    # log stdout to trace
     import os.path
-    fh = logging.FileHandler(os.path.join(log_path, 'malleefowl_warn.log'))
+    import sys
+    sys.stdout = TraceLogger(os.path.join(log_path, 'malleefowl_trace.log'))
+    
+    # warn
+    fh = logging.StreamHandler(stream=sys.stdout) #os.path.join(log_path, 'malleefowl_warn.log'))
     fh.setLevel(logging.WARN)
     fh.setFormatter(formatter)
     logger.addHandler(fh)
 
     # info
-    fh = logging.FileHandler(os.path.join(log_path, 'malleefowl_info.log'))
+    fh = logging.StreamHandler(stream=sys.stdout) #os.path.join(log_path, 'malleefowl_info.log'))
     fh.setLevel(logging.INFO)
     fh.setFormatter(formatter)
     logger.addHandler(fh)
 
     # debug
-    fh = logging.FileHandler(os.path.join(log_path, 'malleefowl_debug.log'))
+    fh = logging.StreamHandler(stream=sys.stdout) #os.path.join(log_path, 'malleefowl_debug.log'))
     fh.setLevel(logging.DEBUG)
     fh.setFormatter(formatter)
     logger.addHandler(fh)
-
-    # log stdout to trace
-    import sys
-    sys.stdout = TraceLogger(os.path.join(log_path, 'malleefowl_trace.log'))
 
     return logger
     

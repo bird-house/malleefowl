@@ -67,7 +67,7 @@ def execute(service, identifier, inputs=[], outputs=[], sleep_secs=2, verbose=Fa
 
     # TODO: give wps some time to publish result document
     import time
-    time.sleep(10)
+    time.sleep(2)
     
     return to_json(execution.processOutputs)
     
@@ -129,9 +129,6 @@ def main():
     parser.add_option_group(execute_opts)
 
     options, command = parser.parse_args()
-    
-    #if options.verbose:
-    #    logger.setLevel(logging.DEBUG)
         
     logger.debug("SERVICE    = %s", options.service)
     logger.debug("IDENTIFIER = %s", options.identifier)
@@ -172,9 +169,10 @@ def main():
         exit(1)
 
     if options.outfile:
-        logger.debug('writing result %s', options.outfile)
+        logger.info('writing result %s', options.outfile)
         with open(options.outfile, "w") as fp:
             json.dump(result, fp, sort_keys=True, indent=2)
+            fp.flush()
             
 
-    logger.info('done')
+    logger.info('wps process %s done', options.identifier)

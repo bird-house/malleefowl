@@ -31,7 +31,9 @@
       cmd = ['wpsclient', 'execute', 
                     '-s', service,
                     '-i', identifier,
-                    '-o', outfile]
+                    '-o', outfile,
+                    '--verbose',
+                    '--sleep', 5]
       if (verbose) {
           cmd.add('-v')
       }
