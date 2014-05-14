@@ -30,7 +30,7 @@ r a more secure location (set with .set_extraction_path or the PYTHON_EGG_CACHE 
 Common
 ------
 
-* redirect stdout to log file
+* DONE: redirect stdout to log file
 http://stackoverflow.com/questions/4675728/redirect-stdout-to-a-file-in-python
 * disable php-fpm
 * remove data on server: wpsoutput, files quota, cache, ... 
