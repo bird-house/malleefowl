@@ -51,21 +51,24 @@ def describe_process(service, identifier, verbose=False):
     
     return to_json(process)
 
-def execute(service, identifier, inputs=[], outputs=[], sleep_secs=1, verbose=False):
+def execute(service, identifier, inputs=[], outputs=[], sleep_secs=2, verbose=False):
     #logger.debug("inputs %s", inputs)
     #logger.debug("outputs %s", outputs)
-    logger.debug("wpsclient.wps")
+    logger.info("execute wps process %s", identifier)
     
     wps = WebProcessingService(service, verbose=verbose, skip_caps=True)
-    logger.debug("wpsclient.execution")
     execution = wps.execute(identifier, inputs=inputs, output=outputs)
-    logger.debug("wpsclient.monitor")
+    logger.debug("monitor wps execution ...")
     monitorExecution(execution, sleepSecs=sleep_secs)
 
-    logger.info("process %s results", identifier)
+    logger.info("wps process %s done", identifier)
     #for item in execution.processOutputs:
-    #    logger.info("%s: %s", item.identifier, item.reference)
+    #    logger.debug("%s: %s", item.identifier, item.reference)
 
+    # TODO: give wps some time to publish result document
+    import time
+    time.sleep(10)
+    
     return to_json(execution.processOutputs)
     
 def to_json(result):
@@ -120,7 +123,7 @@ def main():
     execute_opts.add_option('--sleep',
                             dest = "sleep_secs",
                             action = "store",
-                            default = 1,
+                            default = 2,
                             type="int",
                             help = "sleep interval in seconds when checking process status")
     parser.add_option_group(execute_opts)
