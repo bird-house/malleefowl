@@ -36,7 +36,7 @@ class CDOOperation(malleefowl.process.WorkerProcess):
             type=type(''),
             minOccurs=1,
             maxOccurs=1,
-            allowedValues=['merge', 'dayavg', 'daymax', 'daymean', 'daymin', 'monmax', 'monmin', 'monmean', 'monavg']
+            allowedValues=['merge', 'dayavg', 'daymax', 'daymean', 'daymin','daysum', 'dayvar',    'daystd', 'monmax', 'monmin', 'monmean', 'monavg', 'monsum', 'monvar', 'monstd', 'ymonmin', 'ymonmax', 'ymonsum', 'ymonmean', 'ymonavg', 'ymonvar', 'ymonstd', 'yearavg', 'yearmax', 'yearmean', 'yearmin', 'yearsum', 'yearvar', 'yearstd', 'yseasvar']
             )
 
         # netcdf input
