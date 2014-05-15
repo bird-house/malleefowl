@@ -32,7 +32,6 @@
                     '-s', service,
                     '-i', identifier,
                     '-o', outfile,
-                    '--verbose',
                     '--sleep', 5]
       if (verbose) {
           cmd.add('-v')

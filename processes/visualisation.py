@@ -131,7 +131,6 @@ class VisualisationProcess(malleefowl.process.WorkerProcess):
             if (count == 0 ):
                 ma = ts 
                 dates = dt
-                
                 ma = np.append([ma],[(np.empty((len(dates)))*np.NAN)], axis = 0)
                 
                 #ma = np.append([dt], [ts] , axis = 0 )               
@@ -140,9 +139,7 @@ class VisualisationProcess(malleefowl.process.WorkerProcess):
                 # add row for next ensemble menber
                 ma = np.append(ma,[(np.empty((len(dates)))*np.NAN)], axis = 0)
                 # check date and add value
-                
                 #self.show_status('time series to matix  %s' % count , 72)
-            
                 for t in range(len(dt)):
                     
                     #logger.debug("in loop")
@@ -155,10 +152,8 @@ class VisualisationProcess(malleefowl.process.WorkerProcess):
                         #self.show_status('date not exits', 73)
                         col = (np.empty( count +2 )*np.NAN)
                         #self.show_status('col %s ' % col, 74)
-                        
                         ma = np.c_[ma,col]
                         #self.show_status('ma done'  , 75)
-                        
                         dates = np.append(dates,[dt[t]])
                         #self.show_status('dates appended '  , 76)
                         
@@ -186,49 +181,32 @@ class VisualisationProcess(malleefowl.process.WorkerProcess):
         #logger.debug('matrix %s ', mdat.shape) 
         
         
-        if (len(ncfiles) > 1) : 
+        if (count > 1) : 
             ma_mean = np.mean(mdat,axis=0)
-            logger.debug('mean  %s ', ma_mean.shape )
+            self.show_status('mean  %s '%  ma_mean.shape, 97 )
             ma_min = np.min(mdat,axis=0)
             ma_max = np.max(mdat,axis=0)
-            #self.show_status('ma_max Vaules %s' % ma_max , 75)
+            #ma_sub = np.subtract(ma_max, ma_min)
+            #ma_per75 = np.percentile(mdat,75, axis=0)
+            #ma_per25 = np.percentile(mdat,25, axis=0)
+            self.show_status('ma Vaules %s' % mdat.data , 75)
         else : 
             ma_mean = ma_min = ma_max = mdat
             #self.show_status('ma_max Vaules %s' % ma_max , 75)
         
-        
-        #mdat = np.ma.masked_array(ma [1:,:],np.isnan(ma [1:,:]))
-        
-       # ens_mean = np.mean(ma [1:,:] ,axis=0)
-        #self.show_status('mean created ' , 80)
-    #    ens_min = np.min(ma [1:,:] ,axis=0) # np.nanmin
-        #self.show_status('min created ' , 80)
-     #   ens_max = np.max(ma [1:,:] ,axis=0)
-        #self.show_status('max created ' , 80)
-        
-        #per5 = np.percentile(mdat[1:,:], 5, axis=0, out=None )
-        #per95 = np.percentile(mdat[1:,:], 95, axis=0, out=None )
-        
-        #ens_mean = np.mean(ma[1:,:] , axis = 0, out=None )
-        #per5 = np.percentile(ma[1:,:], 5, axis=0, out=None )
-        #per95 = np.percentile(ma[1:,:], 95, axis=0, out=None )
-        
-        #self.show_status('mean and percentiles done ', 80)
+        #x = []
+        #y = []
+        #x = np.append(dates,dates)
+        #y = np.append(ma_min.data, ma_max.data)
 
-        #segment(dt , (ens_min-10) , dt, (ens_max+30) , color='grey' )
-        #xs = np.arry[[dt],[ens_min]]
-        #ys = np.arry[[dt],[ens_max]]
-        x = []
-        y = []
-        x = np.append(dates,dates)
-        y = np.append(ma_min.data, ma_max.data)
-
-        patch(x,y, color='grey', alpha=0.8, line_color=None)
+        #patch(x,y, color='grey', alpha=0.8, line_color=None)
         
-        
-        #line(dates, ma_min , color='grey')
-        line(dates, ma_mean , color='red')
-        #line(dates, ma_max , color='grey')
+        line(dates, ma_min , color='grey' ,line_width=1)
+        line(dates, ma_max , color='grey' , line_width=2, legend =len(ncfiles)  )
+        line(dates, ma_mean , color='red', line_width=3)
+        #line(dates, ma_sub + 10  , color='red', line_width=3)
+        #line(dates, ma_per25 , color='black', line_width=3)
+        #line(dates, ma_per75 , color='grey', line_width=3)
         
         curplot().title = "Mean and Uncertainty of  %s " % var  
         save()
