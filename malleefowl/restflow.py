@@ -40,20 +40,20 @@ def run(filename, basedir=None, timeout=0, status_callback=status):
     status_file = os.path.join(basedir, 'restflow_status.txt')
     result_file = os.path.join(basedir, 'restflow_output.txt')
     
-    logger.debug("before process call")
     import time
     count = 0
     status_callback('workflow is started', 5)
     #(out, err) = p.communicate()
     #logger.debug('out=%s, err=%s', out, err)
     while p.poll() is None:
-        logger.debug('doing restflow ...')
         time.sleep(1)
         if os.path.exists(status_file):
             with open(status_file, 'r') as fp:
                 msg = fp.read()
                 status_callback(msg, 20)
-        logger.debug("still running: count=%s, returncode=%s", count, p.returncode)
+        if logger.isEnabledFor(logging.DEBUG):
+            if count % 60 == 0:
+                logger.debug("still running: count=%s, returncode=%s", count, p.returncode)
         if timeout > 0 and count > timeout:
             msg = 'Killed workflow due to timeout of %d secs' % ( timeout)
             logger.error(msg)
