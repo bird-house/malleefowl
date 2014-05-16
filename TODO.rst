@@ -16,6 +16,7 @@ Helsinki
 Bugs
 ----
 
+* fix capabilities for isometa process
 * pywps key-value request does not work if data-input has an @ sign
 * fix pywps install
 * set egg_cache:
