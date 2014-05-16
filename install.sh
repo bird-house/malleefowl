@@ -44,10 +44,18 @@ function setup_os() {
     if [ -f /etc/debian_version ] ; then
         setup_debian
     fi
+    if [ -f /etc/redhat-release ] ; then
+        setup_centos
+    fi
 }
 
 function setup_debian() {
     sudo apt-get -y --force-yes install wget subversion
+}
+
+function setup_centos() {
+    sudo rpm -i http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+
 }
 
 function install_anaconda() {
