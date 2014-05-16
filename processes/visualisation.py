@@ -148,7 +148,7 @@ class VisualisationProcess(malleefowl.process.WorkerProcess):
             data = np.squeeze(ds.variables[var][:])
             meanData = np.mean(data,axis=1)
             ts = np.mean(meanData,axis=1)
-            self.show_status('ts array  : %s ' % (len(ts)), 66)
+            logger.debug('ts array  : %s ' % (len(ts)), 66)
             
             
             for t in range(0, len(strDate)) : 
@@ -162,18 +162,14 @@ class VisualisationProcess(malleefowl.process.WorkerProcess):
         #self.show_status('matrix masked %s ' % mdat , 80)
         #logger.debug('matrix %s ', mdat.shape) 
         
-        if (len(ncfiles) > 1) : 
-            ma_mean = np.mean(mdat,axis=1)
-            self.show_status('mean  %s '%  len(ma_mean) , 97 )
-            ma_min = np.min(mdat,axis=1)
-            ma_max = np.max(mdat,axis=1)
-            #ma_sub = np.subtract(ma_max, ma_min)
-            #ma_per75 = np.percentile(mdat,75, axis=0)
-            #ma_per25 = np.percentile(mdat,25, axis=0)
-            #self.show_status('ma Vaules %s' % len(mdat.data) , 75)
-        else : 
-            ma_mean = ma_min = ma_max = mdat
-            #self.show_status('ma_max Vaules %s' % ma_max , 75)
+        ma_mean = np.mean(mdat,axis=1)
+        self.show_status('mean  %s '%  len(ma_mean) , 97 )
+        ma_min = np.min(mdat,axis=1)
+        ma_max = np.max(mdat,axis=1)
+        #ma_sub = np.subtract(ma_max, ma_min)
+        #ma_per75 = np.percentile(mdat,75, axis=0)
+        #ma_per25 = np.percentile(mdat,25, axis=0)
+        self.show_status('ma Vaules %s' % len(mdat.data) , 75)
         
         line(dt, ma_min , color='grey' ,line_width=1)
         line(dt, ma_max , color='grey' , line_width=2 )
