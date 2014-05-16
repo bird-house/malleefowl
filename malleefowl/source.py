@@ -8,13 +8,18 @@ logger = logging.getLogger(__name__)
 root_path = config.getConfigValue("malleefowl", "filesPath")
 
 def list_files(token, filter):
+    import glob
     userid = tokenmgr.get_userid(tokenmgr.sys_token(), token)
         
     files_path = os.path.join(root_path, userid)
     utils.mkdir(files_path)
+    filter_path = os.path.join(files_path, '*' + filter + '*')
 
-    files = [f for f in os.listdir(files_path) if filter in f]
-
+    logger.debug('before files, path=%s', files_path)
+    #files = [f for f in os.listdir(files_path) if filter in f]
+    files = [os.path.basename(f) for f in glob.glob(filter_path)]
+    logger.debug('num files %s', len(files))
+    
     return files
 
 def get_files(token, file_id):
