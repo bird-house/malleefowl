@@ -22,7 +22,7 @@ class IntegrationCheckProcess(WPSProcess):
             identifier = "output",
             title = "nosetests result",
             metadata=[],
-            formats=[{"mimeType":"text/plain"}],
+            formats=[{"mimeType":"text/xml"}],
             asReference=True,
             )
                                            
@@ -35,20 +35,9 @@ class IntegrationCheckProcess(WPSProcess):
             config.getConfigValue("malleefowl", "integration_tests"),
             "test_integration.py")
 
-        from subprocess import Popen, PIPE
-        try:
-            # nosetests --verbosity 3 -x --with-xunit -a 'integration'
-            p = Popen(['nosetests', '--verbosity', '3', integration_tests],
-                      stdout=PIPE, stderr=PIPE)
-            (stdoutdata,stderrdata) = p.communicate()
-
-            with open("nose.txt", "w") as fp:
-                fp.write(stdoutdata)
-                fp.write(stderrdata)
-        except Exception as e:
-            logger.exception('nosetest failed!')
-            raise
+        import nose
+        nose.run(argv=['nosetests', '-v', '--with-xunit', integration_tests])
         
-        self.output.setValue("nose.txt")
+        self.output.setValue("nosetests.xml")
         self.show_status("Done", 95)
     
