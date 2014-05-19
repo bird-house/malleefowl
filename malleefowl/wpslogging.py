@@ -1,5 +1,8 @@
 import logging
 
+# https://pypi.python.org/pypi/ConcurrentLogHandler/0.8.3
+from cloghandler import ConcurrentRotatingFileHandler
+
 @property
 def DEBUG():
     return logging.DEBUG
@@ -31,23 +34,25 @@ def getLogger(name):
 
     # log stdout to trace
     import os.path
-    import sys
-    sys.stdout = TraceLogger(os.path.join(log_path, 'malleefowl_trace.log'))
+    #import sys
+    #sys.stdout = TraceLogger(os.path.join(log_path, 'malleefowl_trace.log'))
     
     # warn
-    fh = logging.StreamHandler(stream=sys.stdout) #os.path.join(log_path, 'malleefowl_warn.log'))
-    fh.setLevel(logging.WARN)
-    fh.setFormatter(formatter)
-    logger.addHandler(fh)
+    #fh = logging.StreamHandler(stream=sys.stdout) #os.path.join(log_path, 'malleefowl_warn.log'))
+    #fh.setLevel(logging.WARN)
+    #fh.setFormatter(formatter)
+    #logger.addHandler(fh)
 
     # info
-    fh = logging.StreamHandler(stream=sys.stdout) #os.path.join(log_path, 'malleefowl_info.log'))
-    fh.setLevel(logging.INFO)
-    fh.setFormatter(formatter)
-    logger.addHandler(fh)
+    #fh = logging.StreamHandler(stream=sys.stdout) #os.path.join(log_path, 'malleefowl_info.log'))
+    #fh.setLevel(logging.INFO)
+    #fh.setFormatter(formatter)
+    #logger.addHandler(fh)
 
     # debug
-    fh = logging.StreamHandler(stream=sys.stdout) #os.path.join(log_path, 'malleefowl_debug.log'))
+    fh = ConcurrentRotatingFileHandler(
+        os.path.join(log_path, 'malleefowl_trace.log'),
+        "a", 512*1024, 5) 
     fh.setLevel(logging.DEBUG)
     fh.setFormatter(formatter)
     logger.addHandler(fh)
