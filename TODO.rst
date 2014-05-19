@@ -31,6 +31,10 @@ r a more secure location (set with .set_extraction_path or the PYTHON_EGG_CACHE 
 Common
 ------
 
+* concurrent logging or logging per process ...
+* multiprocessing test
+* integration test suite with nose, called as wps process
+  html output, test-data, test-account, progress 
 * DONE: redirect stdout to log file
 http://stackoverflow.com/questions/4675728/redirect-stdout-to-a-file-in-python
 * disable php-fpm
