@@ -21,4 +21,5 @@ __all__ = ["base",
            "addons",
            "visualisation",
            #"quality_processes",
+           "integration",
            ]
