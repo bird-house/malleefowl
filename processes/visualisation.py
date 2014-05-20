@@ -171,21 +171,17 @@ class VisualisationProcess(malleefowl.process.WorkerProcess):
         #ma_per25 = np.percentile(mdat,25, axis=0)
         self.show_status('ma Vaules %s' % len(mdat.data) , 75)
         
-        line(dt, ma_min , color='grey' ,line_width=1)
-        line(dt, ma_max , color='grey' , line_width=2 )
+        #line(dt, ma_min , color='grey' ,line_width=1)
+        #line(dt, ma_max , color='grey' , line_width=2 )
         line(dt, ma_mean , color='red', line_width=1)
         
-        #x = []
-        #y = []
-        #x = np.append(dt,dt)
-        #y = np.append(ma_min, ma_max)
+        x = []
+        y = []
+        x = np.append(dt,dt[::-1])
+        y = np.append(ma_min, ma_max[::-1])
 
-        #patch(x,y, color='grey', alpha=0.8, line_color=None)
+        patch(x,y, color='grey', alpha=0.8, line_color=None)
   
-        #line(dates, ma_sub + 10  , color='red', line_width=3)
-        #line(dates, ma_per25 , color='black', line_width=3)
-        #line(dates, ma_per75 , color='grey', line_width=3)
-        
         curplot().title = "Mean and Uncertainty of  %s " % var  
         save()
         hold('off')
