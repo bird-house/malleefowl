@@ -7,6 +7,17 @@ import tempfile
 
 from netCDF4 import Dataset
 
+def test_dupname():
+    f = open('/tmp/_test_dupname.nc', 'w')
+    f.close()
+    newname = utils.dupname('/tmp', '_test_dupname')
+    nose.tools.ok_( '_test_dupname_1' == newname, newname)
+
+    import os
+    os.remove('/tmp/_test_dupname.nc')
+    newname = utils.dupname('/tmp', '_test_dupname')
+    nose.tools.ok_( '_test_dupname' == newname, newname)
+    
 def test_user_id():
     user_id = utils.user_id("https://esgf-data.dkrz.de/esgf-idp/openid/jule")
     nose.tools.ok_(user_id == "jule_esgf-data.dkrz.de", user_id)

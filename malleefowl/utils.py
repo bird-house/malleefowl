@@ -11,6 +11,14 @@ import os
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
+
+def dupname(path, filename):
+    newname = filename
+    count = sum(1 for fname in os.listdir(path) if filename == fname[0:-3])
+    if count > 0:
+        return newname + '_' + str(count)
+    return newname 
+
 def cert_infos(filename):
     import OpenSSL
     with open(filename) as fh:

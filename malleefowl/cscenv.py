@@ -17,17 +17,10 @@ logger = logging.getLogger(__name__)
 
 def indices( outdir, ncfile, TG, TX, TN, RR, TG_5to9, TG_6to8, RR_5to9, RR_6to8, SU ): # 
 
-    #self.show_status('indices def call ', 15)
-    #token = self.token.getValue()
-    
     outlog = "Starting the indice calculation at: \n"
-    
-#    self.show_status('starting ECA indices ...', 5)
     
     logger.debug('starting ECA indices ... done')
             
-     #self.show_status('got token and outdir ...', 5)
-    logger.debug('got token and outdir ... done')
     logger.debug('outdir ... : %s' % ( outdir ))
     
     ocgis.env.OVERWRITE = True
