@@ -18,11 +18,7 @@ class IndicesProcess(malleefowl.process.WorkerProcess):
             #storeSupported = "true",   # async
             #statusSupported = "true",  # retrieve status, needs to be true for async 
             ## TODO: what can i do with this?
-            metadata=[
-                {"title":"Foobar","href":"http://foo/bar"},
-                {"title":"Barfoo","href":"http://bar/foo"},
-                {"title":"Literal process"},
-                {"href":"http://foobar/"}],
+            metadata=[],
             abstract="Just testing a python script to test icclim",
             #extra_metadata={
                   #'esgfilter': 'variable:tas, variable:evspsblpot, variable:huss, variable:ps, variable:pr, variable:sftlf, time_frequency:day', 
