@@ -24,9 +24,8 @@ class WPSProcess(PyWPSProcess):
 
         self.extra_metadata=extra_metadata
         database.register_process_metadata(identifier, extra_metadata)
-        metadata.append(
-            {"title":"Hardworking Bird Malleefowl", "href":"http://en.wikipedia.org/wiki/Malleefowl"}
-            )
+        # TODO: fix metadata appending
+        #metadata.append({"title":"Hardworking Bird Malleefowl", "href":"http://en.wikipedia.org/wiki/Malleefowl"})
 
         PyWPSProcess.__init__(
             self,
