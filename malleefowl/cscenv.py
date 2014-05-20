@@ -9,7 +9,7 @@ import time
 
 import subprocess
 from malleefowl.process import WorkerProcess
-from malleefowl import utils, tokenmgr
+from malleefowl.utils import dupname
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
@@ -17,17 +17,10 @@ logger = logging.getLogger(__name__)
 
 def indices( outdir, ncfile, TG, TX, TN, RR, TG_5to9, TG_6to8, RR_5to9, RR_6to8, SU ): # 
 
-    #self.show_status('indices def call ', 15)
-    #token = self.token.getValue()
-    
     outlog = "Starting the indice calculation at: \n"
-    
-#    self.show_status('starting ECA indices ...', 5)
     
     logger.debug('starting ECA indices ... done')
             
-     #self.show_status('got token and outdir ...', 5)
-    logger.debug('got token and outdir ... done')
     logger.debug('outdir ... : %s' % ( outdir ))
     
     ocgis.env.OVERWRITE = True
@@ -89,7 +82,12 @@ def indices( outdir, ncfile, TG, TX, TN, RR, TG_5to9, TG_6to8, RR_5to9, RR_6to8,
                     rd = ocgis.RequestDataset(nc, 'tas') # time_range=[dt1, dt2]
                     group = ['year']
                     calc_icclim = [{'func':'icclim_TG','name':'TG'}]
-                    TG_file = ocgis.OcgOperations(dataset=rd, calc=calc_icclim, calc_grouping=group, prefix=str('TG_' + filename), output_crs=output_crs, output_format='nc', add_auxiliary_files=False).execute()
+                    TG_file = ocgis.OcgOperations(dataset=rd, calc=calc_icclim,
+                                                  calc_grouping=group,
+                                                  prefix=dupname(outdir, 'TG_' + filename),
+                                                  output_crs=output_crs,
+                                                  output_format='nc',
+                                                  add_auxiliary_files=False).execute()
 
                     logger.debug('TG calculated ...:%s' % ( filename))
                     outlog = outlog + "TG indice processed sucessfully  \n"
@@ -100,7 +98,11 @@ def indices( outdir, ncfile, TG, TX, TN, RR, TG_5to9, TG_6to8, RR_5to9, RR_6to8,
                     rd = ocgis.RequestDataset(nc, 'tasmax') # time_range=[dt1, dt2]
                     group = ['year']
                     calc_icclim = [{'func':'icclim_TX','name':'TX'}]
-                    TX_file = ocgis.OcgOperations(dataset=rd, calc=calc_icclim, calc_grouping=group, prefix=str('TX_' + filename), output_crs=output_crs, output_format='nc', add_auxiliary_files=False).execute()
+                    TX_file = ocgis.OcgOperations(dataset=rd, calc=calc_icclim, calc_grouping=group,
+                                                  prefix=dupname(outdir, 'TX_' + filename),
+                                                  output_crs=output_crs,
+                                                  output_format='nc',
+                                                  add_auxiliary_files=False).execute()
 
                     logger.debug('TX calculated ...:%s' % ( filename))
                     outlog = outlog + "TX indice processed sucessfully  \n"
@@ -112,7 +114,11 @@ def indices( outdir, ncfile, TG, TX, TN, RR, TG_5to9, TG_6to8, RR_5to9, RR_6to8,
                     rd = ocgis.RequestDataset(nc, 'tasmin') # time_range=[dt1, dt2]
                     group = ['year']
                     calc_icclim = [{'func':'icclim_TN','name':'TN'}]
-                    TN_file = ocgis.OcgOperations(dataset=rd, calc=calc_icclim, calc_grouping=group, prefix=str('TN_' + filename), output_crs=output_crs, output_format='nc', add_auxiliary_files=False).execute()
+                    TN_file = ocgis.OcgOperations(dataset=rd, calc=calc_icclim, calc_grouping=group,
+                                                  prefix=dupname(outdir, 'TN_' + filename),
+                                                  output_crs=output_crs,
+                                                  output_format='nc',
+                                                  add_auxiliary_files=False).execute()
 
                 logger.debug('TN calculated ...:%s' % ( filename))
                 outlog = outlog + "TN indice processed sucessfully  \n"
@@ -123,7 +129,11 @@ def indices( outdir, ncfile, TG, TX, TN, RR, TG_5to9, TG_6to8, RR_5to9, RR_6to8,
                     rd = ocgis.RequestDataset(nc, 'pr') # time_range=[dt1, dt2]
                     group = ['year']
                     calc_icclim = [{'func':'sum','name':'RR'}]
-                    RR_file = ocgis.OcgOperations(dataset=rd, calc=calc_icclim, calc_grouping=group, prefix=str('RR_' + filename), output_crs=output_crs, output_format='nc', add_auxiliary_files=False).execute()
+                    RR_file = ocgis.OcgOperations(dataset=rd, calc=calc_icclim, calc_grouping=group,
+                                                  prefix=dupname(outdir, 'RR_' + filename),
+                                                  output_crs=output_crs,
+                                                  output_format='nc',
+                                                  add_auxiliary_files=False).execute()
 
                     logger.debug('RR calculated ...:%s' % ( filename))
                     outlog = outlog + "RR indice processed sucessfully  \n"
@@ -134,7 +144,11 @@ def indices( outdir, ncfile, TG, TX, TN, RR, TG_5to9, TG_6to8, RR_5to9, RR_6to8,
                     rd = ocgis.RequestDataset(nc, 'tas', time_region={'month':[5,6,7,8,9]}) # time_range=[dt1, dt2]
                     group = ['year']
                     calc_icclim = [{'func':'icclim_TG','name':'TG_5to9'}]
-                    TG_5to9_file = ocgis.OcgOperations(dataset=rd, calc=calc_icclim, calc_grouping=group, prefix=str('TG_5to9_' + filename), output_crs=output_crs, output_format='nc', add_auxiliary_files=False).execute()
+                    TG_5to9_file = ocgis.OcgOperations(dataset=rd, calc=calc_icclim, calc_grouping=group,
+                                                       prefix=dupname(outdir, 'TG_5to9_' + filename),
+                                                       output_crs=output_crs,
+                                                       output_format='nc',
+                                                       add_auxiliary_files=False).execute()
 
                     logger.debug('TG_5to9 calculated ...:%s' % ( filename))
                     outlog = outlog + "TG_5to9 indice processed sucessfully  \n"
@@ -145,7 +159,11 @@ def indices( outdir, ncfile, TG, TX, TN, RR, TG_5to9, TG_6to8, RR_5to9, RR_6to8,
                     rd = ocgis.RequestDataset(nc, 'tas', time_region={'month':[6,7,8]}) # time_range=[dt1, dt2]
                     group = ['year']
                     calc_icclim = [{'func':'icclim_TG','name':'TG_6to8'}]
-                    TG_6to8_file = ocgis.OcgOperations(dataset=rd, calc=calc_icclim, calc_grouping=group, prefix=str('TG_6to8_' + filename), output_crs=output_crs, output_format='nc', add_auxiliary_files=False).execute()
+                    TG_6to8_file = ocgis.OcgOperations(dataset=rd, calc=calc_icclim, calc_grouping=group,
+                                                       prefix=dupname(outdir, 'TG_6to8_' + filename),
+                                                       output_crs=output_crs,
+                                                       output_format='nc',
+                                                       add_auxiliary_files=False).execute()
 
                     logger.debug('TG_6to8 calculated ...:%s' % ( filename))
                     outlog = outlog + "TG_6to8 indice processed sucessfully  \n"
@@ -156,7 +174,11 @@ def indices( outdir, ncfile, TG, TX, TN, RR, TG_5to9, TG_6to8, RR_5to9, RR_6to8,
                     rd = ocgis.RequestDataset(nc, 'pr', time_region={'month':[5,6,7,8,9]}) # time_range=[dt1, dt2]
                     group = ['year']
                     calc_icclim = [{'func':'sum','name':'RR_5to9'}]
-                    RR_5to9_file = ocgis.OcgOperations(dataset=rd, calc=calc_icclim, calc_grouping=group, prefix=str('RR_5to9_' + filename), output_crs=output_crs, output_format='nc', add_auxiliary_files=False).execute()
+                    RR_5to9_file = ocgis.OcgOperations(dataset=rd, calc=calc_icclim, calc_grouping=group,
+                                                       prefix=dupname(outdir, 'RR_5to9_' + filename),
+                                                       output_crs=output_crs,
+                                                       output_format='nc',
+                                                       add_auxiliary_files=False).execute()
 
                 #RR_5to9_nc = outdir + 'RR_5to9'+ filename + ''
                     #cdo.setname('RR_5to9',input = "-yearsum -selmon,5,6,7,8,9 "+ nc , output = RR_5to9_nc, output_crs=output_crs, options =  '-f nc')  
@@ -170,7 +192,11 @@ def indices( outdir, ncfile, TG, TX, TN, RR, TG_5to9, TG_6to8, RR_5to9, RR_6to8,
                     rd = ocgis.RequestDataset(nc, 'pr', time_region={'month':[6,7,8]}) # time_range=[dt1, dt2]
                     group = ['year']
                     calc_icclim = [{'func':'sum','name':'RR_6to8'}]
-                    RR_6to8_file = ocgis.OcgOperations(dataset=rd, calc=calc_icclim, calc_grouping=group, prefix=str('RR_6to8_' + filename), output_crs=output_crs, output_format='nc', add_auxiliary_files=False).execute()
+                    RR_6to8_file = ocgis.OcgOperations(dataset=rd, calc=calc_icclim, calc_grouping=group,
+                                                       prefix=dupname(outdir, 'RR_6to8_' + filename),
+                                                       output_crs=output_crs,
+                                                       output_format='nc',
+                                                       add_auxiliary_files=False).execute()
 
                     #RR_6to8_nc = outdir + 'RR_6to8'+ filename + ''
                     #cdo.setname('RR_6to8',input = "-yearsum -selmon,6,7,8 "+ nc , output = RR_6to8_nc, output_crs=output_crs, options =  '-f nc')  
@@ -185,7 +211,10 @@ def indices( outdir, ncfile, TG, TX, TN, RR, TG_5to9, TG_6to8, RR_5to9, RR_6to8,
                 group = ['year']
                 calc_icclim = [{'func':'icclim_SU','name':'SU'}]
                 try :
-                    SU_file = ocgis.OcgOperations(dataset=rd, calc=calc_icclim, calc_grouping=group, prefix=str('SU_' + filename),  output_format='nc', add_auxiliary_files=False).execute()
+                    SU_file = ocgis.OcgOperations(dataset=rd, calc=calc_icclim, calc_grouping=group,
+                                                  prefix=dupname(outdir, 'SU_' + filename),
+                                                  output_format='nc',
+                                                  add_auxiliary_files=False).execute()
                     #self.show_status('SU calculated ...:'+ filename , 15)
                     logger.debug('SU calculated ...:%s' % ( filename))
                     outlog = outlog + "SU indice processed sucessfully  \n"
