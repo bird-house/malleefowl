@@ -94,7 +94,7 @@ class RecoveryProcess(WPSProcess):
             inputlist = []
         inputs = []
         for inp in inputlist:
-            if inp in [None, "<colander.null>", ""]:
+            if inp in [None, "<colander.null>", ""] or "<colander._drop" in str(inp):
                 continue#ignore empty fields.
             if "=" not in inp:
                 raise Exception(inp + " does not follow the inputname=value syntax")
@@ -105,16 +105,23 @@ class RecoveryProcess(WPSProcess):
         outputlist = self.process_outputs.getValue()
         if outputlist in [None, "<colander.null>"]:
             outputlist = []
+        #for the wps call
         outputs = []
+        #better suited for the evaluation of the result
+        outputref = {}
         for outp in outputlist:
-            if outp in [None, "<colander.null>", ""]:
+            #In the case an empty box is submitted the value of outp is something like
+            #<colander._drop object at 0x28a8690> 
+            if str(outp) in ["None", "<colander.null>", ""] or "<colander._drop" in str(outp):
                 continue#ignore empty fields.
             if "=" not in outp:
                 raise Exception(outp + " does not follow the outputname=asReference")
             outputname, asReference = outp.split("=",1)
             if len(outputname) == 0:
                 raise Exception("The inputname is empty")
-            outputs.append((outputname, asReference.lower()=="true"))
+            asref = asReference.lower()=="true"
+            outputs.append((outputname, asref))
+            outputref[outputname] = asref
         
         timeout = self.timeout.getValue()
         retry_delays = self.retry_delays.getValue()
@@ -130,7 +137,15 @@ class RecoveryProcess(WPSProcess):
                 outputs = outputs,
                 )
             resdict["result"] = result
-        #TODO: add recovery handling for method.
+            #Find the defined outputs in the returned list of dicts result
+            for entry in result:
+                eid = entry["identifier"]
+                if eid in outputref: 
+                   if outputref[eid]:#if as reference is used
+                       val = entry["reference"]
+                   else:#else return the plain data
+                       val = entry["data"][0]
+                   resdict[eid] = val
         resdict = {}
         try:
             recovery(method, resdict = resdict, timeout = timeout, retries = retries,
@@ -140,7 +155,8 @@ class RecoveryProcess(WPSProcess):
                             str(len(retries)) + " retries were done. The exception thrown by " +
                             "recovery was " + str(e))
         self.result.setValue(resdict["result"])
-        process_log.write("RESDICT" + str(resdict))
+        for key, val in resdict.items():
+            process_log.write("\n" + 60*"*" + "\n" + str(key) + ":\n" + str(val) + 2*"\n")
         self.process_log.setValue(process_log)
 
 
