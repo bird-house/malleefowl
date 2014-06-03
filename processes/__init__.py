@@ -20,6 +20,6 @@ __all__ = ["base",
            "animate",
            "addons",
            "visualisation",
-           #"quality_processes",
            "integration",
+           "recovery",
            ]
