@@ -129,8 +129,32 @@ class RecoveryProcess(WPSProcess):
         retries = [x.strip() for x in ret if x.strip().isdigit()]
         identifier = self.process_identifier.getValue()
         process_log.write("Calling recovery for " + identifier + "\n")
+        
+        from owslib.wps import WebProcessingService
+        from malleefowl.wpsclient import to_json
+        def status_wps_execute(service, identifier, inputs=[], outputs=[], sleep_secs=1, verbose=False):
+            wps = WebProcessingService(service, verbose=verbose, skip_caps=True)
+            execution = wps.execute(identifier, inputs=inputs, output=outputs)
+            #Modified inline version of owslib.wps.monitorExecution
+            while execution.isComplete()==False: 
+                execution.checkStatus(sleepSecs=sleep_secs)
+                #update the status of the parent process
+                perc = execution.percentCompleted
+                msg = execution.statusMessage
+                self.show_status(msg, perc)
+            if execution.isSucceded():
+                for output in execution.processOutputs:               
+                    if output.reference is not None:
+                        print 'Output URL=%s' % output.reference
+                else:
+                    for ex in execution.errors:
+                        print 'Error: code=%s, locator=%s, text=%s' % (ex.code, ex.locator, ex.text)
+            return to_json(execution.processOutputs)
+
+
         def method(resdict):
-            result = wpsclient.execute(
+            #result = wpsclient.execute(
+            result = status_wps_execute(
                 service = wps_url,
                 identifier = identifier,
                 inputs = inputs, 
@@ -143,9 +167,10 @@ class RecoveryProcess(WPSProcess):
                 if eid in outputref: 
                    if outputref[eid]:#if as reference is used
                        val = entry["reference"]
-                   else:#else return the plain data
+                   else:#return the plain data
                        val = entry["data"][0]
                    resdict[eid] = val
+
         resdict = {}
         try:
             recovery(method, resdict = resdict, timeout = timeout, retries = retries,
