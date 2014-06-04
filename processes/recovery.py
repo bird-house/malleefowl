@@ -75,6 +75,11 @@ class RecoveryProcess(WPSProcess):
             title = "Result",
             type = types.StringType)
 
+        self.result_dict = self.addLiteralOutput(
+            identifier = "result_dict",
+            title = "Result dictionary",
+            type = types.StringType)
+
         self.process_log = self.addComplexOutput(
             identifier = "process_log",
             title = "Log of this process",
@@ -182,6 +187,8 @@ class RecoveryProcess(WPSProcess):
         for key, val in resdict.items():
             process_log.write("\n" + 60*"*" + "\n" + str(key) + ":\n" + str(val) + 2*"\n")
         self.process_log.setValue(process_log)
+        result_dict = {key:value for key,value in resdict.items() if key != "result"}
+        self.result_dict.setValue(str(result_dict))
 
 
 #For now the method is assumed to be parameterless. 
