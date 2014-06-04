@@ -1,6 +1,5 @@
 import types
 from malleefowl.process import WPSProcess
-from malleefowl import wpsclient
 import threading
 import time
 
