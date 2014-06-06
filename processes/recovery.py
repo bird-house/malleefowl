@@ -175,36 +175,43 @@ class RecoveryProcess(WPSProcess):
                        val = entry["data"][0]
                    resdict[eid] = val
 
-        resdict = {}
+        resdict = {"recovery_tries":0}
         try:
-            recovery(method, resdict = resdict, timeout = timeout, retries = retries,
-                     status = self.show_status) 
+            recovery(method, resdict = resdict, timeout = timeout, timeout_step = 1.0,
+                     retries = retries, status = self.show_status) 
         except Exception as e:
             raise Exception("Trying to run " + identifier + " failed even though " + 
-                            str(len(retries)) + " retries were done. The exception thrown by " +
+                            str(resdict["recovery_tries"]) +
+                            " tries were done. The exception thrown by " +
                             "recovery was " + str(e))
         self.result.setValue(resdict["result"])
         for key, val in resdict.items():
             process_log.write("\n" + 60*"*" + "\n" + str(key) + ":\n" + str(val) + 2*"\n")
         self.process_log.setValue(process_log)
-        result_dict = {key:value for key,value in resdict.items() if key != "result"}
+        result_dict = {key:value for key,value in resdict.items()
+                       if key not in ["result","recovery_tries"]}
         self.result_dict.setValue(str(result_dict))
 
 
 #For now the method is assumed to be parameterless. 
-def recovery(method, resdict, timeout=300.0, timeout_step=1.0, retries=[1.0]*10, status=lambda x,y:None):
+def recovery(method, resdict, timeout, timeout_step, retries, status=lambda x,y:None):
     retries = [0]+retries#to reduce the number of lines the first delay is set to 0.
     for delay in retries:
+        resdict["recovery_tries"]+=1
         time.sleep(float(delay))#wait for the delay and then try to run it.
         finished = run(method, resdict=resdict, timeout = timeout ,
                        timeout_step = timeout_step, status=status)
         if finished:
-            return
+            if str(resdict["result"])=="[]":#just to be sure that both are the same type.
+                finished = False#The result may not be empty.
+                continue
+            else:
+                return
     #if not finished:
     raise Exception("Did not finish correctly after the given number of retries.")
             
 
-def run(method, resdict,  timeout=10.0, timeout_step=1.0, status = lambda x,y:None):
+def run(method, resdict,  timeout, timeout_step, status = lambda x,y:None):
     """
     :param method: The to execute method. No parameters for now.
     :param timeout: Time limit in seconds.
