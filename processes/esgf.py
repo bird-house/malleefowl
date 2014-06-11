@@ -65,6 +65,8 @@ class Logon(WPSProcess):
             )
 
     def execute(self):
+        from malleefowl import myproxy
+        
         self.show_status("start logon ...", 5)
 
         openid=self.openid.getValue()
@@ -72,12 +74,12 @@ class Logon(WPSProcess):
         
         logger.debug('openid=%s' % (openid))
 
-        credentials = utils.logon(openid=openid, password=password)
+        myproxy.logon(openid=openid, password=password, interactive=False)
         
         self.show_status("logon successful", 90)
 
-        self.output.setValue( credentials )
-        self.expires.setValue(utils.cert_infos(credentials)['expires'])
+        self.output.setValue( "cert.pem" )
+        self.expires.setValue(utils.cert_infos("cert.pem")['expires'])
         
 
 class Wget(SourceProcess):
