@@ -133,10 +133,11 @@ class RecoveryProcess(WPSProcess):
         retries = [x.strip() for x in ret if x.strip().isdigit()]
         identifier = self.process_identifier.getValue()
         process_log.write("Calling recovery for " + identifier + "\n")
-        
+         
         from owslib.wps import WebProcessingService
         from malleefowl.wpsclient import to_json
-        def status_wps_execute(service, identifier, inputs=[], outputs=[], sleep_secs=1, verbose=False):
+        def status_wps_execute(service, identifier, inputs=[], outputs=[], sleep_secs=1, verbose=False,
+                               msg_prefix = ""):
             wps = WebProcessingService(service, verbose=verbose, skip_caps=True)
             execution = wps.execute(identifier, inputs=inputs, output=outputs)
             #Modified inline version of owslib.wps.monitorExecution
@@ -145,7 +146,7 @@ class RecoveryProcess(WPSProcess):
                 #update the status of the parent process
                 perc = execution.percentCompleted
                 msg = execution.statusMessage
-                self.show_status(msg, perc)
+                self.show_status(msg_prefix+msg, perc)
             if execution.isSucceded():
                 for output in execution.processOutputs:               
                     if output.reference is not None:
@@ -156,13 +157,14 @@ class RecoveryProcess(WPSProcess):
             return to_json(execution.processOutputs)
 
 
-        def method(resdict):
+        def method(resdict, msg_prefix):
             #result = wpsclient.execute(
             result = status_wps_execute(
                 service = wps_url,
                 identifier = identifier,
                 inputs = inputs, 
                 outputs = outputs,
+                msg_prefix = msg_prefix
                 )
             resdict["result"] = result
             #Find the defined outputs in the returned list of dicts result
@@ -196,11 +198,14 @@ class RecoveryProcess(WPSProcess):
 #For now the method is assumed to be parameterless. 
 def recovery(method, resdict, timeout, timeout_step, retries, status=lambda x,y:None):
     retries = [0]+retries#to reduce the number of lines the first delay is set to 0.
+    tries = 1
     for delay in retries:
         resdict["recovery_tries"]+=1
         time.sleep(float(delay))#wait for the delay and then try to run it.
         finished = run(method, resdict=resdict, timeout = timeout ,
-                       timeout_step = timeout_step, status=status)
+                       timeout_step = timeout_step, status=status,
+                       msg_prefix="Recovery in try number " + str(tries) + ":")
+        tries += 1
         if finished:
             if str(resdict["result"])=="[]":#just to be sure that both are the same type.
                 finished = False#The result may not be empty.
@@ -211,13 +216,13 @@ def recovery(method, resdict, timeout, timeout_step, retries, status=lambda x,y:
     raise Exception("Did not finish correctly after the given number of retries.")
             
 
-def run(method, resdict,  timeout, timeout_step, status = lambda x,y:None):
+def run(method, resdict,  timeout, timeout_step, status = lambda x,y:None, msg_prefix = ""):
     """
     :param method: The to execute method. No parameters for now.
     :param timeout: Time limit in seconds.
     :param timeout_step: Time between time limit checks in seconds.
     """
-    met = threading.Thread(target=method, kwargs={"resdict":resdict})
+    met = threading.Thread(target=method, kwargs={"resdict":resdict, "msg_prefix": msg_prefix})
     met.daemon = True
     met.start()
     timer = 0.0
