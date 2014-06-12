@@ -11,11 +11,10 @@ requires = [
     'lxml',
     #'htmltmpl',
     'python-magic',
-    'MyProxyClient',
+    'pyOpenSSL',
     'netCDF4',
     'pymongo',
     'nose',
-    'c3meta',
     ]
 
 classifiers=[

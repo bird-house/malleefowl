@@ -1,0 +1,3 @@
+class MyProxyLogonError(Exception):
+    pass
+

@@ -23,40 +23,6 @@ def dupname(path, filename):
         return newname + '_' + str(count)
     return newname 
 
-def cert_infos(filename):
-    import OpenSSL
-    with open(filename) as fh:
-        data = fh.read()
-        cert = OpenSSL.crypto.load_certificate(OpenSSL.SSL.FILETYPE_PEM, data)
-    expires = date_parser.parse(cert.get_notAfter())
-    return dict(expires=expires)
-
-def logon(openid, password):
-    from pyesgf.logon import LogonManager
-    # TODO: unset x509 env
-    #del os.environ['X509_CERT_DIR']
-    #del os.environ['X509_USER_PROXY']
-    
-    # NetCDF DAP support looks in CWD for configuration
-    credentials = 'credentials.pem'
-    # TODO: where are my cookies?
-    #dap_cookies = '.dods_cookies'
-
-    lm = LogonManager(os.curdir, dap_config='.dodsrc')
-    lm.logoff()
-    
-    lm.logon_with_openid(
-        openid=openid,
-        password=password,
-        bootstrap=True, 
-        update_trustroots=True, 
-        interactive=False)
-
-    if not lm.is_logged_on():
-        raise Exception("Logon with openid %s failed" % (openid))
-
-    return credentials 
-
 def user_id(openid):
     """generate user_id from openid"""
 
