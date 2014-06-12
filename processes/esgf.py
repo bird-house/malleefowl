@@ -79,7 +79,7 @@ class Logon(WPSProcess):
         self.show_status("logon successful", 90)
 
         self.output.setValue( certfile )
-        self.expires.setValue(utils.cert_infos(certfile)['expires'])
+        self.expires.setValue(myproxy.cert_infos(certfile)['expires'])
         
 
 class Wget(SourceProcess):
