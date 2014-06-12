@@ -74,12 +74,12 @@ class Logon(WPSProcess):
         
         logger.debug('openid=%s' % (openid))
 
-        myproxy.logon(openid=openid, password=password, interactive=False)
+        certfile = myproxy.logon_with_openid(openid=openid, password=password, interactive=False)
         
         self.show_status("logon successful", 90)
 
-        self.output.setValue( "cert.pem" )
-        self.expires.setValue(utils.cert_infos("cert.pem")['expires'])
+        self.output.setValue( certfile )
+        self.expires.setValue(utils.cert_infos(certfile)['expires'])
         
 
 class Wget(SourceProcess):

@@ -6,12 +6,26 @@ https://github.com/stephenpascoe/esgf-pyclient
 """
 
 import os
+from .exceptions import MyProxyLogonError
 
-def logon_with_openid(openid, password=None, interactive=True, workdir=None):
+def logon_with_openid(openid, password=None, interactive=False, outdir=None):
+    """
+    Trys to get MyProxy parameters from OpenID and calls :meth:`logon`.
+
+    :param openid: OpenID used to login at ESGF node.
+    """
     (username, hostname, port) = parse(openid)
-    return logon(username, hostname, port, password, interactive, workdir)
+    return logon(username, hostname, port, password, interactive, outdir)
 
-def logon(username, hostname, port=7512, password=None, interactive=True, workdir=None):
+def logon(username, hostname, port=7512, password=None, interactive=False, outdir=None):
+    """
+    Runs myproxy logon with username and password.
+
+    :param outdir: path used for retrieved files (certificates, ...).
+    :param interactive: if true user is prompted for parameters.
+
+    :return: certfile, proxy certificate.
+    """
     if interactive:
         if hostname is None:
             print 'Enter myproxy hostname:',
@@ -23,25 +37,27 @@ def logon(username, hostname, port=7512, password=None, interactive=True, workdi
             from getpass import getpass
             password = getpass('Enter password for %s: ' % username)
 
-    if workdir == None:
-        workdir = os.curdir
+    if outdir == None:
+        outdir = os.curdir
             
-    success = False
     try:
         import subprocess
         from subprocess import PIPE
         env = os.environ.copy()
-        env['X509_CERT_DIR'] = workdir
-        certfile = os.path.join(workdir, "cert.pem")
+        env['X509_CERT_DIR'] = outdir
+        certfile = os.path.join(outdir, "cert.pem")
         p = subprocess.Popen(
             ["myproxy-logon", "-l", username, "-s", hostname, "-p", port, "-b", "-T", "-S", "-o", certfile, "-v"],
             stdin=PIPE,
+            stdout=PIPE,
+            stderr=PIPE,
             env=env)
-        p.communicate(password)
-        success = (p.returncode == 0)
-    except:
-        pass
-    return success
+        (stdoutstr, stderrstr) = p.communicate(password)
+        if p.returncode != 0:
+            raise MyProxyLogonError("logon failed! %s %s" % (stdoutstr, stderrstr))
+    except Exception as e:
+        raise MyProxyLogonError("myproxy-logon process failed! %s" % (e.message))
+    return certfile
     
 def parse(openid):
     """
