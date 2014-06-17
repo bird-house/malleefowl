@@ -66,6 +66,7 @@ def parse(openid):
     from xml.etree import ElementTree
     import urllib2
     import re
+    from dateutil import parser as date_parser
 
     XRI_NS = 'xri://$xrd*($v*2.0)'
     MYPROXY_URN = 'urn:esg:security:myproxy-service'
