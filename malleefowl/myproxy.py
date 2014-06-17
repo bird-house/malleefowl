@@ -66,7 +66,6 @@ def parse(openid):
     from xml.etree import ElementTree
     import urllib2
     import re
-    from dateutil import parser as date_parser
 
     XRI_NS = 'xri://$xrd*($v*2.0)'
     MYPROXY_URN = 'urn:esg:security:myproxy-service'
@@ -107,6 +106,7 @@ def parse(openid):
 
 def cert_infos(filename):
     import OpenSSL
+    from dateutil import parser as date_parser
     with open(filename) as fh:
         data = fh.read()
         cert = OpenSSL.crypto.load_certificate(OpenSSL.SSL.FILETYPE_PEM, data)
