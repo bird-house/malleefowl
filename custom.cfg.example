@@ -10,7 +10,7 @@ hostname = localhost
 http = 8091
 #http_proxy = 80
 tomcat = 8080
-supervisor = 9001
+
 
 [logging]
 log_level = DEBUG

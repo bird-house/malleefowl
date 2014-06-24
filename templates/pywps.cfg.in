@@ -58,7 +58,7 @@ latest=true
 database_location_host=localhost
 database_location_port=27017
 database_location_databasename=climdaps
-work_directory=${conda:home}/var/qc_cache
+work_directory=${buildout:anaconda-home}/var/qc_cache
 example_directory=${malleefowl_path}/examples/data/CORDEX
 
 [ssh]
