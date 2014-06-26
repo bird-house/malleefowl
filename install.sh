@@ -2,10 +2,10 @@
 PWD=`pwd`
 BUILDOUT_DIR=`dirname $0`
 DOWNLOAD_CACHE=downloads
-ANACONDA_HOME="/opt/anaconda"
+ANACONDA_HOME="$HOME/anaconda"
 ANACONDA_FILE=Miniconda-latest-Linux-x86_64.sh
 ANACONDA_URL=http://repo.continuum.io/miniconda/$ANACONDA_FILE
-ANACONDA_MD5=01b39f6b143102e6e0008a12533c1fc9
+#ANACONDA_MD5=01b39f6b143102e6e0008a12533c1fc9
 
 # actions before build
 function pre_build() {
@@ -65,11 +65,11 @@ function install_anaconda() {
 
     # md5 check sum on the current file you downloaded and save results to 'test1'
     test_md5=`md5sum "$DOWNLOAD_CACHE/$ANACONDA_FILE" | awk '{print $1}'`;
-    if [ "$test_md5" != $ANACONDA_MD5 ]; then 
-        echo "checksum didn't match!"
-        #echo "Installing Anaconda ... Failed"
-        #exit 1
-    fi
+    #if [ "$test_md5" != $ANACONDA_MD5 ]; then 
+    #    echo "checksum didn't match!"
+    #    #echo "Installing Anaconda ... Failed"
+    #    #exit 1
+    #fi
 
     # run miniconda setup, install in ANACONDA_HOME
     if [ ! -d $ANACONDA_HOME ]; then
