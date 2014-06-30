@@ -12,6 +12,7 @@ function pre_build() {
     upgrade
     setup_cfg
     setup_os
+    install_java
     install_anaconda
 }
 
@@ -42,21 +43,26 @@ function setup_cfg() {
 # install os packages needed for bootstrap
 function setup_os() {
     if [ -f /etc/debian_version ] ; then
-        setup_debian
+        sudo apt-get -y --force-yes install build-essential wget subversion myproxy
     fi
     if [ -f /etc/redhat-release ] ; then
-        setup_centos
+        sudo rpm -i http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+        sudo yum install -y gcc-c++ subversion myproxy
     fi
 }
 
-function setup_debian() {
-    sudo apt-get -y --force-yes install wget subversion
-}
-
-function setup_centos() {
-    sudo rpm -i http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
-    sudo yum install -y gcc-c++ subversion
-
+function install_java() {
+    if [ -f /etc/debian_version ] ; then
+        sudo apt-get install -y --force-yes openjdk-7-jre openjdk-7-jdk
+        if [ -d /usr/lib/jvm/java-7-openjdk-amd64 ] ; then
+            sudo update-alternatives --set java /usr/lib/jvm/java-7-openjdk-amd64/jre/bin/java
+        elif [ -d /usr/lib/jvm/java-7-openjdk-i386 ] ; then
+            sudo update-alternatives --set java /usr/lib/jvm/java-7-openjdk-i386/jre/bin/java
+       fi
+    fi  
+    if [ -f /etc/redhat-release ] ; then
+        sudo yum install -y java-1.7.0-openjdk java-1.7.0-openjdk-devel 
+    fi 
 }
 
 function install_anaconda() {
