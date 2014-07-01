@@ -62,7 +62,7 @@ def test_icclim():
         inputs = [('file_identifier', 'http://localhost:8090/thredds/fileServer/test/nils.hempelmann@hzg.de/tasmax_day_MPI-ESM-LR_historical_r1i1p1_20040101-20051231.nc'),
         ('SU','True'),
         ('token', TEST_TOKEN)], #http://localhost:8090/thredds/fileServer/test/nils.hempelmann_hzg.de/tasmax_EUR11_test-pywpsInputbtel_q.nc
-        outputs = [('output', True)]
+        outputs = [('output', True)],
         verbose=False
         )
 
