@@ -11,9 +11,12 @@ requires = [
     'lxml',
     #'htmltmpl',
     'python-magic',
+    'ordereddict',
+    'owslib',
+    'pymongo',
     'pyOpenSSL',
     'netCDF4',
-    'pymongo',
+    'pyYAML',
     'nose',
     ]
 
