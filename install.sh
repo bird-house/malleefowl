@@ -18,11 +18,7 @@ function pre_build() {
 
 # upgrade stuff which can not be done by buildout
 function upgrade() {
-    old_phoenix="$BUILDOUT_DIR/src/Phoenix"
-    if [ -d $old_phoenix ]; then
-        echo "Removing old Phoenix sources in $old_phoenix."
-        rm -rf $old_phoenix
-    fi
+    echo "no upgrade ..."
 }
 
 # set configurion file for buildout
@@ -34,7 +30,7 @@ function setup_cfg() {
 
     if [ ! -f custom.cfg ]; then
         echo "Copy default configuration to $BUILDOUT_DIR/custom.cfg"
-        cp custom.cfg.example custom.cfg
+        cp "$BUILDOUT_DIR/custom.cfg.example" "$BUILDOUT_DIR/custom.cfg"
     else
         echo "Using custom configuration $BUILDOUT_DIR/custom.cfg"
     fi
@@ -84,11 +80,6 @@ function install_anaconda() {
         #echo -e "\n# Anaconda PATH added by climdaps installer" >> $HOME/.bashrc
         #echo "export PATH=$ANACONDA_HOME/bin:\$PATH" >> $HOME/.bashrc
     fi
-    ##TODO: workaround for required packages
-    #sudo $ANACONDA_HOME/bin/conda install --yes numpy
-    #sudo $ANACONDA_HOME/bin/conda install --yes Fiona
-    #sudo $ANACONDA_HOME/bin/conda install --yes netCDF4
-    #sudo $ANACONDA_HOME/bin/conda install --yes shapely
 
     # add anaconda to system path for all users
     #echo "export PATH=$ANACONDA_HOME/bin:\$PATH" | sudo tee /etc/profile.d/anaconda.sh > /dev/null
