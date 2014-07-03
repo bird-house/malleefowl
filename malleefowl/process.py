@@ -9,9 +9,8 @@ import types
 import tempfile
 
 from pywps.Process import WPSProcess as PyWPSProcess
-from pywps import config
 
-from malleefowl import database
+from malleefowl import database, config
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
@@ -63,15 +62,11 @@ class WPSProcess(PyWPSProcess):
 
     @property
     def cache_path(self):
-        return config.getConfigValue("malleefowl","cachePath")
+        return config.cache_path
 
     @property
     def files_path(self):
-        return config.getConfigValue("malleefowl","filesPath")
-
-    @property
-    def files_url(self):
-        return config.getConfigValue("malleefowl","filesUrl")
+        return config.files_path
 
     @property
     def working_dir(self):
@@ -84,13 +79,6 @@ class WPSProcess(PyWPSProcess):
     @property
     def service_url(self):
         return config.getConfigValue("wps", "serveraddress")
-
-    def irods_home(self):
-        import yaml
-        value = config.getConfigValue("irods", "home")
-        homes = yaml.load(value)
-        #logger.debug('homes = %s', homes.keys())
-        return homes
 
     @property
     def timeout(self):

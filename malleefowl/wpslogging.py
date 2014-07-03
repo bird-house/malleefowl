@@ -21,8 +21,9 @@ class TraceLogger(object):
 
 def getLogger(name):
     from pywps import config
-    log_path = config.getConfigValue("malleefowl", "logPath")
-    log_level = config.getConfigValue("malleefowl", "logLevel")
+    import os
+    log_path = os.path.dirname(config.getConfigValue("server", "logFile"))
+    log_level = config.getConfigValue("server", "logLevel")
     
     logger = logging.getLogger(name)
     if 'DEBUG' in log_level:
@@ -33,7 +34,6 @@ def getLogger(name):
     formatter = logging.Formatter('%(asctime)-15s - %(name)-20s - %(levelname)-8s %(message)s')
 
     # log stdout to trace
-    import os.path
     #import sys
     #sys.stdout = TraceLogger(os.path.join(log_path, 'malleefowl_trace.log'))
     
