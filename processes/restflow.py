@@ -11,7 +11,7 @@ from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
 from malleefowl.process import WPSProcess
-from malleefowl import restflow
+from malleefowl import restflow, config
 
 class Generate(WPSProcess):
     """Generates workflow description document in yaml for restflow"""
@@ -129,10 +129,10 @@ class Run(WPSProcess):
 
     def execute(self):
         filename = os.path.abspath(self.workflow_description.getValue(asFile=False))
-        logger.debug("filename = %s, timeout= %d" % (filename, self.timeout))
+        logger.debug("filename = %s, timeout= %d" % (filename, config.timeout()))
 
         status = lambda msg, percent: self.show_status(msg, percent)
-        result_file = restflow.run(filename, timeout=self.timeout, status_callback=status)
+        result_file = restflow.run(filename, timeout=config.timeout(), status_callback=status)
 
         self.output.setValue( result_file )
 

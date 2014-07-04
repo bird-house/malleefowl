@@ -61,35 +61,12 @@ class WPSProcess(PyWPSProcess):
             maxmegabites=maxmegabites)
 
     @property
-    def cache_path(self):
-        return config.cache_path
-
-    @property
     def files_path(self):
-        return config.files_path
+        return config.files_path()
 
     @property
     def working_dir(self):
         return os.path.abspath(os.curdir)
-
-    @property
-    def thredds_url(self):
-        return config.getConfigValue("malleefowl", "threddsUrl")
-
-    @property
-    def service_url(self):
-        return config.getConfigValue("wps", "serveraddress")
-
-    @property
-    def timeout(self):
-        timeout = 0
-        try:
-            value = config.getConfigValue("malleefowl", "timeout")
-            logger.debug("timeout = %s" % (value))
-            timeout = int(value)
-        except:
-            logger.warn('invalid malleefowl:timeout parameter in pywps config')
-        return timeout
 
     def mktempfile(self, suffix='.txt'):
         (_, filename) = tempfile.mkstemp(dir=self.working_dir, suffix=suffix)

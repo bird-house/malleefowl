@@ -8,7 +8,7 @@ def list_files(token, filter):
     import glob
     userid = tokenmgr.get_userid(tokenmgr.sys_token(), token)
         
-    files_path = os.path.join(config.files_path, userid)
+    files_path = os.path.join(config.files_path(), userid)
     utils.mkdir(files_path)
     filter_path = os.path.join(files_path, '*' + filter + '*')
 
@@ -24,7 +24,7 @@ def get_files(token, file_id):
 
     logger.debug('get files for userid=%s' % (userid))
         
-    files_path = os.path.join(config.files_path, userid)
+    files_path = os.path.join(config.files_path(), userid)
     utils.mkdir(files_path)
 
     files = [f for f in os.listdir(files_path) if file_id in f]
