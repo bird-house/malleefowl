@@ -19,7 +19,7 @@ def mongodb_url():
     try:
         url = wpsconfig.getConfigValue("malleefowl", "mongodbUrl")
     except Exception:
-        logger.exception("mongodbUrl not configured ... using default %s", url)
+        logger.warn("mongodbUrl not configured ... using default %s", url)
     return url
 
 def thredds_url():
@@ -27,7 +27,7 @@ def thredds_url():
     try:
         url = wpsconfig.getConfigValue("malleefowl", "threddsUrl")
     except Exception:
-        logger.exception("threddsUrl not configured ... using default %s", url)
+        logger.warn("threddsUrl not configured ... using default %s", url)
     return url
 
 def timeout():
@@ -36,7 +36,7 @@ def timeout():
     try:
         timeout = int(wpsconfig.getConfigValue("malleefowl", "timeout"))
     except Exception:
-        logger.exception("timeout not configured ... using default %s", url)
+        logger.warn("timeout not configured ... using default %s", url)
     return timeout
 
 def sys_token():
@@ -44,7 +44,7 @@ def sys_token():
     try:
         token = wpsconfig.getConfigValue("malleefowl", "sysToken")
     except Exception:
-        logger.exception("sysToken not configured ... using default %s", url)
+        logger.warn("sysToken not configured ... using default %s", url)
     return token
     
 def cache_path():
