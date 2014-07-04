@@ -20,10 +20,9 @@ class TraceLogger(object):
         self.logger.flush()
 
 def getLogger(name):
-    from pywps import config
-    import os
-    log_path = os.path.dirname(config.getConfigValue("server", "logFile"))
-    log_level = config.getConfigValue("server", "logLevel")
+    from pywps import config as wpsconfig
+    log_file = wpsconfig.getConfigValue("server", "logFile").replace('.log', '_trace.log')
+    log_level = wpsconfig.getConfigValue("server", "logLevel")
     
     logger = logging.getLogger(name)
     if 'DEBUG' in log_level:
@@ -50,9 +49,7 @@ def getLogger(name):
     #logger.addHandler(fh)
 
     # debug
-    fh = ConcurrentRotatingFileHandler(
-        os.path.join(log_path, 'malleefowl_trace.log'),
-        "a", 512*1024, 5) 
+    fh = ConcurrentRotatingFileHandler(log_file, "a", 512*1024, 5) 
     fh.setLevel(logging.DEBUG)
     fh.setFormatter(formatter)
     logger.addHandler(fh)
