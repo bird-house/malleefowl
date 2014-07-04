@@ -5,13 +5,13 @@
 import json
 
 import pymongo
-from pywps import config
 
+from malleefowl import config
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
 def database():
-    dburi = config.getConfigValue("malleefowl", "mongodbUrl")
+    dburi = config.mongodb_url()
     conn = pymongo.Connection(dburi)
     return conn.malleefowl_db
 

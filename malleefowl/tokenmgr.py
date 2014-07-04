@@ -4,8 +4,7 @@
 ##
 ## TODO: use a standard python module ... maybe for oauth2?
 
-from pywps import config
-from malleefowl import database
+from malleefowl import database, config
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)

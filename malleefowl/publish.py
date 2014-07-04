@@ -2,9 +2,7 @@
 
 import os
 
-from pywps import config
-
-from malleefowl import utils
+from malleefowl import utils, config
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
@@ -13,7 +11,7 @@ logger = logging.getLogger(__name__)
 def link_to_local_store(files=[], basename=None, userid=None):
     logger.debug("publish to local store, userid=%s", userid)
     
-    basedir = config.getConfigValue( "malleefowl", "filesPath" )
+    basedir = config.files_path
     outdir = os.path.join(basedir, userid)
     utils.mkdir(outdir)
 
