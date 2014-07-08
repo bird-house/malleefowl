@@ -14,6 +14,7 @@ function pre_build() {
     setup_os
     install_java
     install_anaconda
+    install_conda
 }
 
 # upgrade stuff which can not be done by buildout
@@ -100,6 +101,10 @@ function install_anaconda() {
     sudo chown -R $USER $ANACONDA_HOME
 
     echo "Installing Anaconda ... Done"
+}
+
+function install_conda() {
+    $ANACONDA_HOME/bin/conda install --yes python mako
 }
 
 # run install
