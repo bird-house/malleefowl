@@ -18,7 +18,18 @@ function pre_build() {
 
 # upgrade stuff which can not be done by buildout
 function upgrade() {
-    echo "no upgrade ..."
+    if [ -f /etc/debian_version ] ; then
+        echo "Upgrade on Debian/Ubuntu"
+        sudo apt-get -y --force-yes purge supervisor
+        sudo apt-get -y --force-yes purge nginx-full
+        sudo apt-get -y --force-yes purge mongodb
+        sudo apt-get -y --force-yes purge tomcat7
+
+        sudo apt-get -y --force-yes autoremove
+    elif [ -f /etc/redhat-release ] ; then
+        echo "Upgrade on Redhat/CentOS"
+        sudo yum -y erase mongodb mongodb-server
+    fi
 }
 
 # set configurion file for buildout
@@ -40,8 +51,7 @@ function setup_cfg() {
 function setup_os() {
     if [ -f /etc/debian_version ] ; then
         sudo apt-get -y --force-yes install build-essential wget subversion myproxy
-    fi
-    if [ -f /etc/redhat-release ] ; then
+    elif [ -f /etc/redhat-release ] ; then
         sudo rpm -i http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
         sudo yum install -y gcc-c++ subversion myproxy
     fi
