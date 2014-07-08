@@ -4,7 +4,7 @@ rm -rf eggs
 rm -rf develop-eggs
 rm -rf parts
 rm -rf bin
-rm .installed.cfg
+rm -f .installed.cfg
 rm -rf *.egg-info
  
 

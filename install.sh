@@ -14,7 +14,7 @@ function pre_build() {
     setup_os
     install_java
     install_anaconda
-    install_conda
+    #install_conda
 }
 
 # upgrade stuff which can not be done by buildout
@@ -104,7 +104,7 @@ function install_anaconda() {
 }
 
 function install_conda() {
-    $ANACONDA_HOME/bin/conda install --yes python mako
+    $ANACONDA_HOME/bin/conda install --yes -c https://conda.binstar.org/pingucarsti python mako
 }
 
 # run install
