@@ -22,7 +22,7 @@ function upgrade() {
         echo "Upgrade on Debian/Ubuntu"
         sudo apt-get -y --force-yes purge supervisor
         sudo apt-get -y --force-yes purge nginx-full
-        sudo apt-get -y --force-yes purge mongodb
+        sudo apt-get -y --force-yes purge mongodb mongodb-server mongodb-clients mongodb-dev
         sudo apt-get -y --force-yes purge tomcat7
 
         sudo apt-get -y --force-yes autoremove
