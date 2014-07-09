@@ -52,10 +52,10 @@ function setup_cfg() {
 # install os packages needed for bootstrap
 function setup_os() {
     if [ -f /etc/debian_version ] ; then
-        sudo apt-get -y --force-yes install build-essential wget subversion myproxy
+        sudo apt-get -y --force-yes install build-essential wget myproxy
     elif [ -f /etc/redhat-release ] ; then
         sudo rpm -i http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
-        sudo yum install -y gcc-c++ subversion myproxy
+        sudo yum install -y gcc-c++ wget myproxy
     fi
 }
 
