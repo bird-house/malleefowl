@@ -1,10 +1,12 @@
 #!/bin/bash
-rm -rf downloads
-rm -rf eggs
-rm -rf develop-eggs
-rm -rf parts
-rm -rf bin
-rm -f .installed.cfg
-rm -rf *.egg-info
- 
+BUILDOUT_DIR=`dirname $0`
 
+echo "Cleaning buildout ..."
+rm -rf $BUILDOUT_DIR/downloads
+rm -rf $BUILDOUT_DIR/eggs
+rm -rf $BUILDOUT_DIR/develop-eggs
+rm -rf $BUILDOUT_DIR/parts
+rm -rf $BUILDOUT_DIR/bin
+rm -f $BUILDOUT_DIR/.installed.cfg
+rm -rf $BUILDOUT_DIR/*.egg-info
+echo "Cleaning buildout ... Done"
