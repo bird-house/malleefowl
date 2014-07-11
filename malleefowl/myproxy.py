@@ -106,6 +106,7 @@ def parse(openid):
 
 def cert_infos(filename):
     import OpenSSL
+    from dateutil import parser as date_parser
     with open(filename) as fh:
         data = fh.read()
         cert = OpenSSL.crypto.load_certificate(OpenSSL.SSL.FILETYPE_PEM, data)

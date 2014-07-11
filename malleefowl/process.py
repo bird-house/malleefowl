@@ -9,9 +9,8 @@ import types
 import tempfile
 
 from pywps.Process import WPSProcess as PyWPSProcess
-from pywps import config
 
-from malleefowl import database
+from malleefowl import database, config
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
@@ -62,46 +61,12 @@ class WPSProcess(PyWPSProcess):
             maxmegabites=maxmegabites)
 
     @property
-    def cache_path(self):
-        return config.getConfigValue("malleefowl","cachePath")
-
-    @property
     def files_path(self):
-        return config.getConfigValue("malleefowl","filesPath")
-
-    @property
-    def files_url(self):
-        return config.getConfigValue("malleefowl","filesUrl")
+        return config.files_path()
 
     @property
     def working_dir(self):
         return os.path.abspath(os.curdir)
-
-    @property
-    def thredds_url(self):
-        return config.getConfigValue("malleefowl", "threddsUrl")
-
-    @property
-    def service_url(self):
-        return config.getConfigValue("wps", "serveraddress")
-
-    def irods_home(self):
-        import yaml
-        value = config.getConfigValue("irods", "home")
-        homes = yaml.load(value)
-        #logger.debug('homes = %s', homes.keys())
-        return homes
-
-    @property
-    def timeout(self):
-        timeout = 0
-        try:
-            value = config.getConfigValue("malleefowl", "timeout")
-            logger.debug("timeout = %s" % (value))
-            timeout = int(value)
-        except:
-            logger.warn('invalid malleefowl:timeout parameter in pywps config')
-        return timeout
 
     def mktempfile(self, suffix='.txt'):
         (_, filename) = tempfile.mkstemp(dir=self.working_dir, suffix=suffix)

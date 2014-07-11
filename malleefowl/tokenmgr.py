@@ -4,8 +4,7 @@
 ##
 ## TODO: use a standard python module ... maybe for oauth2?
 
-from pywps import config
-from malleefowl import database
+from malleefowl import database, config
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
@@ -30,21 +29,8 @@ class checkAccess(object):
             raise AccessDeniedError
         return self.f(access_token, other)
 
-def sys_userid():
-    return config.getConfigValue("malleefowl", "sysUserID")
-
 def sys_token():
     return config.getConfigValue("malleefowl", "sysToken")
-
-def test_userid():
-    return config.getConfigValue("tests", "testUserID")
-
-def test_token():
-    return config.getConfigValue("tests", "testToken")
-
-def init():
-    _add(sys_token(), sys_userid())
-    _add(test_token(), test_userid())
 
 @checkAccess
 def get_token(access_token, userid):
@@ -68,7 +54,7 @@ def get_userid(access_token, token):
 
 @checkAccess
 def is_token_valid(access_token, token):
-    valid = False
+    valid = false
     try:
         userid = database.get_userid_by_token(token)
         valid = userid is not None
@@ -77,13 +63,7 @@ def is_token_valid(access_token, token):
     return valid
 
 def _is_sys_token(token):
-    valid = False
-    try:
-        userid = database.get_userid_by_token(token)
-        valid = userid == sys_userid()
-    except Exception as e:
-        logger.warn("is_sys_token raised exception. err msg=%s" % (e.message))
-    return valid
+    return token == sys_token()
 
 def _add(token, userid):
     database.add_token(token=token, userid=userid)

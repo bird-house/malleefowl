@@ -8,12 +8,17 @@ CHANGES = open(os.path.join(here, 'CHANGES.rst')).read()
 
 requires = [
     'PyWPS',
-    'lxml',
-    #'htmltmpl',
+    'htmltmpl',
     'python-magic',
+    'ordereddict',
+    'lxml',
+    'owslib',
+    'pymongo',
     'pyOpenSSL',
     'netCDF4',
-    'pymongo',
+    'pyYAML',
+    'ConcurrentLogHandler',
+#    'dateutil',
     'nose',
     ]
 

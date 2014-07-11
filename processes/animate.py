@@ -10,6 +10,7 @@ import types
 import os
 import shutil
 
+from malleefowl import config
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
@@ -82,7 +83,7 @@ class GetWMSLayers(WPSProcess):
         count = 0
         percent_done = 10
         for file_name in files:
-            service_url = self.thredds_url + '/wms/test/' + userid + '/' +file_name
+            service_url = config.thredds_url() + '/wms/test/' + userid + '/' +file_name
             try:
                 wms = WebMapService(service_url, version='1.1.1')
             except:

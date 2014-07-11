@@ -4,8 +4,6 @@ Utility functions for WPS processes.
 
 import json
 from netCDF4 import Dataset
-from datetime import datetime
-from dateutil import parser as date_parser
 import os
 
 from malleefowl import wpslogging as logging
