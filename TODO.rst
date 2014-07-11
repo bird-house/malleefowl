@@ -42,6 +42,8 @@ r a more secure location (set with .set_extraction_path or the PYTHON_EGG_CACHE 
 Common
 ------
 
+* maybe use varnish web accelerator 
+https://www.varnish-cache.org/
 * concurrent logging or logging per process ...
 * multiprocessing test
 * integration test suite with nose, called as wps process

@@ -13,7 +13,7 @@ import StringIO
 from netCDF4 import Dataset
 
 from malleefowl.process import WPSProcess, SourceProcess, WorkerProcess
-from malleefowl import utils, publish
+from malleefowl import utils, publish, config
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
@@ -146,14 +146,14 @@ class Wget(SourceProcess):
                    "--private-key", credentials, 
                    "--no-check-certificate", 
                    "-N",
-                   "-P", self.cache_path,
+                   "-P", config.cache_path(),
                    "--progress", "dot:mega",
                    file_url]
             self.cmd(cmd, stdout=True)
         except Exception as e:
             raise RuntimeError("wget failed (%s)." % (e.message))
 
-        outfile = os.path.join(self.cache_path, filename)
+        outfile = os.path.join(config.cache_path(), filename)
         logger.debug('result file=%s', outfile)
 
         publish.link_to_local_store(files=[outfile], userid=userid)
