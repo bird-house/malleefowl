@@ -7,25 +7,26 @@ from malleefowl import utils, config
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
-
-def link_to_local_store(files=[], basename=None, userid=None):
+def link_to_local_store(filename, newname=None, userid=None):
+    """
+    Link filename to local store. If newname is given then rename file to this name.
+    """ 
     logger.debug("publish to local store, userid=%s", userid)
     
     basedir = config.files_path()
     outdir = os.path.join(basedir, userid)
     utils.mkdir(outdir)
 
-    results = []
-    for f in files:
-        outfile = os.path.basename(f)
-        if basename is not None:
-            outfile = basename + '-' + outfile
-        outfile = os.path.join(outdir, outfile)
-        success = False
-        try:
-            if not os.path.exists(outfile):
-                os.link(f, outfile)
-        except:
-            logger.error("publishing of %s failed", f)
-        results.append( (outfile, success) )
-    return results
+    if newname is None or newname.strip() == '' or newname == '<colander.null>':
+        newname = os.path.basename(filename)
+    if not newname.endswith('.nc'):
+        newname = newname + '.nc'
+    outfile = os.path.join(outdir, newname)
+    success = False
+    try:
+        if not os.path.exists(outfile):
+            os.link(filename, outfile)
+        success = True
+    except:
+        logger.exception("publishing of %s failed", filename)
+    return (newname, success)

@@ -1,20 +1,20 @@
-from malleefowl.process import WorkerProcess
+from malleefowl.process import WPSProcess
 from malleefowl import publish, tokenmgr
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
-class Publish(WorkerProcess):
-    """Publish netcdf files to thredds server"""
+class Publish(WPSProcess):
+    """Publish netcdf file to thredds server."""
     def __init__(self):
-        WorkerProcess.__init__(
+        WPSProcess.__init__(
             self,
             identifier = "org.malleefowl.publish",
-            title = "Publish NetCDF Files to Thredds Server",
-            version = "0.2",
+            title = "Publish to Thredds",
+            version = "0.3",
             metadata=[
                 ],
-            abstract="Publish netcdf files to Thredds server...",
+            abstract="Publish netcdf file to Thredds server...",
             )
 
         self.token = self.addLiteralInput(
@@ -26,32 +26,43 @@ class Publish(WorkerProcess):
             type = type('')
             )
 
-        self.basename = self.addLiteralInput(
-            identifier="basename",
-            title="Basename",
-            abstract="Basename of files",
+        self.newname = self.addLiteralInput(
+            identifier="newname",
+            title="New Filename",
+            abstract="For Example: tas_test_01.nc",
             type=type(''),
+            default='',
+            minOccurs=0,
+            maxOccurs=1,
+            )
+
+        self.nc_file = self.addComplexInput(
+            identifier="nc_file",
+            title="NetCDF File",
+            abstract="NetCDF File",
+            metadata=[],
             minOccurs=1,
             maxOccurs=1,
+            maxmegabites=5000,
+            formats=[{"mimeType":"application/x-netcdf"}],
             )
 
         self.output = self.addComplexOutput(
             identifier="output",
             title="Publisher result",
-            abstract="Publisher result",
             metadata=[],
             formats=[{"mimeType":"text/plain"}],
             asReference=True,
             )
         
     def execute(self):
-        self.show_status("publishing ...", 10)
+        self.show_status("Publishing ...", 10)
 
         token = self.token.getValue()
         userid = tokenmgr.get_userid(tokenmgr.sys_token(), token)
 
-        result = publish.link_to_local_store(files=self.get_nc_files(),
-                                             basename=self.basename.getValue(),
+        result = publish.link_to_local_store(filename=self.nc_file.getValue(),
+                                             newname=self.newname.getValue(),
                                              userid=userid)
     
         outfile = self.mktempfile(suffix='.txt')
@@ -60,4 +71,4 @@ class Publish(WorkerProcess):
              json.dump(result, fp, indent=True)
         self.output.setValue( outfile )
 
-        self.show_status("publishing ... done", 90)
+        self.show_status("Publishing ... done", 90)
