@@ -16,5 +16,7 @@ elif [ -f /etc/redhat-release ] ; then
     # java
     sudo yum install -y java-1.7.0-openjdk java-1.7.0-openjdk-devel 
 elif [ `uname -s` = "Darwin" ] ; then
-    brew install wget
+    brew install wget libmagic
+    # java
+    brew cask install java
 fi
