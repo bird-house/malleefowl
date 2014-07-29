@@ -423,6 +423,18 @@ class InOutProcess(WPSProcess):
             upload=True,
             )
 
+        self.netcdf_upload = self.addComplexInput(
+            identifier="netcdf_upload",
+            title="NetCDF Upload",
+            abstract="Upoad NetCDF File",
+            metadata=[],
+            minOccurs=0,
+            maxOccurs=1,
+            formats=[{"mimeType":"application/x-netcdf"}],
+            maxmegabites=20,
+            upload=True,
+            )
+
         self.xml_url = self.addComplexInput(
             identifier="xml_url",
             title="XML File",
@@ -550,6 +562,15 @@ class InOutProcess(WPSProcess):
             asReference=True,
             )
 
+        self.netcdf_upload_out = self.addComplexOutput(
+            identifier="netcdf_upload",
+            title="Uploaded NetCDF File",
+            abstract="Uploaded NetCDF File",
+            metadata=[],
+            formats=[{"mimeType":"application/x-netcdf"}],
+            asReference=True,
+            )
+
         self.xml_url_out = self.addComplexOutput(
             identifier="xml_url",
             title="XML File",
@@ -634,6 +655,11 @@ class InOutProcess(WPSProcess):
             else:
                 fp.write( "<result>nothing</result>" )
             self.xml_upload_out.setValue( fp.name )
+
+        # output uploaded netcdf file
+        filename = self.netcdf_upload.getValue()
+        if filename is not None:
+            self.netcdf_upload_out.setValue( filename )
             
         # write file with url from input data
         logger.debug('write input xml_upload')
