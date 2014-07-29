@@ -41,14 +41,10 @@ class WPSProcess(PyWPSProcess):
                         metadata=[], minOccurs=1, maxOccurs=1,
                         formats=[{"mimeType":None}], maxmegabites=None,
                         upload=False):
-        if upload:
-            #logger.debug('update extra metadata for complex input: identifier=%s', identifier)
-            uploads = self.extra_metadata.get('uploads', [])
-            if not identifier in uploads:
-                uploads.append(identifier)
-            self.extra_metadata['uploads'] = uploads
-            #logger.debug('extra metadata = %s', uploads)
-            database.register_process_metadata(self.identifier, self.extra_metadata)
+        self.extra_metadata['uploads'] = self.extra_metadata.get('uploads', [])
+        if upload and not identifier in uploads:
+            self.extra_metadata['uploads'].append(identifier)
+        database.register_process_metadata(self.identifier, self.extra_metadata)
         return PyWPSProcess.addComplexInput(
             self,
             identifier=identifier,
