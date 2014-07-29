@@ -22,6 +22,7 @@ class WPSProcess(PyWPSProcess):
     def __init__(self, identifier, title, version, metadata=[], abstract="", extra_metadata={}):
 
         self.extra_metadata=extra_metadata
+        self.extra_metadata['uploads'] = self.extra_metadata.get('uploads', [])
         database.register_process_metadata(identifier, extra_metadata)
         # TODO: fix metadata appending
         #metadata.append({"title":"Hardworking Bird Malleefowl", "href":"http://en.wikipedia.org/wiki/Malleefowl"})
@@ -41,10 +42,9 @@ class WPSProcess(PyWPSProcess):
                         metadata=[], minOccurs=1, maxOccurs=1,
                         formats=[{"mimeType":None}], maxmegabites=None,
                         upload=False):
-        self.extra_metadata['uploads'] = self.extra_metadata.get('uploads', [])
-        if upload and not identifier in uploads:
+        if upload and not identifier in self.extra_metadata['uploads']:
             self.extra_metadata['uploads'].append(identifier)
-        database.register_process_metadata(self.identifier, self.extra_metadata)
+            database.register_process_metadata(self.identifier, self.extra_metadata)
         return PyWPSProcess.addComplexInput(
             self,
             identifier=identifier,
