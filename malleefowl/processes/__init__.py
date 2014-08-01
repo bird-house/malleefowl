@@ -5,5 +5,4 @@ __all__ = ["base",
            "esgf",
            "source",
            "animate",
-           "testing",
            ]
