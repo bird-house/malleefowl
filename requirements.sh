@@ -19,4 +19,6 @@ elif [ `uname -s` = "Darwin" ] ; then
     brew install wget libmagic
     # java
     brew cask install java
+    # globus myproxy
+    brew install globus-toolkit
 fi
