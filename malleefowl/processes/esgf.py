@@ -22,7 +22,7 @@ class Logon(WPSProcess):
     def __init__(self):
         WPSProcess.__init__(
             self,
-            identifier = "org.malleefowl.esgf.logon",
+            identifier = "esgf_logon",
             title = "Logon with ESGF OpenID",
             version = "1.0",
             metadata=[
@@ -87,22 +87,13 @@ class Wget(SourceProcess):
 
     def __init__(self):
         SourceProcess.__init__(self,
-            identifier = "org.malleefowl.esgf.wget",
+            identifier = "esgf_wget",
             title = "ESGF wget download",
             version = "0.2",
             metadata=[
                 {"title":"ESGF","href":"http://esgf.org"},
                 ],
             abstract="Download files from esgf data node with wget")
-
-        self.token = self.addLiteralInput(
-            identifier = "token",
-            title = "Token",
-            abstract = "Your unique token to publish data",
-            minOccurs = 1,
-            maxOccurs = 1,
-            type = type('')
-            )
 
         self.credentials = self.addComplexInput(
             identifier = "credentials",
@@ -115,30 +106,15 @@ class Wget(SourceProcess):
             formats=[{"mimeType":"application/x-pkcs7-mime"}],
             )
 
-        self.sidecar = self.addComplexOutput(
-            identifier="sidecar",
-            title="Metadata",
-            abstract="Metadata of downloaded files",
-            metadata=[],
-            formats=[{"mimeType":"application/json"}],
-            asReference=True,
-            )
-
     def execute(self):
-        self.show_status("starting esgf wget ...", 5)
+        self.show_status("Starting wget download ...", 5)
 
         credentials = self.credentials.getValue()
-        logger.debug('credentials = %s', credentials)
         file_url = self.file_identifier.getValue()
         filename = os.path.basename(file_url)
         logger.debug('file url = %s', file_url)
 
-        token = self.token.getValue()
-
-        from malleefowl import tokenmgr
-        userid = tokenmgr.get_userid(tokenmgr.sys_token(), token)
-
-        self.show_status("download %s" % (filename), 10)
+        self.show_status("Downloading %s" % (filename), 10)
 
         try:
             cmd = ["wget",
@@ -150,22 +126,19 @@ class Wget(SourceProcess):
                    "--progress", "dot:mega",
                    file_url]
             self.cmd(cmd, stdout=True)
-        except Exception as e:
-            raise RuntimeError("wget failed (%s)." % (e.message))
+        except Exception:
+            msg = "wget failed ..."
+            self.show_status(msg)
+            logger.exception(msg)
+            raise
 
         outfile = os.path.join(config.cache_path(), filename)
         logger.debug('result file=%s', outfile)
 
-        publish.link_to_local_store(files=[outfile], userid=userid)
-        
         self.output.setValue(outfile)
-        self.show_status("esgf wget ... done", 90)
+        self.show_status("Downloading... done", 90)
         
         metadata = dict(url=file_url, filename=filename)
-        sidecar_file = self.mktempfile(suffix='.json')
-        with open(sidecar_file, 'w') as fp:
-            json.dump(obj=metadata, fp=fp, indent=4, sort_keys=True)
-        self.sidecar.setValue(sidecar_file)
 
 
 class OpenDAP(SourceProcess):
@@ -173,7 +146,7 @@ class OpenDAP(SourceProcess):
 
     def __init__(self):
         SourceProcess.__init__(self,
-            identifier = "org.malleefowl.esgf.opendap",
+            identifier = "esgf_opendap",
             title = "ESGF OpenDAP download",
             version = "0.2",
             metadata=[

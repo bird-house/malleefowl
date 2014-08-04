@@ -1,16 +1,6 @@
 TODO list  ....
 ===============
 
-name for github
----------------
-
-* Nils:
-
-Eyrie (oder AM: aerie)
-
-Ist unter anderm der (Adler)Horst und ein gutes Zusause fuer all deine Voegel 
-
-
 Helsinki
 --------
 
@@ -26,10 +16,10 @@ Helsinki
 Bugs
 ----
 
-* myproxy logon does not work anymore
+* wget on debian does not work for esgf downloads
+https://bugs.launchpad.net/linuxmint/+bug/1335174
 * fix capabilities for isometa process
 * pywps key-value request does not work if data-input has an @ sign
-* fix pywps install
 * set egg_cache:
 /home/dkrz/k204199/sandbox/malleefowl/eggs/setuptools-3.4.4-py2.7.egg/pkg_resources.py:1031: UserWarning: /home/dkrz/k
 204199/.python-eggs is writable by group/others and vulnerable to attack when used with get_resource_filename. Conside
