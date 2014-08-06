@@ -80,11 +80,10 @@ class SourceProcess(WPSProcess):
      """This is the base class for all source processes."""
 
      def __init__(self, identifier, title, version, metadata=[], abstract="", extra_metadata={}):
-        wf_identifier = identifier + ".source"
         
         WPSProcess.__init__(
             self,
-            identifier = wf_identifier,
+            identifier = identifier,
             title = title,
             version = version,
             metadata = metadata,
@@ -123,11 +122,10 @@ class WorkerProcess(WPSProcess):
                  extra_metadata={
                      'esgfilter': '',
                      'esgquery': '*'}):
-        wf_identifier = identifier + '.worker'
         
         WPSProcess.__init__(
             self,
-            identifier = wf_identifier,
+            identifier = identifier,
             title = title,
             version = version,
             metadata = metadata,
