@@ -128,7 +128,7 @@ class Wget(SourceProcess):
             self.cmd(cmd, stdout=True)
         except Exception:
             msg = "wget failed ..."
-            self.show_status(msg)
+            self.show_status(msg, 20)
             logger.exception(msg)
             raise
 
@@ -137,9 +137,6 @@ class Wget(SourceProcess):
 
         self.output.setValue(outfile)
         self.show_status("Downloading... done", 90)
-        
-        metadata = dict(url=file_url, filename=filename)
-
 
 class OpenDAP(SourceProcess):
     """This process downloads files form esgf data node via opendap"""
