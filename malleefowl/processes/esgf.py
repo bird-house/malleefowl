@@ -13,7 +13,7 @@ import StringIO
 from netCDF4 import Dataset
 
 from malleefowl.process import WPSProcess, SourceProcess, WorkerProcess
-from malleefowl import utils, publish, config
+from malleefowl import utils, config
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
