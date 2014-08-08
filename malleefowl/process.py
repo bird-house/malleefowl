@@ -55,6 +55,14 @@ class WPSProcess(PyWPSProcess):
         logger.info('STATUS (%d/100) - %s: %s', percent_done, self.identifier, msg)
         self.status.set(msg=msg, percentDone=percent_done, propagate=True)
 
+    def getInputValues(self, identifier):
+        values = self.getInputValue(identifier)
+        if values is None:
+            values = []
+        elif type(values) != types.ListType:
+            values = [values]
+        return values
+
 class SourceProcess(WPSProcess):
      """This is the base class for all source processes."""
 
@@ -107,7 +115,6 @@ class WorkerProcess(WPSProcess):
             identifier="file_identifier",
             title="NetCDF File",
             abstract="NetCDF File",
-            metadata=[],
             minOccurs=1,
             maxOccurs=100,
             maxmegabites=5000,
