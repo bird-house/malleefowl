@@ -30,6 +30,7 @@ components:
       service: ${nodes['source'].get('service')}
       identifier: ${nodes['source'].get('identifier')}
       input: ${nodes['source'].get('input')}
+      complex_input: ${nodes['source'].get('complex_input')}
       output: ${nodes['source'].get('output')}
       verbose: false
     sequences:
@@ -57,6 +58,7 @@ components:
       service: ${nodes['worker'].get('service')}
       identifier: ${nodes['worker'].get('identifier')}
       input: ${nodes['worker'].get('input')}
+      complex_input: ${nodes['worker'].get('complex_input')}  
       output: ${nodes['worker'].get('output')}
       verbose: false
     inflows:

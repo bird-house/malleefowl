@@ -14,17 +14,15 @@ from malleefowl.process import WPSProcess
 from malleefowl import restflow, config
 
 class Generate(WPSProcess):
-    """Generates workflow description document in yaml for restflow"""
-
     def __init__(self):
         WPSProcess.__init__(self,
-            identifier = "org.malleefowl.restflow.generate",
-            title = "Generate Restflow Workflow",
+            identifier = "restflow_generate",
+            title = "Generate Restflow Workflow Description",
             version = "0.1",
             metadata=[
                 {"title":"Restflow","href":"https://github.com/restflow-org"},
                 ],
-            abstract="Generate YAML workflow description for restflow")
+            abstract="Generates Restflow workflow description in yaml from given json input parameters.")
 
         self.name = self.addLiteralInput(
             identifier="name",
@@ -83,12 +81,12 @@ class Generate(WPSProcess):
         self.output.setValue( outfile )
 
 class Run(WPSProcess):
-    """This process runs a restflow workflow description"""
+    """This process runs a restflow workflow"""
 
     def __init__(self):
         WPSProcess.__init__(self,
-            identifier = "org.malleefowl.restflow.run",
-            title = "Run restflow workflow",
+            identifier = "restflow_run",
+            title = "Run Restflow Workflow",
             version = "0.1",
             metadata=[
                 {"title":"Restflow","href":"https://github.com/restflow-org"},
@@ -116,7 +114,6 @@ class Run(WPSProcess):
             maxOccurs=1,
             maxmegabites=2,
             formats=[{"mimeType":"text/yaml"}],
-            upload=True,
             )
 
         self.output = self.addComplexOutput(
@@ -128,11 +125,10 @@ class Run(WPSProcess):
             )
 
     def execute(self):
-        filename = os.path.abspath(self.workflow_description.getValue(asFile=False))
-        logger.debug("filename = %s, timeout= %d" % (filename, config.timeout()))
+        wf_description = self.workflow_description.getValue(asFile=False)
 
         status = lambda msg, percent: self.show_status(msg, percent)
-        result_file = restflow.run(filename, timeout=config.timeout(), status_callback=status)
+        result_file = restflow.run(wf_description, timeout=config.timeout(), status_callback=status)
 
         self.output.setValue( result_file )
 

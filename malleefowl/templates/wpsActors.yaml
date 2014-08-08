@@ -38,7 +38,7 @@
       }
       for (item in sources) {
           cmd.add('--input')
-          cmd.add("file_identifier=" + item.value)
+          cmd.add('' + complex_input + '=' + item.value)
       }
       for (item in input) {
           cmd.add('--input')
@@ -69,6 +69,7 @@
     inputs:
       identifier: 
       service:
+      complex_input:
       input:
         type: Collection
         optional: true
