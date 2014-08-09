@@ -5,17 +5,15 @@ from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
 class Wget(WPSProcess):
-    """This process downloads files form esgf data node via wget and http"""
-
     def __init__(self):
         WPSProcess.__init__(self,
             identifier = "esgf_wget",
-            title = "ESGF wget download",
-            version = "0.2",
+            title = "wget download",
+            version = "0.3",
             metadata=[
                 {"title":"ESGF","href":"http://esgf.org"},
                 ],
-            abstract="Download files from esgf data node with wget")
+            abstract="Downloads files with wget.")
 
         self.source = self.addLiteralInput(
             identifier="source",
@@ -30,7 +28,7 @@ class Wget(WPSProcess):
             identifier = "credentials",
             title = "X509 Certificate",
             abstract = "X509 proxy certificate to access ESGF data.",
-            minOccurs=1,
+            minOccurs=0,
             maxOccurs=1,
             maxmegabites=1,
             formats=[{"mimeType":"application/x-pkcs7-mime"}],
@@ -54,18 +52,23 @@ class Wget(WPSProcess):
         self.show_status("Downloading %s" % (source), 10)
 
         try:
-            cmd = ["wget",
-                   "--certificate", credentials, 
-                   "--private-key", credentials, 
-                   "--no-check-certificate", 
-                   "-N",
-                   "-P", config.cache_path(),
-                   "--progress", "dot:mega",
-                   source]
+            cmd = ["wget"]
+            if credentials is not None:
+                cmd.append("--certificate")
+                cmd.append(credentials) 
+                cmd.append("--private-key")
+                cmd.append(credentials)
+            cmd.append("--no-check-certificate") 
+            cmd.append("-N")
+            cmd.append("-P")
+            cmd.append(config.cache_path())
+            cmd.append("--progress")
+            cmd.append("dot:mega")
+            cmd.append(source)
             self.cmd(cmd, stdout=True)
-        except Exception:
+        except Exception, e:
             msg = "wget failed ..."
-            self.show_status(msg, 20)
+            self.show_status(msg + str(e), 20)
             logger.exception(msg)
             raise
 
@@ -74,5 +77,5 @@ class Wget(WPSProcess):
         logger.debug('result file=%s', outfile)
 
         self.output.setValue(outfile)
-        self.show_status("Downloading... done", 90)
+        self.show_status("Downloading... done", 100)
 
