@@ -14,14 +14,6 @@ def getConfigValue(*args):
         logger.exception("Could not get config value for")
     return value
 
-def mongodb_url():
-    url = "mongodb://localhost"
-    try:
-        url = wpsconfig.getConfigValue("malleefowl", "mongodbUrl")
-    except Exception:
-        logger.warn("mongodbUrl not configured ... using default %s", url)
-    return url
-
 def thredds_url():
     url = "http://localhost:8080/thredds"
     try:
@@ -39,14 +31,6 @@ def timeout():
         logger.warn("timeout not configured ... using default %s", url)
     return timeout
 
-def sys_token():
-    token = change_me_in_custom.cfg
-    try:
-        token = wpsconfig.getConfigValue("malleefowl", "sysToken")
-    except Exception:
-        logger.warn("sysToken not configured ... using default %s", url)
-    return token
-    
 def cache_path():
     mypath = os.path.join(getConfigValue("server","outputPath"), "cache")
     utils.mkdir(mypath)

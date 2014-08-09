@@ -13,7 +13,6 @@ requires = [
     'ordereddict',
     'lxml',
     'owslib',
-    'pymongo',
     'pyOpenSSL',
     'netCDF4',
     'pyYAML',

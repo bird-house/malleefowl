@@ -27,15 +27,6 @@ class GetWMSLayers(WPSProcess):
             abstract = "Get all Layers from Thredds ncWMS Service",
             )
 
-        self.token = self.addLiteralInput(
-            identifier = "token",
-            title = "Token",
-            abstract = "Your unique access token",
-            minOccurs = 1,
-            maxOccurs = 1,
-            type = type('')
-            )
-
         self.start = self.addLiteralInput(
             identifier="start",
             title="Start Date",
@@ -66,13 +57,9 @@ class GetWMSLayers(WPSProcess):
             )
 
     def execute(self):
-        # TODO: needs to be protected by token
         self.show_status("starting ...", 10)
 
-        token = self.token.getValue()
-
-        from malleefowl import tokenmgr
-        userid = tokenmgr.get_userid(tokenmgr.sys_token(), token)
+        userid = "dummy_user"
         
         files_path = os.path.join(self.files_path, userid)
         utils.mkdir(files_path)

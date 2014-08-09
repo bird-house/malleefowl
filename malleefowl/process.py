@@ -1,16 +1,10 @@
-"""
-Processes for ClimDaPs WPS
-
-Author: Carsten Ehbrecht (ehbrecht@dkrz.de)
-"""
-
 import os
 import types
 import tempfile
 
 from pywps.Process import WPSProcess as PyWPSProcess
 
-from malleefowl import database, config
+from malleefowl import config
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
