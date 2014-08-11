@@ -37,6 +37,7 @@ components:
       sources: ${nodes['source'].get('sources')}
     outflows:
       result: /source/
+      statusLocation: /statusLocation/
       status: /status/
 
 - id: WaitForSources
@@ -65,6 +66,7 @@ components:
       sources: /sources/
     outflows:
       result: /worker/
+      statusLocation: /statusLocation/
       status: /status/
  
 - id: WriteResult
@@ -74,7 +76,7 @@ components:
     constants:
       filename: restflow_output.txt
     inflows:
-      message: /worker/
+      message: /statusLocation/
 
 - id: WriteStatus
   type: Node

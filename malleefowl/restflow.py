@@ -71,7 +71,7 @@ def run(filename, basedir=None, timeout=0, status_callback=status):
         #time.sleep(30)
         raise Exception(msg)
 
-    status_callback('workflow is done', 95)
+    status_callback('workflow is done', 100)
             
     logger.debug("after process call")
     #logger.debug("stdoutdata: %s", stdoutdata)

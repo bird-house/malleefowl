@@ -60,11 +60,9 @@
       if (resultFile.exists()) {
          yaml = new Yaml()
          wpsResult = yaml.load(new FileInputStream(resultFile))
-     
-         for (item in wpsResult) {
-            result = item.reference
-            status = identifier + ' ... done'
-         }
+         result = wpsResult.processOutputs[0].reference
+         statusLocation = wpsResult.statusLocation
+         status = wpsResult.status
       }
     inputs:
       identifier: 
@@ -86,6 +84,7 @@
         type: Bool
     outputs:
       result:
+      statusLocation:
       status:
 
 - id: FileWriter

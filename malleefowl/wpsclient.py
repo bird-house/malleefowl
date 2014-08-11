@@ -23,7 +23,6 @@ class MyEncoder(json.JSONEncoder):
             pass
         return d
 
-
 from owslib.wps import WebProcessingService, monitorExecution
 
 def get_caps(service, verbose=False):
@@ -66,10 +65,10 @@ def execute(service, identifier, inputs=[], outputs=[], sleep_secs=2, verbose=Fa
     #    logger.debug("%s: %s", item.identifier, item.reference)
 
     # TODO: give wps some time to publish result document
-    import time
-    time.sleep(2)
+    #import time
+    #time.sleep(2)
     
-    return to_json(execution.processOutputs)
+    return to_json(execution)
     
 def to_json(result):
     # TODO fix json encoding (unicode, ascii)
@@ -91,9 +90,9 @@ def main():
                       )
     parser.add_option('-s', '--service',
                       dest="service",
-                      default="http://localhost:8090/wps",
+                      default="http://localhost:8091/wps",
                       action="store",
-                      help="WPS service url (default: http://localhost:8090/wps)")
+                      help="WPS service url (default: http://localhost:8091/wps)")
     parser.add_option('-i', '--identifier',
                       dest="identifier",
                       action="store",
@@ -125,7 +124,7 @@ def main():
                             action = "store",
                             default = 2,
                             type="int",
-                            help = "sleep interval in seconds when checking process status")
+                            help = "sleep interval in seconds when checking process status. Default: 2.")
     parser.add_option_group(execute_opts)
 
     options, command = parser.parse_args()
@@ -174,5 +173,4 @@ def main():
             json.dump(result, fp, sort_keys=True, indent=2)
             fp.flush()
             
-
     logger.info('wps process %s done', options.identifier)
