@@ -2,25 +2,35 @@
   type: GroovyActor
   properties:
     initialize: |
-      myList = []
+      sourceList = []
+      statusLocationList = []
     step: |
-      myList.add(source)
-      if (myList.size() <  max) {
+      sourceList.add(source)
+      statusLocationList.add(statusLocation)
+      if (sourceList.size() <  max) {
         _status.setOutputEnable('sources', false)
+        _status.setOutputEnable('statusLocations', false)
       } else {
-        sources = myList
+        sources = sourceList
+        statusLocations = statusLocationList
         _status.setOutputEnable('sources', true)
+        _status.setOutputEnable('statusLocations', true)
       }
     inputs:
       max:
         default: 1
       source:
         type: String
+      statusLocation:
+        type: String
     outputs:
       sources:
         type: Collection
+      statusLocations:
+        type: Collection
     state:
-      myList:
+      sourceList:
+      statusLocationList:
 
 - id: WpsExecute
   type: GroovyActor

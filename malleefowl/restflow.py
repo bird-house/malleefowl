@@ -38,6 +38,7 @@ def run(filename, basedir=None, timeout=0, status_callback=status):
     p = subprocess.Popen(cmd, cwd=basedir, stdout=PIPE, stderr=PIPE)
 
     status_file = os.path.join(basedir, 'restflow_status.txt')
+    status_location_file = os.path.join(basedir, 'restflow_status_location.txt')
     result_file = os.path.join(basedir, 'restflow_output.txt')
     
     import time
@@ -81,4 +82,5 @@ def run(filename, basedir=None, timeout=0, status_callback=status):
     logger.info("workflow ... done")
 
     return result_file
+    #return status_location_file
     

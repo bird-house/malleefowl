@@ -21,6 +21,7 @@ components:
     - !ref RunWorker
     - !ref WriteResult
     - !ref WriteStatus
+    - !ref WriteStatusLocation
 
 - id: GetSource
   type: Node
@@ -48,8 +49,10 @@ components:
       max: ${len(nodes['source'].get('sources'))}
     inflows:
       source: /source/
+      statusLocation: /statusLocation/
     outflows:
       sources: /sources/
+      statusLocations: /statusLocations/
 
 - id: RunWorker
   type: Node
@@ -66,7 +69,7 @@ components:
       sources: /sources/
     outflows:
       result: /worker/
-      statusLocation: /statusLocation/
+      statusLocation: /statusLocationWorker/
       status: /status/
  
 - id: WriteResult
@@ -76,7 +79,16 @@ components:
     constants:
       filename: restflow_output.txt
     inflows:
-      message: /statusLocation/
+      message: /statusLocationWorker/
+
+- id: WriteStatusLocation
+  type: Node
+  properties:
+    actor: !ref FileWriter
+    constants:
+      filename: restflow_status_location.txt
+    inflows:
+      message: /statusLocations/
 
 - id: WriteStatus
   type: Node
