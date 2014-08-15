@@ -1,10 +1,15 @@
 import os
 
-from setuptools import setup, find_packages
+from setuptools import find_packages
+from setuptools import setup
 
-here = os.path.abspath(os.path.dirname(__file__))
-README = open(os.path.join(here, 'README.rst')).read()
-CHANGES = open(os.path.join(here, 'CHANGES.rst')).read()
+version = '0.1.0'
+description = 'PyWPS processes to support climate data processing with WPS.'
+long_description = (
+    open('README.rst').read() + '\n' +
+    open('AUTHORS.rst').read() + '\n' +
+    open('CHANGES.rst').read()
+)
 
 requires = [
     'PyWPS',
@@ -33,15 +38,15 @@ classifiers=[
         ]
 
 setup(name='Malleefowl',
-      version='0.1',
-      description='Climate Data Processing with PyWPS',
-      long_description=README + '\n\n' + CHANGES,
+      version=version,
+      description=description,
+      long_description=long_description,
       classifiers=classifiers,
       author='Carsten Ehbrecht',
       author_email='ehbrecht@dkrz.de',
       url='http://www.dkrz.de',
-      license = "http://www.gnu.org/licenses/gpl.html",
-      keywords='wps PyWPS Python Malleefowl netcdf esgf',
+      license = "Apache License v2.0",
+      keywords='pywps python malleefowl netcdf esgf',
       packages=find_packages(),
       include_package_data=True,
       zip_safe=False,
