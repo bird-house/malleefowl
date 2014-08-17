@@ -38,9 +38,8 @@ def run(filename, basedir=None, timeout=0, status_callback=status):
     p = subprocess.Popen(cmd, cwd=basedir, stdout=PIPE, stderr=PIPE)
 
     status_file = os.path.join(basedir, 'restflow_status.txt')
-    status_location_file = os.path.join(basedir, 'restflow_status_location.txt')
-    source_status_locations = os.path.join(basedir, 'restflow_source_status_locations.txt')
-    result_file = os.path.join(basedir, 'restflow_output.txt')
+    f_status_location = os.path.join(basedir, 'restflow_status_location.txt')
+    f_source_status_locations = os.path.join(basedir, 'restflow_source_status_locations.txt')
     
     import time
     count = 0
@@ -62,25 +61,33 @@ def run(filename, basedir=None, timeout=0, status_callback=status):
             p.kill()
             raise Exception(msg)
         count = count + 1
-        if os.path.exists(result_file):
+        if os.path.exists(f_status_location):
             logger.warn('terminated workflow. No exit code but result exists.')
             #p.terminate()
 
-    if not os.path.exists(result_file):
+    if not os.path.exists(f_status_location):
         msg = "No result file found %s: returncode=%s, stdout=%s, stderr=%s" % (
             result_file, p.returncode, p.stdout.read(), p.stderr.read())
         logger.error(msg)
         #time.sleep(30)
         raise Exception(msg)
 
+    result = {}
+    with open(f_status_location, 'r') as f:
+        result['worker'] = []
+        for line in f:
+            result['worker'].append(line)
+    
+    with open(f_source_status_locations, 'r') as f:
+        result['source'] = []
+        for line in f:
+            result['source'].append(line)
+    logger.debug("result: %s", result)
+
     status_callback('workflow is done', 100)
             
-    logger.debug("after process call")
     #logger.debug("stdoutdata: %s", stdoutdata)
     #logger.debug("stderrdata: %s", stderrdata)
 
-    logger.debug("output=%s", result_file)
-    logger.info("workflow ... done")
-
-    return result_file, status_location_file, source_status_locations
+    return result
     

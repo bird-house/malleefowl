@@ -120,21 +120,7 @@ class Run(WPSProcess):
             identifier="output",
             title="Workflow Result",
             abstract="Workflow Result",
-            formats=[{"mimeType":"text/txt"}],
-            asReference=True,
-            )
-        self.status_location = self.addComplexOutput(
-            identifier="status_location",
-            title="WPS status location",
-            abstract="WPS status locations of workflow nodes",
-            formats=[{"mimeType":"text/txt"}],
-            asReference=True,
-            )
-        self.source_status_locations = self.addComplexOutput(
-            identifier="source_status_locations",
-            title="WPS status locations of sources",
-            abstract="WPS status locations of workflow nodes",
-            formats=[{"mimeType":"text/txt"}],
+            formats=[{"mimeType":"application/json"}],
             asReference=True,
             )
         
@@ -142,12 +128,15 @@ class Run(WPSProcess):
         wf_description = self.workflow_description.getValue()
 
         status = lambda msg, percent: self.show_status(msg, percent)
-        result, status_location, source_status_locations = restflow.run(
+        result = restflow.run(
             wf_description, 
             timeout=config.timeout(), 
             status_callback=status)
 
-        self.output.setValue( result )
-        self.status_location.setValue(status_location)
-        self.source_status_locations.setValue(source_status_locations)
+        import json
+        outfile = self.mktempfile(suffix='.json')
+        with open(outfile, 'w') as fp:
+            json.dump(obj=result, fp=fp, indent=4, sort_keys=True)
+        self.output.setValue( outfile )
+
 
