@@ -66,8 +66,8 @@ def run(filename, basedir=None, timeout=0, status_callback=status):
             #p.terminate()
 
     if not os.path.exists(f_status_location):
-        msg = "No result file found %s: returncode=%s, stdout=%s, stderr=%s" % (
-            result_file, p.returncode, p.stdout.read(), p.stderr.read())
+        msg = "No status location file found %s: returncode=%s, stdout=%s, stderr=%s" % (
+            f_status_location, p.returncode, p.stdout.read(), p.stderr.read())
         logger.error(msg)
         #time.sleep(30)
         raise Exception(msg)
