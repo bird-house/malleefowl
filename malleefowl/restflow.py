@@ -81,6 +81,5 @@ def run(filename, basedir=None, timeout=0, status_callback=status):
     logger.debug("output=%s", result_file)
     logger.info("workflow ... done")
 
-    return result_file
-    #return status_location_file
+    return result_file, status_location_file
     

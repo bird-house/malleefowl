@@ -38,8 +38,8 @@ components:
       sources: ${nodes['source'].get('sources')}
     outflows:
       result: /source/
-      statusLocation: /statusLocation/
-      status: /status/
+      statusLocation: /sourceStatusLocation/
+      status: /sourceStatus/
 
 - id: WaitForSources
   type: Node
@@ -49,10 +49,10 @@ components:
       max: ${len(nodes['source'].get('sources'))}
     inflows:
       source: /source/
-      statusLocation: /statusLocation/
+      statusLocation: /sourceStatusLocation/
     outflows:
       sources: /sources/
-      statusLocations: /statusLocations/
+      statusLocations: /sourceStatusLocations/
 
 - id: RunWorker
   type: Node
@@ -69,8 +69,8 @@ components:
       sources: /sources/
     outflows:
       result: /worker/
-      statusLocation: /statusLocationWorker/
-      status: /status/
+      statusLocation: /workerStatusLocation/
+      status: /workerStatus/
  
 - id: WriteResult
   type: Node
@@ -79,7 +79,7 @@ components:
     constants:
       filename: restflow_output.txt
     inflows:
-      message: /statusLocationWorker/
+      message: /worker/
 
 - id: WriteStatusLocation
   type: Node
@@ -88,7 +88,7 @@ components:
     constants:
       filename: restflow_status_location.txt
     inflows:
-      message: /statusLocations/
+      message: /workerStatusLocation/
 
 - id: WriteStatus
   type: Node
@@ -97,7 +97,7 @@ components:
     constants:
       filename: restflow_status.txt
     inflows:
-      message: /status/
+      message: /workerStatus/
 
 
 
