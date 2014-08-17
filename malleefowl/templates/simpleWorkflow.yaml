@@ -18,6 +18,7 @@ components:
     nodes:
     - !ref GetSource
     - !ref WaitForSources
+    - !ref WriteSourceStatusLocations
     - !ref RunWorker
     - !ref WriteResult
     - !ref WriteStatus
@@ -53,6 +54,15 @@ components:
     outflows:
       sources: /sources/
       statusLocations: /sourceStatusLocations/
+
+- id: WriteSourceStatusLocations
+  type: Node
+  properties:
+    actor: !ref FileWriter
+    constants:
+      filename: restflow_source_status_locations.txt
+    inflows:
+      message: /sourceStatusLocations/
 
 - id: RunWorker
   type: Node

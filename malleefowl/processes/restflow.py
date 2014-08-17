@@ -130,17 +130,24 @@ class Run(WPSProcess):
             formats=[{"mimeType":"text/txt"}],
             asReference=True,
             )
+        self.source_status_locations = self.addComplexOutput(
+            identifier="source_status_locations",
+            title="WPS status locations of sources",
+            abstract="WPS status locations of workflow nodes",
+            formats=[{"mimeType":"text/txt"}],
+            asReference=True,
+            )
         
-
     def execute(self):
         wf_description = self.workflow_description.getValue()
 
         status = lambda msg, percent: self.show_status(msg, percent)
-        result, status_location = restflow.run(
+        result, status_location, source_status_locations = restflow.run(
             wf_description, 
             timeout=config.timeout(), 
             status_callback=status)
 
         self.output.setValue( result )
         self.status_location.setValue(status_location)
+        self.source_status_locations.setValue(source_status_locations)
 

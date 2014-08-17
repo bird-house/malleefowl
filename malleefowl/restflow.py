@@ -39,6 +39,7 @@ def run(filename, basedir=None, timeout=0, status_callback=status):
 
     status_file = os.path.join(basedir, 'restflow_status.txt')
     status_location_file = os.path.join(basedir, 'restflow_status_location.txt')
+    source_status_locations = os.path.join(basedir, 'restflow_source_status_locations.txt')
     result_file = os.path.join(basedir, 'restflow_output.txt')
     
     import time
@@ -81,5 +82,5 @@ def run(filename, basedir=None, timeout=0, status_callback=status):
     logger.debug("output=%s", result_file)
     logger.info("workflow ... done")
 
-    return result_file, status_location_file
+    return result_file, status_location_file, source_status_locations
     
