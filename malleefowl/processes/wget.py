@@ -43,6 +43,13 @@ class Wget(WPSProcess):
             asReference=True,
             )
 
+        self.output_path = self.addLiteralOutput(
+            identifier="output_path",
+            title="Output path",
+            abstract="Path to downloaded NetCDF file.",
+            type=type('')
+            )
+
     def execute(self):
         self.show_status("Starting wget download ...", 5)
 
@@ -77,5 +84,6 @@ class Wget(WPSProcess):
         logger.debug('result file=%s', outfile)
 
         self.output.setValue(outfile)
+        self.output_path.setValue("file://" + outfile)
         self.show_status("Downloading... done", 100)
 
