@@ -29,7 +29,6 @@ requires = [
 classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Science/Research',
-        'License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)',
         'Operating System :: MacOS :: MacOS X',
         'Operating System :: Microsoft :: Windows',
         'Operating System :: POSIX',
