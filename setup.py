@@ -1,4 +1,4 @@
-import os
+# -*- coding: utf-8 -*-
 
 from setuptools import find_packages
 from setuptools import setup
@@ -41,11 +41,11 @@ setup(name='malleefowl',
       description=description,
       long_description=long_description,
       classifiers=classifiers,
+      keywords='pywps python malleefowl netcdf esgf',
       author='Carsten Ehbrecht',
       author_email='ehbrecht@dkrz.de',
       url='http://www.dkrz.de',
       license = "Apache License v2.0",
-      keywords='pywps python malleefowl netcdf esgf',
       packages=find_packages(),
       include_package_data=True,
       zip_safe=False,
