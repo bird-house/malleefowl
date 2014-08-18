@@ -36,7 +36,7 @@ classifiers=[
         'Topic :: Scientific/Engineering :: Atmospheric Science',
         ]
 
-setup(name='Malleefowl',
+setup(name='malleefowl',
       version=version,
       description=description,
       long_description=long_description,

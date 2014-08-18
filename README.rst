@@ -39,7 +39,7 @@ Check the log files for errors::
 Configuration
 *************
 
-If you want to run on a different hostname or port then change the default values in custom.cfg::
+If you want to run on a different hostname or port then change the default values in ``custom.cfg``::
 
    $ cd malleefowl
    $ vim custom.cfg
