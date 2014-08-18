@@ -14,7 +14,7 @@ Bugs
 
 * wget on debian does not work for esgf downloads
 https://bugs.launchpad.net/linuxmint/+bug/1335174
-* fix capabilities for isometa process
+* fix capabilities of isometa process
 * pywps key-value request does not work if data-input has an @ sign
 * set egg_cache:
 python-eggs is writable by group/others ... (set PYTHON_EGG_CACHE environment variable)
