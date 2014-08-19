@@ -76,6 +76,8 @@ def run(filename, basedir=None, timeout=0, status_callback=status):
         raise Exception(msg)
 
     result = {}
+    result['stdout'] = p.stdout.read().split('\n')
+    result['stderr'] = p.stderr.read().split('\n')
     with open(f_status_location, 'r') as f:
         result['worker'] = []
         for line in f:
