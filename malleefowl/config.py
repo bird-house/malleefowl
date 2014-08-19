@@ -36,7 +36,3 @@ def cache_path():
     utils.mkdir(mypath)
     return mypath
 
-def files_path():
-    mypath = os.path.join(getConfigValue("server","outputPath"), "files")
-    utils.mkdir(mypath)
-    return mypath

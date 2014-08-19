@@ -30,10 +30,6 @@ class WPSProcess(PyWPSProcess):
             grassLocation = False)
 
     @property
-    def files_path(self):
-        return config.files_path()
-
-    @property
     def working_dir(self):
         return os.path.abspath(os.curdir)
 
