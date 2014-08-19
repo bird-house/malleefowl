@@ -118,7 +118,7 @@ def main():
                             dest = "outputs",
                             action = "append",
                             default = [],
-                            help = "one or more output params")
+                            help = "one or more output params with flag for reference: key=True|False")
     execute_opts.add_option('--sleep',
                             dest = "sleep_secs",
                             action = "store",
@@ -143,7 +143,14 @@ def main():
 
     outputs = []
     for param in options.outputs:
-        outputs.append( (param, True) )
+        key = asref = None
+        try:
+            key,asref = param.split('=')
+            asref= asref=='True'
+        except:
+            key = param
+            asref = True
+        outputs.append( (key, asref) )
 
     result = None
     if 'caps' in command:
