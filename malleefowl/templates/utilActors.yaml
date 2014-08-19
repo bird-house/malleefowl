@@ -1,10 +1,10 @@
-- id: StatusWriter
+- id: FileWriterAppend
   type: GroovyActor
   properties:
     step: |
       new File(filename).withWriterAppend{ out -> out.println message }
     inputs:
       filename:
-        type: String
       message:
-        type: String
+
+      

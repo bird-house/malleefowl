@@ -9,34 +9,52 @@ components:
   type: GroovyActor
   properties:
     step: |
-      new File(filename).withWriterAppend{ out -> out.println message }
+      new File(filename).withWriterAppend{ out -> out.println message+', '+info }
     inputs:
       filename:
-        type: String
       message:
-        type: String
+      info:
 
 - id: HelloWorld
   type: Workflow
   properties:
     director: !ref MTDataDrivenDirector
     nodes:
-    - !ref CreateGreeting
+    - !ref SayThreeGreetings
+    - !ref SayThreeGoodByes
     - !ref RenderGreeting
     - !ref RenderGreetingStdout
 
-- id: CreateGreeting
-  type: Node
-  properties:  
-    actor: !ref ConstantSource
+- id: SayThreeGreetings
+  type: GroovyActorNode
+  properties:
+    actor.step: 
+      message = greeting;
+      info = "greeting";
     sequences:
-      value: 
-      - Hello World!
-      - Salut!
-      - Moin Moin!
+      greeting: 
+      - Good morning!
+      - Hello!
+      - Good night!
     outflows:
-      value: /messages/greeting/
+      message: /messages/greeting/
+      info: /messages/info/
 
+- id: SayThreeGoodByes
+  type: GroovyActorNode
+  properties:
+    actor.step: 
+      message = goodbye;
+      info = "bye";
+    sequences:
+      goodbye: 
+      - Bye!
+      - Tschuess!
+      - Au revoir!
+    outflows:
+      message: /messages/greeting/
+      info: /messages/info/
+      
 - id: RenderGreetingStdout
   type: Node
   properties:
@@ -52,3 +70,4 @@ components:
       filename: hello.txt
     inflows:
       message: /messages/greeting/
+      info: /messages/info/

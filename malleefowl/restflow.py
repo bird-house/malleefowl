@@ -40,9 +40,9 @@ def run(filename, basedir=None, timeout=0, status_callback=status):
     from subprocess import PIPE
     p = subprocess.Popen(cmd, cwd=basedir, stdout=PIPE, stderr=PIPE)
 
-    status_file = os.path.join(basedir, 'restflow_status.txt')
-    f_status_location = os.path.join(basedir, 'restflow_status_location.txt')
-    f_source_status_locations = os.path.join(basedir, 'restflow_source_status_locations.txt')
+    status_file = os.path.join(basedir, 'restflow_worker_status.txt')
+    f_source_status_location = os.path.join(basedir, 'restflow_source_status_location.txt')
+    f_worker_status_location = os.path.join(basedir, 'restflow_worker_status_location.txt')
     
     import time
     count = 0
@@ -65,7 +65,7 @@ def run(filename, basedir=None, timeout=0, status_callback=status):
             status_callback(msg, 100)
             #raise Exception(msg)
         count = count + 1
-        if os.path.exists(f_status_location):
+        if os.path.exists(f_worker_status_location):
             logger.warn('terminated workflow. No exit code but result exists.')
             #p.terminate()
 
@@ -73,22 +73,21 @@ def run(filename, basedir=None, timeout=0, status_callback=status):
     result['stdout'] = p.stdout.read().split('\n')
     result['stderr'] = p.stderr.read().split('\n')
     
-    if not os.path.exists(f_status_location):
-        msg = "No status location file found %s: returncode=%s" % (f_status_location, p.returncode)
+    if not os.path.exists(f_worker_status_location):
+        msg = "No status location file found %s: returncode=%s" % (f_worker_status_location, p.returncode)
         logger.error(msg)
         #time.sleep(30)
         status_callback(msg, 100)
         #raise Exception(msg)
     else:
-        with open(f_status_location, 'r') as f:
-            result['worker'] = []
-            for line in f:
-                result['worker'].append(line.strip('\n'))
-
-        with open(f_source_status_locations, 'r') as f:
+        with open(f_source_status_location, 'r') as f:
             result['source'] = []
             for line in f:
                 result['source'].append(line.strip('\n'))
+        with open(f_worker_status_location, 'r') as f:
+            result['worker'] = []
+            for line in f:
+                result['worker'].append(line.strip('\n'))
         logger.debug("result: %s", result)
         status_callback('workflow is done', 100)
     return result

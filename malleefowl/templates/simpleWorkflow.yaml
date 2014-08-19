@@ -18,11 +18,13 @@ components:
     director: !ref MTDataDrivenDirector
     nodes:
     - !ref GetSource
-    - !ref WaitForSources
     - !ref WriteSourceStatusLocation
+    - !ref WaitForSources
     - !ref RunWorker
-    - !ref WriteStatus
-    - !ref WriteStatusLocation
+    - !ref WriteWorkerStatusLocation
+    - !ref WriteWorkerStatus
+
+# source nodes
 
 - id: GetSource
   type: Node
@@ -42,6 +44,24 @@ components:
       statusLocation: /statusLocation/source/
       status: /status/source/
 
+- id: WriteSourceStatusLocation
+  type: Node
+  properties:
+    actor: !ref FileWriterAppend
+    constants:
+      filename: restflow_source_status_location.txt
+    inflows:
+      message: /statusLocation/source/
+
+- id: WriteSourceStatus
+  type: Node
+  properties:
+    actor: !ref FileWriterAppend
+    constants:
+      filename: restflow_source_status.txt
+    inflows:
+      message: /status/source/
+
 - id: WaitForSources
   type: Node
   properties:
@@ -53,14 +73,7 @@ components:
     outflows:
       sources: /sources/
 
-- id: WriteSourceStatusLocation
-  type: Node
-  properties:
-    actor: !ref StatusWriter
-    constants:
-      filename: restflow_source_status_locations.txt
-    inflows:
-      message: /statusLocation/source/
+# worker nodes
 
 - id: RunWorker
   type: Node
@@ -80,21 +93,21 @@ components:
       statusLocation: /statusLocation/worker/
       status: /status/worker/
  
-- id: WriteStatusLocation
+- id: WriteWorkerStatusLocation
   type: Node
   properties:
-    actor: !ref StatusWriter
+    actor: !ref FileWriterAppend
     constants:
-      filename: restflow_status_location.txt
+      filename: restflow_worker_status_location.txt
     inflows:
       message: /statusLocation/worker/
 
-- id: WriteStatus
+- id: WriteWorkerStatus
   type: Node
   properties:
-    actor: !ref StatusWriter
+    actor: !ref FileWriterAppend
     constants:
-      filename: restflow_status.txt
+      filename: restflow_worker_status.txt
     inflows:
       message: /status/worker/
 
