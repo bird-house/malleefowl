@@ -5,7 +5,7 @@ imports:
 
 components:
 
-- id: FileWriterAppend
+- id: StatusWriter
   type: GroovyActor
   properties:
     step: |
@@ -47,7 +47,7 @@ components:
 - id: RenderGreeting
   type: Node
   properties:
-    actor: !ref FileWriterAppend
+    actor: !ref StatusWriter
     constants:
       filename: hello.txt
     inflows:

@@ -8,6 +8,7 @@ components:
 # actors
 
 <%include file="wpsActors.yaml"/>
+<%include file="utilActors.yaml"/>
 
 # workflow
 
@@ -18,9 +19,8 @@ components:
     nodes:
     - !ref GetSource
     - !ref WaitForSources
-    - !ref WriteSourceStatusLocations
+    - !ref WriteSourceStatusLocation
     - !ref RunWorker
-    - !ref WriteResult
     - !ref WriteStatus
     - !ref WriteStatusLocation
 
@@ -39,8 +39,8 @@ components:
       sources: ${nodes['source'].get('sources')}
     outflows:
       result: /source/
-      statusLocation: /sourceStatusLocation/
-      status: /sourceStatus/
+      statusLocation: /statusLocation/source/
+      status: /status/source/
 
 - id: WaitForSources
   type: Node
@@ -50,19 +50,17 @@ components:
       max: ${len(nodes['source'].get('sources'))}
     inflows:
       source: /source/
-      statusLocation: /sourceStatusLocation/
     outflows:
       sources: /sources/
-      statusLocations: /sourceStatusLocations/
 
-- id: WriteSourceStatusLocations
+- id: WriteSourceStatusLocation
   type: Node
   properties:
-    actor: !ref FileWriter
+    actor: !ref StatusWriter
     constants:
       filename: restflow_source_status_locations.txt
     inflows:
-      message: /sourceStatusLocations/
+      message: /statusLocation/source/
 
 - id: RunWorker
   type: Node
@@ -79,35 +77,26 @@ components:
       sources: /sources/
     outflows:
       result: /worker/
-      statusLocation: /workerStatusLocation/
-      status: /workerStatus/
+      statusLocation: /statusLocation/worker/
+      status: /status/worker/
  
-- id: WriteResult
-  type: Node
-  properties:
-    actor: !ref FileWriter
-    constants:
-      filename: restflow_output.txt
-    inflows:
-      message: /worker/
-
 - id: WriteStatusLocation
   type: Node
   properties:
-    actor: !ref FileWriter
+    actor: !ref StatusWriter
     constants:
       filename: restflow_status_location.txt
     inflows:
-      message: /workerStatusLocation/
+      message: /statusLocation/worker/
 
 - id: WriteStatus
   type: Node
   properties:
-    actor: !ref FileWriter
+    actor: !ref StatusWriter
     constants:
       filename: restflow_status.txt
     inflows:
-      message: /workerStatus/
+      message: /status/worker/
 
 
 

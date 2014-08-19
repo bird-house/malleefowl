@@ -97,14 +97,3 @@
       statusLocation:
       status:
 
-- id: FileWriter
-  type: GroovyActor
-  properties:
-    step: |
-      f = new File(filename)
-      f.write(message)
-    inputs:
-      filename:
-        type: String
-      message:
-        type: String

@@ -83,12 +83,12 @@ def run(filename, basedir=None, timeout=0, status_callback=status):
         with open(f_status_location, 'r') as f:
             result['worker'] = []
             for line in f:
-                result['worker'].append(line)
+                result['worker'].append(line.strip('\n'))
 
         with open(f_source_status_locations, 'r') as f:
             result['source'] = []
             for line in f:
-                result['source'].append(line)
+                result['source'].append(line.strip('\n'))
         logger.debug("result: %s", result)
         status_callback('workflow is done', 100)
     return result
