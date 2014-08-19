@@ -36,8 +36,8 @@ class Wget(WPSProcess):
 
         self.output = self.addComplexOutput(
             identifier="output",
-            title="NetCDF File",
-            abstract="NetCDF file downloaded with wget.",
+            title="Downloaded file",
+            abstract="File downloaded with wget.",
             metadata=[],
             formats=[{"mimeType":"application/x-netcdf"}],
             asReference=True,
@@ -45,8 +45,8 @@ class Wget(WPSProcess):
 
         self.output_path = self.addLiteralOutput(
             identifier="output_path",
-            title="Output path",
-            abstract="Path to downloaded NetCDF file.",
+            title="File path",
+            abstract="Local Path to downloaded file.",
             type=type('')
             )
 
