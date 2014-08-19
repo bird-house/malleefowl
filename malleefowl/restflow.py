@@ -40,7 +40,8 @@ def run(filename, basedir=None, timeout=0, status_callback=status):
     from subprocess import PIPE
     p = subprocess.Popen(cmd, cwd=basedir, stdout=PIPE, stderr=PIPE)
 
-    status_file = os.path.join(basedir, 'restflow_worker_status.txt')
+    f_source_status_file = os.path.join(basedir, 'restflow_source_status.txt')
+    f_worker_status_file = os.path.join(basedir, 'restflow_worker_status.txt')
     f_source_status_location = os.path.join(basedir, 'restflow_source_status_location.txt')
     f_worker_status_location = os.path.join(basedir, 'restflow_worker_status_location.txt')
     
@@ -50,11 +51,14 @@ def run(filename, basedir=None, timeout=0, status_callback=status):
     #(out, err) = p.communicate()
     #logger.debug('out=%s, err=%s', out, err)
     while p.poll() is None:
-        time.sleep(1)
-        if os.path.exists(status_file):
-            with open(status_file, 'r') as fp:
-                msg = fp.read()
-                status_callback(msg, 20)
+        # TODO: change update time
+        time.sleep(3)
+        if os.path.exists(f_source_status_file):
+            status_callback("first file downloaded", 20)
+            logger.debug('file downloaded')
+        elif os.path.exists(f_worker_status_file):
+            status_callback("worker startet ...", 65)
+            logger.debug('worker startet')
         if logger.isEnabledFor(logging.DEBUG):
             if count % 60 == 0:
                 logger.debug("still running: count=%s, returncode=%s", count, p.returncode)
