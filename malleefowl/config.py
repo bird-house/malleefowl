@@ -2,8 +2,8 @@ import os
 from pywps import config as wpsconfig
 
 from malleefowl import utils
-from malleefowl import wpslogging as logging
 
+from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
 def getConfigValue(*args):
@@ -35,4 +35,9 @@ def cache_path():
     mypath = os.path.join(getConfigValue("server","outputPath"), "cache")
     utils.mkdir(mypath)
     return mypath
+
+def mako_cache():
+    mako_cache = getConfigValue("malleefowl", "mako_cache")
+    utils.mkdir(mako_cache)
+    return mako_cache
 

@@ -1,15 +1,16 @@
 import os
 import tempfile
 
+from malleefowl.config import mako_cache
+
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
-# TODO: set template cache to anaconda/var/cache/mako/...
 from mako.lookup import TemplateLookup
 mylookup = TemplateLookup(
     directories=[os.path.join(os.path.dirname(__file__), 'templates')],
     output_encoding='ascii', input_encoding='utf-8', encoding_errors='replace',
-    module_directory=os.path.join(os.path.curdir, 'mako_cache'))
+    module_directory=mako_cache())
 
 def generate(name, nodes):
     from mako.template import Template
