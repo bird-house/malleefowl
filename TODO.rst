@@ -18,7 +18,6 @@ https://bugs.launchpad.net/linuxmint/+bug/1335174
 * pywps key-value request does not work if data-input has an @ sign
 * set egg_cache:
 python-eggs is writable by group/others ... (set PYTHON_EGG_CACHE environment variable)
-* fix permissions on /tmp/mako_cache
 
 
 OWSLib

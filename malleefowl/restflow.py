@@ -4,13 +4,15 @@ import tempfile
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
+# TODO: set template cache to anaconda/var/cache/mako/...
+from mako.lookup import TemplateLookup
+mylookup = TemplateLookup(
+    directories=[os.path.join(os.path.dirname(__file__), 'templates')],
+    output_encoding='ascii', input_encoding='utf-8', encoding_errors='replace',
+    module_directory=os.path.join(os.path.curdir, 'mako_cache'))
+
 def generate(name, nodes):
     from mako.template import Template
-    from mako.lookup import TemplateLookup
-    
-    mylookup = TemplateLookup(directories=[os.path.join(os.path.dirname(__file__), 'templates')],
-                              output_encoding='ascii', input_encoding='utf-8', encoding_errors='replace',
-                              module_directory=os.path.join(tempfile.gettempdir(), 'mako_cache'))
     mytemplate = mylookup.get_template(name + '.yaml')
     return  mytemplate.render(nodes=nodes)
 
