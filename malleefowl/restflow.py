@@ -62,37 +62,34 @@ def run(filename, basedir=None, timeout=0, status_callback=status):
             msg = 'Killed workflow due to timeout of %d secs' % ( timeout)
             logger.error(msg)
             p.kill()
-            raise Exception(msg)
+            status_callback(msg, 100)
+            #raise Exception(msg)
         count = count + 1
         if os.path.exists(f_status_location):
             logger.warn('terminated workflow. No exit code but result exists.')
             #p.terminate()
 
-    if not os.path.exists(f_status_location):
-        msg = "No status location file found %s: returncode=%s, stdout=%s, stderr=%s" % (
-            f_status_location, p.returncode, p.stdout.read(), p.stderr.read())
-        logger.error(msg)
-        #time.sleep(30)
-        raise Exception(msg)
-
     result = {}
     result['stdout'] = p.stdout.read().split('\n')
     result['stderr'] = p.stderr.read().split('\n')
-    with open(f_status_location, 'r') as f:
-        result['worker'] = []
-        for line in f:
-            result['worker'].append(line)
     
-    with open(f_source_status_locations, 'r') as f:
-        result['source'] = []
-        for line in f:
-            result['source'].append(line)
-    logger.debug("result: %s", result)
+    if not os.path.exists(f_status_location):
+        msg = "No status location file found %s: returncode=%s" % (f_status_location, p.returncode)
+        logger.error(msg)
+        #time.sleep(30)
+        status_callback(msg, 100)
+        #raise Exception(msg)
+    else:
+        with open(f_status_location, 'r') as f:
+            result['worker'] = []
+            for line in f:
+                result['worker'].append(line)
 
-    status_callback('workflow is done', 100)
-            
-    #logger.debug("stdoutdata: %s", stdoutdata)
-    #logger.debug("stderrdata: %s", stderrdata)
-
+        with open(f_source_status_locations, 'r') as f:
+            result['source'] = []
+            for line in f:
+                result['source'].append(line)
+        logger.debug("result: %s", result)
+        status_callback('workflow is done', 100)
     return result
     
