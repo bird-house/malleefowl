@@ -171,7 +171,7 @@ def main():
             sleep_secs = options.sleep_secs,
             verbose = options.verbose)
     else:
-        logger.error("Unknown command %s", command)
+        logger.error("Unknown command %s. Should be execute, describe or caps.", command)
         exit(1)
 
     if options.outfile:

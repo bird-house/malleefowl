@@ -44,10 +44,6 @@
           cmd.add('--input')
           cmd.add('' + item.value)
       }
-      for (item in output) {
-          cmd.add('--output')
-          cmd.add('' + item.value)
-      }
      
       proc = cmd.execute()
       proc.waitFor()
@@ -61,6 +57,16 @@
          yaml = new Yaml()
          wpsResult = yaml.load(new FileInputStream(resultFile))
          result = wpsResult.processOutputs[0].reference
+         for (item in wpsResult.processOutputs) {
+            if (item.identifier == output) {
+               if (item.reference != null) {
+                  result = item.reference
+               }
+               else {
+                  result = item.data[0]
+               }
+            }
+         }
          statusLocation = wpsResult.statusLocation
          status = wpsResult.status
       }
@@ -73,7 +79,7 @@
         optional: true
         nullable: true
       output:
-        type: Collection
+        type: String
         optional: true
         nullable: true
       sources:

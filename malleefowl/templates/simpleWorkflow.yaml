@@ -35,7 +35,7 @@ components:
       identifier: ${nodes['source'].get('identifier')}
       input: ${nodes['source'].get('input')}
       complex_input: ${nodes['source'].get('complex_input')}
-      output: ${nodes['source'].get('output')}
+      output: ${nodes['source'].get('output', 'output')}
       verbose: false
     sequences:
       sources: ${nodes['source'].get('sources')}
@@ -84,7 +84,6 @@ components:
       identifier: ${nodes['worker'].get('identifier')}
       input: ${nodes['worker'].get('input')}
       complex_input: ${nodes['worker'].get('complex_input')}  
-      output: ${nodes['worker'].get('output')}
       verbose: false
     inflows:
       sources: /sources/
