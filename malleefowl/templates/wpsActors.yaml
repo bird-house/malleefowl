@@ -48,7 +48,7 @@
       proc = cmd.execute()
       proc.waitFor()
 
-      result = identifier + ' ... failed'
+      result = 'no output specified'
       status = 'ProcessFailed'
 
       import org.yaml.snakeyaml.Yaml
