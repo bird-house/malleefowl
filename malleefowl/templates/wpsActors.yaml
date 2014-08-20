@@ -56,7 +56,6 @@
       if (resultFile.exists()) {
          yaml = new Yaml()
          wpsResult = yaml.load(new FileInputStream(resultFile))
-         result = wpsResult.processOutputs[0].reference
          for (item in wpsResult.processOutputs) {
             if (item.identifier == output) {
                if (item.reference != null) {
