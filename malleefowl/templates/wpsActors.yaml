@@ -64,6 +64,7 @@
                else {
                   result = item.data[0]
                }
+               break
             }
          }
          statusLocation = wpsResult.statusLocation
