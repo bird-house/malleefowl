@@ -32,7 +32,7 @@ def timeout():
     return timeout
 
 def cache_path():
-    mypath = os.path.join(getConfigValue("server","outputPath"), "cache")
+    mypath = getConfigValue("malleefowl","cache")
     utils.mkdir(mypath)
     return mypath
 

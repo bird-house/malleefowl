@@ -3,7 +3,7 @@
 from setuptools import find_packages
 from setuptools import setup
 
-version = '0.1.0'
+version = '0.1.1'
 description = 'PyWPS processes to support climate data processing with WPS.'
 long_description = (
     open('README.rst').read() + '\n' +
