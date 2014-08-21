@@ -56,29 +56,26 @@ class Generate(WPSProcess):
             )
 
     def execute(self):
-        self.status.set(msg="Generate workflow ...", percentDone=5, propagate=True)
+        self.show_status("Generate workflow ...", 0)
 
         # TODO: handle multiple values (fix in pywps)
         # http://pymotw.com/2/json/
-        logger.debug('json doc: %s', self.nodes.getValue())
-        fp = open(self.nodes.getValue())
-        
-        import yaml
-        # TODO: fix json encode to unicode
-        nodes = yaml.load(fp)
-        logger.debug("nodes: %s", nodes)
+        wf = ''
+        with open(self.nodes.getValue()) as fp:
+            import yaml
+            # TODO: fix json encode to unicode
+            nodes = yaml.load(fp)
+            logger.debug("nodes: %s", nodes)
    
-        wf = restflow.generate(self.name.getValue(), nodes)
-        logger.debug("generated wf: %s", wf)
+            wf = restflow.generate(self.name.getValue(), nodes)
+            logger.debug("generated wf: %s", wf)
         
-        outfile = self.mktempfile(suffix='.txt')
+        outfile = self.mktempfile(suffix='.yaml')
         restflow.write( outfile, wf )
 
-        logger.debug("wf generation done")
-
-        self.status.set(msg="Generate workflow ... Done", percentDone=90, propagate=True)
-
         self.output.setValue( outfile )
+
+        self.show_status("Generate workflow ... Done", 100)
 
 class Run(WPSProcess):
     """This process runs a restflow workflow"""
@@ -125,6 +122,8 @@ class Run(WPSProcess):
             )
         
     def execute(self):
+        self.show_status("starting workflow", 0)
+        
         wf_description = self.workflow_description.getValue()
 
         status = lambda msg, percent: self.show_status(msg, percent)
@@ -138,5 +137,7 @@ class Run(WPSProcess):
         with open(outfile, 'w') as fp:
             json.dump(obj=result, fp=fp, indent=4, sort_keys=True)
         self.output.setValue( outfile )
+
+        self.show_status("starting workflow", 100)
 
 
