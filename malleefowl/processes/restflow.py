@@ -183,12 +183,14 @@ class GenerateAndRun(WPSProcess):
             # TODO: fix json encode to unicode
             nodes = yaml.load(fp)
         wf_yaml = restflow.generate(self.name.getValue(), nodes)
+        outfile = self.mktempfile(suffix='.yaml')
+        restflow.write( outfile, wf_yaml )
 
         self.show_status("Starting workflow ...", 5)
 
         status = lambda msg, percent: self.show_status(msg, percent)
         result = restflow.run(
-            wf_yaml, 
+            outfile, 
             timeout=config.timeout(), 
             status_callback=status)
 
