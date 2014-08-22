@@ -32,7 +32,7 @@
                     '-s', service,
                     '-i', identifier,
                     '-o', outfile,
-                    '--sleep', 5]
+                    '--sleep', 1]
       if (verbose) {
           cmd.add('-v')
       }
