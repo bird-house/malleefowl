@@ -15,13 +15,8 @@ def getConfigValue(*args):
     return value
 
 def thredds_url():
-    url = "http://localhost:8080/thredds"
-    try:
-        url = wpsconfig.getConfigValue("malleefowl", "threddsUrl")
-    except Exception:
-        logger.warn("threddsUrl not configured ... using default %s", url)
-    return url
-
+    return wpsconfig.getConfigValue("malleefowl", "thredds_url")
+    
 def timeout():
     # default 1 day, in secs, 0 means for ever
     timeout = 86400
@@ -35,6 +30,9 @@ def cache_path():
     mypath = getConfigValue("malleefowl","cache")
     utils.mkdir(mypath)
     return mypath
+
+def cache_url():
+    return getConfigValue("malleefowl","cache_url")
 
 def mako_cache():
     mako_cache = getConfigValue("malleefowl", "mako_cache")

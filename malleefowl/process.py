@@ -53,38 +53,6 @@ class WPSProcess(PyWPSProcess):
             values = [values]
         return values
 
-class SourceProcess(WPSProcess):
-     """This is the base class for all source processes."""
-
-     def __init__(self, identifier, title, version, metadata=[], abstract=""):
-        
-        WPSProcess.__init__(
-            self,
-            identifier = identifier,
-            title = title,
-            version = version,
-            metadata = metadata,
-            abstract = abstract)
-
-        self.file_identifier = self.addLiteralInput(
-            identifier="file_identifier",
-            title="File Identifier",
-            abstract="URL, keyword, ...",
-            metadata=[],
-            minOccurs=1,
-            maxOccurs=1,
-            type=type('')
-            )
-
-        self.output = self.addComplexOutput(
-            identifier="output",
-            title="NetCDF Output",
-            abstract="NetCDF Output",
-            metadata=[],
-            formats=[{"mimeType":"application/x-netcdf"}],
-            asReference=True,
-            )
-
 class WorkerProcess(WPSProcess):
     """This is the base class for all worker processes."""
 
