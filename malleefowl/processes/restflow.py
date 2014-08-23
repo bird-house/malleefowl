@@ -146,11 +146,11 @@ class GenerateAndRun(WPSProcess):
             identifier="name",
             title="Workflow",
             abstract="Choose Workflow",
-            default="simpleWorkflow2",
+            default="simpleWorkflow",
             type=type(''),
             minOccurs=1,
             maxOccurs=1,
-            allowedValues=['simpleWorkflow2']
+            allowedValues=['simpleWorkflow']
             )
 
         self.nodes= self.addComplexInput(

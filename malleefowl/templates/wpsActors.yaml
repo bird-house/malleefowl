@@ -1,27 +1,3 @@
-- id: CollectSources
-  type: GroovyActor
-  properties:
-    initialize: |
-      sourceList = []
-    step: |
-      sourceList.add(source)
-      if (sourceList.size() <  max) {
-        _status.setOutputEnable('sources', false)
-      } else {
-        sources = sourceList
-        _status.setOutputEnable('sources', true)
-      }
-    inputs:
-      max:
-        default: 1
-      source:
-        type: String
-    outputs:
-      sources:
-        type: Collection
-    state:
-      sourceList:
-
 - id: WpsExecute
   type: GroovyActor
   properties:
@@ -36,9 +12,13 @@
       if (verbose) {
           cmd.add('-v')
       }
-      for (item in sources) {
-          cmd.add('--input')
-          cmd.add('' + complex_input + '=' + item.value)
+      if (sources != null) {
+          yaml = new Yaml()
+          urls = yaml.load(new URL(sources).openStream())
+          for (url in urls) {
+              cmd.add('--input')
+              cmd.add('' + complex_input + '=' + url)
+          }
       }
       for (item in input) {
           cmd.add('--input')

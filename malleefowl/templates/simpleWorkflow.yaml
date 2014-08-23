@@ -19,7 +19,6 @@ components:
     nodes:
     - !ref GetSource
     - !ref WriteSourceStatusLocation
-    - !ref WaitForSources
     - !ref RunWorker
     - !ref WriteWorkerStatusLocation
     - !ref WriteWorkerStatus
@@ -34,13 +33,10 @@ components:
       service: ${nodes['source'].get('service')}
       identifier: ${nodes['source'].get('identifier')}
       input: ${nodes['source'].get('input')}
-      complex_input: ${nodes['source'].get('complex_input')}
       output: ${nodes['source'].get('output', 'output')}
       verbose: false
-    sequences:
-      sources: ${nodes['source'].get('sources')}
     outflows:
-      result: /source/
+      result: /sources/
       statusLocation: /statusLocation/source/
       status: /status/source/
 
@@ -61,17 +57,6 @@ components:
       filename: restflow_source_status.txt
     inflows:
       message: /status/source/
-
-- id: WaitForSources
-  type: Node
-  properties:
-    actor: !ref CollectSources
-    constants:
-      max: ${len(nodes['source'].get('sources'))}
-    inflows:
-      source: /source/
-    outflows:
-      sources: /sources/
 
 # worker nodes
 
