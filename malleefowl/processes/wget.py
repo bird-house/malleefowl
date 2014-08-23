@@ -33,8 +33,17 @@ class Wget2(WPSProcess):
 
         self.output = self.addComplexOutput(
             identifier="output",
-            title="Downloaded files",
-            abstract="Json document with list of downloaded files.",
+            title="Downloaded files for local access",
+            abstract="Json document with list of downloaded files with file:// url.",
+            metadata=[],
+            formats=[{"mimeType":"test/json"}],
+            asReference=True,
+            )
+
+        self.output_external = self.addComplexOutput(
+            identifier="output_external",
+            title="Downloaded files for external access",
+            abstract="Json document with list of downloaded files with http:// url for external use.",
             metadata=[],
             formats=[{"mimeType":"test/json"}],
             asReference=True,
@@ -50,7 +59,9 @@ class Wget2(WPSProcess):
         if type(resource) != types.ListType:
             resource = [resource]
 
-        files = {'local': [], 'external': []}
+        local_files = []
+        external_files = []
+
         count = 0
         for url in resource:
             count = count + 1
@@ -82,15 +93,20 @@ class Wget2(WPSProcess):
             from os.path import join
             cached_file = join(config.cache_path(), resource_name)
             local_url = "file://" + cached_file
-            external_url = "http://localhost/cash" + cached_file
-            files['local'].append(local_url)
-            files['external'].append(external_url)
+            external_url = "http://localhost/cash/" + resource_name
+            local_files.append(local_url)
+            external_files.append(external_url)
 
         import json
         outfile = self.mktempfile(suffix='.json')
         with open(outfile, 'w') as fp:
-            json.dump(obj=files, fp=fp, indent=4, sort_keys=True)
+            json.dump(obj=local_files, fp=fp, indent=4, sort_keys=True)
         self.output.setValue( outfile )
+
+        outfile = self.mktempfile(suffix='.json')
+        with open(outfile, 'w') as fp:
+            json.dump(obj=external_files, fp=fp, indent=4, sort_keys=True)
+        self.output_external.setValue( outfile )
 
         self.show_status("Downloading... done", 100)
 
