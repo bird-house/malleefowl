@@ -1,6 +1,7 @@
 Todo list
 *********
 
+* maybe use metadata wps attribute to provide esgf filter etc ... could be local/pseudo links with json response.
 * concurrent logging or logging per process ...
 * test suite with nose
 * cleanup data on server: wpsoutput, ...
