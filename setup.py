@@ -22,6 +22,8 @@ requires = [
     'netCDF4',
     'pyYAML',
     'ConcurrentLogHandler',
+    'xmltodict',
+    'images2gif',
 #    'dateutil',
     'nose',
     ]
