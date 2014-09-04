@@ -1,0 +1,87 @@
+imports:
+
+- classpath:/common/directors.yaml
+- classpath:/common/groovy/actors.yaml
+
+components:
+
+# actors
+
+<%include file="wpsActors.yaml"/>
+
+# workflow
+
+- id: SimpleWorkflow
+  type: Workflow
+  properties:
+    director: !ref MTDataDrivenDirector
+    nodes:
+    - !ref GetSource
+    - !ref WaitForSources
+    - !ref RunWorker
+    - !ref WriteResult
+    - !ref WriteStatus
+
+- id: GetSource
+  type: Node
+  properties:
+    actor: !ref WpsExecute
+    constants:
+      service: ${nodes['source'].get('service')}
+      identifier: ${nodes['source'].get('identifier')}
+      input: ${nodes['source'].get('input')}
+      output: ${nodes['source'].get('output')}
+      verbose: false
+    sequences:
+      sources: ${nodes['source'].get('sources')}
+    outflows:
+      result: /source/
+      status: /status/
+
+- id: WaitForSources
+  type: Node
+  properties:
+    actor: !ref CollectSources
+    constants:
+      max: ${len(nodes['source'].get('sources'))}
+    inflows:
+      source: /source/
+    outflows:
+      sources: /sources/
+
+- id: RunWorker
+  type: Node
+  properties:
+    actor: !ref WpsExecute
+    constants:
+      service: ${nodes['worker'].get('service')}
+      identifier: ${nodes['worker'].get('identifier')}
+      input: ${nodes['worker'].get('input')}
+      output: ${nodes['worker'].get('output')}
+      verbose: false
+    inflows:
+      sources: /sources/
+    outflows:
+      result: /worker/
+      status: /status/
+ 
+- id: WriteResult
+  type: Node
+  properties:
+    actor: !ref FileWriter
+    constants:
+      filename: restflow_output.txt
+    inflows:
+      message: /worker/
+
+- id: WriteStatus
+  type: Node
+  properties:
+    actor: !ref FileWriter
+    constants:
+      filename: restflow_status.txt
+    inflows:
+      message: /status/
+
+
+

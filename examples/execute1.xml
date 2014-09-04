@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wps100:Execute 
+  xmlns:wps100="http://www.opengis.net/wps/1.0.0" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  service="WPS" 
+  version="1.0.0" 
+  xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/
+  1.0.0/wpsExecute_request.xsd">
+  <ows110:Identifier xmlns:ows110="http://www.opengis.net/ows/1.1">v.net.path</ows110:Identifier>
+  <wps100:DataInputs>
+    <wps100:Input>
+      <ows110:Identifier xmlns:ows110="http://www.opengis.net/ows/1.1">alayer</ows110:Identifier>
+      <wps100:Data>
+        <wps100:LiteralData>2013-07-01T00:00:00+00:00</wps100:LiteralData>
+      </wps100:Data>
+    </wps100:Input>
+    <wps100:Input>
+      <ows110:Identifier xmlns:ows110="http://www.opengis.net/ows/1.1">-s</ows110:Identifier>
+      <wps100:Data>
+        <wps100:LiteralData>true</wps100:LiteralData>
+      </wps100:Data>
+    </wps100:Input>
+    <wps100:Input>
+      <ows110:Identifier xmlns:ows110="http://www.opengis.net/ows/1.1">abcolumn</ows110:Identifier>
+      <wps100:Data>
+        <wps100:LiteralData>&lt;colander.null&gt;</wps100:LiteralData>
+      </wps100:Data>
+    </wps100:Input>
+    <wps100:Input>
+      <ows110:Identifier xmlns:ows110="http://www.opengis.net/ows/1.1">-g</ows110:Identifier>
+      <wps100:Data>
+        <wps100:LiteralData>true</wps100:LiteralData>
+      </wps100:Data>
+    </wps100:Input>
+    <wps100:Input>
+      <ows110:Identifier xmlns:ows110="http://www.opengis.net/ows/1.1">ncolumn</ows110:Identifier>
+      <wps100:Data>
+        <wps100:LiteralData>&lt;colander.null&gt;</wps100:LiteralData>
+      </wps100:Data>
+    </wps100:Input>
+    <wps100:Input>
+      <ows110:Identifier xmlns:ows110="http://www.opengis.net/ows/1.1">file</ows110:Identifier>
+      <wps100:Data>
+        <wps100:LiteralData>coords.txt</wps100:LiteralData>
+      </wps100:Data>
+    </wps100:Input>
+    <wps100:Input>
+      <ows110:Identifier xmlns:ows110="http://www.opengis.net/ows/1.1">afcolumn</ows110:Identifier>
+      <wps100:Data>
+        <wps100:LiteralData>&lt;colander.null&gt;</wps100:LiteralData>
+      </wps100:Data>
+    </wps100:Input>
+    <wps100:Input>
+      <ows110:Identifier xmlns:ows110="http://www.opengis.net/ows/1.1">input</ows110:Identifier>
+      <wps100:Data>
+        <wps100:LiteralData>graph.gml</wps100:LiteralData>
+        </wps100:Data>
+    </wps100:Input>
+    <wps100:Input>
+      <ows110:Identifier xmlns:ows110="http://www.opengis.net/ows/1.1">dmax</ows110:Identifier>
+      <wps100:Data>
+        <wps100:LiteralData>1000.0</wps100:LiteralData>
+      </wps100:Data>
+    </wps100:Input>
+    <wps100:Input>
+      <ows110:Identifier xmlns:ows110="http://www.opengis.net/ows/1.1">nlayer</ows110:Identifier>
+      <wps100:Data>
+        <wps100:LiteralData>2013-07-02T00:00:00+00:00</wps100:LiteralData>
+      </wps100:Data>
+    </wps100:Input>
+    <wps100:Input>
+      <ows110:Identifier xmlns:ows110="http://www.opengis.net/ows/1.1">type</ows110:Identifier>
+      <wps100:Data>
+        <wps100:LiteralData>[]</wps100:LiteralData>
+      </wps100:Data>
+    </wps100:Input>
+  </wps100:DataInputs>
+  <wps100:ResponseForm>
+    <wps100:ResponseDocument status="true" storeExecuteResponse="true">
+      <wps100:Output asReference="true">
+        <ows110:Identifier xmlns:ows110="http://www.opengis.net/ows/1.1">output</ows110:Identifier>
+      </wps100:Output>
+    </wps100:ResponseDocument>
+  </wps100:ResponseForm>
+</wps100:Execute>

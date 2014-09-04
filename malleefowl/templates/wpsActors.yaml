@@ -1,0 +1,100 @@
+- id: CollectSources
+  type: GroovyActor
+  properties:
+    initialize: |
+      myList = []
+    step: |
+      myList.add(source)
+      if (myList.size() <  max) {
+        _status.setOutputEnable('sources', false)
+      } else {
+        sources = myList
+        _status.setOutputEnable('sources', true)
+      }
+    inputs:
+      max:
+        default: 1
+      source:
+        type: String
+    outputs:
+      sources:
+        type: Collection
+    state:
+      myList:
+
+- id: WpsExecute
+  type: GroovyActor
+  properties:
+    step: |
+      tempFile = File.createTempFile('wps-result-', '.json', new File('.'))
+      outfile = tempFile.absolutePath
+      cmd = ['wpsclient', 'execute', 
+                    '-s', service,
+                    '-i', identifier,
+                    '-o', outfile,
+                    '--sleep', 5]
+      if (verbose) {
+          cmd.add('-v')
+      }
+      for (item in sources) {
+          cmd.add('--input')
+          cmd.add("file_identifier=" + item.value)
+      }
+      for (item in input) {
+          cmd.add('--input')
+          cmd.add('' + item.value)
+      }
+      for (item in output) {
+          cmd.add('--output')
+          cmd.add('' + item.value)
+      }
+     
+      proc = cmd.execute()
+      proc.waitFor()
+
+      result = identifier + ' ... failed'
+      status = result
+
+      import org.yaml.snakeyaml.Yaml
+      resultFile = new File(outfile)
+      if (resultFile.exists()) {
+         yaml = new Yaml()
+         wpsResult = yaml.load(new FileInputStream(resultFile))
+     
+         for (item in wpsResult) {
+            result = item.reference
+            status = identifier + ' ... done'
+         }
+      }
+    inputs:
+      identifier: 
+      service:
+      input:
+        type: Collection
+        optional: true
+        nullable: true
+      output:
+        type: Collection
+        optional: true
+        nullable: true
+      sources:
+        type: Collection
+        optional: true
+        nullable: true
+      verbose:
+        type: Bool
+    outputs:
+      result:
+      status:
+
+- id: FileWriter
+  type: GroovyActor
+  properties:
+    step: |
+      f = new File(filename)
+      f.write(message)
+    inputs:
+      filename:
+        type: String
+      message:
+        type: String

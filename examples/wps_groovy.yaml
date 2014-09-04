@@ -1,0 +1,138 @@
+imports:
+
+- classpath:/common/directors.yaml
+- classpath:/common/groovy/actors.yaml
+
+components:
+
+# actors
+# ------
+
+- id: CollectSources
+  type: GroovyActor
+  properties:
+    initialize: |
+      count = 0
+      currentSources = ''
+    step: |
+      count = count + 1
+      if (count == 1) {
+        currentSources = source
+      }
+      else {
+        currentSources = currentSources + ',' + source
+      }
+      if (count <  max) {
+        _status.setOutputEnable('allSources', false)
+      } else {
+        allSources = currentSources
+        _status.setOutputEnable('allSources', true)
+      }
+    inputs:
+      max:
+        default: 1
+      source:
+        type: String
+    outputs:
+      allSources:
+    state:
+      currentSources:
+      count:
+
+- id: ExecuteWPSProcess
+  type: GroovyActor
+  properties:
+    step: |
+      proc = ['/home/pingu/sandbox/climdaps/bin/wpsclient', 'execute', 
+                    '-s', service,
+                    '-i', identifier,
+                    '--input', 'input1=1',
+                    '--input', 'input2=2',
+                    '--output', 'output1',
+                    '--output', 'output2',
+                    '-o', 'wps_result.json'].execute()
+      proc.waitFor()
+
+      import org.yaml.snakeyaml.Yaml
+      input = new FileInputStream(new File("wps_result.json"))
+      yaml = new Yaml()
+      result = yaml.load(input)
+
+      status = 'done'
+      output = result[0].reference
+    inputs:
+      identifier: 
+      service:
+      file_identifiers:
+        type: String
+        optional: true
+        nullable: true
+      input_params:
+        type: Collection
+        optional: true
+        nullable: true
+    outputs:
+      status: 
+      output:
+
+
+# workflow
+# --------
+
+- id: SimpleProcessing
+  type: Workflow
+  properties:
+    director: !ref MTDataDrivenDirector
+    nodes:
+    - !ref DownloadData
+    - !ref WaitForDownloads
+    - !ref RunDataProcessing
+    - !ref RenderResult
+
+- id: DownloadData
+  type: Node
+  properties:
+    actor: !ref ExecuteWPSProcess
+    constants:
+      service: http://localhost:8090/wps
+      identifier: org.malleefowl.test.dummyprocess
+      input_params: []
+    sequences:
+      file_identifiers: 
+        - test123.nc
+    outflows:
+      status: /wps/download/status/
+      output: /wps/download/file_identifier/
+
+- id: WaitForDownloads
+  type: Node
+  properties:
+    actor: !ref CollectSources
+    constants:
+      max: 1
+    inflows:
+      source: /wps/download/file_identifier/
+    outflows:
+      allSources: /wps/download/file_identifiers/
+
+- id: RunDataProcessing
+  type: Node
+  properties:
+    actor: !ref ExecuteWPSProcess
+    constants:
+      service: http://localhost:8090/wps
+      identifier: org.malleefowl.test.dummyprocess
+      input_params: []
+    inflows:
+      file_identifiers: /wps/download/file_identifiers
+    outflows:
+      status: /wps/work/status/
+      output: /wps/work/output/  
+ 
+- id: RenderResult
+  type: Node
+  properties:
+    actor: !ref PrintStreamWriter
+    inflows:
+      message: /wps/work/output/
+

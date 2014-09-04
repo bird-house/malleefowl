@@ -1,0 +1,156 @@
+imports:
+
+- classpath:/common/directors.yaml
+- classpath:/common/groovy/actors.yaml
+- classpath:/common/python/actors.yaml
+
+components:
+
+# actors
+# ------
+
+- id: CollectSources
+  type: GroovyActor
+  properties:
+    initialize: |
+      count = 0
+      currentSources = ''
+    step: |
+      count = count + 1
+      if (count == 1) {
+        currentSources = source
+      }
+      else {
+        currentSources = currentSources + ',' + source
+      }
+      if (count <  max) {
+        _status.setOutputEnable('allSources', false);
+      } else {
+        allSources = currentSources
+        _status.setOutputEnable('allSources', true);
+      }
+    inputs:
+      max:
+        default: 1
+      source:
+        type: String
+    outputs:
+      allSources:
+    state:
+      currentSources:
+      count:
+
+- id: ExecuteWPSProcess
+  type: PythonActor
+  properties:
+    step: |
+      import sys
+      sys.path.append(sys_path)
+      from phoenix.helpers import unquote_wps_params
+      from owslib.wps import WebProcessingService, monitorExecution
+      wps = WebProcessingService(service, verbose=False)
+      inputs = []
+      if openid != None:
+        inputs.append( ("openid", openid) )
+      if password != None:
+        inputs.append( ("password", password) )
+      if file_identifiers != None:
+        for file_identifier in file_identifiers.split(','):
+          inputs.append( ("file_identifier", file_identifier) )
+      outputs = [("output", True)]
+      if input_params != None:
+        input_params = unquote_wps_params(input_params)
+        inputs.extend(input_params)
+      execution = wps.execute(identifier, inputs=inputs, output=outputs)
+      monitorExecution(execution, sleepSecs=20)
+      status = execution.status
+      output = execution.processOutputs[0].reference
+    inputs:
+      sys_path:
+      identifier: 
+      service:
+      openid:
+        type: String
+        optional: true
+        nullable: true
+      password:
+        type: String
+        optional: true
+        nullable: true
+      file_identifiers:
+        type: String
+        optional: true
+        nullable: true
+      input_params:
+        type: Collection
+        optional: true
+        nullable: true
+    outputs:
+      status: 
+      output:
+
+
+# workflow
+# --------
+
+- id: SimpleProcessing
+  type: Workflow
+  properties:
+    director: !ref MTDataDrivenDirector
+    nodes:
+    - !ref DownloadData
+    - !ref WaitForDownloads
+    - !ref RunDataProcessing
+    - !ref RenderResult
+
+- id: DownloadData
+  type: Node
+  properties:
+    actor: !ref ExecuteWPSProcess
+    constants:
+      sys_path: /home/pingu/sandbox/climdaps/src/OWSLib
+      service: http://tracy.local:8090/wps
+      identifier: org.malleefowl.esgf.opendap.source
+      openid: https://esgf-data.dkrz.de/esgf-idp/openid/pingutest
+      password: Pingutest1
+      input_params: [('startindex', 1), ('endindex', 1)]
+    sequences:
+      file_identifiers: 
+        - http://esg-dn1.nsc.liu.se/thredds/dodsC/cordex.AFR-44.SMHI.ICHEC-EC-EARTH.rcp26.r12i1p1.RCA4-v1.day.evspsblpot.evspsblpot.20130927.aggregation
+    outflows:
+      status: /wps/download/status/
+      output: /wps/download/file_identifier/
+
+- id: WaitForDownloads
+  type: Node
+  properties:
+    actor: !ref CollectSources
+    constants:
+      max: 1
+    inflows:
+      source: /wps/download/file_identifier/
+    outflows:
+      allSources: /wps/download/file_identifiers/
+
+- id: RunDataProcessing
+  type: Node
+  properties:
+    actor: !ref ExecuteWPSProcess
+    constants:
+      sys_path: /home/pingu/sandbox/climdaps/src/OWSLib
+      service: http://tracy.local:8090/wps
+      identifier: de.csc.esgf.anopheles.worker
+      input_params: [('info_notes', u'%3Cp%3Etest%3C/p%3E'), ('info_tags', u'test'), ('sftlf', u'http%3A//tracy.local%3A8090/thredds/fileServer/test/cordex-tas-one-year-pywpsInputV4t2wb.nc')]
+    inflows:
+      file_identifiers: /wps/download/file_identifiers
+    outflows:
+      status: /wps/work/status/
+      output: /wps/work/output/  
+ 
+- id: RenderResult
+  type: Node
+  properties:
+    actor: !ref PrintStreamWriter
+    inflows:
+      message: /wps/work/status/
+

@@ -1,0 +1,78 @@
+imports:
+
+- classpath:/common/directors.yaml
+- classpath:/common/groovy/actors.yaml
+- classpath:/common/python/actors.yaml
+
+
+components:
+
+- id: Sources
+  type: Workflow
+  properties:
+    director: !ref MTDataDrivenDirector
+    nodes:
+    - !ref Source1
+    - !ref Source2
+    - !ref SourceCollector
+    - !ref PrintSource
+
+- id: Source1
+  type: GroovyActorNode
+  properties:
+    actor.step: source = "1"
+    outflows:
+      source: /source/
+
+- id: Source2
+  type: GroovyActorNode
+  properties:
+    actor.step: source = "2"
+    outflows:
+      source: /source/
+
+- id: SourceCollector
+  type: Node
+  properties:
+    actor: !ref CollectorActor
+    constants:
+      max: 2
+    inflows:
+      source: /source/
+    outflows:
+      allSources: /allSources/
+    
+- id: PrintSource
+  type: GroovyActorNode
+  properties:
+    actor.step: |
+      println allSources
+    inflows:
+      allSources: /allSources/
+    
+- id: CollectorActor
+  type: GroovyActor
+  properties:
+    initialize: |
+      count = 0
+      currentSources = '0'
+    step: |
+      count = count + 1
+      currentSources = currentSources + ',' + source
+      allSources = currentSources
+
+      if (count <  max) {
+        _status.setOutputEnable('allSources', false);
+      }
+     
+    inputs:
+      max:
+        default: 1
+      source: 
+        default: 1
+    outputs:
+      allSources:
+    state:
+      currentSources:
+      count:
+    
