@@ -8,6 +8,9 @@ https://github.com/stephenpascoe/esgf-pyclient
 import os
 from .exceptions import MyProxyLogonError
 
+from malleefowl import wpslogging as logging
+logger = logging.getLogger(__name__)
+
 def logon_with_openid(openid, password=None, interactive=False, outdir=None):
     """
     Trys to get MyProxy parameters from OpenID and calls :meth:`logon`.
@@ -45,9 +48,13 @@ def logon(username, hostname, port=7512, password=None, interactive=False, outdi
         from subprocess import PIPE
         env = os.environ.copy()
         env['X509_CERT_DIR'] = outdir
+        logger.debug("env=%s", env)
+        logger.debug("env path=%s", env.get('PATH'))
         certfile = os.path.join(outdir, "cert.pem")
+        cmd=["myproxy-logon", "-l", username, "-s", hostname, "-p", port, "-b", "-T", "-S", "-o", certfile, "-v"]
+        logger.debug("cmd=%s", cmd)
         p = subprocess.Popen(
-            ["myproxy-logon", "-l", username, "-s", hostname, "-p", port, "-b", "-T", "-S", "-o", certfile, "-v"],
+            cmd,
             stdin=PIPE,
             stdout=PIPE,
             stderr=PIPE,
@@ -56,6 +63,7 @@ def logon(username, hostname, port=7512, password=None, interactive=False, outdi
         if p.returncode != 0:
             raise MyProxyLogonError("logon failed! %s %s" % (stdoutstr, stderrstr))
     except Exception as e:
+        logger.exception("myproxy logon failed")
         raise MyProxyLogonError("myproxy-logon process failed! %s" % (e.message))
     return certfile
     

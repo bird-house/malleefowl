@@ -2,8 +2,8 @@ import os
 from pywps import config as wpsconfig
 
 from malleefowl import utils
-from malleefowl import wpslogging as logging
 
+from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
 def getConfigValue(*args):
@@ -14,22 +14,9 @@ def getConfigValue(*args):
         logger.exception("Could not get config value for")
     return value
 
-def mongodb_url():
-    url = "mongodb://localhost"
-    try:
-        url = wpsconfig.getConfigValue("malleefowl", "mongodbUrl")
-    except Exception:
-        logger.warn("mongodbUrl not configured ... using default %s", url)
-    return url
-
 def thredds_url():
-    url = "http://localhost:8080/thredds"
-    try:
-        url = wpsconfig.getConfigValue("malleefowl", "threddsUrl")
-    except Exception:
-        logger.warn("threddsUrl not configured ... using default %s", url)
-    return url
-
+    return wpsconfig.getConfigValue("malleefowl", "thredds_url")
+    
 def timeout():
     # default 1 day, in secs, 0 means for ever
     timeout = 86400
@@ -39,20 +26,16 @@ def timeout():
         logger.warn("timeout not configured ... using default %s", url)
     return timeout
 
-def sys_token():
-    token = change_me_in_custom.cfg
-    try:
-        token = wpsconfig.getConfigValue("malleefowl", "sysToken")
-    except Exception:
-        logger.warn("sysToken not configured ... using default %s", url)
-    return token
-    
 def cache_path():
-    mypath = os.path.join(getConfigValue("server","outputPath"), "cache")
+    mypath = getConfigValue("malleefowl","cache")
     utils.mkdir(mypath)
     return mypath
 
-def files_path():
-    mypath = os.path.join(getConfigValue("server","outputPath"), "files")
-    utils.mkdir(mypath)
-    return mypath
+def cache_url():
+    return getConfigValue("malleefowl","cache_url")
+
+def mako_cache():
+    mako_cache = getConfigValue("malleefowl", "mako_cache")
+    utils.mkdir(mako_cache)
+    return mako_cache
+

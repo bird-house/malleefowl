@@ -1,10 +1,15 @@
-import os
+# -*- coding: utf-8 -*-
 
-from setuptools import setup, find_packages
+from setuptools import find_packages
+from setuptools import setup
 
-here = os.path.abspath(os.path.dirname(__file__))
-README = open(os.path.join(here, 'README.rst')).read()
-CHANGES = open(os.path.join(here, 'CHANGES.rst')).read()
+version = '0.1.1'
+description = 'Malleefowl simplifies the usage of WPS and has some supporting WPS processes.'
+long_description = (
+    open('README.rst').read() + '\n' +
+    open('AUTHORS.rst').read() + '\n' +
+    open('CHANGES.rst').read()
+)
 
 requires = [
     'PyWPS',
@@ -13,11 +18,12 @@ requires = [
     'ordereddict',
     'lxml',
     'owslib',
-    'pymongo',
     'pyOpenSSL',
     'netCDF4',
     'pyYAML',
     'ConcurrentLogHandler',
+    'xmltodict',
+    'images2gif',
 #    'dateutil',
     'nose',
     ]
@@ -25,7 +31,6 @@ requires = [
 classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Science/Research',
-        'License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)',
         'Operating System :: MacOS :: MacOS X',
         'Operating System :: Microsoft :: Windows',
         'Operating System :: POSIX',
@@ -33,16 +38,15 @@ classifiers=[
         'Topic :: Scientific/Engineering :: Atmospheric Science',
         ]
 
-setup(name='Malleefowl',
-      version='0.1',
-      description='Climate Data Processing with PyWPS',
-      long_description=README + '\n\n' + CHANGES,
+setup(name='malleefowl',
+      version=version,
+      description=description,
+      long_description=long_description,
       classifiers=classifiers,
-      author='Carsten Ehbrecht',
-      author_email='ehbrecht@dkrz.de',
-      url='http://www.dkrz.de',
-      license = "http://www.gnu.org/licenses/gpl.html",
-      keywords='wps PyWPS Python Malleefowl netcdf esgf',
+      keywords='wps pywps python malleefowl netcdf esgf',
+      author='Birdhouse',
+      url='https://github.com/bird-house/malleefowl',
+      license = "Apache License v2.0",
       packages=find_packages(),
       include_package_data=True,
       zip_safe=False,

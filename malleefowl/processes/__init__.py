@@ -1,11 +1,7 @@
 
-__all__ = ["base",
-           "publish",
-           "tokenmgr",
+__all__ = [
+           "esgf_logon",
+           "wget",
            "restflow",
-           "esgf",
-           "testing",
-           "source",
-           "animate",
-           "integration",
+           "map",
            ]

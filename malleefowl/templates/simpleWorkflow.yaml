@@ -8,6 +8,7 @@ components:
 # actors
 
 <%include file="wpsActors.yaml"/>
+<%include file="utilActors.yaml"/>
 
 # workflow
 
@@ -17,10 +18,12 @@ components:
     director: !ref MTDataDrivenDirector
     nodes:
     - !ref GetSource
-    - !ref WaitForSources
+    - !ref WriteSourceStatusLocation
     - !ref RunWorker
-    - !ref WriteResult
-    - !ref WriteStatus
+    - !ref WriteWorkerStatusLocation
+    - !ref WriteWorkerStatus
+
+# source nodes
 
 - id: GetSource
   type: Node
@@ -30,24 +33,32 @@ components:
       service: ${nodes['source'].get('service')}
       identifier: ${nodes['source'].get('identifier')}
       input: ${nodes['source'].get('input')}
-      output: ${nodes['source'].get('output')}
+      output: ${nodes['source'].get('output', 'output')}
       verbose: false
-    sequences:
-      sources: ${nodes['source'].get('sources')}
     outflows:
-      result: /source/
-      status: /status/
+      result: /sources/
+      statusLocation: /statusLocation/source/
+      status: /status/source/
 
-- id: WaitForSources
+- id: WriteSourceStatusLocation
   type: Node
   properties:
-    actor: !ref CollectSources
+    actor: !ref FileWriterAppend
     constants:
-      max: ${len(nodes['source'].get('sources'))}
+      filename: restflow_source_status_location.txt
     inflows:
-      source: /source/
-    outflows:
-      sources: /sources/
+      message: /statusLocation/source/
+
+- id: WriteSourceStatus
+  type: Node
+  properties:
+    actor: !ref FileWriterAppend
+    constants:
+      filename: restflow_source_status.txt
+    inflows:
+      message: /status/source/
+
+# worker nodes
 
 - id: RunWorker
   type: Node
@@ -57,31 +68,32 @@ components:
       service: ${nodes['worker'].get('service')}
       identifier: ${nodes['worker'].get('identifier')}
       input: ${nodes['worker'].get('input')}
-      output: ${nodes['worker'].get('output')}
+      complex_input: ${nodes['worker'].get('complex_input')}  
       verbose: false
     inflows:
       sources: /sources/
     outflows:
       result: /worker/
-      status: /status/
+      statusLocation: /statusLocation/worker/
+      status: /status/worker/
  
-- id: WriteResult
+- id: WriteWorkerStatusLocation
   type: Node
   properties:
-    actor: !ref FileWriter
+    actor: !ref FileWriterAppend
     constants:
-      filename: restflow_output.txt
+      filename: restflow_worker_status_location.txt
     inflows:
-      message: /worker/
+      message: /statusLocation/worker/
 
-- id: WriteStatus
+- id: WriteWorkerStatus
   type: Node
   properties:
-    actor: !ref FileWriter
+    actor: !ref FileWriterAppend
     constants:
-      filename: restflow_status.txt
+      filename: restflow_worker_status.txt
     inflows:
-      message: /status/
+      message: /status/worker/
 
 
 

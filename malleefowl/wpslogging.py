@@ -22,6 +22,8 @@ class TraceLogger(object):
 def getLogger(name):
     from pywps import config as wpsconfig
     log_file = wpsconfig.getConfigValue("server", "logFile").replace('.log', '_trace.log')
+    if log_file == '':
+        log_file = "pywps_trace.log"
     log_level = wpsconfig.getConfigValue("server", "logLevel")
     
     logger = logging.getLogger(name)
