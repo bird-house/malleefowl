@@ -4,7 +4,7 @@ from setuptools import find_packages
 from setuptools import setup
 
 version = '0.1.1'
-description = 'PyWPS processes to support climate data processing with WPS.'
+description = 'Malleefowl simplifies the usage of WPS and has some supporting WPS processes.'
 long_description = (
     open('README.rst').read() + '\n' +
     open('AUTHORS.rst').read() + '\n' +
@@ -43,10 +43,9 @@ setup(name='malleefowl',
       description=description,
       long_description=long_description,
       classifiers=classifiers,
-      keywords='pywps python malleefowl netcdf esgf',
-      author='Carsten Ehbrecht',
-      author_email='ehbrecht@dkrz.de',
-      url='http://www.dkrz.de',
+      keywords='wps pywps python malleefowl netcdf esgf',
+      author='Birdhouse',
+      url='https://github.com/bird-house/malleefowl',
       license = "Apache License v2.0",
       packages=find_packages(),
       include_package_data=True,

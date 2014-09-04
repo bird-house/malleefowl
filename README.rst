@@ -14,8 +14,9 @@ Malleefowl is a Python package to simplify the usage of Web Processing Services 
 Installation
 ============
 
-Check out code from the malleefowl git repo (will be available on github). Then do the following::
-
+Check out code from the malleefowl github repo and start the installation::
+ 
+   $ git clone https://github.com/bird-house/malleefowl.git
    $ cd malleefowl
    $ ./requirements.sh
    $ ./install.sh
