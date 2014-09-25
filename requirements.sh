@@ -13,6 +13,8 @@ elif [ -f /etc/redhat-release ] ; then
     sudo rpm -i http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
     sudo yum -y install wget gcc-c++
     sudo yum -y install myproxy
+    # for pyopenssl 0.13.1
+    sudo yum -y install openssl openssl-devel
     # java
     sudo yum install -y java-1.7.0-openjdk java-1.7.0-openjdk-devel 
 elif [ `uname -s` = "Darwin" ] ; then
