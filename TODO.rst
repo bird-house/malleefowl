@@ -13,6 +13,7 @@ http://fe4.sic.rm.cnr.it:8080/thredds/docs/datasetScan/index.html
 Bugs
 ====
 
+* install of project emu etc will fail if malleefowl conda dependencies are not already installed. Check projects depending on malleefowl.
 * wget on debian does not work for esgf downloads
 https://bugs.launchpad.net/linuxmint/+bug/1335174
 * fix capabilities of isometa process
