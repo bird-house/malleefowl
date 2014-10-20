@@ -1,0 +1,16 @@
+FROM ubuntu:14.04
+MAINTAINER Carsten Ehbrecht <ehbrecht@dkrz.de>
+
+RUN apt-get update && apt-get install -y git
+WORKDIR birdhouse
+RUN git clone https://github.com/bird-house/malleefowl.git
+WORKDIR malleefowl
+RUN bash requirements.sh
+RUN bash install.sh
+RUN ~/anaconda/bin/conda install --yes -c https://conda.binstar.org/pingucarsti pyopenssl=0.13.1
+RUN bash install.sh
+EXPOSE 9001
+EXPOSE 8094
+CMD ~/anaconda/etc/init.d/supervisord start
+
+
