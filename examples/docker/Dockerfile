@@ -9,8 +9,11 @@ RUN bash requirements.sh
 RUN bash install.sh
 RUN ~/anaconda/bin/conda install --yes -c https://conda.binstar.org/pingucarsti pyopenssl=0.13.1
 RUN bash install.sh
+WORKDIR /root/anaconda
+RUN etc/init.d/supervisord start
+RUN addgroup nobody
+RUN etc/init.d/nginx start
+CMD bin/supervisorctl status
 EXPOSE 9001
-EXPOSE 8094
-CMD ~/anaconda/etc/init.d/supervisord start
-
+EXPOSE 8091
 
