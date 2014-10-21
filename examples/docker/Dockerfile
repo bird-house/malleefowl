@@ -13,6 +13,8 @@ RUN git clone https://github.com/bird-house/emu.git
 RUN cd emu && bash install.sh && cd -
 RUN git clone https://github.com/bird-house/hummingbird.git
 RUN cd hummingbird && bash install.sh && cd -
+RUN git clone https://github.com/bird-house/flyingpigeon.git
+RUN cd flyingpigeon && bash install.sh && cd -
 RUN git clone https://github.com/bird-house/pyramid-phoenix.git
 RUN cd pyramid-phoenix && bash install.sh && cd -
 WORKDIR /home/phoenix/anaconda
