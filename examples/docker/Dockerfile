@@ -9,7 +9,17 @@ RUN adduser phoenix
 USER phoenix
 RUN git clone https://github.com/bird-house/malleefowl.git
 RUN cd malleefowl && bash install.sh && cd -
+RUN git clone https://github.com/bird-house/emu.git
+RUN cd emu && bash install.sh && cd -
+RUN git clone https://github.com/bird-house/hummingbird.git
+RUN cd hummingbird && bash install.sh && cd -
+RUN git clone https://github.com/bird-house/pyramid-phoenix.git
+RUN cd pyramid-phoenix && bash install.sh && cd -
 WORKDIR /home/phoenix/anaconda
 EXPOSE 9001
 EXPOSE 8091
+EXPOSE 8092
+EXPOSE 8093
+EXPOSE 8094
 EXPOSE 8080
+EXPOSE 8081
