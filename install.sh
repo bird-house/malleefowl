@@ -52,7 +52,7 @@ function setup_cfg() {
 
 # install conda dependencies
 function install_deps() {
-    "$ANACONDA_HOME/bin/conda" install pyopenssl
+    "$ANACONDA_HOME/bin/conda" install --yes pyopenssl
 }
 
 # run install
