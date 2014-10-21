@@ -1,9 +1,11 @@
-==========
+*****************************
 Malleefowl
-==========
+*****************************
+
+.. contents::
 
 Introduction
-============
+************
 
 Malleefowl (the bird)
    *Malleefowl are shy, wary, solitary birds that usually fly only to escape danger or reach a tree to roost in. Although very active, they are seldom seen [..]* (`Wikipedia https://en.wikipedia.org/wiki/Malleefowl`_).
@@ -12,7 +14,7 @@ Malleefowl (the bird)
 Malleefowl is a Python package to simplify the usage of Web Processing Services (WPS). Currently it is using the `PyWPS https://github.com/geopython/PyWPS`_ server. It comes with some WPS processes which are used by the ``Phoenix`` WPS web-application. These processes are used to support climate data processing with WPS.
 
 Installation
-============
+************
 
 Check out code from the malleefowl github repo and start the installation::
  
@@ -40,7 +42,7 @@ Check the log files for errors::
    $ tail -f  ~/anaconda/var/log/pywps/malleefowl_trace.log
 
 Configuration
--------------
+=============
 
 If you want to run on a different hostname or port then change the default values in ``custom.cfg``::
 
@@ -57,7 +59,7 @@ After any change to your ``custom.cfg`` you **need** to run ``install.sh`` again
    $  ~/anaconda/etc/init.d/supervisor restart
 
 Update
-------
+======
 
 When updating your installation you may run ``clean.sh`` to remove outdated Python dependencies::
 
