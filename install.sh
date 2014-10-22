@@ -1,4 +1,14 @@
-#!/bin/bash
+#!/bin/bash -
+#===============================================================================
+# vim: softtabstop=4 shiftwidth=4 expandtab fenc=utf-8 spell spelllang=en cc=120
+#===============================================================================
+#
+#          FILE: install.sh
+#
+#   DESCRIPTION: Bootstrap birdhouse installation
+#
+#===============================================================================
+set -o nounset                              # Treat unset variables as an error
 
 # user settings
 ANACONDA_HOME=$HOME/anaconda
@@ -77,14 +87,74 @@ function install() {
     echo "Installing ... Done"
 }
 
+function clean() {
+    echo "Cleaning buildout ..."
+    if [ -f custom.cfg ]; then
+        echo "removing custom.cfg ... backup is custom.cfg.bak"
+        mv -f custom.cfg custom.cfg.bak
+    fi
+    rm -rf $BUILDOUT_DIR/downloads
+    rm -rf $BUILDOUT_DIR/eggs
+    rm -rf $BUILDOUT_DIR/develop-eggs
+    rm -rf $BUILDOUT_DIR/parts
+    rm -rf $BUILDOUT_DIR/bin
+    rm -f $BUILDOUT_DIR/.installed.cfg
+    rm -rf $BUILDOUT_DIR/*.egg-info
+    rm -rf $BUILDOUT_DIR/dist
+    rm -rf $BUILDOUT_DIR/build
+    echo "Cleaning buildout ... Done"
+}
+
 function usage() {
-    echo "Usage: $0"
+    cat << EOT
+
+  Usage : $0 [command]
+
+  Commands:
+    - selfupdate
+    - bootstrap
+    - install
+    - clean
+
+  Examples:
+    - $0
+    - $0 bootstrap
+    - $0 install
+    - $0 clean
+EOT
     exit 1
 }
 
-install_anaconda
-install_deps
-install
+# Define command
+if [ "$#" -eq 0 ];then
+    COMMAND="install"
+else
+    COMMAND=$1
+fi
+
+# Check command
+if [ "$(echo "$COMMAND" | egrep '(install|clean|bootstrap|selfupdate)')" = "" ]; then
+    usage
+    exit 1
+fi
+
+# Check for any unparsed arguments. Should be an error.
+if [ "$#" -gt 1 ]; then
+    usage
+    echo
+    echo "Too many arguments."
+    exit 1
+fi
+
+# install ...
+if [ "$COMMAND" = "install" ]; then
+    install
+elif [ "$COMMAND" = "bootstrap" ]; then
+    install_anaconda
+    install_deps
+elif [ "$COMMAND" = "clean" ]; then
+    clean
+fi
 
 exit 0
 
