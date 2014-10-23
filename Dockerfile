@@ -9,7 +9,6 @@ RUN useradd -d /home/phoenix -m phoenix
 USER phoenix
 RUN git clone -b pingudev --single-branch https://github.com/bird-house/malleefowl.git 
 RUN cd malleefowl && bash bootstrap.sh && cd -
-RUN cd malleefowl && bash install.sh bootstrap && cd -
 RUN cd malleefowl && bash install.sh install && cd -
 WORKDIR /home/phoenix/anaconda
 EXPOSE 8080 8091 9001
