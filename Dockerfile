@@ -11,4 +11,8 @@ RUN git clone -b pingudev --single-branch https://github.com/bird-house/malleefo
 RUN cd malleefowl && bash bootstrap.sh && cd -
 RUN cd malleefowl && bash install.sh build && cd -
 WORKDIR /home/phoenix/anaconda
-EXPOSE 8080 8091 9001
+
+EXPOSE 8080 8090 8091 9001
+
+CMD bin/supervisord -n -c etc/supervisor/supervisord.conf && bin/nginx -c etc/nginx/nginx.conf -g 'daemon off;'
+
