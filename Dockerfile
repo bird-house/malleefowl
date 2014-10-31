@@ -14,7 +14,8 @@ RUN chown -R malleefowl /home/malleefowl/src
 USER malleefowl
 WORKDIR /home/malleefowl/src
 
-RUN bash bootstrap.sh && make all
+RUN bash bootstrap.sh
+RUN make all
 
 WORKDIR /home/malleefowl/anaconda
 
