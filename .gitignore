@@ -1,5 +1,6 @@
 # installer
 install.sh
+Makefile
 
 # custom configs
 custom.cfg
