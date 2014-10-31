@@ -24,6 +24,9 @@ BUILDOUT_FILES := parts eggs develop-eggs bin .installed.cfg .mr.developer.cfg *
 
 .DEFAULT_GOAL := help
 
+.PHONY: all
+all: clean install
+
 .PHONY: help
 help:
 	@echo "make [target]\n"
@@ -46,7 +49,7 @@ custom.cfg:
 
 .PHONY: init
 init: custom.cfg
-	@echo "Initializing ..."
+	@echo "Initializing buildout ..."
 	@test -d $(DOWNLOAD_CACHE) || mkdir -p $(DOWNLOAD_CACHE)
 
 bootstrap.py:
@@ -55,7 +58,7 @@ bootstrap.py:
 .PHONY: bootstrap
 bootstrap: init anaconda bootstrap.py
 	@echo "Bootstrap buildout ..."
-	$(HOME)/anaconda/bin/python bootstrap.py -c custom.cfg
+	$(ANACONDA_HOME)/bin/python bootstrap.py -c custom.cfg
 
 .PHONY: anaconda
 anaconda:
@@ -67,9 +70,9 @@ anaconda:
 conda_pkgs: anaconda
 	"$(ANACONDA_HOME)/bin/conda" install --yes pyopenssl
 
-.PHONY: build
-build: bootstrap conda_pkgs
-	@echo "Building application with buildout ..."
+.PHONY: install
+install: bootstrap conda_pkgs
+	@echo "Installing application with buildout ..."
 	bin/buildout -c custom.cfg
 
 .PHONY: clean
