@@ -18,7 +18,7 @@ FN := unknown
 endif
 
 # buildout files
-BUILDOUT_FILES := parts eggs develop-eggs bin .installed.cfg *.egg-info $(DOWNLOAD_CACHE)
+BUILDOUT_FILES := parts eggs develop-eggs bin .installed.cfg *.egg-info bootstrap.py $(DOWNLOAD_CACHE)
 
 # end of configuration
 
