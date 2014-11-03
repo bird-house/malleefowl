@@ -48,8 +48,10 @@ def logon(username, hostname, port=7512, password=None, interactive=False, outdi
         from subprocess import PIPE
         env = os.environ.copy()
         env['X509_CERT_DIR'] = outdir
+        env['LD_LIBRARY_PATH'] = ''
         logger.debug("env=%s", env)
-        logger.debug("env path=%s", env.get('PATH'))
+        logger.debug("env PATH=%s", env.get('PATH'))
+        logger.debug("env LD_LIBRARY_PATH=%s", env.get('LD_LIBRARY_PATH'))
         certfile = os.path.join(outdir, "cert.pem")
         cmd=["myproxy-logon", "-l", username, "-s", hostname, "-p", port, "-b", "-T", "-S", "-o", certfile, "-v"]
         logger.debug("cmd=%s", cmd)
