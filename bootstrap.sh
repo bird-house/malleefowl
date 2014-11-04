@@ -23,7 +23,7 @@ install_pkgs() {
         sudo yum -y install wget gcc-c++
     elif [ `uname -s` = "Darwin" ] ; then
         echo "Install Homebrew packages for Birdhouse build ..."
-        brew install wget
+        brew install wget libmagic
     fi
 }
 
