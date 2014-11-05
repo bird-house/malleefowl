@@ -1,6 +1,9 @@
 Todo list
 *********
 
+* build docker images
+* use salt to deploy docker images
+* use common birdhouse bootstrap for starting buildout installer
 * maybe use metadata wps attribute to provide esgf filter etc ... could be local/pseudo links with json response.
 * concurrent logging or logging per process ...
 * test suite with nose
