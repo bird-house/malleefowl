@@ -21,7 +21,7 @@ endif
 
 # Buildout files and folders
 DOWNLOAD_CACHE := $(APP_ROOT)/downloads
-BUILDOUT_FILES := parts eggs develop-eggs bin .installed.cfg .mr.developer.cfg *.egg-info bootstrap.py $(DOWNLOAD_CACHE)
+BUILDOUT_FILES := parts eggs develop-eggs bin .installed.cfg .mr.developer.cfg *.egg-info bootstrap.py *.bak.* $(DOWNLOAD_CACHE)
 
 # Docker
 DOCKER_IMAGE := $(APP_NAME)
@@ -77,10 +77,12 @@ backup:
 bootstrap.sh:
 	@echo "Update bootstrap.sh ..."
 	@wget -q --no-check-certificate -O bootstrap.sh "https://raw.githubusercontent.com/bird-house/birdhousebuilder.bootstrap/master/bootstrap.sh"
+	@chmod 755 bootstrap.sh
 
 requirements.sh:
 	@echo "Setup default requirements.sh ..."
 	@wget -q --no-check-certificate -O requirements.sh "https://raw.githubusercontent.com/bird-house/birdhousebuilder.bootstrap/master/requirements.sh"
+	@chmod 755 requirements.sh
 
 .PHONY: Makefile
 Makefile: bootstrap.sh
@@ -135,6 +137,10 @@ install: bootstrap conda_pkgs
 	@echo "Installing application with buildout ..."
 	bin/buildout -c custom.cfg
 
+.PHONY: build
+build: install
+	@echo "Please use 'make install' instead of 'make build'"
+
 .PHONY: clean
 clean:
 	@echo "Cleaning buildout files ..."
@@ -145,6 +151,7 @@ clean:
 .PHONY: distclean
 distclean: backup clean
 	@echo "Cleaning distribution ..."
+	@git diff --quiet HEAD || echo "There are uncommited changes! Not doing 'git clean' ..."
 	@-git clean -dfx --exclude=*.bak
 
 .PHONY: buildclean
