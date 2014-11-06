@@ -32,19 +32,19 @@ DOCKER_CONTAINER := $(APP_NAME)
 .DEFAULT_GOAL := all
 
 .PHONY: all
-all: clean install
+all: sysinstall clean install
 	@echo "\nCall 'make help' for a description of all make targets."
 
 .PHONY: help
 help:
 	@echo "make [target]\n"
 	@echo "targets:\n"
+	@echo "\t all         \t- Does a complete installation. Shortcut for 'make sysinstall clean install.' (Default)"
 	@echo "\t help        \t- Prints this help message."
 	@echo "\t info        \t- Prints information about your system."
 	@echo "\t install     \t- Installs your application by running 'bin/buildout -c custom.cfg'."
 	@echo "\t clean       \t- Deletes all files that are created by running buildout."
 	@echo "\t distclean   \t- Removes *all* files that are not controlled by 'git'.\n\t\tWARNING: use it *only* if you know what you do!"
-	@echo "\t all         \t- Does a clean build. Shortcut for 'make clean build.' (Default)"
 	@echo "\t sysinstall  \t- Installs system packages from requirements.sh. You can also call 'bash requirements.sh' directly."
 	@echo "\t Dockerfile  \t- Generates a Dockerfile for this application."
 	@echo "\t dockerbuild \t- Build a docker image for this application."
@@ -69,8 +69,6 @@ info:
 backup:
 	@echo "Backup custom config ..." 
 	@-test -f custom.cfg && cp -v --update --backup=numbered --suffix=.bak custom.cfg custom.cfg.bak
-	@echo "Backup Makefile ..."
-	@-test -f Makefile && cp -v --update --backup=numbered --suffix=.bak Makefile Makefile.bak
 
 .gitignore:
 	@echo "Setup default .gitignore ..."
@@ -151,11 +149,12 @@ distclean: backup clean
 
 .PHONY: buildclean
 buildclean:
-	@echo "Cleaning bootstrap.sh ..."
+	@echo "Removing bootstrap.sh ..."
 	@test -e bootstrap.sh && rm -v bootstrap.sh
 
 .PHONY: selfupdate
 selfupdate: Makefile
+	@echo "Selfupdate done"
 
 ## Docker targets
 
