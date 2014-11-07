@@ -90,11 +90,6 @@ requirements.sh:
 	@wget -q --no-check-certificate -O requirements.sh "https://raw.githubusercontent.com/bird-house/birdhousebuilder.bootstrap/master/requirements.sh"
 	@chmod 755 requirements.sh
 
-.PHONY: Makefile
-Makefile: bootstrap.sh
-	@echo "Update Makefile ..."
-	@bash bootstrap.sh -u
-
 custom.cfg:
 	@echo "Using custom.cfg for buildout ..."
 	@test -f custom.cfg || cp -v custom.cfg.example custom.cfg
@@ -166,9 +161,8 @@ buildclean:
 	@test -e bootstrap.sh && rm -v bootstrap.sh
 
 .PHONY: selfupdate
-selfupdate: Makefile
-	@echo "Selfupdate done"
-
+selfupdate: bootstrap.sh
+	@bash bootstrap.sh -u
 
 ## Supervisor targets
 
