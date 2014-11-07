@@ -53,8 +53,8 @@ If you want to run on a different hostname or port then change the default value
    hostname = localhost
    http-port = 8091
 
-After any change to your ``custom.cfg`` you **need** to run ``install.sh`` again and restart the ``supervisor`` service::
+After any change to your ``custom.cfg`` you **need** to run ``make install`` again and restart the ``supervisor`` service::
 
-   $ ./install.sh
+   $ make install
    $  ~/anaconda/etc/init.d/supervisor restart
 
