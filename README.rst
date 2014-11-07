@@ -8,10 +8,10 @@ Introduction
 ************
 
 Malleefowl (the bird)
-   *Malleefowl are shy, wary, solitary birds that usually fly only to escape danger or reach a tree to roost in. Although very active, they are seldom seen [..]* (`Wikipedia https://en.wikipedia.org/wiki/Malleefowl`_).
+   *Malleefowl are shy, wary, solitary birds that usually fly only to escape danger or reach a tree to roost in. Although very active, they are seldom seen [..]* (`Wikipedia <https://en.wikipedia.org/wiki/Malleefowl>`_).
 
 
-Malleefowl is a Python package to simplify the usage of Web Processing Services (WPS). Currently it is using the `PyWPS https://github.com/geopython/PyWPS`_ server. It comes with some WPS processes which are used by the ``Phoenix`` WPS web-application. These processes are used to support climate data processing with WPS.
+Malleefowl is a Python package to simplify the usage of Web Processing Services (WPS). Currently it is using the `PyWPS <https://github.com/geopython/PyWPS>`_ server. It comes with some WPS processes which are used by the ``Phoenix`` WPS web-application. These processes are used to support climate data processing with WPS.
 
 Installation
 ************
@@ -22,10 +22,10 @@ Check out code from the malleefowl github repo and start the installation::
    $ cd malleefowl
    $ make
 
-For other install options run ``make help`` and read the documention for the `Makefile https://github.com/bird-house/birdhousebuilder.bootstrap/blob/master/README.rst`_.
+For other install options run ``make help`` and read the documention for the `Makefile <https://github.com/bird-house/birdhousebuilder.bootstrap/blob/master/README.rst>`_.
 
 After successful installation you need to start the
-services. Malleefowl is using `Anaconda http://www.continuum.io/`_
+services. Malleefowl is using `Anaconda <http://www.continuum.io/>`_
 Python distribution system. All installed files (config etc ...) are
 below the Anaconda root folder which is by default in your home
 directory ``~/anaconda``. Now, start the services::
