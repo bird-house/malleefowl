@@ -20,9 +20,9 @@ Check out code from the malleefowl github repo and start the installation::
  
    $ git clone https://github.com/bird-house/malleefowl.git
    $ cd malleefowl
-   $ ./requirements.sh
-   $ ./install.sh
+   $ make
 
+For other install options run ``make help`` and read the documention for the `Makefile https://github.com/bird-house/birdhousebuilder.bootstrap/blob/master/README.rst`_.
 
 After successful installation you need to start the
 services. Malleefowl is using `Anaconda http://www.continuum.io/`_
@@ -58,15 +58,3 @@ After any change to your ``custom.cfg`` you **need** to run ``install.sh`` again
    $ ./install.sh
    $  ~/anaconda/etc/init.d/supervisor restart
 
-Update
-======
-
-When updating your installation you may run ``clean.sh`` to remove outdated Python dependencies::
-
-   $ cd malleefowl
-   $ git pull
-   $ ./clean.sh
-   $ ./requirement.sh
-   $ ./install.sh
-
-And then restart the ``supervisor`` and ``nginx`` service.
