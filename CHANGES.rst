@@ -1,8 +1,8 @@
 Change History
 **************
 
-0.1.3 (current)
-===============
+0.1.3 (2014-11-11)
+==================
 
 * Fixed LD_LIBRARY_PATH for myproxy-logon. Should not use openssl library from anaconda.
 * Replaced install.sh by Makefile.
