@@ -1,6 +1,7 @@
 Todo list
 *********
 
+* check WebSockets and wps
 * build docker images
 * use salt to deploy docker images
 * use common birdhouse bootstrap for starting buildout installer
