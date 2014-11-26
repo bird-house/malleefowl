@@ -28,6 +28,8 @@ def timeout():
 
 def cache_path():
     mypath = getConfigValue("malleefowl","cache")
+    if len(mypath) == 0:
+        mypath = os.path.join("/tmp", "cache")
     utils.mkdir(mypath)
     return mypath
 
