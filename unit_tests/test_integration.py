@@ -11,6 +11,7 @@ import tempfile
 
 @attr('integration')
 def test_inout():
+    raise SkipTest
     result = wpsclient.execute(
         service = base.SERVICE,
         identifier = "org.malleefowl.test.inout",
@@ -21,6 +22,7 @@ def test_inout():
 
 @attr('integration')
 def test_visualisation():
+    raise SkipTest
     result = wpsclient.execute(
         service = base.SERVICE,
         identifier = "de.csc.visualisation.worker",
@@ -35,6 +37,7 @@ def test_visualisation():
 
 @attr('integration')
 def test_cdo_sinfo():
+    raise SkipTest
     result = wpsclient.execute(
         service = base.SERVICE,
         identifier = "de.dkrz.cdo.sinfo.worker",

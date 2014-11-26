@@ -43,15 +43,16 @@ def mkdir(path):
         os.mkdir(path)
     
 def within_date_range(timesteps, start=None, end=None):
+    from dateutil.parser import parse as date_parser
     start_date = None
     if start != None:
-        start_date = date_parser.parse(start)
+        start_date = date_parser(start)
     end_date = None
     if end != None:
-        end_date = date_parser.parse(end)
+        end_date = date_parser(end)
     new_timesteps = []
     for timestep in timesteps:
-        candidate = date_parser.parse(timestep)
+        candidate = date_parser(timestep)
         # within time range?
         if start_date != None and candidate < start_date:
             continue
@@ -61,6 +62,7 @@ def within_date_range(timesteps, start=None, end=None):
     return new_timesteps
     
 def filter_timesteps(timesteps, aggregation="monthly", start=None, end=None):
+    from dateutil.parser import parse as date_parser
     logger.debug("aggregation: %s", aggregation)
     
     if (timesteps == None or len(timesteps) == 0):
@@ -71,8 +73,8 @@ def filter_timesteps(timesteps, aggregation="monthly", start=None, end=None):
     new_timesteps = [work_timesteps[0]]
 
     for index in range(1,len(work_timesteps)):
-        current = date_parser.parse(new_timesteps[-1])
-        candidate = date_parser.parse(work_timesteps[index])
+        current = date_parser(new_timesteps[-1])
+        candidate = date_parser(work_timesteps[index])
     
         if current.year < candidate.year:
             new_timesteps.append(work_timesteps[index])

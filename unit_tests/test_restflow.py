@@ -7,18 +7,17 @@ import tempfile
 import yaml
 
 from malleefowl import (
-    restflow,
+    #restflow,
     wpsclient,
-    tokenmgr,
     )
 
 from pywps import config
 import __init__ as base
 
 # set path to buildout/bin to have access to restflow binary
-os.environ['PATH'] = '%s:%s' % (
-    os.path.join(os.path.dirname(restflow.__file__), '..', '..', '..', 'bin'),
-    os.environ['PATH'])
+## os.environ['PATH'] = '%s:%s' % (
+##     os.path.join(os.path.dirname(restflow.__file__), '..', '..', '..', 'bin'),
+##     os.environ['PATH'])
 
 NODES = None
 ESGF_NODES = None
@@ -28,7 +27,7 @@ def setup_nodes():
     source = dict(
         service = base.SERVICE,
         identifier = "org.malleefowl.storage.filesystem.source",
-        input = ['token=' + tokenmgr.test_token()],
+        input = [],
         output = ['output'],
         sources = [['test1.nc'], ['test2.nc']]
         )
@@ -66,6 +65,8 @@ def setup_esgf_nodes():
 
 @with_setup(setup_nodes)
 def test_generate_simple():
+    raise SkipTest
+    
     global NODES
     
     wf = restflow.generate("simpleWorkflow", NODES)
@@ -76,6 +77,8 @@ def test_generate_simple():
 @attr('online')
 @with_setup(setup_nodes)
 def test_run_simple():
+    raise SkipTest
+
     global NODES
     wf = restflow.generate("simpleWorkflow", NODES)
 
@@ -91,6 +94,8 @@ def test_run_simple():
 @attr('online')
 @with_setup(setup_nodes)
 def test_run_simple_with_wps():
+    raise SkipTest
+
     global NODES
     gen_result = wpsclient.execute(
         service = base.SERVICE,
@@ -117,31 +122,33 @@ def test_run_simple_with_wps():
     content = fp.read()
     ok_('wpsoutputs' in content, content)
 
-@attr('esgf')
-@attr('online')
-@with_setup(setup_esgf_nodes)
-def test_run_simple_esgf():
-    global ESGF_NODES
-    gen_result = wpsclient.execute(
-        service = base.SERVICE,
-        identifier = "org.malleefowl.restflow.generate",
-        inputs = [('nodes', yaml.dump(ESGF_NODES))],
-        outputs = [('output', True)]
-        )
-    wf_url = gen_result[0]['reference'].encode('ascii', 'ignore')
-    print wf_url
+## @attr('esgf')
+## @attr('online')
+## @with_setup(setup_esgf_nodes)
+## def test_run_simple_esgf():
+##     raise SkipTest
 
-    run_result = wpsclient.execute(
-        service = base.SERVICE,
-        identifier = "org.malleefowl.restflow.run",
-        inputs = [('workflow_description', wf_url)],
-        outputs = [('output', True)]
-        )
-    result_url = run_result[0]['reference']
-    ok_('wpsoutputs' in result_url, result_url)
+##     global ESGF_NODES
+##     gen_result = wpsclient.execute(
+##         service = base.SERVICE,
+##         identifier = "org.malleefowl.restflow.generate",
+##         inputs = [('nodes', yaml.dump(ESGF_NODES))],
+##         outputs = [('output', True)]
+##         )
+##     wf_url = gen_result[0]['reference'].encode('ascii', 'ignore')
+##     print wf_url
 
-    import urllib
-    fp = urllib.urlopen(result_url)
-    content = fp.read()
-    ok_('wpsoutputs' in content, content)
+##     run_result = wpsclient.execute(
+##         service = base.SERVICE,
+##         identifier = "org.malleefowl.restflow.run",
+##         inputs = [('workflow_description', wf_url)],
+##         outputs = [('output', True)]
+##         )
+##     result_url = run_result[0]['reference']
+##     ok_('wpsoutputs' in result_url, result_url)
+
+##     import urllib
+##     fp = urllib.urlopen(result_url)
+##     content = fp.read()
+##     ok_('wpsoutputs' in content, content)
   

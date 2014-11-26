@@ -8,6 +8,8 @@ caps_request = "service=wps&request=getcapabilities"
 wpsns = "http://www.opengis.net/wps/1.0.0"
 
 def test_caps():
+    raise SkipTest
+
     mypywps = pywps.Pywps(pywps.METHOD_GET)
     inputs = mypywps.parseRequest(caps_request)
     mypywps.performRequest(inputs)

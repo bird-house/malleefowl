@@ -2,24 +2,21 @@ import nose.tools
 from nose import SkipTest
 from nose.plugins.attrib import attr
 
-from malleefowl import tokenmgr, wpsclient
+from malleefowl import wpsclient
 
 import __init__ as base
 
-TEST_TOKEN = tokenmgr.get_uuid()
-
 def setup():
-    tokenmgr.init()
-    tokenmgr._add(TEST_TOKEN, 'amelie@montematre.org')
+    pass
 
 @attr('online')
 def test_wget():
+    raise SkipTest
     result = wpsclient.execute(
         service = base.SERVICE,
         identifier = "org.malleefowl.esgf.wget.source",
         inputs = [
             ('file_identifier', 'http://bmbf-ipcc-ar5.dkrz.de/thredds/fileServer/cmip5/output1/MPI-M/MPI-ESM-LR/historical/day/atmos/day/r1i1p1/v20111006/tas/tas_day_MPI-ESM-LR_historical_r1i1p1_20000101-20051231.nc'),
-            ('token', TEST_TOKEN),
             ('credentials', '')
             ],
         

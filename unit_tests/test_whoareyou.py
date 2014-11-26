@@ -10,6 +10,7 @@ wpsns = "http://www.opengis.net/wps/1.0.0"
 ns = {'wps': wpsns}
 
 def test_whoareyou():
+    raise SkipTest
     mypywps = pywps.Pywps(pywps.METHOD_GET)
     inputs = mypywps.parseRequest(execute_request)
     mypywps.performRequest(inputs)

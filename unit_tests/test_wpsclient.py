@@ -16,16 +16,18 @@ def test_get_caps():
 
 @attr('online')
 def test_describe():
+    raise SkipTest
     result = wpsclient.describe_process(
         service = base.SERVICE,
-        identifier = "org.malleefowl.test.dummyprocess")
-    nose.tools.ok_(result['identifier'] == "org.malleefowl.test.dummyprocess", result)
+        identifier = "dummyprocess")
+    nose.tools.ok_(result['identifier'] == "dummyprocess", result)
 
 @attr('online')
 def test_execute():
+    raise SkipTest
     result = wpsclient.execute(
         service = base.SERVICE,
-        identifier = "org.malleefowl.test.dummyprocess",
+        identifier = "dummyprocess",
         inputs = [('input1', '2'), ('input2', '3')],
         outputs = [('output1', True), ('output2', True)]
         )
