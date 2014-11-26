@@ -6,13 +6,14 @@ from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
 
-def download(url):
-    from os.path import basename, join
-    resource_name = basename(url)
-    filename = join(config.cache_path(), resource_name)
+def download(url, cache_enabled=True):
+    import wget
+    from os.path import join
+    filename = wget.filename_from_url(url)
+    filename = join(config.cache_path(), filename)
 
-    if not os.path.exists(filename):
-        import wget
+    # if caching is enabled download only if file does not exist
+    if not cache_enabled or not os.path.exists(filename):
         filename = wget.download(url, out=config.cache_path(), bar=None)
     return filename
 
