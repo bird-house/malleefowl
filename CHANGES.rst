@@ -4,6 +4,7 @@ Change History
 0.1.5 (2014-11-26)
 ==================
 
+* changed config for cache_path and cache_url.
 * Cleaned up unit tests.
 * download method added.
 

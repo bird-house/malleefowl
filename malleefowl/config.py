@@ -27,14 +27,14 @@ def timeout():
     return timeout
 
 def cache_path():
-    mypath = getConfigValue("malleefowl","cache")
+    mypath = getConfigValue("cache", "cache_path")
     if len(mypath) == 0:
-        mypath = os.path.join("/tmp", "cache")
+        mypath = os.path.join(os.sep, "tmp", "cache")
     utils.mkdir(mypath)
     return mypath
 
 def cache_url():
-    return getConfigValue("malleefowl","cache_url")
+    return getConfigValue("cache", "cache_url")
 
 def mako_cache():
     mako_cache = getConfigValue("malleefowl", "mako_cache")
