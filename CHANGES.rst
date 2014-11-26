@@ -1,6 +1,12 @@
 Change History
 **************
 
+0.1.5 (2014-11-26)
+==================
+
+* Cleaned up unit tests.
+* download method added.
+
 0.1.4 (2014-11-24)
 ==================
 
