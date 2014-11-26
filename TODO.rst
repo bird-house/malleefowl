@@ -3,7 +3,8 @@ Todo list
 
 * add wps commandline tool similar to miklip:
 https://code.zmaw.de/projects/miklip-d-integration/wiki
- * check WebSockets and wps
+* check WebSockets and wps
+https://pypi.python.org/pypi/gevent-websocket
 * build docker images
 * use salt to deploy docker images
 * use common birdhouse bootstrap for starting buildout installer
