@@ -5,7 +5,7 @@ Generic wps client
 import logging
 from owslib.wps import WebProcessingService
 
-SERVICE = "http://localhost:8091/wps"
+SERVICE = "http://localhost:8093/wps"
 
 def execute(wps, args):
     inputs = []
@@ -15,7 +15,7 @@ def execute(wps, args):
     # list of tuple (output identifier, asReference attribute)
     outputs = [("output",True)]
     execution = wps.execute(args.identifier, inputs, outputs)
-    monitor(execution)
+    monitor(execution, download=False)
 
 def monitor(execution, sleepSecs=3, download=False, filepath=None):
     '''
