@@ -101,7 +101,7 @@ def dump_files(filelist, output):
     logging.info("unit test file list written, %s", output)
     
 def main():
-    logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+    logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
     
     import argparse
 
