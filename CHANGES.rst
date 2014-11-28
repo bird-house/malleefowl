@@ -1,6 +1,11 @@
 Change History
 **************
 
+0.1.6 (2014-11-28)
+==================
+
+* Added wpsfetch script to retrieve test data for unit tests.
+
 0.1.5 (2014-11-26)
 ==================
 
