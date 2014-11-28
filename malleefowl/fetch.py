@@ -6,12 +6,35 @@ import logging
 
 from owslib.wps import WebProcessingService, monitorExecution
 
-def fetch(service, username, password, provider, filelist):
-    cert_url = get_cert(service, username, password, provider)
+class FetchException(Exception):
+    pass
 
-def get_cert(service, username, password, provider):
-    wps = WebProcessingService(service, verbose=False, skip_caps=True)
 
+def fetch(service, username, password, provider, filename, output):
+    wps = None
+    try:
+        wps = WebProcessingService(service, verbose=False, skip_caps=True)
+    except:
+        logger.exception("Could not access WPS %s", service)
+        raise
+    filelist_json = wget(wps,
+         cert_url=get_cert(wps, username, password, provider),
+         files=load_files(filename))
+    dump_files(filelist_json, output)
+
+def load_files(filename):
+    files = None
+    try:
+        import json
+        with open(filename, 'r') as fp:
+            files = json.load(fp)
+            logging.debug(files)
+    except:
+        logging.exception("Could not read file list: %s", filename)
+        raise
+    return files
+
+def get_cert(wps, username, password, provider):
     openid = "https://esgf-data.dkrz.de/esgf-idp/openid/%s" % (username)
 
     inputs = [('openid', openid), ('password', password)]
@@ -21,21 +44,62 @@ def get_cert(service, username, password, provider):
     
     try:
         execution = wps.execute("esgf_logon", inputs=inputs, output=outputs)
-        monitorExecution(execution, sleepSecs=5)
+        monitorExecution(execution, sleepSecs=3)
         if execution.isSucceded():
             cert_url = execution.processOutputs[0].reference
             logging.info('ESGF certificate successfully retrieved.')
         else:
             logging.error('Could not get certificate from your esgf provider.')
             for ex in execution.errors:
-                loggging.error('code=%s, locator=%s, text=%s' % (ex.code, ex.locator, ex.text))
-            exit(1)
-    except Exception as e:
-        logging.error('Could not get certificate from your esgf provider.')
-        logging.debug(e.message)
-        exit(1)
+                logging.error('code=%s, locator=%s, text=%s' % (ex.code, ex.locator, ex.text))
+            raise Exception()
+    except:
+        logging.exception('Could not get certificate from your esgf provider.')
+        raise
     return cert_url
 
+def wget(wps, cert_url, files):
+    inputs = [('credentials', cert_url)]
+    for file_url in files:
+        inputs.append( ('resource', str(file_url)) )
+    outputs = [('output', True), ('output_external', True)]
+
+    logging.info('Retrieving files ...')
+    
+    try:
+        execution = wps.execute("wget", inputs=inputs, output=outputs)
+        monitorExecution(execution, sleepSecs=10)
+        if execution.isSucceded():
+            import json
+            filelist = json.loads(execution.processOutputs[0].retrieveData())
+            logging.info('Files succesfully retrieved.')
+        else:
+            logging.error('Could not retrieve files.')
+            for ex in execution.errors:
+                logging.error('code=%s, locator=%s, text=%s' % (ex.code, ex.locator, ex.text))
+            raise FetchException()
+    except:
+        logging.exception('Could not retrieve files.')
+        raise
+    return filelist
+
+def dump_files(filelist, output):
+    try:
+        import json
+        from os.path import basename
+        from urlparse import urlparse
+        file_dict = {}
+        for file_url in filelist:
+            filename = basename(urlparse(file_url).path)
+            file_dict[filename] = file_url 
+    
+        with open(output, 'w') as fp:
+            json.dump(file_dict, fp, indent=4, sort_keys=True)
+    except:
+        logging.exception('Could not write %s', output)
+        raise
+    logging.info("unit test file list written, %s", output)
+    
 def main():
     logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
     
@@ -71,14 +135,32 @@ def main():
                         action="store",
                         help="Password of your ESGF OpenID (default: enter interactivly)")
 
+    parser.add_argument('--files',
+                        dest="files",
+                        default="testdata.json",
+                        action="store",
+                        help="JSON document with testdata urls (default: testdata.json)")
+
+    parser.add_argument('--output',
+                        dest="output",
+                        default="unit_tests/testdata.json",
+                        action="store",
+                        help="Output: JSON document with testdata for unit tests (default: unit_tests/testdata.json)")
+
+
     args = parser.parse_args()
     password = args.password
     if password is None:
         import getpass
         password = getpass.getpass('Enter Password of your OpenID: ')
-    
-    fetch(args.service,
-          args.username,
-          password,
-          args.provider,
-          filelist=None)
+
+
+    try:
+        fetch(args.service,
+              args.username,
+              password,
+              args.provider,
+              filename=args.files,
+              output=args.output)
+    except:
+        logging.exception("Could not fetch files.")
