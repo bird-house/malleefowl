@@ -11,9 +11,10 @@ def execute(wps, args):
     inputs = []
     # TODO: this is probably not the way to do it
     for key in args.__dict__.keys():
-        inputs.append( (key, str( getattr(args, key) )) )
+        if not key in ['identifier', 'output']:
+            inputs.append( (key, str( getattr(args, key) )) )
     # list of tuple (output identifier, asReference attribute)
-    outputs = [("output",True)]
+    outputs = [(args.output, True)]
     execution = wps.execute(args.identifier, inputs, outputs)
     monitor(execution, download=False)
 
@@ -69,6 +70,19 @@ def main():
                                         action="store",
                                         help="%s" % (input.title)
                                 )
+
+        output_choices = [output.identifier for output in process.processOutputs]
+        help_msg = "Output: "
+        for output in process.processOutputs:
+            help_msg = help_msg + '%s=%s, ' % (output.identifier, output.title)
+        parser_process.add_argument(
+            '--output',
+            dest="output",
+            default="output",
+            choices=output_choices,
+            action="store",
+            help=help_msg
+        )
 
     args = parser.parse_args()
     execute(wps, args)
