@@ -1,6 +1,8 @@
 Todo list
 *********
 
+* token service ... sets simple username/password for wps https access
+* user stats/jobs/... proxy before wps services  
 * add wps commandline tool similar to miklip:
 https://code.zmaw.de/projects/miklip-d-integration/wiki
 
