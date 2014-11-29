@@ -5,7 +5,8 @@ Generic wps client
 import logging
 from owslib.wps import WebProcessingService
 
-SERVICE = "http://localhost:8093/wps"
+#SERVICE = "http://localhost:8093/wps"
+SERVICE = "https://mouflon.dkrz.de/wps"
 
 def execute(wps, args):
     inputs = []
