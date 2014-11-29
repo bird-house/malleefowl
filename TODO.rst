@@ -3,6 +3,14 @@ Todo list
 
 * add wps commandline tool similar to miklip:
 https://code.zmaw.de/projects/miklip-d-integration/wiki
+
+progress_bar, more work on input, output, get wps list form csw,
+refactor wps processes (e.a. wps), unit test
+choose bird (wps) by setting env variable
+chaining example
+
+* esgf search on console (files, opendap, local files)
+* csw search on console
 * check WebSockets and wps
 https://pypi.python.org/pypi/gevent-websocket
 * build docker images
