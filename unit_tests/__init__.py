@@ -12,5 +12,8 @@ try:
     import json
     with open(__testdata_filename__, 'r') as fp:
         TESTDATA = json.load(fp)
+        # TODO: owslib does not like unicode
+        for key in TESTDATA.keys():
+            TESTDATA[key] = str(TESTDATA[key]) 
 except:
     logging.error('could not read testdata! %s', __testdata_filename__ )

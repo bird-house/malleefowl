@@ -91,7 +91,7 @@ def dump_files(filelist, output):
         file_dict = {}
         for file_url in filelist:
             filename = basename(urlparse(file_url).path)
-            file_dict[filename] = file_url 
+            file_dict[filename] = str(file_url) 
     
         with open(output, 'w') as fp:
             json.dump(file_dict, fp, indent=4, sort_keys=True)
