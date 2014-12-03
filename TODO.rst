@@ -20,6 +20,11 @@ http://fe4.sic.rm.cnr.it:8080/thredds/docs/datasetScan/index.html
 Bugs
 ====
 
+* owslib can not handle some exception reports: for example:
+<Exception exceptionCode="NoApplicableCode">
+                <ExceptionText>'Failed to execute WPS process [visualisation]: (returncode:1) cdo showdate: Open failed on &gt;./pywpsInput5A4aF4&lt;\nNo such file or directory\n'</ExceptionText>
+        </Exception>
+
 * install of project emu etc will fail if malleefowl conda dependencies are not already installed. Check projects depending on malleefowl.
 * wget on debian does not work for esgf downloads
 https://bugs.launchpad.net/linuxmint/+bug/1335174
