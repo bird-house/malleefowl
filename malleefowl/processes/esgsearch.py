@@ -5,6 +5,14 @@ from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
 class ESGSearch(WPSProcess):
+    """
+    wps wrapper for esg search.
+
+    TODO: time constraints for datasets and files
+    TODO: bbox constraint for datasets
+    TODO: free text query
+    TODO: latest, replica
+    """
     def __init__(self):
         WPSProcess.__init__(self,
             identifier = "esgsearch",
@@ -15,7 +23,7 @@ class ESGSearch(WPSProcess):
         self.url = self.addLiteralInput(
             identifier="url",
             title="URL",
-            abstract="URL of ESGF Search Index",
+            abstract="URL of ESGF Search Index. Example: http://esgf-data.dkrz.de/esg-search",
             default='http://localhost:8081/esg-search',
             minOccurs=1,
             maxOccurs=1,
@@ -54,8 +62,8 @@ class ESGSearch(WPSProcess):
 
         self.type = self.addLiteralInput(
             identifier = "type",
-            title = "Result Type",
-            abstract = "Datasets, Files or Aggregations",
+            title = "Search Type",
+            abstract = "Search on Datasets, Files or Aggregations",
             default = 'datasets',
             minOccurs=1,
             maxOccurs=1,

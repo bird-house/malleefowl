@@ -35,6 +35,51 @@ class WgetTestCase(WpsTestCase):
         nose.tools.ok_(execution.status == 'ProcessSucceeded', execution.status)
 
     @attr('online')
+    def test_esgsearch_datasets_with_spaces(self):
+        inputs = []
+        inputs.append(('type', 'datasets'))
+        inputs.append(('limit', '10'))
+        inputs.append(('offset', '10'))
+        inputs.append(
+            ('constraints', ' project: CORDEX, time_frequency : mon,variable:tas,  experiment:historical  '))
+
+        output=[('output', True), ('summary', True)]
+        execution = self.wps.execute(identifier="esgsearch", inputs=inputs, output=output)
+        monitorExecution(execution, sleepSecs=1)
+
+        nose.tools.ok_(execution.status == 'ProcessSucceeded', execution.status)
+
+    @attr('online')
+    def test_esgsearch_datasets_out_of_limit(self):
+        inputs = []
+        inputs.append(('type', 'datasets'))
+        inputs.append(('limit', '100'))
+        inputs.append(('offset', '99'))
+        inputs.append(
+            ('constraints', 'project:CORDEX,time_frequency:mon,variable:tas,experiment:historical'))
+
+        output=[('output', True), ('summary', True)]
+        execution = self.wps.execute(identifier="esgsearch", inputs=inputs, output=output)
+        monitorExecution(execution, sleepSecs=1)
+
+        nose.tools.ok_(execution.status == 'ProcessSucceeded', execution.status)
+
+    @attr('online')
+    def test_esgsearch_datasets_out_of_offset(self):
+        inputs = []
+        inputs.append(('type', 'datasets'))
+        inputs.append(('limit', '1'))
+        inputs.append(('offset', '1000'))
+        inputs.append(
+            ('constraints', 'project:CORDEX,time_frequency:mon,variable:tas,experiment:historical'))
+
+        output=[('output', True), ('summary', True)]
+        execution = self.wps.execute(identifier="esgsearch", inputs=inputs, output=output)
+        monitorExecution(execution, sleepSecs=1)
+
+        nose.tools.ok_(execution.status == 'ProcessSucceeded', execution.status)
+
+    @attr('online')
     def test_esgsearch_aggregations(self):
         inputs = []
         inputs.append(('type', 'aggregations'))
