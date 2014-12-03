@@ -25,23 +25,76 @@ class ESGSearch(WPSProcess):
         self.distrib = self.addLiteralInput(
             identifier = "distrib",
             title = "Distributed",
-            abstract = "Flag for distributed search.",
+            abstract = "If flag is set then a distributed search will be run.",
             default = True,
             minOccurs=1,
             maxOccurs=1,
             type=type(True)
             )
 
+        self.replica = self.addLiteralInput(
+            identifier = "replica",
+            title = "Replica",
+            abstract = "If flag is set then search will include replicated datasets.",
+            default = False,
+            minOccurs=1,
+            maxOccurs=1,
+            type=type(True)
+            )
+
+        self.latest = self.addLiteralInput(
+            identifier = "latest",
+            title = "Latest",
+            abstract = "If flag is set then search will include only latest datasets.",
+            default = True,
+            minOccurs=1,
+            maxOccurs=1,
+            type=type(True)
+            )
+
+        self.type = self.addLiteralInput(
+            identifier = "type",
+            title = "Result Type",
+            abstract = "Datasets, Files or Aggregations",
+            default = 'datasets',
+            minOccurs=1,
+            maxOccurs=1,
+            type=type(''),
+            allowedValues=['datasets', 'files', 'aggregations']
+            )
+
         self.query = self.addLiteralInput(
             identifier = "query",
             title = "Query",
             abstract = "Query search string",
-            default = '',
-            minOccurs=1,
+            default = 'CORDEX',
+            minOccurs=0,
             maxOccurs=1,
             type=type('')
             )
+        
+        self.from_timestamp = self.addLiteralInput(
+            identifier = "from",
+            title = "From",
+            abstract = "From Timestamp",
+            default = '2000',
+            minOccurs=0,
+            maxOccurs=1,
+            type=type(''),
+            allowedValues=['1990', '2000', '2010', '2020']
+            )
 
+        self.to_timestamp = self.addLiteralInput(
+            identifier = "to",
+            title = "To",
+            abstract = "To Timestamp",
+            default = '2010',
+            minOccurs=0,
+            maxOccurs=1,
+            type=type(''),
+            allowedValues=['1990', '2000', '2010', '2020']
+            )
+        
         self.output = self.addComplexOutput(
             identifier="output",
             title="Search Result",
@@ -52,7 +105,7 @@ class ESGSearch(WPSProcess):
             )
 
     def execute(self):
-        self.show_status("Starting ...", 0)
+        self.show_status("Starting ...", 1)
 
         from pyesgf.search import SearchConnection
         conn = SearchConnection(self.url.getValue(),
@@ -68,41 +121,42 @@ class ESGSearch(WPSProcess):
                 
         self.show_status("Datasets found=%d" % ctx.hit_count, 5)
 
-        datasets = []
-        keys = ['id', 'number_of_files', 'number_of_aggregations', 'size']
-        for ds in ctx.search():
-            ds_dict = {}
-            for key in keys:
-                ds_dict[key] = ds.json.get(key)
-            datasets.append(ds_dict)
+        type = self.type.getValue()
 
-        aggregations = []
-        count = 0
-        for ds in ctx.search():
-            count = count + 1
-            progress = int( ((30.0 - 5.0) / ctx.hit_count) * count )
-            self.show_status("Dataset %d/%d" % (count, ctx.hit_count), progress)
-            agg_ctx = ds.aggregation_context()
-            for agg in agg_ctx.search():
-                aggregations.append(agg.opendap_url)
+        result = []
+        if type == 'datasets':
+            keys = ['id', 'number_of_files', 'number_of_aggregations', 'size']
+            for ds in ctx.search():
+                ds_dict = {}
+                for key in keys:
+                    ds_dict[key] = ds.json.get(key)
+                result.append(ds_dict)
 
-        self.show_status("Aggregations found=%d" % len(aggregations), 30)
+        elif type == 'aggregations':
+            count = 0
+            for ds in ctx.search():
+                count = count + 1
+                progress = int( ((95.0 - 5.0) / ctx.hit_count) * count )
+                self.show_status("Dataset %d/%d" % (count, ctx.hit_count), progress)
+                agg_ctx = ds.aggregation_context()
+                for agg in agg_ctx.search():
+                    result.append(agg.opendap_url)
+            self.show_status("Aggregations found=%d" % len(result), 95)
 
-        files = []
-        count = 0
-        for ds in ctx.search():
-            count = count + 1
-            progress = int( ((95.0 - 30.0) / ctx.hit_count) * count )
-            self.show_status("Dataset %d/%d" % (count, ctx.hit_count), progress)
-            for f in ds.file_context().search():
-                files.append(f.download_url)
-
-        self.show_status("Files found=%d" % len(files), 95)
+        elif type == 'files':
+            count = 0
+            for ds in ctx.search():
+                count = count + 1
+                progress = int( ((95.0 - 5.0) / ctx.hit_count) * count )
+                self.show_status("Dataset %d/%d" % (count, ctx.hit_count), progress)
+                for f in ds.file_context().search():
+                    result.append(f.download_url)
+            self.show_status("Files found=%d" % len(result), 95)
 
         import json
         outfile = self.mktempfile(suffix='.json')
         with open(outfile, 'w') as fp:
-            json.dump(obj=files, fp=fp, indent=4, sort_keys=True)
+            json.dump(obj=result, fp=fp, indent=4, sort_keys=True)
         self.output.setValue( outfile )
 
         self.show_status("Done.", 100)
