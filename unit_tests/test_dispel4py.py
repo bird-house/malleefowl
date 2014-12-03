@@ -18,12 +18,14 @@ def test_tee():
 from dispel4py.core import GenericPE, NAME, TYPE, GROUPING
     
 class ESGSearchProducer(GenericPE):
-    def __init__(self, constraints="project:CORDEX"):
+    def __init__(self, monitor, constraints="project:CORDEX"):
         GenericPE.__init__(self)
+        self.monitor = monitor
         self.constraints = constraints
         self.outputconnections["output"] = dict(NAME="output", TYPE=['string'])
         
     def process(self, inputs=None):
+        self.monitor('doing esgsearch')
         from owslib.wps import WebProcessingService, monitorExecution
         wps = WebProcessingService("http://localhost:8091/wps")
         execution = wps.execute(identifier='esgsearch', inputs=[('constraints', self.constraints)], output=[('output', True)])
@@ -32,20 +34,28 @@ class ESGSearchProducer(GenericPE):
         return outputs
 
 class ShowResultConsumer(GenericPE):
-    def __init__(self):
+    def __init__(self, monitor):
+        self.monitor = monitor
         GenericPE.__init__(self)
         self.inputconnections['input'] = { NAME : 'input'}
+        self.outputconnections['output'] = { NAME : 'output'}
 
     def process(self, inputs):
+        self.monitor('very busy today')
         print inputs['input']
+        outputs = {'output' : inputs['input']}
+        return outputs
     
-
+def monitor(message):
+    print message
+    
 def test_esgsearch():
     graph = WorkflowGraph()
-    esgsearch = ESGSearchProducer()
-    show = ShowResultConsumer()
+    esgsearch = ESGSearchProducer(monitor)
+    show = ShowResultConsumer(monitor)
     graph.connect(esgsearch, 'output', show, 'input')
     results = simple_process.process(graph, {esgsearch: [{}]})
+    tools.ok_(False, results)
     
     
     
