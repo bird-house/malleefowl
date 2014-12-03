@@ -113,6 +113,24 @@ class WgetTestCase(WpsTestCase):
         nose.tools.ok_(execution.status == 'ProcessSucceeded', execution.status)
         #nose.tools.ok_(False, "TODO: check latest")
 
+
+    @attr('online')
+    def test_esgsearch_datasets_facet_counts(self):
+        inputs = []
+        inputs.append(('type', 'datasets'))
+        inputs.append(('limit', '1'))
+        inputs.append(('offset', '0'))
+        inputs.append(('latest', 'True'))
+        inputs.append(
+            ('constraints', 'project:CORDEX,time_frequency:mon'))
+
+        output=[('facet_counts', True)]
+        execution = self.wps.execute(identifier="esgsearch", inputs=inputs, output=output)
+        monitorExecution(execution, sleepSecs=1)
+
+        nose.tools.ok_(execution.status == 'ProcessSucceeded', execution.status)
+        #nose.tools.ok_(False, "TODO: check facets")
+
         
     @attr('online')
     def test_esgsearch_aggregations(self):
