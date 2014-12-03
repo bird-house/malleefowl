@@ -66,7 +66,7 @@ class ESGSearch(WPSProcess):
             realm='ocean',
             ensemble='r1i2p1')
                 
-        self.show_status("Datasets found=%d" % ctx.hit_count, 10)
+        self.show_status("Datasets found=%d" % ctx.hit_count, 5)
 
         datasets = []
         keys = ['id', 'number_of_files', 'number_of_aggregations', 'size']
@@ -76,12 +76,33 @@ class ESGSearch(WPSProcess):
                 ds_dict[key] = ds.json.get(key)
             datasets.append(ds_dict)
 
-        self.show_status("Writing output ...", 10)
+        aggregations = []
+        count = 0
+        for ds in ctx.search():
+            count = count + 1
+            progress = int( ((30.0 - 5.0) / ctx.hit_count) * count )
+            self.show_status("Dataset %d/%d" % (count, ctx.hit_count), progress)
+            agg_ctx = ds.aggregation_context()
+            for agg in agg_ctx.search():
+                aggregations.append(agg.opendap_url)
+
+        self.show_status("Aggregations found=%d" % len(aggregations), 30)
+
+        files = []
+        count = 0
+        for ds in ctx.search():
+            count = count + 1
+            progress = int( ((95.0 - 30.0) / ctx.hit_count) * count )
+            self.show_status("Dataset %d/%d" % (count, ctx.hit_count), progress)
+            for f in ds.file_context().search():
+                files.append(f.download_url)
+
+        self.show_status("Files found=%d" % len(files), 95)
 
         import json
         outfile = self.mktempfile(suffix='.json')
         with open(outfile, 'w') as fp:
-            json.dump(obj=datasets, fp=fp, indent=4, sort_keys=True)
+            json.dump(obj=files, fp=fp, indent=4, sort_keys=True)
         self.output.setValue( outfile )
 
         self.show_status("Done.", 100)
