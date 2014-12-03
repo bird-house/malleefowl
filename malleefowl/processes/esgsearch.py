@@ -11,7 +11,7 @@ class ESGSearch(WPSProcess):
     TODO: time constraints for datasets and files
     TODO: bbox constraint for datasets
     TODO: free text query
-    TODO: latest, replica
+    TODO: facets
     """
     def __init__(self):
         WPSProcess.__init__(self,
@@ -152,6 +152,15 @@ class ESGSearch(WPSProcess):
             asReference=True,
             )
 
+        self.facet_counts = self.addComplexOutput(
+            identifier="facet_counts",
+            title="Facet Counts",
+            abstract="JSON document with facet counts for contstaints.",
+            metadata=[],
+            formats=[{"mimeType":"test/json"}],
+            asReference=True,
+            )
+        
     def execute(self):
         self.show_status("Starting ...", 1)
 
@@ -185,7 +194,7 @@ class ESGSearch(WPSProcess):
                                **constraints)
                 
         self.show_status("Datasets found=%d" % ctx.hit_count, 5)
-
+        
         result_type = self.type.getValue()
         limit = self.limit.getValue()
         offset = self.offset.getValue()
@@ -257,6 +266,11 @@ class ESGSearch(WPSProcess):
         with open(outfile, 'w') as fp:
             json.dump(obj=summary, fp=fp, indent=4, sort_keys=True)
             self.summary.setValue( outfile )
+
+        outfile = self.mktempfile(suffix='.json')
+        with open(outfile, 'w') as fp:
+            json.dump(obj=ctx.facet_counts, fp=fp, indent=4, sort_keys=True)
+            self.facet_counts.setValue( outfile )
 
         self.show_status("Done.", 100)
 
