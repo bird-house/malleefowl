@@ -3,6 +3,7 @@ Todo list
 
 * check dispel4py as workflow engine
   http://www2.epcc.ed.ac.uk/~amrey/VERCE/Dispel4Py/index.html
+  https://github.com/akrause2014/dispel4py
 * token service ... sets simple username/password for wps https access
 * user stats/jobs/... proxy before wps services  
 * check WebSockets and wps
