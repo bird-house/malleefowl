@@ -19,6 +19,7 @@ requires = [
     'lxml',
     'owslib',
     'wget',
+    'esgf-pyclient',
 #    'pyOpenSSL',
 #    'netCDF4',
 #    'pyYAML',
