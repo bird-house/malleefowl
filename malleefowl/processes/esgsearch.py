@@ -113,13 +113,22 @@ class ESGSearch(WPSProcess):
             minOccurs=1,
             maxOccurs=1,
             type=type(1),
-            allowedValues=[10, 20, 50, 100]
+            allowedValues=[1, 5, 10, 20, 50, 100]
             )
         
         self.output = self.addComplexOutput(
             identifier="output",
             title="Search Result",
             abstract="JSON document with search result",
+            metadata=[],
+            formats=[{"mimeType":"test/json"}],
+            asReference=True,
+            )
+
+        self.summary = self.addComplexOutput(
+            identifier="summary",
+            title="Search Result Summary",
+            abstract="JSON document with search result summary",
             metadata=[],
             formats=[{"mimeType":"test/json"}],
             asReference=True,
@@ -139,17 +148,21 @@ class ESGSearch(WPSProcess):
 
         logger.debug('constraints=%s', constraints)
 
-        ctx = conn.new_context(**constraints)
+        fields = 'id,number_of_files,number_of_aggregations,size'
+        ctx = conn.new_context(fields=fields, **constraints)
                 
         self.show_status("Datasets found=%d" % ctx.hit_count, 5)
 
         result_type = self.type.getValue()
         max_datasets = self.max_datasets.getValue()
 
+        summary = dict(number_of_datasets=ctx.hit_count,
+                       number_of_files=0,
+                       number_of_aggregations=0,
+                       size=0)
         result = []
         count = 0
         if result_type == 'datasets':
-            keys = ['id', 'number_of_files', 'number_of_aggregations', 'size']
             for ds in ctx.search():
                 count = count + 1
                 if count > max_datasets:
@@ -157,10 +170,10 @@ class ESGSearch(WPSProcess):
                     break
                 progress = int( ((95.0 - 5.0) / ctx.hit_count) * count )
                 self.show_status("Dataset %d/%d" % (count, ctx.hit_count), progress)
-                ds_dict = {}
-                for key in keys:
-                    ds_dict[key] = ds.json.get(key)
-                result.append(ds_dict)
+                result.append(ds.json)
+                for key in ['number_of_files', 'number_of_aggregations', 'size']:
+                    logger.debug(ds.json)
+                    summary[key] = summary[key] + ds.json.get(key, 0)
 
         elif result_type == 'aggregations':
             for ds in ctx.search():
@@ -191,7 +204,12 @@ class ESGSearch(WPSProcess):
         outfile = self.mktempfile(suffix='.json')
         with open(outfile, 'w') as fp:
             json.dump(obj=result, fp=fp, indent=4, sort_keys=True)
-        self.output.setValue( outfile )
+            self.output.setValue( outfile )
+
+        outfile = self.mktempfile(suffix='.json')
+        with open(outfile, 'w') as fp:
+            json.dump(obj=summary, fp=fp, indent=4, sort_keys=True)
+            self.summary.setValue( outfile )
 
         self.show_status("Done.", 100)
 

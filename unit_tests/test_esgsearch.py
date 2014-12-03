@@ -22,9 +22,11 @@ class WgetTestCase(WpsTestCase):
     @attr('online')
     def test_esgsearch_datasets(self):
         inputs = []
+        inputs.append(('type', 'datasets'))
+        inputs.append(('max_datasets', '10'))
         inputs.append(
-            ('type', 'datasets')
-            )
+            ('constraints', 'project:CORDEX,time_frequency:mon,variable:tas,experiment:historical'))
+
         execution = self.wps.execute(identifier="esgsearch", inputs=inputs, output=[('output', True)])
         monitorExecution(execution, sleepSecs=1)
 
@@ -33,9 +35,10 @@ class WgetTestCase(WpsTestCase):
     @attr('online')
     def test_esgsearch_aggregations(self):
         inputs = []
+        inputs.append(('type', 'aggregations'))
+        inputs.append(('max_datasets', '5'))
         inputs.append(
-            ('type', 'aggregations')
-            )
+            ('constraints', 'project:CORDEX,time_frequency:mon,variable:tas,experiment:historical,domain:EUR-11'))
         execution = self.wps.execute(identifier="esgsearch", inputs=inputs, output=[('output', True)])
         monitorExecution(execution, sleepSecs=1)
 
@@ -44,9 +47,10 @@ class WgetTestCase(WpsTestCase):
     @attr('online')
     def test_esgsearch_files(self):
         inputs = []
+        inputs.append(('type', 'files'))
+        inputs.append(('max_datasets', '1'))
         inputs.append(
-            ('type', 'files')
-            )
+            ('constraints', 'project:CORDEX,time_frequency:mon,variable:tas,experiment:historical,domain:EUR-11'))
         execution = self.wps.execute(identifier="esgsearch", inputs=inputs, output=[('output', True)])
         monitorExecution(execution, sleepSecs=1)
 
