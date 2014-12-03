@@ -83,10 +83,10 @@ class ESGSearch(WPSProcess):
             type=type('')
             )
         
-        self.from_timestamp = self.addLiteralInput(
-            identifier = "from",
-            title = "From",
-            abstract = "From Timestamp",
+        self.start = self.addLiteralInput(
+            identifier = "start",
+            title = "Start",
+            abstract = "Start time",
             default = '2000',
             minOccurs=0,
             maxOccurs=1,
@@ -94,10 +94,10 @@ class ESGSearch(WPSProcess):
             allowedValues=['1990', '2000', '2010', '2020']
             )
 
-        self.to_timestamp = self.addLiteralInput(
-            identifier = "to",
-            title = "To",
-            abstract = "To Timestamp",
+        self.end = self.addLiteralInput(
+            identifier = "end",
+            title = "End",
+            abstract = "End time",
             default = '2010',
             minOccurs=0,
             maxOccurs=1,
@@ -165,21 +165,28 @@ class ESGSearch(WPSProcess):
 
         result_type = self.type.getValue()
         limit = self.limit.getValue()
+        offset = self.offset.getValue()
 
-        summary = dict(number_of_datasets=ctx.hit_count,
+        summary = dict(total_number_of_datasets=ctx.hit_count,
+                       number_of_datasets=0,
                        number_of_files=0,
                        number_of_aggregations=0,
                        number_of_invalid_aggregations=0,
                        size=0)
+       
         result = []
         count = 0
         # search datasets
         # we always do this to get the summary document
-        for ds in ctx.search():
+        datasets = ctx.search()
+        start_index = min(offset, len(datasets))
+        stop_index = min(offset+limit, len(datasets))
+        
+        summary['number_of_datasets'] = max(0, stop_index - start_index)
+        
+        for i in range(start_index, stop_index):
+            ds = datasets[i]
             count = count + 1
-            if count > limit:
-                logger.warning('dataset limit %d reached, skip the rest', limit)
-                break
             progress = int( ((10.0 - 5.0) / ctx.hit_count) * count )
             self.show_status("Dataset %d/%d" % (count, ctx.hit_count), progress)
             result.append(ds.json)
@@ -191,11 +198,9 @@ class ESGSearch(WPSProcess):
         if result_type == 'aggregations':
             result = []
             count = 0
-            for ds in ctx.search():
+            for i in range(start_index, stop_index):
+                ds = datasets[i]
                 count = count + 1
-                if count > limit:
-                    logger.warning('dataset limit %d reached, skip the rest', limit)
-                    break
                 progress = int( ((95.0 - 10.0) / ctx.hit_count) * count )
                 self.show_status("Dataset %d/%d" % (count, ctx.hit_count), progress)
                 agg_ctx = ds.aggregation_context()
@@ -207,11 +212,9 @@ class ESGSearch(WPSProcess):
         elif result_type == 'files':
             result = []
             count = 0
-            for ds in ctx.search():
+            for i in range(start_index, stop_index):
+                ds = datasets[i]
                 count = count + 1
-                if count > limit:
-                    logger.warning('dataset limit %d reached, skip the rest', limit)
-                    break
                 progress = int( ((95.0 - 10.0) / ctx.hit_count) * count )
                 self.show_status("Dataset %d/%d" % (count, ctx.hit_count), progress)
                 for f in ds.file_context().search():
