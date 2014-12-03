@@ -23,7 +23,7 @@ class WgetTestCase(WpsTestCase):
     def test_esgsearch_datasets(self):
         inputs = []
         inputs.append(('type', 'datasets'))
-        inputs.append(('max_datasets', '10'))
+        inputs.append(('limit', '10'))
         inputs.append(
             ('constraints', 'project:CORDEX,time_frequency:mon,variable:tas,experiment:historical'))
 
@@ -36,7 +36,7 @@ class WgetTestCase(WpsTestCase):
     def test_esgsearch_aggregations(self):
         inputs = []
         inputs.append(('type', 'aggregations'))
-        inputs.append(('max_datasets', '5'))
+        inputs.append(('limit', '5'))
         inputs.append(
             ('constraints', 'project:CORDEX,time_frequency:mon,variable:tas,experiment:historical,domain:EUR-11'))
         execution = self.wps.execute(identifier="esgsearch", inputs=inputs, output=[('output', True)])
@@ -48,7 +48,7 @@ class WgetTestCase(WpsTestCase):
     def test_esgsearch_files(self):
         inputs = []
         inputs.append(('type', 'files'))
-        inputs.append(('max_datasets', '1'))
+        inputs.append(('limit', '1'))
         inputs.append(
             ('constraints', 'project:CORDEX,time_frequency:mon,variable:tas,experiment:historical,domain:EUR-11'))
         execution = self.wps.execute(identifier="esgsearch", inputs=inputs, output=[('output', True)])

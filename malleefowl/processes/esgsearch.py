@@ -105,15 +105,25 @@ class ESGSearch(WPSProcess):
             allowedValues=['1990', '2000', '2010', '2020']
             )
 
-        self.max_datasets = self.addLiteralInput(
-            identifier = "max_datasets",
-            title = "Max Datasets",
+        self.limit = self.addLiteralInput(
+            identifier = "limit",
+            title = "Limit",
             abstract = "Maximum number of datasets in search result",
             default = 10,
             minOccurs=1,
             maxOccurs=1,
             type=type(1),
             allowedValues=[1, 5, 10, 20, 50, 100]
+            )
+
+        self.offset = self.addLiteralInput(
+            identifier = "offset",
+            title = "Offset",
+            abstract = "Start search of datasets at offset.",
+            default = 0,
+            minOccurs=1,
+            maxOccurs=1,
+            type=type(1),
             )
         
         self.output = self.addComplexOutput(
@@ -154,7 +164,7 @@ class ESGSearch(WPSProcess):
         self.show_status("Datasets found=%d" % ctx.hit_count, 5)
 
         result_type = self.type.getValue()
-        max_datasets = self.max_datasets.getValue()
+        limit = self.limit.getValue()
 
         summary = dict(number_of_datasets=ctx.hit_count,
                        number_of_files=0,
@@ -165,8 +175,8 @@ class ESGSearch(WPSProcess):
         if result_type == 'datasets':
             for ds in ctx.search():
                 count = count + 1
-                if count > max_datasets:
-                    logger.warning('dataset limit %d reached, skip the rest', max_datasets)
+                if count > limit:
+                    logger.warning('dataset limit %d reached, skip the rest', limit)
                     break
                 progress = int( ((95.0 - 5.0) / ctx.hit_count) * count )
                 self.show_status("Dataset %d/%d" % (count, ctx.hit_count), progress)
@@ -178,8 +188,8 @@ class ESGSearch(WPSProcess):
         elif result_type == 'aggregations':
             for ds in ctx.search():
                 count = count + 1
-                if count > max_datasets:
-                    logger.warning('dataset limit %d reached, skip the rest', max_datasets)
+                if count > limit:
+                    logger.warning('dataset limit %d reached, skip the rest', limit)
                     break
                 progress = int( ((95.0 - 5.0) / ctx.hit_count) * count )
                 self.show_status("Dataset %d/%d" % (count, ctx.hit_count), progress)
@@ -191,8 +201,8 @@ class ESGSearch(WPSProcess):
         elif result_type == 'files':
             for ds in ctx.search():
                 count = count + 1
-                if count > max_datasets:
-                    logger.warning('dataset limit %d reached, skip the rest', max_datasets)
+                if count > limit:
+                    logger.warning('dataset limit %d reached, skip the rest', limit)
                     break
                 progress = int( ((95.0 - 5.0) / ctx.hit_count) * count )
                 self.show_status("Dataset %d/%d" % (count, ctx.hit_count), progress)
