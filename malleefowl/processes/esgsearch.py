@@ -63,6 +63,16 @@ class ESGSearch(WPSProcess):
             allowedValues=['datasets', 'files', 'aggregations']
             )
 
+        self.constraints = self.addLiteralInput(
+            identifier = "constraints",
+            title = "Constraints",
+            abstract = "Constraints as list of key/value pairs. Example: project:CORDEX, time_frequency:mon, variable:tas, experiment:historical, domain:EUR-11",
+            default = 'project:CORDEX,time_frequency:mon,variable:tas,experiment:historical,domain:EUR-11',
+            minOccurs=1,
+            maxOccurs=1,
+            type=type('')
+            )
+
         self.query = self.addLiteralInput(
             identifier = "query",
             title = "Query",
@@ -94,6 +104,17 @@ class ESGSearch(WPSProcess):
             type=type(''),
             allowedValues=['1990', '2000', '2010', '2020']
             )
+
+        self.max_datasets = self.addLiteralInput(
+            identifier = "max_datasets",
+            title = "Max Datasets",
+            abstract = "Maximum number of datasets in search result",
+            default = 10,
+            minOccurs=1,
+            maxOccurs=1,
+            type=type(1),
+            allowedValues=[10, 20, 50, 100]
+            )
         
         self.output = self.addComplexOutput(
             identifier="output",
@@ -111,31 +132,42 @@ class ESGSearch(WPSProcess):
         conn = SearchConnection(self.url.getValue(),
                                 distrib=self.distrib.getValue())
 
-        ctx = conn.new_context(
-            project='CMIP5',
-            model='HadCM3',
-            experiment='decadal2000',
-            time_frequency='day',
-            realm='ocean',
-            ensemble='r1i2p1')
+        constraints = {}
+        for constrain in self.constraints.getValue().strip().split(','):
+            key, value = constrain.split(':')
+            constraints[key.strip()] = value.strip()
+
+        logger.debug('constraints=%s', constraints)
+
+        ctx = conn.new_context(**constraints)
                 
         self.show_status("Datasets found=%d" % ctx.hit_count, 5)
 
-        type = self.type.getValue()
+        result_type = self.type.getValue()
+        max_datasets = self.max_datasets.getValue()
 
         result = []
-        if type == 'datasets':
+        count = 0
+        if result_type == 'datasets':
             keys = ['id', 'number_of_files', 'number_of_aggregations', 'size']
             for ds in ctx.search():
+                count = count + 1
+                if count > max_datasets:
+                    logger.warning('dataset limit %d reached, skip the rest', max_datasets)
+                    break
+                progress = int( ((95.0 - 5.0) / ctx.hit_count) * count )
+                self.show_status("Dataset %d/%d" % (count, ctx.hit_count), progress)
                 ds_dict = {}
                 for key in keys:
                     ds_dict[key] = ds.json.get(key)
                 result.append(ds_dict)
 
-        elif type == 'aggregations':
-            count = 0
+        elif result_type == 'aggregations':
             for ds in ctx.search():
                 count = count + 1
+                if count > max_datasets:
+                    logger.warning('dataset limit %d reached, skip the rest', max_datasets)
+                    break
                 progress = int( ((95.0 - 5.0) / ctx.hit_count) * count )
                 self.show_status("Dataset %d/%d" % (count, ctx.hit_count), progress)
                 agg_ctx = ds.aggregation_context()
@@ -143,10 +175,12 @@ class ESGSearch(WPSProcess):
                     result.append(agg.opendap_url)
             self.show_status("Aggregations found=%d" % len(result), 95)
 
-        elif type == 'files':
-            count = 0
+        elif result_type == 'files':
             for ds in ctx.search():
                 count = count + 1
+                if count > max_datasets:
+                    logger.warning('dataset limit %d reached, skip the rest', max_datasets)
+                    break
                 progress = int( ((95.0 - 5.0) / ctx.hit_count) * count )
                 self.show_status("Dataset %d/%d" % (count, ctx.hit_count), progress)
                 for f in ds.file_context().search():
