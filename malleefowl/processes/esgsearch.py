@@ -169,45 +169,56 @@ class ESGSearch(WPSProcess):
         summary = dict(number_of_datasets=ctx.hit_count,
                        number_of_files=0,
                        number_of_aggregations=0,
+                       number_of_invalid_aggregations=0,
                        size=0)
         result = []
         count = 0
-        if result_type == 'datasets':
-            for ds in ctx.search():
-                count = count + 1
-                if count > limit:
-                    logger.warning('dataset limit %d reached, skip the rest', limit)
-                    break
-                progress = int( ((95.0 - 5.0) / ctx.hit_count) * count )
-                self.show_status("Dataset %d/%d" % (count, ctx.hit_count), progress)
-                result.append(ds.json)
-                for key in ['number_of_files', 'number_of_aggregations', 'size']:
-                    logger.debug(ds.json)
-                    summary[key] = summary[key] + ds.json.get(key, 0)
+        # search datasets
+        # we always do this to get the summary document
+        for ds in ctx.search():
+            count = count + 1
+            if count > limit:
+                logger.warning('dataset limit %d reached, skip the rest', limit)
+                break
+            progress = int( ((10.0 - 5.0) / ctx.hit_count) * count )
+            self.show_status("Dataset %d/%d" % (count, ctx.hit_count), progress)
+            result.append(ds.json)
+            for key in ['number_of_files', 'number_of_aggregations', 'size']:
+                logger.debug(ds.json)
+                summary[key] = summary[key] + ds.json.get(key, 0)
 
-        elif result_type == 'aggregations':
+        # search aggregations (optional)
+        if result_type == 'aggregations':
+            result = []
+            count = 0
             for ds in ctx.search():
                 count = count + 1
                 if count > limit:
                     logger.warning('dataset limit %d reached, skip the rest', limit)
                     break
-                progress = int( ((95.0 - 5.0) / ctx.hit_count) * count )
+                progress = int( ((95.0 - 10.0) / ctx.hit_count) * count )
                 self.show_status("Dataset %d/%d" % (count, ctx.hit_count), progress)
                 agg_ctx = ds.aggregation_context()
                 for agg in agg_ctx.search():
                     result.append(agg.opendap_url)
             self.show_status("Aggregations found=%d" % len(result), 95)
 
+        # search files (optional)
         elif result_type == 'files':
+            result = []
+            count = 0
             for ds in ctx.search():
                 count = count + 1
                 if count > limit:
                     logger.warning('dataset limit %d reached, skip the rest', limit)
                     break
-                progress = int( ((95.0 - 5.0) / ctx.hit_count) * count )
+                progress = int( ((95.0 - 10.0) / ctx.hit_count) * count )
                 self.show_status("Dataset %d/%d" % (count, ctx.hit_count), progress)
                 for f in ds.file_context().search():
-                    result.append(f.download_url)
+                    if f.download_url == 'null':
+                        summary['number_of_invalid_aggregations'] = summary['number_of_invalid_aggregations'] + 1
+                    else:
+                        result.append(f.download_url)
             self.show_status("Files found=%d" % len(result), 95)
 
         import json
