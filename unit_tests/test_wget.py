@@ -1,32 +1,47 @@
-import nose.tools 
+import nose.tools
+from unittest import TestCase
 from nose import SkipTest
 from nose.plugins.attrib import attr
 
-from malleefowl import wpsclient
+from owslib.wps import monitorExecution
 
-import __init__ as base
+from __init__ import TESTDATA, SERVICE
 
-def setup():
-    pass
+class WpsTestCase(TestCase):
+    """
+    Base TestCase class, sets up a wps
+    """
 
-@attr('online')
-def test_wget():
-    raise SkipTest
-    result = wpsclient.execute(
-        service = base.SERVICE,
-        identifier = "org.malleefowl.esgf.wget.source",
-        inputs = [
-            ('file_identifier', 'http://bmbf-ipcc-ar5.dkrz.de/thredds/fileServer/cmip5/output1/MPI-M/MPI-ESM-LR/historical/day/atmos/day/r1i1p1/v20111006/tas/tas_day_MPI-ESM-LR_historical_r1i1p1_20000101-20051231.nc'),
-            ('credentials', '')
-            ],
-        
-        outputs = [('output', True), ('sidecar', True)]
-        )
-    nose.tools.ok_(len(result) == 2, result)
-    nose.tools.ok_('.nc' in result[0]['reference'])
-    nose.tools.ok_('.json' in result[1]['reference'])
+    @classmethod
+    def setUpClass(cls):
+        from owslib.wps import WebProcessingService
+        cls.wps = WebProcessingService(SERVICE, verbose=False, skip_caps=False)
 
-    import urllib
-    content = urllib.urlopen(result[1]['reference']).read()
-    nose.tools.ok_('tas_day_MPI-ESM-LR_historical_r1i1p1_20000101-20051231.nc' in content, content)
+class WgetTestCase(WpsTestCase):
+
+    @attr('online')
+    def test_wget_http(self):
+        inputs = []
+        inputs.append((
+            'resource',
+            'http://localhost:8090/wpscache/tasmax_WAS-44_MPI-M-MPI-ESM-LR_historical_r1i1p1_MPI-CSC-REMO2009_v1_day_20010101-20051231.nc'))
+        execution = self.wps.execute(identifier="wget", inputs=inputs, output=[('output', True)])
+        monitorExecution(execution, sleepSecs=1)
+
+        nose.tools.ok_(execution.status == 'ProcessSucceeded', execution.status)
     
+    @attr('online')
+    def test_wget_file(self):
+        # TODO: wget should also accept file urls ...
+        raise SkipTest
+        inputs = []
+        inputs.append((
+            'resource',
+            TESTDATA['tasmax_WAS-44_MPI-M-MPI-ESM-LR_historical_r1i1p1_MPI-CSC-REMO2009_v1_day_20010101-20051231.nc']))
+        execution = self.wps.execute(identifier="wget", inputs=inputs, output=[('output', True)])
+        monitorExecution(execution, sleepSecs=1)
+
+        nose.tools.ok_(execution.status == 'ProcessSucceeded', execution.status)
+
+
+

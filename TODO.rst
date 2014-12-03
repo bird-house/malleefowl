@@ -34,6 +34,11 @@ https://bugs.launchpad.net/linuxmint/+bug/1335174
 python-eggs is writable by group/others ... (set PYTHON_EGG_CACHE environment variable)
 
 
+wget
+====
+
+* should accept file:// urls
+
 OWSLib
 ======
 
