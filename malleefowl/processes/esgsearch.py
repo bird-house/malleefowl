@@ -166,8 +166,23 @@ class ESGSearch(WPSProcess):
 
         logger.debug('constraints=%s', constraints)
 
+        # replica is  boolean defining whether to return master records
+        # or replicas, or None to return both.
+        replica = None
+        if self.replica.getValue() == True:
+            replica = True
+
+        # latest: A boolean defining whether to return only latest verisons
+        #    or only non-latest versions, or None to return both.
+        latest = True
+        if self.replica.getValue() == False:
+            latest= None
+
         fields = 'id,number_of_files,number_of_aggregations,size'
-        ctx = conn.new_context(fields=fields, **constraints)
+        ctx = conn.new_context(fields=fields,
+                               replica=replica,
+                               latest=latest,
+                               **constraints)
                 
         self.show_status("Datasets found=%d" % ctx.hit_count, 5)
 
