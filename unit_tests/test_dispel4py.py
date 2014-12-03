@@ -33,6 +33,27 @@ class ESGSearchProducer(GenericPE):
         outputs = { 'output' : [execution.processOutputs[0].reference] }
         return outputs
 
+class WPSWorker(GenericPE):
+    def __init__(self, url, identifier, inputs, outputs, monitor):
+        GenericPE.__init__(self)
+        from owslib.wps import WebProcessingService, monitorExecution
+        self.wps = WebProcessingService(self.url)
+        self.identifier = identifier
+        self.inputs = inputs
+        self.outputs = outputs
+        self.monitor = monitor
+        self.inputconnections['resource'] = { NAME : 'resource' }
+        self.outputconnections['output'] = { NAME : 'output'}
+    
+    def process(self, inputs):
+        self.monitor('doing wps')
+        execution = wps.execute(identifier=selfidentifier,
+                                inputs=self.inputs,
+                                output=self.outputs)
+        monitorExecution(execution)
+        outputs = { 'output' : [execution.processOutputs[0].reference] }
+        return outputs
+
 class ShowResultConsumer(GenericPE):
     def __init__(self, monitor):
         self.monitor = monitor
