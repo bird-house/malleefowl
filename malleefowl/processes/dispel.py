@@ -46,6 +46,9 @@ class DispelWorkflow(WPSProcess):
     def execute(self):
         self.show_status("Starting ...", 0)
 
+        import os
+        logger.debug('environ: %s', os.environ)
+
         # TODO: handle multiple values (fix in pywps)
         # http://pymotw.com/2/json/
         nodes = None
@@ -60,6 +63,7 @@ class DispelWorkflow(WPSProcess):
         
         constraints = 'project:CORDEX,experiment:historical,variable:tas,time_frequency:mon'
         from malleefowl.dispel import esgsearch_workflow
+        logger.debug('nodes=%s', nodes)
         result = esgsearch_workflow(
             url=nodes['source']['service'],
             esgsearch_params=dict(constraints=constraints, limit=1, type='files', distrib=False),
@@ -68,7 +72,7 @@ class DispelWorkflow(WPSProcess):
                              identifier=nodes['worker']['identifier'],
                              resource=nodes['worker']['resource'],
                              inputs=nodes['worker']['inputs']),
-            monitor = my_monitor,
+            monitor = monitor,
             )
         
         import json

@@ -5,5 +5,6 @@ __all__ = [
            "wget",
            "dispel", 
            "restflow",
+           "dummy",
            "map",
            ]

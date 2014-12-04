@@ -22,13 +22,13 @@ class WpsTestCase(TestCase):
     def setup_nodes(cls):
         source = dict(
             service = SERVICE,
-            cedentials = CREDENTIALS,
+            credentials = CREDENTIALS,
             )
         worker = dict(
             service = SERVICE,
-            identifier = "cdo_sinfo",
+            identifier = "dummy",
             inputs = [],
-            resource = 'netcdf_file')
+            resource = 'resource')
         NODES = dict(source=source, worker=worker)
 
         # TODO: fix json encoding to unicode
