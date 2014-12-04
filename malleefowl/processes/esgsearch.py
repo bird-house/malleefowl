@@ -59,15 +59,15 @@ class ESGSearch(WPSProcess):
             type=type(True)
             )
 
-        self.type = self.addLiteralInput(
-            identifier = "type",
+        self.search_type = self.addLiteralInput(
+            identifier = "search_type",
             title = "Search Type",
             abstract = "Search on Datasets, Files or Aggregations",
-            default = 'datasets',
+            default = 'Dataset',
             minOccurs=1,
             maxOccurs=1,
             type=type(''),
-            allowedValues=['datasets', 'files', 'aggregations']
+            allowedValues=['Dataset', 'File', 'Aggregation']
             )
 
         self.constraints = self.addLiteralInput(
@@ -120,7 +120,7 @@ class ESGSearch(WPSProcess):
             minOccurs=1,
             maxOccurs=1,
             type=type(1),
-            allowedValues=[1, 5, 10, 20, 50, 100]
+            allowedValues=[0,1,5,10,20,50,100]
             )
 
         self.offset = self.addLiteralInput(
@@ -194,7 +194,7 @@ class ESGSearch(WPSProcess):
                 
         self.show_status("Datasets found=%d" % ctx.hit_count, 5)
         
-        result_type = self.type.getValue()
+        search_type = self.search_type.getValue()
         limit = self.limit.getValue()
         offset = self.offset.getValue()
 
@@ -226,7 +226,7 @@ class ESGSearch(WPSProcess):
                 summary[key] = summary[key] + ds.json.get(key, 0)
 
         # search aggregations (optional)
-        if result_type == 'aggregations':
+        if search_type == 'Aggregation':
             result = []
             count = 0
             for i in range(start_index, stop_index):
@@ -240,7 +240,7 @@ class ESGSearch(WPSProcess):
             self.show_status("Aggregations found=%d" % len(result), 95)
 
         # search files (optional)
-        elif result_type == 'files':
+        elif search_type == 'File':
             result = []
             count = 0
             for i in range(start_index, stop_index):

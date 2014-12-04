@@ -22,7 +22,7 @@ class WgetTestCase(WpsTestCase):
     @attr('online')
     def test_esgsearch_datasets(self):
         inputs = []
-        inputs.append(('type', 'datasets'))
+        inputs.append(('search_type', 'Dataset'))
         inputs.append(('limit', '10'))
         inputs.append(('offset', '10'))
         inputs.append(
@@ -37,7 +37,7 @@ class WgetTestCase(WpsTestCase):
     @attr('online')
     def test_esgsearch_datasets_with_spaces(self):
         inputs = []
-        inputs.append(('type', 'datasets'))
+        inputs.append(('search_type', 'Dataset'))
         inputs.append(('limit', '10'))
         inputs.append(('offset', '10'))
         inputs.append(
@@ -52,7 +52,7 @@ class WgetTestCase(WpsTestCase):
     @attr('online')
     def test_esgsearch_datasets_out_of_limit(self):
         inputs = []
-        inputs.append(('type', 'datasets'))
+        inputs.append(('search_type', 'Dataset'))
         inputs.append(('limit', '100'))
         inputs.append(('offset', '99'))
         inputs.append(
@@ -67,7 +67,7 @@ class WgetTestCase(WpsTestCase):
     @attr('online')
     def test_esgsearch_datasets_out_of_offset(self):
         inputs = []
-        inputs.append(('type', 'datasets'))
+        inputs.append(('search_type', 'Dataset'))
         inputs.append(('limit', '1'))
         inputs.append(('offset', '1000'))
         inputs.append(
@@ -82,7 +82,7 @@ class WgetTestCase(WpsTestCase):
     @attr('online')
     def test_esgsearch_datasets_replica(self):
         inputs = []
-        inputs.append(('type', 'datasets'))
+        inputs.append(('search_type', 'Dataset'))
         inputs.append(('limit', '100'))
         inputs.append(('offset', '0'))
         inputs.append(('replica', 'True'))
@@ -99,7 +99,7 @@ class WgetTestCase(WpsTestCase):
     @attr('online')
     def test_esgsearch_datasets_latest(self):
         inputs = []
-        inputs.append(('type', 'datasets'))
+        inputs.append(('search_type', 'Dataset'))
         inputs.append(('limit', '100'))
         inputs.append(('offset', '0'))
         inputs.append(('latest', 'False'))
@@ -117,7 +117,7 @@ class WgetTestCase(WpsTestCase):
     @attr('online')
     def test_esgsearch_datasets_facet_counts(self):
         inputs = []
-        inputs.append(('type', 'datasets'))
+        inputs.append(('search_type', 'Dataset'))
         inputs.append(('limit', '1'))
         inputs.append(('offset', '0'))
         inputs.append(('latest', 'True'))
@@ -135,7 +135,7 @@ class WgetTestCase(WpsTestCase):
     @attr('online')
     def test_esgsearch_aggregations(self):
         inputs = []
-        inputs.append(('type', 'aggregations'))
+        inputs.append(('search_type', 'Aggregation'))
         inputs.append(('limit', '5'))
         inputs.append(('offset', '20'))
         inputs.append(
@@ -149,7 +149,7 @@ class WgetTestCase(WpsTestCase):
     @attr('online')
     def test_esgsearch_files(self):
         inputs = []
-        inputs.append(('type', 'files'))
+        inputs.append(('search_type', 'File'))
         inputs.append(('limit', '1'))
         inputs.append(('offset', '30'))
         inputs.append(
