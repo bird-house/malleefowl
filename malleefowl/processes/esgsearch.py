@@ -10,7 +10,6 @@ class ESGSearch(WPSProcess):
 
     TODO: time constraints for datasets and files
     TODO: bbox constraint for datasets
-    TODO: free text query
     """
     def __init__(self):
         WPSProcess.__init__(self,
@@ -73,8 +72,7 @@ class ESGSearch(WPSProcess):
         self.constraints = self.addLiteralInput(
             identifier = "constraints",
             title = "Constraints",
-            abstract = "Constraints as list of key/value pairs. Example: project:CORDEX, time_frequency:mon, variable:tas, experiment:historical, domain:EUR-11",
-            default = 'project:CORDEX,time_frequency:mon,variable:tas,experiment:historical,domain:EUR-11',
+            abstract = "Constraints as list of key/value pairs. Example: project:CORDEX, time_frequency:mon, variable:tas",
             minOccurs=1,
             maxOccurs=1,
             type=type('')
@@ -83,8 +81,8 @@ class ESGSearch(WPSProcess):
         self.query = self.addLiteralInput(
             identifier = "query",
             title = "Query",
-            abstract = "Query search string",
-            default = 'CORDEX',
+            abstract = "Freetext query. For Example: temperatue",
+            default = '*',
             minOccurs=0,
             maxOccurs=1,
             type=type('')
@@ -187,10 +185,16 @@ class ESGSearch(WPSProcess):
             latest= None
 
         fields = 'id,number_of_files,number_of_aggregations,size'
+        query = self.query.getValue()
+        logger.debug('query: %s', query)
+        if query is None or len(query.strip()) == 0:
+            query = '*'
         ctx = conn.new_context(fields=fields,
                                replica=replica,
                                latest=latest,
-                               **constraints)
+                               query=query)
+        if len(constraints) > 0:
+            ctx = ctx.constrain(**constraints)
                 
         self.show_status("Datasets found=%d" % ctx.hit_count, 5)
         
