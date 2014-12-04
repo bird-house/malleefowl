@@ -16,20 +16,47 @@ class BaseWPS(GenericPE):
         self.wps_output = output
         self.inputconnections['resource'] = { NAME : 'resource' }
         self.outputconnections['output'] = { NAME : 'output'}
+        self.outputconnections['status'] = { NAME : 'status'}
+        self.outputconnections['status_location'] = { NAME : 'status_location'}
+        self.monitor = None
+
+    def set_monitor(self, monitor):
+        self.monitor = monitor
+
+    def monitor_execution(self, execution):
+        logger.debug("status_location = %s", execution.statusLocation)
+        
+        while execution.isComplete() == False:
+            execution.checkStatus(sleepSecs = 3)
+            logger.info('Execution status=%s, progress=%s',
+                        execution.status, execution.percentCompleted )
+            if self.monitor is not None:
+                self.monitor(execution)
+        
+        if execution.isSucceded():
+            for output in execution.processOutputs:               
+                if output.reference is not None:
+                    logger.info('%s=%s (%s)', output.identifier, output.reference, output.mimeType)
+                else:
+                    logger.info('%s=%s', output.identifier, ", ".join(output.data))
+        else:
+            for ex in execution.errors:
+                logger.error('code=%s, locator=%s, text=%s', ex.code, ex.locator, ex.text)
 
     def execute(self):
-        from owslib.wps import monitorExecution
         execution = self.wps.execute(
             identifier=self.identifier,
             inputs=self.wps_inputs,
             output=[(self.wps_output, True)])
-        monitorExecution(execution)
-        result = { 'output' : [execution.processOutputs[0].reference] }
+        self.monitor_execution(execution)
+
+        result = {}
+        result['output'] = execution.processOutputs[0].reference
+        result['status'] = execution.status
+        result['status_location'] = execution.statusLocation
         return result
     
     def process(self, inputs):
-        #print inputs.keys()
-        #print inputs.values()
         if inputs.has_key('resource'):
             for value in inputs['resource']:
                 self.wps_inputs.append((self.wps_resource, str(value)))
@@ -67,7 +94,7 @@ class EsgSearch(BaseWPS):
         # read json document with list of urls
         import json
         import urllib2
-        urls = json.load(urllib2.urlopen(result['output'][0]))
+        urls = json.load(urllib2.urlopen(result['output']))
         result['output'] = urls
         return result
 
@@ -84,16 +111,19 @@ class Wget(BaseWPS):
         # read json document with list of urls
         import json
         import urllib2
-        urls = json.load(urllib2.urlopen(result['output'][0]))
+        urls = json.load(urllib2.urlopen(result['output']))
         result['output'] = urls
         return result
 
-def esgsearch_workflow(url, esgsearch_params, wget_params, doit_params):
+def esgsearch_workflow(url, esgsearch_params, wget_params, doit_params, monitor=None):
     graph = WorkflowGraph()
 
     esgsearch = EsgSearch(url, **esgsearch_params)
+    esgsearch.set_monitor(monitor)
     download = Wget(url, **wget_params)
+    download.set_monitor(monitor)
     doit = GenericWPS(**doit_params)
+    doit.set_monitor(monitor)
 
     graph.connect(esgsearch, 'output', download, 'resource')
     graph.connect(download, 'output', doit, 'resource')
