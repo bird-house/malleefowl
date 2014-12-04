@@ -37,17 +37,31 @@ class BaseWPS(GenericPE):
 
 class GenericWPS(BaseWPS):
     def _process(self, inputs):
-        return self.execute()
+        print inputs
+        result = self.execute()
+        print result
+        return result
 
 class EsgSearch(BaseWPS):
-    def __init__(self, url, constraints='project:CORDEX'):
+    def __init__(self, url,
+                 constraints='project:CORDEX',
+                 limit=1,
+                 type='files',
+                 distrib=False,
+                 replica=False,):
         BaseWPS.__init__(self, url, 'esgsearch')
         self.constraints = constraints
+        self.distrib = distrib
+        self.replica = replica
+        self.limit = limit
+        self.type = type
 
     def _process(self, inputs):
         self.wps_inputs.append( ('constraints', self.constraints) )
-        self.wps_inputs.append( ('limit', '1') )
-        self.wps_inputs.append( ('type', 'files') )
+        self.wps_inputs.append( ('limit', str(self.limit)) )
+        self.wps_inputs.append( ('type', self.type) )
+        self.wps_inputs.append( ('distrib', str(self.distrib)) )
+        self.wps_inputs.append( ('replica', str(self.replica)) )
         result = self.execute()
 
         # read json document with list of urls
@@ -74,18 +88,17 @@ class Wget(BaseWPS):
         result['output'] = urls
         return result
 
-def esgsearch_workflow(url, credentials, constraints):
+def esgsearch_workflow(url, esgsearch_params, wget_params, doit_params):
     graph = WorkflowGraph()
-    esgsearch = EsgSearch(url, constraints)
-    download = Wget(url, credentials=credentials)
-    doit = GenericWPS(
-        url='http://localhost:8092/wps',
-        identifier='cdo_sinfo',
-        resource='netcdf_file',
-        )
+
+    esgsearch = EsgSearch(url, **esgsearch_params)
+    download = Wget(url, **wget_params)
+    doit = GenericWPS(**doit_params)
+
     graph.connect(esgsearch, 'output', download, 'resource')
     graph.connect(download, 'output', doit, 'resource')
 
-    results = simple_process.process(graph, inputs={ esgsearch : [{}] })
-    return results
+    result = simple_process.process(graph, inputs={ esgsearch : [{}] })
+    
+    return result
 
