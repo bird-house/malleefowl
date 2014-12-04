@@ -27,6 +27,7 @@ requires = [
 #    'xmltodict',
 #    'images2gif',
 #    'dateutil',
+#    'dispel4py',
     'nose',
     ]
 
