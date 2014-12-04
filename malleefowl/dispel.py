@@ -1,3 +1,5 @@
+from dispel4py.workflow_graph import WorkflowGraph
+from dispel4py import simple_process
 from dispel4py.core import GenericPE, NAME, TYPE, GROUPING
 
 from malleefowl import wpslogging as logging
@@ -38,13 +40,12 @@ class GenericWPS(BaseWPS):
         return self.execute()
 
 class EsgSearch(BaseWPS):
-    def __init__(self, url):
+    def __init__(self, url, constraints='project:CORDEX'):
         BaseWPS.__init__(self, url, 'esgsearch')
-        self.inputconnections['constraints'] = { NAME : 'constraints' }
+        self.constraints = constraints
 
     def _process(self, inputs):
-        if inputs.has_key('constraints'):
-            self.wps_inputs.append( ('constraints', inputs['constraints']) )
+        self.wps_inputs.append( ('constraints', self.constraints) )
         self.wps_inputs.append( ('limit', '1') )
         self.wps_inputs.append( ('type', 'files') )
         result = self.execute()
@@ -73,4 +74,18 @@ class Wget(BaseWPS):
         result['output'] = urls
         return result
 
+def esgsearch_workflow(url, credentials, constraints):
+    graph = WorkflowGraph()
+    esgsearch = EsgSearch(url, constraints)
+    download = Wget(url, credentials=credentials)
+    doit = GenericWPS(
+        url='http://localhost:8092/wps',
+        identifier='cdo_sinfo',
+        resource='netcdf_file',
+        )
+    graph.connect(esgsearch, 'output', download, 'resource')
+    graph.connect(download, 'output', doit, 'resource')
+
+    results = simple_process.process(graph, inputs={ esgsearch : [{}] })
+    return results
 
