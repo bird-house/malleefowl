@@ -1,6 +1,7 @@
 Todo list
 *********
 
+* change tomcat config
 * check dispel4py as workflow engine
   http://www2.epcc.ed.ac.uk/~amrey/VERCE/Dispel4Py/index.html
   https://github.com/akrause2014/dispel4py

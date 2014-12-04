@@ -2,6 +2,7 @@ import logging
 
 SERVICE = "http://localhost:8091/wps"
 TESTDATA = {}
+CREDENTIALS = "http://localhost:8081/wpsoutputs/malleefowl/output-c335fbfa-7bc2-11e4-ae29-5c260a40ceb8.pem"
 
 
 from os.path import join, dirname

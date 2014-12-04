@@ -1,29 +1,31 @@
 from dispel4py.workflow_graph import WorkflowGraph
 from dispel4py import simple_process
 
-from malleefowl.dispel import GenericWPS, EsgSearch
+from malleefowl.dispel import GenericWPS, EsgSearch, Wget
 
 from nose import tools
+from unittest import TestCase
+from nose import SkipTest
+from nose.plugins.attrib import attr
 
-from __init__ import SERVICE, TESTDATA
+from __init__ import SERVICE, TESTDATA, CREDENTIALS
 
+@attr('online')
+@attr('security')
 def test_esgsearch():
     graph = WorkflowGraph()
     esgsearch = EsgSearch(url=SERVICE)
-    download = GenericWPS(
-        url=SERVICE,
-        identifier='wget',
-        inputs=[('resource',
-                 'http://localhost:8090/wpscache/tasmax_WAS-44_MPI-M-MPI-ESM-LR_historical_r1i1p1_MPI-CSC-REMO2009_v1_day_20010101-20051231.nc' )]
-        )
+    download = Wget(url=SERVICE,
+                    credentials=CREDENTIALS)
     doit = GenericWPS(
         url='http://localhost:8092/wps',
         identifier='cdo_sinfo',
         resource='netcdf_file',
         )
-    graph.connect(esgsearch, 'output', download, 'ignore')
-    graph.connect(download, 'output', doit, 'resource_url')
-    results = simple_process.process(graph, {esgsearch: [{'constraints' : 'project:CORDEX'}]})
+    graph.connect(esgsearch, 'output', download, 'resource')
+    graph.connect(download, 'output', doit, 'resource')
+    results = simple_process.process(graph, {
+        esgsearch: [{'constraints' : 'project:CORDEX,experiment:historical,variable:tas,time_frequency:mon'}]})
     tools.ok_(False, results)
     
     

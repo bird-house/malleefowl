@@ -13,7 +13,6 @@ class BaseWPS(GenericPE):
         self.wps_inputs = inputs
         self.wps_output = output
         self.inputconnections['resource'] = { NAME : 'resource' }
-        self.inputconnections['resource_url'] = { NAME : 'resource_url' }
         self.outputconnections['output'] = { NAME : 'output'}
 
     def execute(self):
@@ -23,21 +22,14 @@ class BaseWPS(GenericPE):
             inputs=self.wps_inputs,
             output=[(self.wps_output, True)])
         monitorExecution(execution)
-        outputs = { 'output' : [execution.processOutputs[0].reference] }
-        return outputs
+        result = { 'output' : [execution.processOutputs[0].reference] }
+        return result
     
     def process(self, inputs):
-        print inputs
         #print inputs.keys()
         #print inputs.values()
         if inputs.has_key('resource'):
             for value in inputs['resource']:
-                self.wps_inputs.append((self.wps_resource, str(value)))
-        elif inputs.has_key('resource_url'):
-            import json
-            import urllib2
-            values = json.load(urllib2.urlopen(inputs['resource_url'][0]))
-            for value in values:
                 self.wps_inputs.append((self.wps_resource, str(value)))
         return self._process(inputs)
 
@@ -53,5 +45,32 @@ class EsgSearch(BaseWPS):
     def _process(self, inputs):
         if inputs.has_key('constraints'):
             self.wps_inputs.append( ('constraints', inputs['constraints']) )
-        return self.execute()
+        self.wps_inputs.append( ('limit', '1') )
+        self.wps_inputs.append( ('type', 'files') )
+        result = self.execute()
+
+        # read json document with list of urls
+        import json
+        import urllib2
+        urls = json.load(urllib2.urlopen(result['output'][0]))
+        result['output'] = urls
+        return result
+
+class Wget(BaseWPS):
+    def __init__(self, url, credentials=None):
+        BaseWPS.__init__(self, url, 'wget')
+        self.credentials = credentials
+
+    def _process(self, inputs):
+        if self.credentials:
+            self.wps_inputs.append( ('credentials', self.credentials) )
+        result = self.execute()
+
+        # read json document with list of urls
+        import json
+        import urllib2
+        urls = json.load(urllib2.urlopen(result['output'][0]))
+        result['output'] = urls
+        return result
+
 
