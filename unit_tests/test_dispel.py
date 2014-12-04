@@ -16,10 +16,11 @@ def test_esgsearch_workflow():
         SERVICE,
         esgsearch_params=dict(constraints=constraints, limit=1, type='files', distrib=False),
         wget_params=dict(credentials=CREDENTIALS),
-        doit_params=dict(url='http://localhost:8092/wps', identifier='cdo_sinfo', resource='netcdf_file', inputs=[])
+        doit_params=dict(url='http://localhost:8092/wps',
+                         identifier='cdo_sinfo', resource='netcdf_file', inputs=[])
         )
     tools.ok_( len(result) == 1, result)
-    tools.ok_('hummingbird' in result.values()[0][0][0], result.values()[0])
+    tools.ok_('hummingbird' in result[0][0], result)
     #tools.eq_({(prev.id, 'output'): [1, 2, 3, 4, 5]}, result)
     #tools.ok_(False, result)
     

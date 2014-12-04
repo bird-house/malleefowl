@@ -100,5 +100,5 @@ def esgsearch_workflow(url, esgsearch_params, wget_params, doit_params):
 
     result = simple_process.process(graph, inputs={ esgsearch : [{}] })
     
-    return result
+    return result[(doit.id, 'output')]
 
