@@ -13,6 +13,7 @@ from __init__ import SERVICE, TESTDATA, CREDENTIALS
 @attr('online')
 @attr('security')
 def test_esgsearch():
+    # TODO: set environ with credentials
     graph = WorkflowGraph()
     esgsearch = EsgSearch(url=SERVICE)
     download = Wget(url=SERVICE,
