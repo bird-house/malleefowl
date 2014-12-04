@@ -223,7 +223,7 @@ class ESGSearch(WPSProcess):
             ds = datasets[i]
             count = count + 1
             progress = int( ((10.0 - 5.0) / ctx.hit_count) * count )
-            self.show_status("Dataset %d/%d" % (count, ctx.hit_count), progress)
+            self.show_status("Dataset %d/%d" % (count, limit), progress)
             result.append(ds.json)
             for key in ['number_of_files', 'number_of_aggregations', 'size']:
                 logger.debug(ds.json)
@@ -237,7 +237,7 @@ class ESGSearch(WPSProcess):
                 ds = datasets[i]
                 count = count + 1
                 progress = int( ((95.0 - 10.0) / ctx.hit_count) * count )
-                self.show_status("Dataset %d/%d" % (count, ctx.hit_count), progress)
+                self.show_status("Dataset %d/%d" % (count, limit), progress)
                 agg_ctx = ds.aggregation_context()
                 for agg in agg_ctx.search():
                     result.append(agg.opendap_url)
@@ -251,7 +251,7 @@ class ESGSearch(WPSProcess):
                 ds = datasets[i]
                 count = count + 1
                 progress = int( ((95.0 - 10.0) / ctx.hit_count) * count )
-                self.show_status("Dataset %d/%d" % (count, ctx.hit_count), progress)
+                self.show_status("Dataset %d/%d" % (count, limit), progress)
                 for f in ds.file_context().search():
                     if f.download_url == 'null':
                         summary['number_of_invalid_aggregations'] = summary['number_of_invalid_aggregations'] + 1
