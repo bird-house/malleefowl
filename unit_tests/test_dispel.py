@@ -27,8 +27,10 @@ def test_esgsearch_workflow():
         )
     tools.ok_( len(result) == 1, result)
     tools.ok_('hummingbird' in result[0], result)
-    #tools.eq_({(prev.id, 'output'): [1, 2, 3, 4, 5]}, result)
     #tools.ok_(False, result)
+
+
+
     
     
     

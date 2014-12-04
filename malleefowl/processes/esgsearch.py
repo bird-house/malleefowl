@@ -11,7 +11,6 @@ class ESGSearch(WPSProcess):
     TODO: time constraints for datasets and files
     TODO: bbox constraint for datasets
     TODO: free text query
-    TODO: facets
     """
     def __init__(self):
         WPSProcess.__init__(self,
