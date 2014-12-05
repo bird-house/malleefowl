@@ -93,7 +93,7 @@ class Wget(WPSProcess):
                 logger.debug('file_path = %s', file_path)
                 if isfile(file_path):
                     logger.info('found in archive: %s', url)
-                    archive_path = file_path
+                    archive_path = 'file://' + file_path
                     break
             if archive_path is None:
                 logger.debug('not found in archive: %s', url)
