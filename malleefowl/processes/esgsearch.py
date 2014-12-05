@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from malleefowl.process import WPSProcess
 from malleefowl import config
 
@@ -58,6 +60,16 @@ class ESGSearch(WPSProcess):
             type=type(True)
             )
 
+        self.temporal = self.addLiteralInput(
+            identifier = "temporal",
+            title = "Temporal",
+            abstract = "If flag is set then search will use temporal filter.",
+            default = False,
+            minOccurs=1,
+            maxOccurs=1,
+            type=type(True)
+            )
+
         self.search_type = self.addLiteralInput(
             identifier = "search_type",
             title = "Search Type",
@@ -87,29 +99,25 @@ class ESGSearch(WPSProcess):
             maxOccurs=1,
             type=type('')
             )
-        
+
         self.start = self.addLiteralInput(
-            identifier = "start",
-            title = "Start",
-            abstract = "Start time",
-            default = '2000',
+            identifier="start",
+            title="Start",
+            abstract="Startime: 2000-01-11T12:00:00Z",
+            type=type(datetime(year=2000, month=1, day=1)),
             minOccurs=0,
             maxOccurs=1,
-            type=type(''),
-            allowedValues=['1990', '2000', '2010', '2020']
             )
 
         self.end = self.addLiteralInput(
-            identifier = "end",
-            title = "End",
-            abstract = "End time",
-            default = '2010',
+            identifier="end",
+            title="End",
+            abstract="Endtime: 2005-12-31T12:00:00Z",
+            type=type(datetime(year=2005, month=12, day=31)),
             minOccurs=0,
             maxOccurs=1,
-            type=type(''),
-            allowedValues=['1990', '2000', '2010', '2020']
             )
-
+        
         self.limit = self.addLiteralInput(
             identifier = "limit",
             title = "Limit",
@@ -164,6 +172,7 @@ class ESGSearch(WPSProcess):
         from pyesgf.search import SearchConnection
         conn = SearchConnection(self.url.getValue(),
                                 distrib=self.distrib.getValue())
+            
 
         constraints = {}
         for constrain in self.constraints.getValue().strip().split(','):
@@ -189,10 +198,28 @@ class ESGSearch(WPSProcess):
         logger.debug('query: %s', query)
         if query is None or len(query.strip()) == 0:
             query = '*'
-        ctx = conn.new_context(fields=fields,
-                               replica=replica,
-                               latest=latest,
-                               query=query)
+        # TODO: check type of start, end
+        start = self.start.getValue()
+        end = self.end.getValue()
+        logger.debug('start=%s, end=%s', start, end)
+        #if start is not None:
+        #    from_timestamp = start.strftime(format="%Y-%m-%dT%H:%M:%SZ")
+        #if end is not None:
+        #    to_timestamp = end.strftime(format="%Y-%m-%dT%H:%M:%SZ")
+        # TODO: update esgf-pyclient to constrain with timestamps
+        ctx = None
+        if self.temporal.getValue() == True:
+             ctx = conn.new_context(fields=fields,
+                                   replica=replica,
+                                   latest=latest,
+                                   query=query,
+                                   from_timestamp=start,
+                                   to_timestamp=end)
+        else:
+            ctx = conn.new_context(fields=fields,
+                                   replica=replica,
+                                   latest=latest,
+                                   query=query)
         if len(constraints) > 0:
             ctx = ctx.constrain(**constraints)
                 

@@ -63,21 +63,20 @@ class DispelWorkflow(WPSProcess):
         self.show_status("Prepared ...", 5)
 
         esgsearch = nodes['esgsearch']
-        constraints = esgsearch['facets']
-        distrib = esgsearch['distrib']
-        latest = esgsearch['latest']
-        replica = esgsearch['replica']
         from malleefowl.dispel import esgsearch_workflow
         logger.debug('nodes=%s', nodes)
         result = esgsearch_workflow(
             url=nodes['source']['service'],
             esgsearch_params=dict(
-                constraints=constraints,
+                constraints=esgsearch['facets'],
                 limit=100,
                 search_type='File',
-                distrib=distrib,
-                latest=latest,
-                replica=replica),
+                distrib=esgsearch['distrib'],
+                latest=esgsearch['latest'],
+                replica=esgsearch['replica'],
+                temporal=esgsearch['temporal'],
+                start=esgsearch['start'],
+                end=esgsearch['end']),
             wget_params=dict(credentials=nodes['source']['credentials']),
             doit_params=dict(url=nodes['worker']['service'],
                              identifier=nodes['worker']['identifier'],

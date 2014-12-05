@@ -1,6 +1,10 @@
 Todo list
 *********
 
+* fix temporal contrain in esgf pyclient
+* fix esgsearch process datetime parameters
+* handle multiple wget downloads (mabe same file) ...
+* add literal input with value range[(0,100)] ... see pywps doc
 * change tomcat config
 * check dispel4py as workflow engine
   http://www2.epcc.ed.ac.uk/~amrey/VERCE/Dispel4Py/index.html
