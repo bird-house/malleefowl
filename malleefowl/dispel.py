@@ -75,11 +75,13 @@ class EsgSearch(BaseWPS):
                  limit=100,
                  search_type='File',
                  distrib=False,
-                 replica=False,):
+                 replica=False,
+                 latest=True,):
         BaseWPS.__init__(self, url, 'esgsearch')
         self.constraints = constraints
         self.distrib = distrib
         self.replica = replica
+        self.latest = latest
         self.limit = limit
         self.search_type = search_type
 
@@ -89,6 +91,7 @@ class EsgSearch(BaseWPS):
         self.wps_inputs.append( ('search_type', self.search_type) )
         self.wps_inputs.append( ('distrib', str(self.distrib)) )
         self.wps_inputs.append( ('replica', str(self.replica)) )
+        self.wps_inputs.append( ('latest', str(self.latest)) )
         result = self.execute()
 
         # read json document with list of urls
