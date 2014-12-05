@@ -225,6 +225,8 @@ class ESGSearch(WPSProcess):
                 
         self.show_status("Datasets found=%d" % ctx.hit_count, 5)
         
+        summary['total_number_of_datasets'] = ctx.hit_count
+        
         search_type = self.search_type.getValue()
         limit = self.limit.getValue()
         offset = self.offset.getValue()
