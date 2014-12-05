@@ -120,15 +120,17 @@ def esgsearch_workflow(url, esgsearch_params, wget_params, doit_params, monitor=
 
     esgsearch = EsgSearch(url, **esgsearch_params)
     esgsearch.set_monitor(monitor)
-    download = Wget(url, **wget_params)
-    download.set_monitor(monitor)
+    wget = Wget(url, **wget_params)
+    wget.set_monitor(monitor)
     doit = GenericWPS(**doit_params)
     doit.set_monitor(monitor)
 
-    graph.connect(esgsearch, 'output', download, 'resource')
-    graph.connect(download, 'output', doit, 'resource')
+    graph.connect(esgsearch, 'output', wget, 'resource')
+    graph.connect(wget, 'output', doit, 'resource')
 
     result = simple_process.process(graph, inputs={ esgsearch : [{}] })
+    wf_result = dict(source=result[(wget.id, 'status_location')],
+                     worker=result[(doit.id, 'status_location')])
     
-    return result[(doit.id, 'output')]
+    return wf_result
 

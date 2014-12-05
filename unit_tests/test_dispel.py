@@ -26,8 +26,10 @@ def test_esgsearch_workflow():
                          identifier='dummy', resource='resource', inputs=[]),
         monitor = my_monitor,
         )
-    tools.ok_( len(result) == 1, result)
-    tools.ok_('malleefowl' in result[0], result)
+    tools.ok_( len(result['source']) == 1, result)
+    tools.ok_('malleefowl' in result['source'][0], result)
+    tools.ok_( len(result['worker']) == 1, result)
+    tools.ok_('malleefowl' in result['worker'][0], result)
     #tools.ok_(False, result)
 
 
