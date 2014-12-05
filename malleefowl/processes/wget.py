@@ -50,7 +50,7 @@ class Wget(WPSProcess):
             )
 
     def execute(self):
-        self.show_status("Starting wget download ...", 0)
+        self.show_status("Downloading ...", 0)
 
         credentials = self.credentials.getValue()
         resource = self.resource.getValue()
@@ -63,12 +63,14 @@ class Wget(WPSProcess):
         external_files = []
 
         count = 0
+        max_count = len(resource)
         for url in resource:
             count = count + 1
 
             from os.path import basename
             resource_name = basename(url)
-            self.show_status("Downloading %s" % resource_name, count)
+            progress = count * 100.0 / max_count
+            self.show_status("Downloading %d/%d" % (count, max_count), progress)
 
             try:
                 cmd = ["wget"]
@@ -108,6 +110,6 @@ class Wget(WPSProcess):
             json.dump(obj=external_files, fp=fp, indent=4, sort_keys=True)
         self.output_external.setValue( outfile )
 
-        self.show_status("Downloading... done", 100)
+        self.show_status("Downloading ... done", 100)
 
 

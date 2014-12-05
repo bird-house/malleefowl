@@ -178,7 +178,7 @@ class ESGSearch(WPSProcess):
         if self.replica.getValue() == True:
             replica = True
 
-        # latest: A boolean defining whether to return only latest verisons
+        # latest: A boolean defining whether to return only latest versions
         #    or only non-latest versions, or None to return both.
         latest = True
         if self.replica.getValue() == False:
