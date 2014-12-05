@@ -66,9 +66,12 @@ class Wget(WPSProcess):
             cmd.append(url)
             self.cmd(cmd, stdout=True)
         except Exception, e:
-            msg = "wget failed ..."
+            msg = "wget failed on %s" % (url)
             logger.exception(msg)
             raise Exception(msg + str(e))
+
+        from os.path import basename
+        resource_name = basename(url)
 
         from os.path import join
         cached_file = join(config.cache_path(), resource_name)
@@ -95,12 +98,10 @@ class Wget(WPSProcess):
         for url in resource:
             count = count + 1
 
-            from os.path import basename
-            resource_name = basename(url)
             progress = count * 100.0 / max_count
             self.show_status("Downloading %d/%d" % (count, max_count), progress)
 
-            local_url, external_url = self._wget(url, resource_name, credentials)
+            local_url, external_url = self._wget(url, credentials)
             
             local_files.append(local_url)
             external_files.append(external_url)
