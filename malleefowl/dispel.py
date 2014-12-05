@@ -72,8 +72,8 @@ class GenericWPS(BaseWPS):
 class EsgSearch(BaseWPS):
     def __init__(self, url,
                  constraints='project:CORDEX',
-                 limit=1,
-                 type='files',
+                 limit=100,
+                 search_type='File',
                  distrib=False,
                  replica=False,):
         BaseWPS.__init__(self, url, 'esgsearch')
@@ -81,12 +81,12 @@ class EsgSearch(BaseWPS):
         self.distrib = distrib
         self.replica = replica
         self.limit = limit
-        self.type = type
+        self.search_type = search_type
 
     def _process(self, inputs):
         self.wps_inputs.append( ('constraints', self.constraints) )
         self.wps_inputs.append( ('limit', str(self.limit)) )
-        self.wps_inputs.append( ('type', self.type) )
+        self.wps_inputs.append( ('search_type', self.search_type) )
         self.wps_inputs.append( ('distrib', str(self.distrib)) )
         self.wps_inputs.append( ('replica', str(self.replica)) )
         result = self.execute()

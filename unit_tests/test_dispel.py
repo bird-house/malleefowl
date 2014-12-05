@@ -19,14 +19,15 @@ def test_esgsearch_workflow():
     constraints = 'project:CORDEX,experiment:historical,variable:tas,time_frequency:mon'
     result = esgsearch_workflow(
         SERVICE,
-        esgsearch_params=dict(constraints=constraints, limit=1, type='files', distrib=False),
+        esgsearch_params=dict(constraints=constraints,
+                              limit=1, search_type='File', distrib=False),
         wget_params=dict(credentials=CREDENTIALS),
-        doit_params=dict(url='http://localhost:8092/wps',
-                         identifier='cdo_sinfo', resource='netcdf_file', inputs=[]),
+        doit_params=dict(url=SERVICE,
+                         identifier='dummy', resource='resource', inputs=[]),
         monitor = my_monitor,
         )
     tools.ok_( len(result) == 1, result)
-    tools.ok_('hummingbird' in result[0], result)
+    tools.ok_('malleefowl' in result[0], result)
     #tools.ok_(False, result)
 
 

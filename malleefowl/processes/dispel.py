@@ -66,7 +66,7 @@ class DispelWorkflow(WPSProcess):
         logger.debug('nodes=%s', nodes)
         result = esgsearch_workflow(
             url=nodes['source']['service'],
-            esgsearch_params=dict(constraints=constraints, limit=1, type='files', distrib=False),
+            esgsearch_params=dict(constraints=constraints, limit=1, search_type='File', distrib=False),
             wget_params=dict(credentials=nodes['source']['credentials']),
             doit_params=dict(url=nodes['worker']['service'],
                              identifier=nodes['worker']['identifier'],
