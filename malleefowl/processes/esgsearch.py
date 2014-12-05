@@ -257,6 +257,10 @@ class ESGSearch(WPSProcess):
                 logger.debug(ds.json)
                 summary[key] = summary[key] + ds.json.get(key, 0)
 
+        summary['size_mb'] = summary.get('size', 0) / 1024 / 1024
+        summary['size_gb'] = summary.get('size_mb', 0) / 1024
+        summary['size_tb'] = summary.get('size_gb', 0) / 1024
+
         # search aggregations (optional)
         if search_type == 'Aggregation':
             result = []
