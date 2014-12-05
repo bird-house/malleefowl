@@ -44,6 +44,9 @@ class DispelWorkflow(WPSProcess):
             )
        
     def execute(self):
+        def monitor(execution):
+            self.show_status(execution.statusMessage,execution.percentCompleted)
+        
         self.show_status("Starting ...", 0)
 
         import os
@@ -59,14 +62,16 @@ class DispelWorkflow(WPSProcess):
 
         self.show_status("Prepared ...", 5)
 
-        monitor = lambda execution: self.show_status(execution.statusMessage,execution.percentCompleted)
-        
-        constraints = 'project:CORDEX,experiment:historical,variable:tas,time_frequency:mon'
+        esgsearch = nodes['esgsearch']
+        constraints = esgsearch['facets']
+        distrib = esgsearch['distrib'] == 'true'
+        latest = esgsearch['latest'] == 'true'
+        replica = esgsearch['replica'] == 'true'
         from malleefowl.dispel import esgsearch_workflow
         logger.debug('nodes=%s', nodes)
         result = esgsearch_workflow(
             url=nodes['source']['service'],
-            esgsearch_params=dict(constraints=constraints, limit=1, search_type='File', distrib=False),
+            esgsearch_params=dict(constraints=constraints, limit=100, search_type='File', distrib=distrib),
             wget_params=dict(credentials=nodes['source']['credentials']),
             doit_params=dict(url=nodes['worker']['service'],
                              identifier=nodes['worker']['identifier'],
