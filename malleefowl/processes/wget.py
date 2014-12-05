@@ -50,6 +50,9 @@ class Wget(WPSProcess):
             )
 
     def _wget(self, url, resource_name, credentials=None):
+        from os.path import basename
+        resource_name = basename(url)
+        
         try:
             cmd = ["wget"]
             if credentials is not None:
@@ -66,12 +69,9 @@ class Wget(WPSProcess):
             cmd.append(url)
             self.cmd(cmd, stdout=True)
         except Exception, e:
-            msg = "wget failed on %s" % (url)
+            msg = "wget failed on %s. Maybe not authorized? " % (resource_name)
             logger.exception(msg)
             raise Exception(msg + str(e))
-
-        from os.path import basename
-        resource_name = basename(url)
 
         from os.path import join
         cached_file = join(config.cache_path(), resource_name)
@@ -81,16 +81,23 @@ class Wget(WPSProcess):
         return (local_url, external_url)
 
     def _check_archive(self, url):
-        from os.path import join
+        from os.path import join, isfile
+
+        archive_path = None
 
         if 'thredds/fileServer/' in url:
             url_path = url.split('thredds/fileServer/')[1]
+            logger.debug('check thredds archive: url_path=%s', url_path)
             for root_path in config.archive_root():
                 file_path = join(root_path, url_path)
-                if os.path.isfile(file_path):
-                    logger.debug('found in archive: %s', url)
-                    return file_path
-        return None
+                logger.debug('file_path = %s', file_path)
+                if isfile(file_path):
+                    logger.info('found in archive: %s', url)
+                    archive_path = file_path
+                    break
+            if archive_path is None:
+                logger.debug('not found in archive: %s', url)
+        return archive_path
 
     def execute(self):
         self.show_status("Downloading ...", 0)

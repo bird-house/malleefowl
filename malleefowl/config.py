@@ -37,11 +37,12 @@ def cache_url():
     return getConfigValue("cache", "cache_url")
 
 def archive_root():
-    archive_root = []
+    archive_root = None
     try:
         archive_root = wpsconfig.getConfigValue("malleefowl", "archive_root")
-        archive_root = [path.strip() for path in archive_root.split(','))
+        archive_root = [path.strip() for path in archive_root.split(',')]
     except Exception:
+        archive_root = []
         logger.warn("archive root not configured")
     return archive_root
 
