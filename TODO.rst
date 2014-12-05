@@ -1,6 +1,7 @@
 Todo list
 *********
 
+* esgsearch: fix case when esgsearch has no resuls
 * fix temporal contrain in esgf pyclient
 * fix esgsearch process datetime parameters
 * handle multiple wget downloads (mabe same file) ...

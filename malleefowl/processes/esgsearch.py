@@ -1,4 +1,5 @@
 from datetime import datetime
+from dateutil import parser as date_parser
 
 from malleefowl.process import WPSProcess
 from malleefowl import config
@@ -202,6 +203,12 @@ class ESGSearch(WPSProcess):
         start = self.start.getValue()
         end = self.end.getValue()
         logger.debug('start=%s, end=%s', start, end)
+
+        start_date = end_date = None
+        if start is not None and end is not None:
+            start_date = date_parser.parse(start)
+            end_date = date_parser.parse(end)
+        
         #if start is not None:
         #    from_timestamp = start.strftime(format="%Y-%m-%dT%H:%M:%SZ")
         #if end is not None:
@@ -224,8 +231,6 @@ class ESGSearch(WPSProcess):
             ctx = ctx.constrain(**constraints)
                 
         self.show_status("Datasets found=%d" % ctx.hit_count, 5)
-        
-        summary['total_number_of_datasets'] = ctx.hit_count
         
         search_type = self.search_type.getValue()
         limit = self.limit.getValue()
@@ -263,6 +268,36 @@ class ESGSearch(WPSProcess):
         summary['size_gb'] = summary.get('size_mb', 0) / 1024
         summary['size_tb'] = summary.get('size_gb', 0) / 1024
 
+        def date_from_filename(filename):
+            """Example cordex:
+            tas_EUR-44i_ECMWF-ERAINT_evaluation_r1i1p1_HMS-ALADIN52_v1_mon_200101-200812.nc
+            """
+            value = filename.split('.')
+            value.pop() # remove .nc
+            value = value[-1] # part with date
+            value = value.split('_')[-1] # only date part
+            value = value.split('-') # split start-end
+            start_year = int(value[0][:4]) # keep only the year
+            end_year = int(value[1][:4])
+            return (start_year, end_year)
+
+        def temporal_filter(filename, start_date=None, end_date=None):
+            """return True if file is in timerange start/end"""
+            # TODO: keep fixed fields fx ... see esgsearch.js
+
+            logger.debug('filename=%s, start_date=%s, end_date=%s', filename, start_date, end_date)
+            
+            if start_date is None or end_date is None:
+                return True
+            start_year, end_year = date_from_filename(filename)
+            if start_year > end_date.year:
+                logger.debug('skip: %s > %s', start_year, end_date.year)
+                return False
+            if end_year < start_date.year:
+                logger.debug('skip: %s < %s', end_year, start_date.year)
+                return False
+            return True
+            
         # search aggregations (optional)
         if search_type == 'Aggregation':
             result = []
@@ -287,8 +322,10 @@ class ESGSearch(WPSProcess):
                 progress = int( ((95.0 - 10.0) / ctx.hit_count) * count )
                 self.show_status("Dataset %d/%d" % (count, max_count), progress)
                 for f in ds.file_context().search():
+                    if not temporal_filter(f.filename, start_date, end_date):
+                        continue
                     if f.download_url == 'null':
-                        summary['number_of_invalid_aggregations'] = summary['number_of_invalid_aggregations'] + 1
+                        summary['number_of_invalid_files'] = summary['number_of_invalid_files'] + 1
                     else:
                         result.append(f.download_url)
             self.show_status("Files found=%d" % len(result), 95)
