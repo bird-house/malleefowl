@@ -11,7 +11,7 @@ def getConfigValue(*args):
     try:
         value = wpsconfig.getConfigValue(*args)
     except Exception:
-        logger.exception("Could not get config value for")
+        logger.exception("Could not get config value for %s", args)
     return value
 
 def thredds_url():
@@ -35,6 +35,15 @@ def cache_path():
 
 def cache_url():
     return getConfigValue("cache", "cache_url")
+
+def archive_root():
+    archive_root = []
+    try:
+        archive_root = wpsconfig.getConfigValue("malleefowl", "archive_root")
+        archive_root = [path.strip() for path in archive_root.split(','))
+    except Exception:
+        logger.warn("archive root not configured")
+    return archive_root
 
 def mako_cache():
     mako_cache = getConfigValue("malleefowl", "mako_cache")

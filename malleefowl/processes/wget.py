@@ -80,6 +80,18 @@ class Wget(WPSProcess):
 
         return (local_url, external_url)
 
+    def _check_archive(self, url):
+        from os.path import join
+
+        if 'thredds/fileServer/' in url:
+            url_path = url.split('thredds/fileServer/')[1]
+            for root_path in config.archive_root():
+                file_path = join(root_path, url_path)
+                if os.path.isfile(file_path):
+                    logger.debug('found in archive: %s', url)
+                    return file_path
+        return None
+
     def execute(self):
         self.show_status("Downloading ...", 0)
 
@@ -101,10 +113,14 @@ class Wget(WPSProcess):
             progress = count * 100.0 / max_count
             self.show_status("Downloading %d/%d" % (count, max_count), progress)
 
-            local_url, external_url = self._wget(url, credentials)
+            external_url = None
+            local_url = self._check_archive(url)
+            if local_url is None:
+                local_url, external_url = self._wget(url, credentials)
             
             local_files.append(local_url)
-            external_files.append(external_url)
+            if external_url is not None:
+                external_files.append(external_url)
 
         import json
         outfile = self.mktempfile(suffix='.json')
