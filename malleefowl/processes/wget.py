@@ -49,6 +49,34 @@ class Wget(WPSProcess):
             asReference=True,
             )
 
+    def _wget(self, url, resource_name, credentials=None):
+        try:
+            cmd = ["wget"]
+            if credentials is not None:
+                cmd.append("--certificate")
+                cmd.append(credentials) 
+                cmd.append("--private-key")
+                cmd.append(credentials)
+            cmd.append("--no-check-certificate") 
+            cmd.append("-N")
+            cmd.append("-P")
+            cmd.append(config.cache_path())
+            cmd.append("--progress")
+            cmd.append("dot:mega")
+            cmd.append(url)
+            self.cmd(cmd, stdout=True)
+        except Exception, e:
+            msg = "wget failed ..."
+            logger.exception(msg)
+            raise Exception(msg + str(e))
+
+        from os.path import join
+        cached_file = join(config.cache_path(), resource_name)
+        local_url = "file://" + cached_file
+        external_url = config.cache_url() + '/' + resource_name
+
+        return (local_url, external_url)
+
     def execute(self):
         self.show_status("Downloading ...", 0)
 
@@ -72,30 +100,8 @@ class Wget(WPSProcess):
             progress = count * 100.0 / max_count
             self.show_status("Downloading %d/%d" % (count, max_count), progress)
 
-            try:
-                cmd = ["wget"]
-                if credentials is not None:
-                    cmd.append("--certificate")
-                    cmd.append(credentials) 
-                    cmd.append("--private-key")
-                    cmd.append(credentials)
-                cmd.append("--no-check-certificate") 
-                cmd.append("-N")
-                cmd.append("-P")
-                cmd.append(config.cache_path())
-                cmd.append("--progress")
-                cmd.append("dot:mega")
-                cmd.append(url)
-                self.cmd(cmd, stdout=True)
-            except Exception, e:
-                msg = "wget failed ..."
-                logger.exception(msg)
-                raise Exception(msg + str(e))
-
-            from os.path import join
-            cached_file = join(config.cache_path(), resource_name)
-            local_url = "file://" + cached_file
-            external_url = config.cache_url() + '/' + resource_name
+            local_url, external_url = self._wget(url, resource_name, credentials)
+            
             local_files.append(local_url)
             external_files.append(external_url)
 
