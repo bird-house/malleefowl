@@ -1,6 +1,14 @@
 Change History
 **************
 
+0.1.7 ()
+==================
+
+* wget process using local file archive.
+* esgsearch process added.
+* Disabled restflow.
+* Using dispel4py workflow engine.
+
 0.1.6 (2014-11-28)
 ==================
 
