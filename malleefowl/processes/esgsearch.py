@@ -255,17 +255,19 @@ class ESGSearch(WPSProcess):
         max_count = stop_index - start_index
         
         summary['number_of_datasets'] = max(0, stop_index - start_index)
-        
+
+        t0 = datetime.now()
         for i in range(start_index, stop_index):
             ds = datasets[i]
             count = count + 1
-            progress = int( ((10.0 - 5.0) / max_count) * count )
+            progress = int( ((10.0 - 5.0) / max_count) * (count-1) )
             self.show_status("Dataset %d/%d" % (count, max_count), progress)
             result.append(ds.json)
             for key in ['number_of_files', 'number_of_aggregations', 'size']:
                 logger.debug(ds.json)
                 summary[key] = summary[key] + ds.json.get(key, 0)
 
+        summary['ds_search_duration_secs'] = (datetime.now() - t0).seconds
         summary['size_mb'] = summary.get('size', 0) / 1024 / 1024
         summary['size_gb'] = summary.get('size_mb', 0) / 1024
 
@@ -307,6 +309,7 @@ class ESGSearch(WPSProcess):
             
         # search aggregations (optional)
         if search_type == 'Aggregation':
+            t0 = datetime.now()
             summary['aggregation_size'] = 0
             summary['number_of_selected_aggregations'] = 0
             summary['number_of_invalid_aggregations'] = 0
@@ -315,21 +318,26 @@ class ESGSearch(WPSProcess):
             for i in range(start_index, stop_index):
                 ds = datasets[i]
                 count = count + 1
-                progress = 10 + int( ((95.0 - 10.0) / max_count) * count )
+                progress = 10 + int( ((95.0 - 10.0) / max_count) * (count-1) )
                 self.show_status("Dataset %d/%d" % (count, max_count), progress)
                 agg_ctx = ds.aggregation_context()
                 agg_ctx = agg_ctx.constrain(**constraints.mixed())
                 logger.debug('num aggregations: %d', agg_ctx.hit_count)
                 logger.debug('facet constraints=%s', agg_ctx.facet_constraints)
+                if agg_ctx.hit_count == 0:
+                    logger.warn('dataset %s has no aggregations!', ds.dataset_id)
+                    continue
                 for agg in agg_ctx.search():
                     summary['number_of_selected_aggregations'] = summary['number_of_selected_aggregations'] + 1
                     summary['aggregation_size'] = summary['aggregation_size'] + agg.size
                     result.append(agg.opendap_url)
-            summary['aggregation_size_mb'] = summary['file_size'] / 1024 / 1024
+            summary['agg_search_duration_secs'] = (datetime.now() - t0).seconds
+            summary['aggregation_size_mb'] = summary['aggregation_size'] / 1024 / 1024
             self.show_status("Aggregations found=%d" % len(result), 95)
 
         # search files (optional)
         elif search_type == 'File':
+            t0 = datetime.now()
             summary['file_size'] = 0
             summary['number_of_selected_files'] = 0
             summary['number_of_invalid_files'] = 0
@@ -338,7 +346,7 @@ class ESGSearch(WPSProcess):
             for i in range(start_index, stop_index):
                 ds = datasets[i]
                 count = count + 1
-                progress = 10 + int( ((95.0 - 10.0) / max_count) * count )
+                progress = 10 + int( ((95.0 - 10.0) / max_count) * (count-1) )
                 self.show_status("Dataset %d/%d" % (count, max_count), progress)
                 f_ctx = ds.file_context()
                 f_ctx = f_ctx.constrain(**constraints.mixed())
@@ -353,8 +361,11 @@ class ESGSearch(WPSProcess):
                         summary['number_of_selected_files'] = summary['number_of_selected_files'] + 1
                         summary['file_size'] = summary['file_size'] + f.size
                         result.append(f.download_url)
+            summary['file_search_duration_secs'] = (datetime.now() - t0).seconds
             summary['file_size_mb'] = summary['file_size'] / 1024 / 1024
             self.show_status("Files found=%d" % len(result), 95)
+
+        logger.debug('summary=%s', summary)
 
         import json
         outfile = self.mktempfile(suffix='.json')
