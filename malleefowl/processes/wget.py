@@ -49,14 +49,16 @@ class Wget(WPSProcess):
         #    asReference=True,
         #    )
 
-    def _wget(self, url, resource_name, credentials=None):
+    def _wget(self, url, credentials=None):
         from os.path import basename
         resource_name = basename(url)
         logger.debug('downloading %s', url)
+        #logger.debug('credentials %s', credentials)
         
         try:
             cmd = ["wget"]
             if credentials is not None:
+                logger.debug('using credentials')
                 cmd.append("--certificate")
                 cmd.append(credentials) 
                 cmd.append("--private-key")
@@ -106,6 +108,8 @@ class Wget(WPSProcess):
         credentials = self.credentials.getValue()
         resource = self.resource.getValue()
 
+        logger.debug('credentials: %s', credentials)
+
         import types
         if type(resource) != types.ListType:
             resource = [resource]
@@ -117,14 +121,13 @@ class Wget(WPSProcess):
         max_count = len(resource)
         for url in resource:
             count = count + 1
-
-            progress = count * 100.0 / max_count
+            progress = (count-1) * 100.0 / max_count
             self.show_status("Downloading %d/%d" % (count, max_count), progress)
 
             #external_url = None
             local_url = self._check_archive(url)
             if local_url is None:
-                local_url = self._wget(url, credentials)
+                local_url = self._wget(url, credentials=credentials)
             
             local_files.append(local_url)
             #if external_url is not None:
