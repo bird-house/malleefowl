@@ -20,6 +20,25 @@ class WpsTestCase(TestCase):
 
     @classmethod
     def setup_nodes(cls):
+        constraints = [('project', 'CORDEX'),
+                   ('experiment', 'historical'),
+                   ('variable', 'tasmax'),
+                   ('time_frequency', 'day'),
+                   ('ensemble', 'r1i1p1'),
+                   ('institute', 'MPI-CSC'),
+                   ('domain', 'WAS-44')]
+        cs_str = ','.join( ['%s:%s' % (key, value) for key, value in constraints] )
+        # TODO: change facets keyword
+        esgsearch = dict(
+            facets=cs_str,
+            limit=1,
+            temporal=True,
+            distrib=False,
+            latest=True,
+            replica=False,
+            start='2001-01-01T12:00:00Z',
+            end='2005-12-31T12:00:00Z',
+        )
         source = dict(
             service = SERVICE,
             credentials = CREDENTIALS,
@@ -29,7 +48,7 @@ class WpsTestCase(TestCase):
             identifier = "dummy",
             inputs = [],
             resource = 'resource')
-        NODES = dict(source=source, worker=worker)
+        NODES = dict(esgsearch=esgsearch, source=source, worker=worker)
 
         # TODO: fix json encoding to unicode
         import yaml
@@ -40,7 +59,7 @@ class WpsTestCase(TestCase):
 class DispelTestCase(WpsTestCase):
 
     @attr('online')
-    def test_dispel_cdo_sinfo(self):
+    def test_dispel_dummy(self):
         inputs = [('nodes', str(self.nodes))]
         execution = self.wps.execute(identifier="dispel", inputs=inputs, output=[('output', True)])
         monitorExecution(execution, sleepSecs=1)

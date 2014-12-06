@@ -16,11 +16,20 @@ def my_monitor(execution):
 @attr('security')
 def test_esgsearch_workflow():
     # TODO: set environ with credentials
-    constraints = 'project:CORDEX,experiment:historical,variable:tas,time_frequency:mon'
+    constraints = [('project', 'CORDEX'),
+                   ('experiment', 'historical'),
+                   ('variable', 'tasmax'),
+                   ('time_frequency', 'day'),
+                   ('ensemble', 'r1i1p1'),
+                   ('institute', 'MPI-CSC'),
+                   ('domain', 'WAS-44')]
+    cs_str = ','.join( ['%s:%s' % (key, value) for key, value in constraints])
     result = esgsearch_workflow(
         SERVICE,
-        esgsearch_params=dict(constraints=constraints,
-                              limit=1, search_type='File', distrib=False),
+        esgsearch_params=dict(constraints=cs_str,
+                              limit=1, search_type='File', distrib=False, temporal=True,
+                              start='2001-01-01T12:00:00Z', end='2005-12-31T12:00:00Z',
+                          ),
         wget_params=dict(credentials=CREDENTIALS),
         doit_params=dict(url=SERVICE,
                          identifier='dummy', resource='resource', inputs=[]),
