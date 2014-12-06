@@ -108,7 +108,7 @@ class EsgSearch(BaseWPS):
         self.wps_inputs.append( ('replica', str(self.replica)) )
         self.wps_inputs.append( ('latest', str(self.latest)) )
         self.wps_inputs.append( ('temporal', str(self.temporal)) )
-        if self.temporal and self.start != None and self.end != None:
+        if self.start != None and self.end != None:
             self.wps_inputs.append( ('start', str(self.start)) )
             self.wps_inputs.append( ('end', str(self.end)) )
         result = self.execute()

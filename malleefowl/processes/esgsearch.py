@@ -305,7 +305,7 @@ class ESGSearch(WPSProcess):
             for i in range(start_index, stop_index):
                 ds = datasets[i]
                 count = count + 1
-                progress = int( ((95.0 - 10.0) / ctx.hit_count) * count )
+                progress = 10 + int( ((95.0 - 10.0) / ctx.hit_count) * count )
                 self.show_status("Dataset %d/%d" % (count, max_count), progress)
                 agg_ctx = ds.aggregation_context()
                 for agg in agg_ctx.search():
@@ -319,7 +319,7 @@ class ESGSearch(WPSProcess):
             for i in range(start_index, stop_index):
                 ds = datasets[i]
                 count = count + 1
-                progress = int( ((95.0 - 10.0) / ctx.hit_count) * count )
+                progress = 10 + int( ((95.0 - 10.0) / ctx.hit_count) * count )
                 self.show_status("Dataset %d/%d" % (count, max_count), progress)
                 for f in ds.file_context().search():
                     if not temporal_filter(f.filename, start_date, end_date):
