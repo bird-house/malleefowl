@@ -4,6 +4,7 @@ Change History
 0.1.7 ()
 ==================
 
+* Disabled map processes.
 * wget process using local file archive.
 * esgsearch process added.
 * Disabled restflow.
