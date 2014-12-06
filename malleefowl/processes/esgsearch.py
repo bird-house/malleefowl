@@ -35,7 +35,7 @@ class ESGSearch(WPSProcess):
             identifier = "distrib",
             title = "Distributed",
             abstract = "If flag is set then a distributed search will be run.",
-            default = True,
+            default = False,
             minOccurs=1,
             maxOccurs=1,
             type=type(True)
@@ -127,7 +127,7 @@ class ESGSearch(WPSProcess):
             minOccurs=1,
             maxOccurs=1,
             type=type(1),
-            allowedValues=[0,1,5,10,20,50,100]
+            allowedValues=[0,1,2,5,10,20,50,100]
             )
 
         self.offset = self.addLiteralInput(
@@ -175,23 +175,24 @@ class ESGSearch(WPSProcess):
                                 distrib=self.distrib.getValue())
             
 
-        constraints = {}
+        from pyesgf.multidict import MultiDict
+        constraints = MultiDict()
         for constrain in self.constraints.getValue().strip().split(','):
             key, value = constrain.split(':')
-            constraints[key.strip()] = value.strip()
+            constraints.add(key.strip(), value.strip())
 
         logger.debug('constraints=%s', constraints)
 
         # replica is  boolean defining whether to return master records
         # or replicas, or None to return both.
-        replica = None
+        replica = False
         if self.replica.getValue() == True:
             replica = True
 
         # latest: A boolean defining whether to return only latest versions
         #    or only non-latest versions, or None to return both.
         latest = True
-        if self.replica.getValue() == False:
+        if self.latest.getValue() == False:
             latest= None
 
         fields = 'id,number_of_files,number_of_aggregations,size'
@@ -228,8 +229,10 @@ class ESGSearch(WPSProcess):
                                    latest=latest,
                                    query=query)
         if len(constraints) > 0:
-            ctx = ctx.constrain(**constraints)
-                
+            ctx = ctx.constrain(**constraints.mixed())
+
+        logger.debug('ctx: facet_constraints=%s, replica=%s, latests=%s', ctx.facet_constraints, ctx.replica, ctx.latest)
+        
         self.show_status("Datasets found=%d" % ctx.hit_count, 5)
         
         search_type = self.search_type.getValue()
@@ -240,7 +243,6 @@ class ESGSearch(WPSProcess):
                        number_of_datasets=0,
                        number_of_files=0,
                        number_of_aggregations=0,
-                       number_of_invalid_aggregations=0,
                        size=0)
        
         result = []
@@ -257,7 +259,7 @@ class ESGSearch(WPSProcess):
         for i in range(start_index, stop_index):
             ds = datasets[i]
             count = count + 1
-            progress = int( ((10.0 - 5.0) / ctx.hit_count) * count )
+            progress = int( ((10.0 - 5.0) / max_count) * count )
             self.show_status("Dataset %d/%d" % (count, max_count), progress)
             result.append(ds.json)
             for key in ['number_of_files', 'number_of_aggregations', 'size']:
@@ -266,7 +268,6 @@ class ESGSearch(WPSProcess):
 
         summary['size_mb'] = summary.get('size', 0) / 1024 / 1024
         summary['size_gb'] = summary.get('size_mb', 0) / 1024
-        summary['size_tb'] = summary.get('size_gb', 0) / 1024
 
         def date_from_filename(filename):
             """Example cordex:
@@ -284,6 +285,12 @@ class ESGSearch(WPSProcess):
         def temporal_filter(filename, start_date=None, end_date=None):
             """return True if file is in timerange start/end"""
             # TODO: keep fixed fields fx ... see esgsearch.js
+            """
+            // fixed fields are always in time range
+            if ($.inArray("fx", doc.time_frequency) >= 0) {
+              return true;
+            }
+            """
 
             logger.debug('filename=%s, start_date=%s, end_date=%s', filename, start_date, end_date)
             
@@ -300,34 +307,53 @@ class ESGSearch(WPSProcess):
             
         # search aggregations (optional)
         if search_type == 'Aggregation':
+            summary['aggregation_size'] = 0
+            summary['number_of_selected_aggregations'] = 0
+            summary['number_of_invalid_aggregations'] = 0
             result = []
             count = 0
             for i in range(start_index, stop_index):
                 ds = datasets[i]
                 count = count + 1
-                progress = 10 + int( ((95.0 - 10.0) / ctx.hit_count) * count )
+                progress = 10 + int( ((95.0 - 10.0) / max_count) * count )
                 self.show_status("Dataset %d/%d" % (count, max_count), progress)
                 agg_ctx = ds.aggregation_context()
+                agg_ctx = agg_ctx.constrain(**constraints.mixed())
+                logger.debug('num aggregations: %d', agg_ctx.hit_count)
+                logger.debug('facet constraints=%s', agg_ctx.facet_constraints)
                 for agg in agg_ctx.search():
+                    summary['number_of_selected_aggregations'] = summary['number_of_selected_aggregations'] + 1
+                    summary['aggregation_size'] = summary['aggregation_size'] + agg.size
                     result.append(agg.opendap_url)
+            summary['aggregation_size_mb'] = summary['file_size'] / 1024 / 1024
             self.show_status("Aggregations found=%d" % len(result), 95)
 
         # search files (optional)
         elif search_type == 'File':
+            summary['file_size'] = 0
+            summary['number_of_selected_files'] = 0
+            summary['number_of_invalid_files'] = 0
             result = []
             count = 0
             for i in range(start_index, stop_index):
                 ds = datasets[i]
                 count = count + 1
-                progress = 10 + int( ((95.0 - 10.0) / ctx.hit_count) * count )
+                progress = 10 + int( ((95.0 - 10.0) / max_count) * count )
                 self.show_status("Dataset %d/%d" % (count, max_count), progress)
-                for f in ds.file_context().search():
+                f_ctx = ds.file_context()
+                f_ctx = f_ctx.constrain(**constraints.mixed())
+                logger.debug('num files: %d', f_ctx.hit_count)
+                logger.debug('facet constraints=%s', f_ctx.facet_constraints)
+                for f in f_ctx.search():
                     if not temporal_filter(f.filename, start_date, end_date):
                         continue
                     if f.download_url == 'null':
                         summary['number_of_invalid_files'] = summary['number_of_invalid_files'] + 1
                     else:
+                        summary['number_of_selected_files'] = summary['number_of_selected_files'] + 1
+                        summary['file_size'] = summary['file_size'] + f.size
                         result.append(f.download_url)
+            summary['file_size_mb'] = summary['file_size'] / 1024 / 1024
             self.show_status("Files found=%d" % len(result), 95)
 
         import json
