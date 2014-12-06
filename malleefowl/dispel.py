@@ -13,6 +13,7 @@ class BaseWPS(GenericPE):
         self.identifier = identifier
         self.wps_resource = resource
         self.wps_inputs = inputs
+        # TODO: return all wps outputs
         self.wps_output = output
         self.inputconnections['resource'] = { NAME : 'resource' }
         self.outputconnections['output'] = { NAME : 'output'}
