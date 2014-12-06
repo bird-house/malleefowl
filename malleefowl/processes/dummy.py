@@ -23,7 +23,7 @@ class Dummy(WPSProcess):
             identifier="resource",
             title="Resource",
             abstract="NetCDF File",
-            minOccurs=1,
+            minOccurs=0,
             maxOccurs=100,
             maxmegabites=5000,
             formats=[{"mimeType":"application/x-netcdf"}],
@@ -41,10 +41,12 @@ class Dummy(WPSProcess):
     def execute(self):
         self.show_status("starting ...", 0)
 
-        nc_files = self.getInputValues(identifier='netcdf_file')
+        nc_files = self.getInputValues(identifier='resource')
 
         outfile = self.mktempfile(suffix='.txt')
-        with open(outfile, 'w') as fp: 
+        with open(outfile, 'w') as fp:
+            import os
+            fp.write('PYTHONPATH=%s' % (os.environ.get('PYTHONPATH')))
             for nc_file in nc_files:
                 fp.write('%s\n', nc_file)
 
