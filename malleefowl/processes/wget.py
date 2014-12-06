@@ -40,18 +40,19 @@ class Wget(WPSProcess):
             asReference=True,
             )
 
-        self.output_external = self.addComplexOutput(
-            identifier="output_external",
-            title="Downloaded files for external access",
-            abstract="Json document with list of downloaded files with http url for external use.",
-            metadata=[],
-            formats=[{"mimeType":"test/json"}],
-            asReference=True,
-            )
+        #self.output_external = self.addComplexOutput(
+        #    identifier="output_external",
+        #    title="Downloaded files for external access",
+        #    abstract="Json document with list of downloaded files with http url for external use.",
+        #    metadata=[],
+        #   formats=[{"mimeType":"test/json"}],
+        #    asReference=True,
+        #    )
 
     def _wget(self, url, resource_name, credentials=None):
         from os.path import basename
         resource_name = basename(url)
+        logger.debug('downloading %s', url)
         
         try:
             cmd = ["wget"]
@@ -76,9 +77,9 @@ class Wget(WPSProcess):
         from os.path import join
         cached_file = join(config.cache_path(), resource_name)
         local_url = "file://" + cached_file
-        external_url = config.cache_url() + '/' + resource_name
+        #external_url = config.cache_url() + '/' + resource_name
 
-        return (local_url, external_url)
+        return local_url
 
     def _check_archive(self, url):
         from os.path import join, isfile
@@ -110,7 +111,7 @@ class Wget(WPSProcess):
             resource = [resource]
 
         local_files = []
-        external_files = []
+        #external_files = []
 
         count = 0
         max_count = len(resource)
@@ -120,14 +121,19 @@ class Wget(WPSProcess):
             progress = count * 100.0 / max_count
             self.show_status("Downloading %d/%d" % (count, max_count), progress)
 
-            external_url = None
+            #external_url = None
             local_url = self._check_archive(url)
             if local_url is None:
-                local_url, external_url = self._wget(url, credentials)
+                local_url = self._wget(url, credentials)
             
             local_files.append(local_url)
-            if external_url is not None:
-                external_files.append(external_url)
+            #if external_url is not None:
+            #    external_files.append(external_url)
+
+        if max_count > len(local_files):
+            logger.warn('Could not retrieve all files: %d from %d', len(local_files), max_count)
+            if len(local_files) == 0:
+                raise Exception("Could not retrieve any file. Check your permissions!")
 
         import json
         outfile = self.mktempfile(suffix='.json')
@@ -135,10 +141,10 @@ class Wget(WPSProcess):
             json.dump(obj=local_files, fp=fp, indent=4, sort_keys=True)
         self.output.setValue( outfile )
 
-        outfile = self.mktempfile(suffix='.json')
-        with open(outfile, 'w') as fp:
-            json.dump(obj=external_files, fp=fp, indent=4, sort_keys=True)
-        self.output_external.setValue( outfile )
+        #outfile = self.mktempfile(suffix='.json')
+        #with open(outfile, 'w') as fp:
+        #    json.dump(obj=external_files, fp=fp, indent=4, sort_keys=True)
+        #self.output_external.setValue( outfile )
 
         self.show_status("Downloading ... done", 100)
 

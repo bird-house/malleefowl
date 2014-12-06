@@ -6,14 +6,13 @@ from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
 class BaseWPS(GenericPE):
-    def __init__(self, url, identifier, resource='resource', inputs=[], output='output'):
+    def __init__(self, url, identifier, resource='resource', inputs=[], output=None):
         GenericPE.__init__(self)
         from owslib.wps import WebProcessingService
         self.wps = WebProcessingService(url)
         self.identifier = identifier
         self.wps_resource = resource
         self.wps_inputs = inputs
-        # TODO: return all wps outputs
         self.wps_output = output
         self.inputconnections['resource'] = { NAME : 'resource' }
         self.outputconnections['output'] = { NAME : 'output'}
@@ -45,14 +44,23 @@ class BaseWPS(GenericPE):
                 logger.error('code=%s, locator=%s, text=%s', ex.code, ex.locator, ex.text)
 
     def execute(self):
+        output = [] # default: all outputs
+        if self.wps_output is not None:
+            output.append((self.wps_output, True))
         execution = self.wps.execute(
             identifier=self.identifier,
             inputs=self.wps_inputs,
-            output=[(self.wps_output, True)])
+            output=output)
         self.monitor_execution(execution)
 
         result = {}
-        result['output'] = execution.processOutputs[0].reference
+        # only set output if specific output was requested
+        # TODO: use generic dispel outputs matching process description?
+        if self.wps_output is not None:
+            if len(execution.processOutputs) > 0:
+                result['output'] = execution.processOutputs[0].reference
+            else:
+                raise Exception('Process %s could not produce output %s' % (self.identifier, self.wps_output))
         result['status'] = execution.status
         result['status_location'] = execution.statusLocation
         return result
@@ -81,7 +89,7 @@ class EsgSearch(BaseWPS):
                  temporal=False,
                  start=None,
                  end=None,):
-        BaseWPS.__init__(self, url, 'esgsearch')
+        BaseWPS.__init__(self, url, 'esgsearch', output='output')
         self.constraints = constraints
         self.distrib = distrib
         self.replica = replica
@@ -109,12 +117,14 @@ class EsgSearch(BaseWPS):
         import json
         import urllib2
         urls = json.load(urllib2.urlopen(result['output']))
+        if len(urls) == 0:
+            raise Exception('Could not retrieve any files')
         result['output'] = urls
         return result
 
 class Wget(BaseWPS):
     def __init__(self, url, credentials=None):
-        BaseWPS.__init__(self, url, 'wget')
+        BaseWPS.__init__(self, url, 'wget', output='output')
         self.credentials = credentials
 
     def _process(self, inputs):
@@ -126,6 +136,8 @@ class Wget(BaseWPS):
         import json
         import urllib2
         urls = json.load(urllib2.urlopen(result['output']))
+        if len(urls) == 0:
+            raise Exception('Could not retrieve any files')
         result['output'] = urls
         return result
 
@@ -139,6 +151,7 @@ def esgsearch_workflow(url, esgsearch_params, wget_params, doit_params, monitor=
     doit = GenericWPS(**doit_params)
     doit.set_monitor(monitor)
 
+    # TODO: handle exceptions ... see dispel docs
     graph.connect(esgsearch, 'output', wget, 'resource')
     graph.connect(wget, 'output', doit, 'resource')
 

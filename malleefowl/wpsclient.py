@@ -27,7 +27,7 @@ from owslib.wps import WebProcessingService, monitorExecution
 
 def get_caps(service, verbose=False):
     wps = WebProcessingService(service, verbose=verbose)
-    wps.getcapabilities()
+    #wps.getcapabilities()
 
     count = 0
     for process in wps.processes:

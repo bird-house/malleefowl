@@ -38,6 +38,15 @@ class Dummy(WPSProcess):
             asReference=True,
             )
 
+        self.status_log = self.addComplexOutput(
+            identifier="log",
+            title="result",
+            abstract="result",
+            metadata=[],
+            formats=[{"mimeType":"text/plain"}],
+            asReference=True,
+            )
+
     def execute(self):
         self.show_status("starting ...", 0)
 
@@ -46,10 +55,17 @@ class Dummy(WPSProcess):
         outfile = self.mktempfile(suffix='.txt')
         with open(outfile, 'w') as fp:
             import os
-            fp.write('PYTHONPATH=%s' % (os.environ.get('PYTHONPATH')))
-            for nc_file in nc_files:
-                fp.write('%s\n', nc_file)
+            fp.write('PYTHONPATH=%s\n' % (os.environ.get('PYTHONPATH')))
+            fp.write('num input files=%s\n' % len(nc_files))
+            self.output.setValue( outfile )
 
+        outfile = self.mktempfile(suffix='.txt')
+        with open(outfile, 'w') as fp:
+            import os
+            fp.write('job done')
+            self.status_log.setValue( outfile )
+
+            
         self.show_status("done", 100)
 
-        self.output.setValue( outfile )
+        
