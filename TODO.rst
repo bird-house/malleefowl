@@ -1,6 +1,7 @@
 Todo list
 *********
 
+* esgsearch: filter variable in files (cmip5 has several per dataset)
 * esgserach: filter files by start/end also when temporal search is not active
 * esgsearch: fix case when esgsearch has no resuls
 * fix temporal contrain in esgf pyclient
