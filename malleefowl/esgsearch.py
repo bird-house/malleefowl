@@ -150,7 +150,6 @@ class ESGSearch(object):
             ds = datasets[i]
             progress = int( ((10.0 - 5.0) / self.max_count) * self.count )
             self.count = self.count + 1
-            self.monitor("Dataset %d/%d" % (self.count, self.max_count), progress)
             self.result.append(ds.json)
             for key in ['number_of_files', 'number_of_aggregations', 'size']:
                 logger.debug(ds.json)
@@ -216,6 +215,8 @@ class ESGSearch(object):
         self.count = self.count + 1
 
     def _file_search(self, datasets, constraints, start_date, end_date, limit, offset):
+        self.monitor("file search ...", 10)
+        
         t0 = datetime.now()
         self.summary['file_size'] = 0
         self.summary['number_of_selected_files'] = 0
@@ -233,7 +234,7 @@ class ESGSearch(object):
             t.daemon = True
             # begins, must come after daemon definition
             t.start()
-        
+
         for i in range(self.start_index, self.stop_index):
             f_ctx = datasets[i].file_context()
             f_ctx = f_ctx.constrain(**constraints.mixed())
@@ -248,6 +249,8 @@ class ESGSearch(object):
         self.monitor("Files found=%d" % len(self.result), 95)
 
     def _aggregation_search(self, datasets, constraints, limit, offset):
+        self.monitor("aggregation search ...", 10)
+        
         t0 = datetime.now()
         self.summary['aggregation_size'] = 0
         self.summary['number_of_selected_aggregations'] = 0
