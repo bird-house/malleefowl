@@ -285,6 +285,8 @@ class ESGSearch(object):
 
     def _tds_file_search(self, datasets, constraints, start_date, end_date):
         self.monitor("thredds file search ...", 10)
+
+        from urllib2 import urlparse
         
         t0 = datetime.now()
         self.summary['file_size'] = 0
@@ -314,6 +316,7 @@ class ESGSearch(object):
             ns = etree.FunctionNamespace("http://www.unidata.ucar.edu/namespaces/thredds/InvCatalog/v1.0")
             ns.prefix = 'tds'
             try:
+                url_parts = urlparse.urlparse(tds_url)
                 tree=etree.parse(tds_url)
                 for el in tree.xpath('/tds:catalog/tds:dataset/tds:dataset'):
                     url_path = el.attrib.get('urlPath')
@@ -326,7 +329,8 @@ class ESGSearch(object):
                         logger.debug(v.attrib.get('name'))
                         logger.debug(v.attrib.get('vocabulary_name'))
                         logger.debug(v.text)
-                    self.result.append(url_path)
+                    url = url_parts.scheme + '://' + url_parts.netloc + '/thredds/fileServer/' + url_path
+                    self.result.append(url)
             except Exception:
                 logger.exception('could not load thredds url %s', tds_url)
         
