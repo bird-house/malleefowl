@@ -81,7 +81,7 @@ class ESGSearch(object):
         from pyesgf.search import SearchConnection
         self.conn = SearchConnection(url, distrib=distrib)
 
-        self.fields = 'id,number_of_files,number_of_aggregations,size'
+        self.fields = 'id,number_of_files,number_of_aggregations,size,url'
 
         
     
@@ -158,14 +158,20 @@ class ESGSearch(object):
         self.summary['ds_search_duration_secs'] = (datetime.now() - t0).seconds
         self.summary['size_mb'] = self.summary.get('size', 0) / 1024 / 1024
         self.summary['size_gb'] = self.summary.get('size_mb', 0) / 1024
+
+        logger.debug('search_type = %s ', search_type)
             
         # search aggregations (optional)
         if search_type == 'Aggregation':
-            self._aggregation_search(datasets, my_constraints, limit, offset)
+            self._aggregation_search(datasets, my_constraints)
 
         # search files (optional)
         elif search_type == 'File':
-            self._file_search(datasets, my_constraints, start_date, end_date, limit, offset)
+            self._file_search(datasets, my_constraints, start_date, end_date)
+
+        # search files on thredds (optional)
+        elif search_type == 'File_Thredds':
+            self._tds_file_search(datasets, my_constraints, start_date, end_date)
             
         logger.debug('summary=%s', self.summary)
         self.monitor('Done', 100)
@@ -197,7 +203,7 @@ class ESGSearch(object):
             self.job_queue.task_done()
 
     def _file_search_job(self, f_ctx, start_date, end_date):
-        logger.debug('num files: %d', f_ctx.hit_count)
+        #logger.debug('num files: %d', f_ctx.hit_count)
         logger.debug('facet constraints=%s', f_ctx.facet_constraints)
         for f in f_ctx.search():
             if not temporal_filter(f.filename, start_date, end_date):
@@ -214,7 +220,7 @@ class ESGSearch(object):
         self.monitor("Dataset %d/%d" % (self.count, self.max_count), progress)
         self.count = self.count + 1
 
-    def _file_search(self, datasets, constraints, start_date, end_date, limit, offset):
+    def _file_search(self, datasets, constraints, start_date, end_date):
         self.monitor("file search ...", 10)
         
         t0 = datetime.now()
@@ -248,7 +254,7 @@ class ESGSearch(object):
         self.summary['file_size_mb'] = self.summary['file_size'] / 1024 / 1024
         self.monitor("Files found=%d" % len(self.result), 95)
 
-    def _aggregation_search(self, datasets, constraints, limit, offset):
+    def _aggregation_search(self, datasets, constraints):
         self.monitor("aggregation search ...", 10)
         
         t0 = datetime.now()
@@ -264,7 +270,7 @@ class ESGSearch(object):
             self.count = self.count + 1
             agg_ctx = ds.aggregation_context()
             agg_ctx = agg_ctx.constrain(**constraints.mixed())
-            logger.debug('num aggregations: %d', agg_ctx.hit_count)
+            #logger.debug('num aggregations: %d', agg_ctx.hit_count)
             logger.debug('facet constraints=%s', agg_ctx.facet_constraints)
             if agg_ctx.hit_count == 0:
                 logger.warn('dataset %s has no aggregations!', ds.dataset_id)
@@ -276,4 +282,51 @@ class ESGSearch(object):
         self.summary['agg_search_duration_secs'] = (datetime.now() - t0).seconds
         self.summary['aggregation_size_mb'] = self.summary['aggregation_size'] / 1024 / 1024
         self.monitor("Aggregations found=%d" % len(self.result), 95)
+
+    def _tds_file_search(self, datasets, constraints, start_date, end_date):
+        self.monitor("thredds file search ...", 10)
+        
+        t0 = datetime.now()
+        self.summary['file_size'] = 0
+        self.summary['number_of_selected_files'] = 0
+        self.summary['number_of_invalid_files'] = 0
+        self.result = []
+        self.count = 0
+        for i in range(self.start_index, self.stop_index):
+            ds = datasets[i]
+            progress = 10 + int( ((95.0 - 10.0) / self.max_count) * self.count )
+            self.monitor("Dataset %d/%d" % (self.count, self.max_count), progress)
+            self.count = self.count + 1
+
+            tds_url = None
+            for url in ds.json.get('url', []):
+                (tds_url, mime_type, service) = url.split('|')
+                if service == 'Catalog':
+                    if '#' in tds_url:
+                        tds_url = tds_url.split('#')[0]
+                    logger.debug('found tds_url =%s', tds_url)
+                    break
+            if tds_url is None:
+                logger.warn('no thredds url found in dataset %s', ds.dataset_id)
+                continue
+            
+            from lxml import etree
+            ns = etree.FunctionNamespace("http://www.unidata.ucar.edu/namespaces/thredds/InvCatalog/v1.0")
+            ns.prefix = 'tds'
+            try:
+                tree=etree.parse(tds_url)
+                for el in tree.xpath('/tds:catalog/tds:dataset/tds:dataset'):
+                    url_path = el.attrib.get('urlPath')
+                    if url_path is None:
+                        logger.debug('aggregation')
+                        continue
+                    for p in el.xpath('tds:property'):
+                        logger.debug(p.attrib.get('name'), p.attrib.get('value'))
+                    for v in el.xpath('tds:variables/tds:variable'):
+                        logger.debug(v.attrib.get('name'))
+                        logger.debug(v.attrib.get('vocabulary_name'))
+                        logger.debug(v.text)
+                    self.result.append(url_path)
+            except Exception:
+                logger.exception('could not load thredds url %s', tds_url)
         

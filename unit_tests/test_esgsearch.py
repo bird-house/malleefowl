@@ -56,7 +56,7 @@ class EsgSearchTestCase(TestCase):
 
         (result, summary, facet_counts) = self.esgsearch.search(
             search_type='File',
-            limit=10,
+            limit=3,
             offset=0,
             constraints = constraints)
 
@@ -77,6 +77,38 @@ class EsgSearchTestCase(TestCase):
             constraints = constraints)
 
         nose.tools.ok_(len(result) == 0, result)
+
+    @attr('online')
+    def test_tds_file_cordex(self):
+        constraints = []
+        constraints.append( ('project', 'CORDEX') )
+        constraints.append( ('time_frequency', 'mon' ) )
+        constraints.append( ('variable', 'tas') )
+        constraints.append( ('experiment', 'historical') )
+
+        (result, summary, facet_counts) = self.esgsearch.search(
+            search_type='File_Thredds',
+            limit=10,
+            offset=0,
+            constraints = constraints)
+
+        nose.tools.ok_(len(result) > 1, result)
+
+    @attr('online')
+    def test_tds_file_cmip5(self):
+        constraints = []
+        constraints.append( ('project', 'CMIP5') )
+        constraints.append( ('time_frequency', 'mon' ) )
+        constraints.append( ('variable', 'tas') )
+        constraints.append( ('experiment', 'historical') )
+
+        (result, summary, facet_counts) = self.esgsearch.search(
+            search_type='File_Thredds',
+            limit=10,
+            offset=0,
+            constraints = constraints)
+
+        nose.tools.ok_(len(result) > 1, result)
 
     
 

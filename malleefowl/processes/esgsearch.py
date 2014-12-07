@@ -79,7 +79,7 @@ class ESGSearch(WPSProcess):
             minOccurs=1,
             maxOccurs=1,
             type=type(''),
-            allowedValues=['Dataset', 'File', 'Aggregation']
+            allowedValues=['Dataset', 'File', 'Aggregation', 'File_Thredds']
             )
 
         self.constraints = self.addLiteralInput(
