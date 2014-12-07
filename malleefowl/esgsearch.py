@@ -60,8 +60,17 @@ class ESGSearch(object):
             latest=True,
             temporal=False,
             monitor=monitor):
-        self.replica = replica
-        self.latest = latest
+        # replica is  boolean defining whether to return master records
+        # or replicas, or None to return both.
+        self.replica = False
+        if replica == True:
+            self.replica = True
+
+        # latest: A boolean defining whether to return only latest versions
+        #    or only non-latest versions, or None to return both.
+        self.latest = True
+        if latest == False:
+            self.latest= None
         self.temporal = temporal
         self.monitor = monitor
 
@@ -146,11 +155,11 @@ class ESGSearch(object):
             
         # search aggregations (optional)
         if search_type == 'Aggregation':
-            self._aggregation_search(datasets, my_constraints, limit, offset, summary)
+            result = self._aggregation_search(datasets, my_constraints, limit, offset, summary)
 
         # search files (optional)
         elif search_type == 'File':
-            self._file_search(datasets, my_constraints, start_date, end_date, limit, offset, summary)
+            result = self._file_search(datasets, my_constraints, start_date, end_date, limit, offset, summary)
             
         logger.debug('summary=%s', summary)
         self.monitor('Done', 100)
@@ -193,6 +202,7 @@ class ESGSearch(object):
         summary['file_search_duration_secs'] = (datetime.now() - t0).seconds
         summary['file_size_mb'] = summary['file_size'] / 1024 / 1024
         self.monitor("Files found=%d" % len(result), 95)
+        return result
 
     def _aggregation_search(self, datasets, constraints, limit, offset, summary={}):
         t0 = datetime.now()
@@ -221,4 +231,5 @@ class ESGSearch(object):
         summary['agg_search_duration_secs'] = (datetime.now() - t0).seconds
         summary['aggregation_size_mb'] = summary['aggregation_size'] / 1024 / 1024
         self.monitor("Aggregations found=%d" % len(result), 95)
+        return result
         

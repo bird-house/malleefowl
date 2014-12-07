@@ -43,7 +43,7 @@ class EsgSearchTestCase(TestCase):
             offset=0,
             constraints = constraints)
 
-        nose.tools.ok_(len(result) == 1, result)
+        nose.tools.ok_(len(result) > 1, result)
 
     @attr('online')
     def test_aggregation(self):
@@ -59,7 +59,7 @@ class EsgSearchTestCase(TestCase):
             offset=0,
             constraints = constraints)
 
-        nose.tools.ok_(len(result) == 1, result)
+        nose.tools.ok_(len(result) == 0, result)
 
     
 

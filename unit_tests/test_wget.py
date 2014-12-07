@@ -20,7 +20,7 @@ class WpsTestCase(TestCase):
 class WgetTestCase(WpsTestCase):
 
     @attr('online')
-    def test_wget_http(self):
+    def test_http(self):
         inputs = []
         inputs.append((
             'resource',
@@ -31,7 +31,7 @@ class WgetTestCase(WpsTestCase):
         nose.tools.ok_(execution.status == 'ProcessSucceeded', execution.status)
     
     @attr('online')
-    def test_wget_file(self):
+    def test_file(self):
         # TODO: wget should also accept file urls ...
         raise SkipTest
         inputs = []
@@ -44,7 +44,7 @@ class WgetTestCase(WpsTestCase):
         nose.tools.ok_(execution.status == 'ProcessSucceeded', execution.status)
 
     @attr('online')
-    def test_wget_archive(self):
+    def test_archive(self):
         inputs = []
         inputs.append((
             'resource',

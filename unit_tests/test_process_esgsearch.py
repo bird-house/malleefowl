@@ -17,10 +17,10 @@ class WpsTestCase(TestCase):
         from owslib.wps import WebProcessingService
         cls.wps = WebProcessingService(SERVICE, verbose=False, skip_caps=False)
 
-class WgetTestCase(WpsTestCase):
+class EsgSearchTestCase(WpsTestCase):
 
     @attr('online')
-    def test_esgsearch_datasets(self):
+    def test_dataset(self):
         inputs = []
         inputs.append(('search_type', 'Dataset'))
         inputs.append(('limit', '10'))
@@ -35,7 +35,7 @@ class WgetTestCase(WpsTestCase):
         nose.tools.ok_(execution.status == 'ProcessSucceeded', execution.status)
 
     @attr('online')
-    def test_esgsearch_datasets_with_spaces(self):
+    def test_dataset_with_spaces(self):
         inputs = []
         inputs.append(('search_type', 'Dataset'))
         inputs.append(('limit', '10'))
@@ -50,7 +50,7 @@ class WgetTestCase(WpsTestCase):
         nose.tools.ok_(execution.status == 'ProcessSucceeded', execution.status)
 
     @attr('online')
-    def test_esgsearch_datasets_out_of_limit(self):
+    def test_dataset_out_of_limit(self):
         inputs = []
         inputs.append(('search_type', 'Dataset'))
         inputs.append(('limit', '100'))
@@ -65,7 +65,7 @@ class WgetTestCase(WpsTestCase):
         nose.tools.ok_(execution.status == 'ProcessSucceeded', execution.status)
 
     @attr('online')
-    def test_esgsearch_datasets_out_of_offset(self):
+    def test_dataset_out_of_offset(self):
         inputs = []
         inputs.append(('search_type', 'Dataset'))
         inputs.append(('limit', '1'))
@@ -80,7 +80,7 @@ class WgetTestCase(WpsTestCase):
         nose.tools.ok_(execution.status == 'ProcessSucceeded', execution.status)
 
     @attr('online')
-    def test_esgsearch_datasets_replica(self):
+    def test_dataset_replica(self):
         inputs = []
         inputs.append(('search_type', 'Dataset'))
         inputs.append(('limit', '100'))
@@ -97,7 +97,7 @@ class WgetTestCase(WpsTestCase):
         #nose.tools.ok_(False, "TODO: check replica")
 
     @attr('online')
-    def test_esgsearch_datasets_latest(self):
+    def test_dataset_latest(self):
         inputs = []
         inputs.append(('search_type', 'Dataset'))
         inputs.append(('limit', '100'))
@@ -115,7 +115,7 @@ class WgetTestCase(WpsTestCase):
 
 
     @attr('online')
-    def test_esgsearch_datasets_facet_counts(self):
+    def test_dataset_facet_counts(self):
         inputs = []
         inputs.append(('search_type', 'Dataset'))
         inputs.append(('limit', '1'))
@@ -132,7 +132,7 @@ class WgetTestCase(WpsTestCase):
         #nose.tools.ok_(False, "TODO: check facets")
 
     @attr('online')
-    def test_esgsearch_datasets_query(self):
+    def test_dataset_query(self):
         inputs = []
         inputs.append(('search_type', 'Dataset'))
         inputs.append(('limit', '1'))
@@ -150,7 +150,7 @@ class WgetTestCase(WpsTestCase):
 
         
     @attr('online')
-    def test_esgsearch_aggregations(self):
+    def test_aggregation(self):
         inputs = []
         inputs.append(('search_type', 'Aggregation'))
         inputs.append(('limit', '5'))
@@ -164,7 +164,7 @@ class WgetTestCase(WpsTestCase):
         nose.tools.ok_(execution.status == 'ProcessSucceeded', execution.status)
 
     @attr('online')
-    def test_esgsearch_files(self):
+    def test_file(self):
         inputs = []
         inputs.append(('search_type', 'File'))
         inputs.append(('limit', '1'))

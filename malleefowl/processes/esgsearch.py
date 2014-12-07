@@ -168,204 +168,28 @@ class ESGSearch(WPSProcess):
             )
         
     def execute(self):
-        self.show_status("Starting ...", 1)
+        from malleefowl.esgsearch import ESGSearch
+        esgsearch = ESGSearch(
+            url = self.url.getValue(),
+            distrib = self.distrib.getValue(),
+            replica = self.replica.getValue(),
+            latest = self.replica.getValue(),
+            monitor = self.show_status,
+        )
 
-        from pyesgf.search import SearchConnection
-        conn = SearchConnection(self.url.getValue(),
-                                distrib=self.distrib.getValue())
-            
-
-        from pyesgf.multidict import MultiDict
-        constraints = MultiDict()
+        constraints = []
         for constrain in self.constraints.getValue().strip().split(','):
             key, value = constrain.split(':')
-            constraints.add(key.strip(), value.strip())
+            constraints.append( (key.strip(), value.strip() ) )
 
-        logger.debug('constraints=%s', constraints)
-
-        # replica is  boolean defining whether to return master records
-        # or replicas, or None to return both.
-        replica = False
-        if self.replica.getValue() == True:
-            replica = True
-
-        # latest: A boolean defining whether to return only latest versions
-        #    or only non-latest versions, or None to return both.
-        latest = True
-        if self.latest.getValue() == False:
-            latest= None
-
-        fields = 'id,number_of_files,number_of_aggregations,size'
-        query = self.query.getValue()
-        logger.debug('query: %s', query)
-        if query is None or len(query.strip()) == 0:
-            query = '*'
-        # TODO: check type of start, end
-        start = self.start.getValue()
-        end = self.end.getValue()
-        logger.debug('start=%s, end=%s', start, end)
-
-        start_date = end_date = None
-        if start is not None and end is not None:
-            start_date = date_parser.parse(start)
-            end_date = date_parser.parse(end)
-        
-        #if start is not None:
-        #    from_timestamp = start.strftime(format="%Y-%m-%dT%H:%M:%SZ")
-        #if end is not None:
-        #    to_timestamp = end.strftime(format="%Y-%m-%dT%H:%M:%SZ")
-        # TODO: update esgf-pyclient to constrain with timestamps
-        ctx = None
-        if self.temporal.getValue() == True:
-             ctx = conn.new_context(fields=fields,
-                                   replica=replica,
-                                   latest=latest,
-                                   query=query,
-                                   from_timestamp=start,
-                                   to_timestamp=end)
-        else:
-            ctx = conn.new_context(fields=fields,
-                                   replica=replica,
-                                   latest=latest,
-                                   query=query)
-        if len(constraints) > 0:
-            ctx = ctx.constrain(**constraints.mixed())
-
-        logger.debug('ctx: facet_constraints=%s, replica=%s, latests=%s', ctx.facet_constraints, ctx.replica, ctx.latest)
-        
-        self.show_status("Datasets found=%d" % ctx.hit_count, 5)
-        
-        search_type = self.search_type.getValue()
-        limit = self.limit.getValue()
-        offset = self.offset.getValue()
-
-        summary = dict(total_number_of_datasets=ctx.hit_count,
-                       number_of_datasets=0,
-                       number_of_files=0,
-                       number_of_aggregations=0,
-                       size=0)
-       
-        result = []
-        count = 0
-        # search datasets
-        # we always do this to get the summary document
-        datasets = ctx.search()
-        start_index = min(offset, len(datasets))
-        stop_index = min(offset+limit, len(datasets))
-        max_count = stop_index - start_index
-        
-        summary['number_of_datasets'] = max(0, stop_index - start_index)
-
-        t0 = datetime.now()
-        for i in range(start_index, stop_index):
-            ds = datasets[i]
-            count = count + 1
-            progress = int( ((10.0 - 5.0) / max_count) * (count-1) )
-            self.show_status("Dataset %d/%d" % (count, max_count), progress)
-            result.append(ds.json)
-            for key in ['number_of_files', 'number_of_aggregations', 'size']:
-                logger.debug(ds.json)
-                summary[key] = summary[key] + ds.json.get(key, 0)
-
-        summary['ds_search_duration_secs'] = (datetime.now() - t0).seconds
-        summary['size_mb'] = summary.get('size', 0) / 1024 / 1024
-        summary['size_gb'] = summary.get('size_mb', 0) / 1024
-
-        def date_from_filename(filename):
-            """Example cordex:
-            tas_EUR-44i_ECMWF-ERAINT_evaluation_r1i1p1_HMS-ALADIN52_v1_mon_200101-200812.nc
-            """
-            value = filename.split('.')
-            value.pop() # remove .nc
-            value = value[-1] # part with date
-            value = value.split('_')[-1] # only date part
-            value = value.split('-') # split start-end
-            start_year = int(value[0][:4]) # keep only the year
-            end_year = int(value[1][:4])
-            return (start_year, end_year)
-
-        def temporal_filter(filename, start_date=None, end_date=None):
-            """return True if file is in timerange start/end"""
-            # TODO: keep fixed fields fx ... see esgsearch.js
-            """
-            // fixed fields are always in time range
-            if ($.inArray("fx", doc.time_frequency) >= 0) {
-              return true;
-            }
-            """
-
-            logger.debug('filename=%s, start_date=%s, end_date=%s', filename, start_date, end_date)
-            
-            if start_date is None or end_date is None:
-                return True
-            start_year, end_year = date_from_filename(filename)
-            if start_year > end_date.year:
-                logger.debug('skip: %s > %s', start_year, end_date.year)
-                return False
-            if end_year < start_date.year:
-                logger.debug('skip: %s < %s', end_year, start_date.year)
-                return False
-            return True
-            
-        # search aggregations (optional)
-        if search_type == 'Aggregation':
-            t0 = datetime.now()
-            summary['aggregation_size'] = 0
-            summary['number_of_selected_aggregations'] = 0
-            summary['number_of_invalid_aggregations'] = 0
-            result = []
-            count = 0
-            for i in range(start_index, stop_index):
-                ds = datasets[i]
-                count = count + 1
-                progress = 10 + int( ((95.0 - 10.0) / max_count) * (count-1) )
-                self.show_status("Dataset %d/%d" % (count, max_count), progress)
-                agg_ctx = ds.aggregation_context()
-                agg_ctx = agg_ctx.constrain(**constraints.mixed())
-                logger.debug('num aggregations: %d', agg_ctx.hit_count)
-                logger.debug('facet constraints=%s', agg_ctx.facet_constraints)
-                if agg_ctx.hit_count == 0:
-                    logger.warn('dataset %s has no aggregations!', ds.dataset_id)
-                    continue
-                for agg in agg_ctx.search():
-                    summary['number_of_selected_aggregations'] = summary['number_of_selected_aggregations'] + 1
-                    summary['aggregation_size'] = summary['aggregation_size'] + agg.size
-                    result.append(agg.opendap_url)
-            summary['agg_search_duration_secs'] = (datetime.now() - t0).seconds
-            summary['aggregation_size_mb'] = summary['aggregation_size'] / 1024 / 1024
-            self.show_status("Aggregations found=%d" % len(result), 95)
-
-        # search files (optional)
-        elif search_type == 'File':
-            t0 = datetime.now()
-            summary['file_size'] = 0
-            summary['number_of_selected_files'] = 0
-            summary['number_of_invalid_files'] = 0
-            result = []
-            count = 0
-            for i in range(start_index, stop_index):
-                ds = datasets[i]
-                count = count + 1
-                progress = 10 + int( ((95.0 - 10.0) / max_count) * (count-1) )
-                self.show_status("Dataset %d/%d" % (count, max_count), progress)
-                f_ctx = ds.file_context()
-                f_ctx = f_ctx.constrain(**constraints.mixed())
-                logger.debug('num files: %d', f_ctx.hit_count)
-                logger.debug('facet constraints=%s', f_ctx.facet_constraints)
-                for f in f_ctx.search():
-                    if not temporal_filter(f.filename, start_date, end_date):
-                        continue
-                    if f.download_url == 'null':
-                        summary['number_of_invalid_files'] = summary['number_of_invalid_files'] + 1
-                    else:
-                        summary['number_of_selected_files'] = summary['number_of_selected_files'] + 1
-                        summary['file_size'] = summary['file_size'] + f.size
-                        result.append(f.download_url)
-            summary['file_search_duration_secs'] = (datetime.now() - t0).seconds
-            summary['file_size_mb'] = summary['file_size'] / 1024 / 1024
-            self.show_status("Files found=%d" % len(result), 95)
-
-        logger.debug('summary=%s', summary)
+        (result, summary, facet_counts) = esgsearch.search(
+            constraints = constraints,
+            query = self.query.getValue(),
+            start = self.start.getValue(),
+            end = self.end.getValue(),
+            search_type = self.search_type.getValue(),
+            limit = self.limit.getValue(),
+            offset = self.offset.getValue() )
 
         import json
         outfile = self.mktempfile(suffix='.json')
@@ -380,9 +204,8 @@ class ESGSearch(WPSProcess):
 
         outfile = self.mktempfile(suffix='.json')
         with open(outfile, 'w') as fp:
-            json.dump(obj=ctx.facet_counts, fp=fp, indent=4, sort_keys=True)
+            json.dump(obj=facet_counts, fp=fp, indent=4, sort_keys=True)
             self.facet_counts.setValue( outfile )
 
-        self.show_status("Done.", 100)
 
         
