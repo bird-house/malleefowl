@@ -27,6 +27,14 @@ def date_from_filename(filename):
     end_year = int(value[1][:4])
     return (start_year, end_year)
 
+def variable_filter(constraints, variables):
+    """return True if variable is not in contraints"""
+    for name,value in constraints.items():
+        if name in variables and value != variables[name]:
+            logger.debug('skip variable %s', value)
+            return False
+    return True
+
 def temporal_filter(filename, start_date=None, end_date=None):
     """return True if file is in timerange start/end"""
     # TODO: keep fixed fields fx ... see esgsearch.js
@@ -83,8 +91,6 @@ class ESGSearch(object):
 
         self.fields = 'id,number_of_files,number_of_aggregations,size,url'
 
-        
-    
     def search(self, constraints=[('project', 'CORDEX')], query='*',
                start=None, end=None, limit=1, offset=0,
                search_type='Dataset'):
@@ -322,18 +328,20 @@ class ESGSearch(object):
                 for el in tree.xpath('/tds:catalog/tds:dataset/tds:dataset'):
                     url_path = el.attrib.get('urlPath')
                     if url_path is None:
-                        logger.debug('aggregation')
+                        logger.debug('skip aggregation')
                         continue
                     if not temporal_filter(basename(url_path), start_date, end_date):
                         continue
                     property = {}
                     for p in el.xpath('tds:property'):
                         property[p.attrib.get('name')] = p.attrib.get('value')
-                    variable = {}
+                    variables = {}
                     for v in el.xpath('tds:variables/tds:variable'):
-                        variable['variable'] = v.attrib.get('name')
-                        variable['cf_standard_name'] = v.attrib.get('vocabulary_name')
-                        variable['variable_long_name'] = v.text
+                        variables['variable'] = v.attrib.get('name')
+                        variables['cf_standard_name'] = v.attrib.get('vocabulary_name')
+                        variables['variable_long_name'] = v.text
+                    if not variable_filter(constraints, variables):
+                        continue
                     url = url_parts.scheme + '://' + url_parts.netloc + '/thredds/fileServer/' + url_path
                     self.result.append(url)
             except Exception:

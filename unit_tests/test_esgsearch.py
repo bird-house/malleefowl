@@ -110,6 +110,24 @@ class EsgSearchTestCase(TestCase):
 
         nose.tools.ok_(len(result) > 1, result)
 
+    @attr('online')
+    def test_tds_file_cmip5_date(self):
+        constraints = []
+        constraints.append( ('project', 'CMIP5') )
+        constraints.append( ('time_frequency', 'mon' ) )
+        constraints.append( ('variable', 'tas') )
+        constraints.append( ('experiment', 'historical') )
+
+        (result, summary, facet_counts) = self.esgsearch.search(
+            search_type='File_Thredds',
+            limit=20,
+            offset=0,
+            constraints = constraints,
+            start='1960-01-01T12:00:00Z',
+            end='1995-12-31T12:00:00Z')
+
+        nose.tools.ok_(len(result) > 1, result)
+
     
 
 
