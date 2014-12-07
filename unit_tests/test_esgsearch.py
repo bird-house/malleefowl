@@ -46,6 +46,23 @@ class EsgSearchTestCase(TestCase):
         nose.tools.ok_(len(result) > 1, result)
 
     @attr('online')
+    @attr('slow')
+    def test_file_more_than_one(self):
+        constraints = []
+        constraints.append( ('project', 'CORDEX') )
+        constraints.append( ('time_frequency', 'mon' ) )
+        constraints.append( ('variable', 'tas') )
+        constraints.append( ('experiment', 'historical') )
+
+        (result, summary, facet_counts) = self.esgsearch.search(
+            search_type='File',
+            limit=10,
+            offset=0,
+            constraints = constraints)
+
+        nose.tools.ok_(len(result) > 1, result)
+
+    @attr('online')
     def test_aggregation(self):
         constraints = []
         constraints.append( ('project', 'CORDEX') )

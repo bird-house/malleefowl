@@ -1,6 +1,10 @@
 from datetime import datetime
 from dateutil import parser as date_parser
 
+import threading
+from Queue import Queue
+import time
+
 from malleefowl import config
 
 from malleefowl import wpslogging as logging
@@ -78,11 +82,13 @@ class ESGSearch(object):
         self.conn = SearchConnection(url, distrib=distrib)
 
         self.fields = 'id,number_of_files,number_of_aggregations,size'
+
+        
     
     def search(self, constraints=[('project', 'CORDEX')], query='*',
                start=None, end=None, limit=1, offset=0,
                search_type='Dataset'):
-        self.monitor("Starting ...", 1)
+        self.monitor("Starting ...", 0)
 
         from pyesgf.multidict import MultiDict
         my_constraints = MultiDict()
@@ -123,48 +129,49 @@ class ESGSearch(object):
         
         self.monitor("Datasets found=%d" % ctx.hit_count, 5)
         
-        summary = dict(total_number_of_datasets=ctx.hit_count,
+        self.summary = dict(total_number_of_datasets=ctx.hit_count,
                        number_of_datasets=0,
                        number_of_files=0,
                        number_of_aggregations=0,
                        size=0)
-       
-        result = []
-        count = 0
+
+        self.result = []
+        
+        self.count = 0
         # search datasets
         # we always do this to get the summary document
         datasets = ctx.search()
-        (start_index, stop_index, max_count) = self._index(datasets, limit, offset)
-        
-        summary['number_of_datasets'] = max(0, max_count)
+
+        (self.start_index, self.stop_index, self.max_count) = self._index(datasets, limit, offset)
+        self.summary['number_of_datasets'] = max(0, self.max_count)
 
         t0 = datetime.now()
-        for i in range(start_index, stop_index):
+        for i in range(self.start_index, self.stop_index):
             ds = datasets[i]
-            progress = int( ((10.0 - 5.0) / max_count) * count )
-            count = count + 1
-            self.monitor("Dataset %d/%d" % (count, max_count), progress)
-            result.append(ds.json)
+            progress = int( ((10.0 - 5.0) / self.max_count) * self.count )
+            self.count = self.count + 1
+            self.monitor("Dataset %d/%d" % (self.count, self.max_count), progress)
+            self.result.append(ds.json)
             for key in ['number_of_files', 'number_of_aggregations', 'size']:
                 logger.debug(ds.json)
-                summary[key] = summary[key] + ds.json.get(key, 0)
+                self.summary[key] = self.summary[key] + ds.json.get(key, 0)
 
-        summary['ds_search_duration_secs'] = (datetime.now() - t0).seconds
-        summary['size_mb'] = summary.get('size', 0) / 1024 / 1024
-        summary['size_gb'] = summary.get('size_mb', 0) / 1024
+        self.summary['ds_search_duration_secs'] = (datetime.now() - t0).seconds
+        self.summary['size_mb'] = self.summary.get('size', 0) / 1024 / 1024
+        self.summary['size_gb'] = self.summary.get('size_mb', 0) / 1024
             
         # search aggregations (optional)
         if search_type == 'Aggregation':
-            result = self._aggregation_search(datasets, my_constraints, limit, offset, summary)
+            self._aggregation_search(datasets, my_constraints, limit, offset)
 
         # search files (optional)
         elif search_type == 'File':
-            result = self._file_search(datasets, my_constraints, start_date, end_date, limit, offset, summary)
+            self._file_search(datasets, my_constraints, start_date, end_date, limit, offset)
             
-        logger.debug('summary=%s', summary)
+        logger.debug('summary=%s', self.summary)
         self.monitor('Done', 100)
 
-        return (result, summary, ctx.facet_counts)
+        return (self.result, self.summary, ctx.facet_counts)
 
     def _index(self, datasets, limit, offset):
         start_index = min(offset, len(datasets))
@@ -173,50 +180,85 @@ class ESGSearch(object):
 
         return (start_index, stop_index, max_count)
 
-    def _file_search(self, datasets, constraints, start_date, end_date, limit, offset, summary={}):
-        t0 = datetime.now()
-        summary['file_size'] = 0
-        summary['number_of_selected_files'] = 0
-        summary['number_of_invalid_files'] = 0
-        result = []
-        count = 0
-        (start_index, stop_index, max_count) = self._index(datasets, limit, offset)
-        for i in range(start_index, stop_index):
-            ds = datasets[i]
-            progress = 10 + int( ((95.0 - 10.0) / max_count) * count )
-            self.monitor("Dataset %d/%d" % (count, max_count), progress)
-            count = count + 1
-            f_ctx = ds.file_context()
-            f_ctx = f_ctx.constrain(**constraints.mixed())
-            logger.debug('num files: %d', f_ctx.hit_count)
-            logger.debug('facet constraints=%s', f_ctx.facet_constraints)
-            for f in f_ctx.search():
-                if not temporal_filter(f.filename, start_date, end_date):
-                    continue
-                if f.download_url == 'null':
-                    summary['number_of_invalid_files'] = summary['number_of_invalid_files'] + 1
-                else:
-                    summary['number_of_selected_files'] = summary['number_of_selected_files'] + 1
-                    summary['file_size'] = summary['file_size'] + f.size
-                    result.append(f.download_url)
-        summary['file_search_duration_secs'] = (datetime.now() - t0).seconds
-        summary['file_size_mb'] = summary['file_size'] / 1024 / 1024
-        self.monitor("Files found=%d" % len(result), 95)
-        return result
+    # The threader thread pulls an worker from the queue and processes it
+    def threader(self):
+        while True:
+            # gets an worker from the queue
+            worker = self.job_queue.get()
 
-    def _aggregation_search(self, datasets, constraints, limit, offset, summary={}):
+            # Run the example job with the avail worker in queue (thread)
+            try:
+                self._file_search_job(**worker)
+            except Exception:
+                logger.exception('Search job failed! Could not retrieve files/aggregations.')
+                progress = 10 + int( ((95.0 - 10.0) / self.max_count) * self.count )
+                self.monitor('Query for Dataset failed.', progress)
+
+            # completed with the job
+            self.job_queue.task_done()
+
+    def _file_search_job(self, f_ctx, start_date, end_date):
+        logger.debug('num files: %d', f_ctx.hit_count)
+        logger.debug('facet constraints=%s', f_ctx.facet_constraints)
+        for f in f_ctx.search():
+            if not temporal_filter(f.filename, start_date, end_date):
+                continue
+            with self.result_lock:
+                logger.debug('add file %s', f.filename)
+                if f.download_url == 'null':
+                    self.summary['number_of_invalid_files'] = self.summary['number_of_invalid_files'] + 1
+                else:
+                    self.summary['number_of_selected_files'] = self.summary['number_of_selected_files'] + 1
+                    self.summary['file_size'] = self.summary['file_size'] + f.size
+                    self.result.append(f.download_url)
+        progress = 10 + int( ((95.0 - 10.0) / self.max_count) * self.count )
+        self.monitor("Dataset %d/%d" % (self.count, self.max_count), progress)
+        self.count = self.count + 1
+
+    def _file_search(self, datasets, constraints, start_date, end_date, limit, offset):
         t0 = datetime.now()
-        summary['aggregation_size'] = 0
-        summary['number_of_selected_aggregations'] = 0
-        summary['number_of_invalid_aggregations'] = 0
-        result = []
-        count = 0
-        (start_index, stop_index, max_count) = self._index(datasets, limit, offset)
-        for i in range(start_index, stop_index):
+        self.summary['file_size'] = 0
+        self.summary['number_of_selected_files'] = 0
+        self.summary['number_of_invalid_files'] = 0
+        # lock for parallel search
+        self.result_lock = threading.Lock()
+        self.result = []
+        self.count = 0
+        # init threading
+        self.job_queue = Queue()
+        # using 5 thredds
+        for x in range(5):
+            t = threading.Thread(target=self.threader)
+            # classifying as a daemon, so they will die when the main dies
+            t.daemon = True
+            # begins, must come after daemon definition
+            t.start()
+        
+        for i in range(self.start_index, self.stop_index):
+            f_ctx = datasets[i].file_context()
+            f_ctx = f_ctx.constrain(**constraints.mixed())
+            # fill job queue
+            self.job_queue.put(dict(f_ctx=f_ctx, start_date=start_date, end_date=end_date))
+
+        # wait until the thread terminates.
+        self.job_queue.join()
+            
+        self.summary['file_search_duration_secs'] = (datetime.now() - t0).seconds
+        self.summary['file_size_mb'] = self.summary['file_size'] / 1024 / 1024
+        self.monitor("Files found=%d" % len(self.result), 95)
+
+    def _aggregation_search(self, datasets, constraints, limit, offset):
+        t0 = datetime.now()
+        self.summary['aggregation_size'] = 0
+        self.summary['number_of_selected_aggregations'] = 0
+        self.summary['number_of_invalid_aggregations'] = 0
+        self.result = []
+        self.count = 0
+        for i in range(self.start_index, self.stop_index):
             ds = datasets[i]
-            progress = 10 + int( ((95.0 - 10.0) / max_count) * count )
-            self.monitor("Dataset %d/%d" % (count, max_count), progress)
-            count = count + 1
+            progress = 10 + int( ((95.0 - 10.0) / self.max_count) * self.count )
+            self.monitor("Dataset %d/%d" % (self.count, self.max_count), progress)
+            self.count = self.count + 1
             agg_ctx = ds.aggregation_context()
             agg_ctx = agg_ctx.constrain(**constraints.mixed())
             logger.debug('num aggregations: %d', agg_ctx.hit_count)
@@ -225,11 +267,10 @@ class ESGSearch(object):
                 logger.warn('dataset %s has no aggregations!', ds.dataset_id)
                 continue
             for agg in agg_ctx.search():
-                summary['number_of_selected_aggregations'] = summary['number_of_selected_aggregations'] + 1
-                summary['aggregation_size'] = summary['aggregation_size'] + agg.size
-                result.append(agg.opendap_url)
-        summary['agg_search_duration_secs'] = (datetime.now() - t0).seconds
-        summary['aggregation_size_mb'] = summary['aggregation_size'] / 1024 / 1024
-        self.monitor("Aggregations found=%d" % len(result), 95)
-        return result
+                self.summary['number_of_selected_aggregations'] = self.summary['number_of_selected_aggregations'] + 1
+                self.summary['aggregation_size'] = self.summary['aggregation_size'] + agg.size
+                self.result.append(agg.opendap_url)
+        self.summary['agg_search_duration_secs'] = (datetime.now() - t0).seconds
+        self.summary['aggregation_size_mb'] = self.summary['aggregation_size'] / 1024 / 1024
+        self.monitor("Aggregations found=%d" % len(self.result), 95)
         
