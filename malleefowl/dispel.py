@@ -82,7 +82,7 @@ class EsgSearch(BaseWPS):
     def __init__(self, url,
                  constraints='project:CORDEX',
                  limit=100,
-                 search_type='File',
+                 search_type='File_Thredds',
                  distrib=False,
                  replica=False,
                  latest=True,
