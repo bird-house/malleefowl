@@ -287,6 +287,7 @@ class ESGSearch(object):
         self.monitor("thredds file search ...", 10)
 
         from urllib2 import urlparse
+        from os.path import basename
         
         t0 = datetime.now()
         self.summary['file_size'] = 0
@@ -323,12 +324,16 @@ class ESGSearch(object):
                     if url_path is None:
                         logger.debug('aggregation')
                         continue
+                    if not temporal_filter(basename(url_path), start_date, end_date):
+                        continue
+                    property = {}
                     for p in el.xpath('tds:property'):
-                        logger.debug(p.attrib.get('name'), p.attrib.get('value'))
+                        property[p.attrib.get('name')] = p.attrib.get('value')
+                    variable = {}
                     for v in el.xpath('tds:variables/tds:variable'):
-                        logger.debug(v.attrib.get('name'))
-                        logger.debug(v.attrib.get('vocabulary_name'))
-                        logger.debug(v.text)
+                        variable['variable'] = v.attrib.get('name')
+                        variable['cf_standard_name'] = v.attrib.get('vocabulary_name')
+                        variable['variable_long_name'] = v.text
                     url = url_parts.scheme + '://' + url_parts.netloc + '/thredds/fileServer/' + url_path
                     self.result.append(url)
             except Exception:
