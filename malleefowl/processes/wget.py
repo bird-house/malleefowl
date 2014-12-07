@@ -1,6 +1,8 @@
 from malleefowl.process import WPSProcess
 from malleefowl import config
 
+from malleefowl.utils import esgf_archive_path
+
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
@@ -83,25 +85,6 @@ class Wget(WPSProcess):
 
         return local_url
 
-    def _check_archive(self, url):
-        from os.path import join, isfile
-
-        archive_path = None
-
-        if 'thredds/fileServer/' in url:
-            url_path = url.split('thredds/fileServer/')[1]
-            logger.debug('check thredds archive: url_path=%s', url_path)
-            for root_path in config.archive_root():
-                file_path = join(root_path, url_path)
-                logger.debug('file_path = %s', file_path)
-                if isfile(file_path):
-                    logger.info('found in archive: %s', url)
-                    archive_path = 'file://' + file_path
-                    break
-            if archive_path is None:
-                logger.debug('not found in archive: %s', url)
-        return archive_path
-
     def execute(self):
         self.show_status("Downloading ...", 0)
 
@@ -125,7 +108,7 @@ class Wget(WPSProcess):
             self.show_status("Downloading %d/%d" % (count, max_count), progress)
 
             #external_url = None
-            local_url = self._check_archive(url)
+            local_url = esgf_archive_path(url)
             if local_url is None:
                 local_url = self._wget(url, credentials=credentials)
             

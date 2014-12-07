@@ -6,9 +6,29 @@ import json
 from netCDF4 import Dataset
 import os
 
+from malleefowl import config
+
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
+def esgf_archive_path(url):
+    from os.path import join, isfile
+
+    archive_path = None
+
+    if 'thredds/fileServer/' in url:
+        url_path = url.split('thredds/fileServer/')[1]
+        logger.debug('check thredds archive: url_path=%s', url_path)
+        for root_path in config.archive_root():
+            file_path = join(root_path, url_path)
+            logger.debug('file_path = %s', file_path)
+            if isfile(file_path):
+                logger.info('found in archive: %s', url)
+                archive_path = 'file://' + file_path
+                break
+        if archive_path is None:
+            logger.debug('not found in archive: %s', url)
+    return archive_path
 
 def dupname(path, filename):
     """
@@ -38,10 +58,6 @@ def user_id(openid):
         raise Exception("unsupported openid")
     return user_id
 
-def mkdir(path):
-    if not os.path.exists(path):
-        os.mkdir(path)
-    
 def within_date_range(timesteps, start=None, end=None):
     from dateutil.parser import parse as date_parser
     start_date = None
