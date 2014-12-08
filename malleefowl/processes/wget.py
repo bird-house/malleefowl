@@ -19,7 +19,7 @@ class Wget(WPSProcess):
             title="Resource",
             abstract="URL of your resource ...",
             minOccurs=1,
-            maxOccurs=300,
+            maxOccurs=1024,
             type=type('')
             )
 
