@@ -4,6 +4,7 @@ Change History
 0.1.7 ()
 ==================
 
+* added log-level to settings.
 * Disabled map processes.
 * wget process using local file archive.
 * esgsearch process added.
