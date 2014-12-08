@@ -30,12 +30,25 @@ def date_from_filename(filename):
     return (start_year, end_year)
 
 def variable_filter(constraints, variables):
-    """return True if variable is not in contraints"""
-    for name,value in constraints.items():
-        if name in variables and value != variables[name]:
-            logger.debug('skip %s %s', name, variables[name])
-            return False
-    return True
+    """return True if variable fulfills contraints"""
+    var_types = ['variable', 'cf_standard_name', 'variable_long_name']
+
+    success = True
+    cs = constraints.mixed()
+    # check different types of variables
+    for var_type in var_types:
+        # is there a constrain for this variable type?
+        if cs.has_key(var_type):
+            # at least one variable constraint must be fulfilled
+            success = False
+            # do we have this variable type?
+            if variables.has_key(var_type):
+                # do we have an allowed value?
+                allowed_values = cs.get(var_type)
+                if variables[var_type] in allowed_values:
+                    # if one variables matches then we are ok
+                    return True
+    return success
 
 def temporal_filter(filename, start_date=None, end_date=None):
     """return True if file is in timerange start/end"""
@@ -336,6 +349,7 @@ class ESGSearch(object):
                         variables['cf_standard_name'] = v.attrib.get('vocabulary_name')
                         variables['variable_long_name'] = v.text
                     if not variable_filter(constraints, variables):
+                        logger.debug('skip variables %s', variables)
                         continue
                     self.summary['file_size'] = self.summary['file_size'] + int(property.get('size', 0))
                     url = url_parts.scheme + '://' + url_parts.netloc + '/thredds/fileServer/' + url_path
@@ -370,7 +384,7 @@ class ESGSearch(object):
         self.summary['number_of_invalid_files'] = total_files - len(self.result)
         self.summary['tds_file_search_duration_secs'] = (datetime.now() - t0).seconds
         self.summary['file_size_mb'] = self.summary['file_size'] / 1024 / 1024
-        self.monitor("Aggregations found=%d" % len(self.result), 95)
+        self.monitor("Files found=%d" % len(self.result), 95)
             
             
             

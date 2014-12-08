@@ -121,6 +121,42 @@ class EsgSearchTestCase(TestCase):
         nose.tools.ok_(summary['number_of_selected_files'] > 1, result)
 
     @attr('online')
+    def test_tds_file_cordex_fly(self):
+        """
+        example test for flyingpigeon
+        
+        time_frequency:day
+        variable: tas, tasmin, tasmax, pr, prsn
+        domain:EUR-11
+        experiment:historical, rcp26, rcp45, rcp85, 
+        """
+        #raise SkipTest
+        constraints = []
+        constraints.append( ('project', 'CORDEX') )
+        constraints.append( ('time_frequency', 'day' ) )
+        constraints.append( ('variable', 'tas') )
+        constraints.append( ('variable', 'tasmax') )
+        constraints.append( ('variable', 'tasmin') )
+        constraints.append( ('variable', 'pr') )
+        constraints.append( ('variable', 'prsn') )
+        constraints.append( ('experiment', 'historical') )
+        constraints.append( ('experiment', 'rcp26') )
+        constraints.append( ('experiment', 'rcp45') )
+        constraints.append( ('experiment', 'rcp85') )
+
+        (result, summary, facet_counts) = self.esgsearch.search(
+            search_type='File_Thredds',
+            limit=100,
+            offset=0,
+            temporal=True,
+            start='1960-01-01T12:00:00Z',
+            end='1970-12-31T12:00:00Z',
+            constraints = constraints)
+
+        nose.tools.ok_(len(result) > 1, result)
+        nose.tools.ok_(summary['number_of_selected_files'] > 1, result)
+
+    @attr('online')
     def test_tds_file_cmip5(self):
         #raise SkipTest
         constraints = []
