@@ -46,6 +46,13 @@ https://bugs.launchpad.net/linuxmint/+bug/1335174
 * set egg_cache:
 python-eggs is writable by group/others ... (set PYTHON_EGG_CACHE environment variable)
 
+Research
+========
+
+* check couchdb, sqark, ElasticSearch
+  http://couchdb.apache.org/
+  http://www.elasticsearch.org/
+  http://spark.apache.org/
 
 wget
 ====
