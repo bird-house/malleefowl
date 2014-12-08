@@ -11,7 +11,6 @@ class ESGSearch(WPSProcess):
     """
     wps wrapper for esg search.
 
-    TODO: time constraints for datasets and files
     TODO: bbox constraint for datasets
     """
     def __init__(self):
@@ -189,7 +188,8 @@ class ESGSearch(WPSProcess):
             end = self.end.getValue(),
             search_type = self.search_type.getValue(),
             limit = self.limit.getValue(),
-            offset = self.offset.getValue() )
+            offset = self.offset.getValue(),
+            temporal = self.temporal.getValue())
 
         import json
         outfile = self.mktempfile(suffix='.json')

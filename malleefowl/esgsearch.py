@@ -18,10 +18,12 @@ def date_from_filename(filename):
     """Example cordex:
     tas_EUR-44i_ECMWF-ERAINT_evaluation_r1i1p1_HMS-ALADIN52_v1_mon_200101-200812.nc
     """
+    logger.debug('filename=%s', filename)
     value = filename.split('.')
     value.pop() # remove .nc
     value = value[-1] # part with date
     value = value.split('_')[-1] # only date part
+    logger.debug('date part = %s', value)
     value = value.split('-') # split start-end
     start_year = int(value[0][:4]) # keep only the year
     end_year = int(value[1][:4])
@@ -31,7 +33,7 @@ def variable_filter(constraints, variables):
     """return True if variable is not in contraints"""
     for name,value in constraints.items():
         if name in variables and value != variables[name]:
-            logger.debug('skip variable %s', value)
+            logger.debug('skip %s %s', name, variables[name])
             return False
     return True
 
@@ -70,7 +72,6 @@ class ESGSearch(object):
             distrib=False,
             replica=False,
             latest=True,
-            temporal=False,
             monitor=monitor):
         # replica is  boolean defining whether to return master records
         # or replicas, or None to return both.
@@ -83,7 +84,6 @@ class ESGSearch(object):
         self.latest = True
         if latest == False:
             self.latest= None
-        self.temporal = temporal
         self.monitor = monitor
 
         from pyesgf.search import SearchConnection
@@ -93,7 +93,8 @@ class ESGSearch(object):
 
     def search(self, constraints=[('project', 'CORDEX')], query='*',
                start=None, end=None, limit=1, offset=0,
-               search_type='Dataset'):
+               search_type='Dataset',
+               temporal=False):
         self.monitor("Starting ...", 0)
 
         from pyesgf.multidict import MultiDict
@@ -116,8 +117,9 @@ class ESGSearch(object):
             end_date = date_parser.parse(end)
         
         ctx = None
-        if self.temporal == True:
-             ctx = self.conn.new_context(fields=self.fields,
+        if temporal == True:
+            logger.debug("using dataset search with time constraints")
+            ctx = self.conn.new_context(fields=self.fields,
                                    replica=self.replica,
                                    latest=self.latest,
                                    query=query,
@@ -158,7 +160,7 @@ class ESGSearch(object):
             self.count = self.count + 1
             self.result.append(ds.json)
             for key in ['number_of_files', 'number_of_aggregations', 'size']:
-                logger.debug(ds.json)
+                #logger.debug(ds.json)
                 self.summary[key] = self.summary[key] + ds.json.get(key, 0)
 
         self.summary['ds_search_duration_secs'] = (datetime.now() - t0).seconds
@@ -301,40 +303,27 @@ class ESGSearch(object):
         if tds_url is None:
             logger.warn('no thredds url found in dataset %s', dataset.dataset_id)
         return tds_url
-        
-    def _tds_file_search(self, datasets, constraints, start_date, end_date):
-        self.monitor("thredds file search ...", 10)
 
+    def _tds_parse_dataset_urls(self, tds_url, constraints, start_date, end_date):
         from urllib2 import urlparse
         from os.path import basename
         
-        t0 = datetime.now()
-        self.summary['file_size'] = 0
-        self.summary['number_of_selected_files'] = 0
-        self.summary['number_of_invalid_files'] = 0
-        self.result = []
-        self.count = 0
-        for i in range(self.start_index, self.stop_index):
-            progress = 10 + int( ((95.0 - 10.0) / self.max_count) * self.count )
-            self.monitor("Dataset %d/%d" % (self.count, self.max_count), progress)
-            self.count = self.count + 1
+        from lxml import etree
+        ns = etree.FunctionNamespace("http://www.unidata.ucar.edu/namespaces/thredds/InvCatalog/v1.0")
+        ns.prefix = 'tds'
+        tree = None
+        try:
+            url_parts = urlparse.urlparse(tds_url)
+            tree=etree.parse(tds_url)
+        except Exception:
+            logger.exception('could not load thredds url %s', tds_url)
 
-            ds = datasets[i]
-            tds_url = self._tds_url_of_dataset(ds)
-            if tds_url is None:
-                logger.warn('skipping dataset %s. No thredds catalog found', ds.dataset_id)
-                continue
-            
-            from lxml import etree
-            ns = etree.FunctionNamespace("http://www.unidata.ucar.edu/namespaces/thredds/InvCatalog/v1.0")
-            ns.prefix = 'tds'
-            try:
-                url_parts = urlparse.urlparse(tds_url)
-                tree=etree.parse(tds_url)
-                for el in tree.xpath('/tds:catalog/tds:dataset/tds:dataset'):
+        if tree is not None:
+            for el in tree.xpath('/tds:catalog/tds:dataset/tds:dataset'):
+                try:
                     url_path = el.attrib.get('urlPath')
-                    if url_path is None:
-                        logger.debug('skip aggregation')
+                    if url_path is None or 'aggregation' in url_path:
+                        logger.debug('skip aggregation %s', url_path)
                         continue
                     if not temporal_filter(basename(url_path), start_date, end_date):
                         continue
@@ -348,8 +337,40 @@ class ESGSearch(object):
                         variables['variable_long_name'] = v.text
                     if not variable_filter(constraints, variables):
                         continue
+                    self.summary['file_size'] = self.summary['file_size'] + int(property.get('size', 0))
                     url = url_parts.scheme + '://' + url_parts.netloc + '/thredds/fileServer/' + url_path
                     self.result.append(url)
-            except Exception:
-                logger.exception('could not load thredds url %s', tds_url)
+                except Exception:
+                    logger.exception('could not load parse urlPath')
         
+        
+    def _tds_file_search(self, datasets, constraints, start_date, end_date):
+        self.monitor("thredds file search ...", 10)
+
+        t0 = datetime.now()
+        self.summary['file_size'] = 0
+        self.summary['number_of_selected_files'] = 0
+        self.summary['number_of_invalid_files'] = 0
+        self.result = []
+        self.count = 0
+        total_files = 0
+        for i in range(self.start_index, self.stop_index):
+            progress = 10 + int( ((95.0 - 10.0) / self.max_count) * self.count )
+            self.monitor("Dataset %d/%d" % (self.count, self.max_count), progress)
+            self.count = self.count + 1
+
+            ds = datasets[i]
+            total_files = total_files + ds.number_of_files
+            tds_url = self._tds_url_of_dataset(ds)
+            if tds_url is None:
+                logger.warn('skipping dataset %s. No thredds catalog found', ds.dataset_id)
+            else:
+                self._tds_parse_dataset_urls(tds_url, constraints, start_date, end_date)
+        self.summary['number_of_selected_files'] = len(self.result)
+        self.summary['number_of_invalid_files'] = total_files - len(self.result)
+        self.summary['tds_file_search_duration_secs'] = (datetime.now() - t0).seconds
+        self.summary['file_size_mb'] = self.summary['file_size'] / 1024 / 1024
+        self.monitor("Aggregations found=%d" % len(self.result), 95)
+            
+            
+            
