@@ -289,6 +289,19 @@ class ESGSearch(object):
         self.summary['aggregation_size_mb'] = self.summary['aggregation_size'] / 1024 / 1024
         self.monitor("Aggregations found=%d" % len(self.result), 95)
 
+    def _tds_url_of_dataset(self, dataset):
+        tds_url = None
+        for url in dataset.json.get('url', []):
+            (tds_url, mime_type, service) = url.split('|')
+            if service == 'Catalog':
+                if '#' in tds_url:
+                    tds_url = tds_url.split('#')[0]
+                logger.debug('found tds_url =%s', tds_url)
+                break
+        if tds_url is None:
+            logger.warn('no thredds url found in dataset %s', dataset.dataset_id)
+        return tds_url
+        
     def _tds_file_search(self, datasets, constraints, start_date, end_date):
         self.monitor("thredds file search ...", 10)
 
@@ -302,21 +315,14 @@ class ESGSearch(object):
         self.result = []
         self.count = 0
         for i in range(self.start_index, self.stop_index):
-            ds = datasets[i]
             progress = 10 + int( ((95.0 - 10.0) / self.max_count) * self.count )
             self.monitor("Dataset %d/%d" % (self.count, self.max_count), progress)
             self.count = self.count + 1
 
-            tds_url = None
-            for url in ds.json.get('url', []):
-                (tds_url, mime_type, service) = url.split('|')
-                if service == 'Catalog':
-                    if '#' in tds_url:
-                        tds_url = tds_url.split('#')[0]
-                    logger.debug('found tds_url =%s', tds_url)
-                    break
+            ds = datasets[i]
+            tds_url = self._tds_url_of_dataset(ds)
             if tds_url is None:
-                logger.warn('no thredds url found in dataset %s', ds.dataset_id)
+                logger.warn('skipping dataset %s. No thredds catalog found', ds.dataset_id)
                 continue
             
             from lxml import etree
