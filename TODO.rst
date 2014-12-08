@@ -1,6 +1,7 @@
 Todo list
 *********
 
+* fix python search path: buildout malleefowl should overwrite anaconda malleefowl
 * add opendap access
 * check opendap urls
 * esgserach: filter files by start/end also when temporal search is not active
