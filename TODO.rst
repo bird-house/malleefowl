@@ -51,7 +51,9 @@ Research
 
 * check couchdb, sqark, ElasticSearch
   http://couchdb.apache.org/
+  pypi/buildout_couchdb
   http://www.elasticsearch.org/
+  pypi/django-simple-elasticsearch
   http://spark.apache.org/
 
 wget
