@@ -53,6 +53,12 @@ Research
   http://couchdb.apache.org/
   http://www.elasticsearch.org/
   http://spark.apache.org/
+* check cache for downloads
+https://code.google.com/p/python-cache/
+memcache:
+https://cloud.google.com/appengine/docs/python/memcache/clientclass?csw=1
+https://pypi.python.org/pypi/datacache/0.4.2
+
 
 wget
 ====
