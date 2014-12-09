@@ -27,7 +27,7 @@ def esgf_archive_path(url):
                 archive_path = 'file://' + file_path
                 break
         if archive_path is None:
-            logger.debug('not found in archive: %s', url)
+            logger.info('not found in archive: %s', url)
     return archive_path
 
 def dupname(path, filename):

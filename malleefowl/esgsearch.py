@@ -326,7 +326,6 @@ class ESGSearch(object):
         ns.prefix = 'tds'
         tree = None
         try:
-            url_parts = urlparse.urlparse(tds_url)
             tree=etree.parse(tds_url)
         except Exception:
             logger.exception('could not load thredds url %s', tds_url)
@@ -352,6 +351,7 @@ class ESGSearch(object):
                         logger.debug('skip variables %s', variables)
                         continue
                     self.summary['file_size'] = self.summary['file_size'] + int(property.get('size', 0))
+                    url_parts = urlparse.urlparse(tds_url)
                     url = url_parts.scheme + '://' + url_parts.netloc + '/thredds/fileServer/' + url_path
                     self.result.append(url)
                 except Exception:
