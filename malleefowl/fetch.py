@@ -62,7 +62,7 @@ def wget(wps, cert_url, files):
     inputs = [('credentials', cert_url)]
     for file_url in files:
         inputs.append( ('resource', str(file_url)) )
-    outputs = [('output', True), ('output_external', True)]
+    outputs = [('output', True)]
 
     logging.info('Retrieving files ...')
     
