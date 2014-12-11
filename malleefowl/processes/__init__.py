@@ -7,4 +7,5 @@ __all__ = [
 #           "restflow",
            "dummy",
 #           "map",
+           "publish",
            ]

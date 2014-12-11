@@ -11,8 +11,8 @@ def publish(resources, target='local'):
     
     urls = []
     
-    output_path = config.getValue('outputPath')
-    ouput_url = config.getValue('ouputUrl')
+    output_path = config.getConfigValue('server', 'outputPath')
+    output_url = config.getConfigValue('server', 'outputUrl')
     
     import uuid
     publish_id = "publish-%s" % uuid.uuid4()
@@ -25,7 +25,7 @@ def publish(resources, target='local'):
         for resource in resources:
             new_path = join(publish_path, basename(resource))
             os.link(resource, new_path)
-            urls.append(join(output_url, basename(resource)))
+            urls.append(join(output_url, publish_id, basename(resource)))
     except:
         logger.exception('publish has failed.')
 
