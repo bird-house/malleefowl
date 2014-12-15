@@ -33,6 +33,26 @@ http://fe4.sic.rm.cnr.it:8080/thredds/docs/datasetScan/index.html
 Bugs
 ====
 
+* fix logging:
+Error in atexit._run_exitfuncs:
+Traceback (most recent call last):
+  File "/home/pingu/anaconda/lib/python2.7/atexit.py", line 24, in _run_exitfuncs
+    func(*targs, **kargs)
+  File "/home/pingu/anaconda/lib/python2.7/logging/__init__.py", line 1662, in shutdown
+    h.close()
+  File "build/bdist.linux-x86_64/egg/cloghandler.py", line 230, in close
+    if not self.stream_lock.closed:
+AttributeError: 'NoneType' object has no attribute 'closed'
+Error in sys.exitfunc:
+Traceback (most recent call last):
+  File "/home/pingu/anaconda/lib/python2.7/atexit.py", line 24, in _run_exitfuncs
+    func(*targs, **kargs)
+  File "/home/pingu/anaconda/lib/python2.7/logging/__init__.py", line 1662, in shutdown
+    h.close()
+  File "build/bdist.linux-x86_64/egg/cloghandler.py", line 230, in close
+AttributeError: 'NoneType' object has no attribute 'closed'
+
+
 * owslib can not handle some exception reports: for example:
 <Exception exceptionCode="NoApplicableCode">
                 <ExceptionText>'Failed to execute WPS process [visualisation]: (returncode:1) cdo showdate: Open failed on &gt;./pywpsInput5A4aF4&lt;\nNo such file or directory\n'</ExceptionText>
