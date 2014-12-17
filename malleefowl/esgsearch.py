@@ -119,7 +119,7 @@ class ESGSearch(object):
 
         logger.debug('query: %s', query)
         if query is None or len(query.strip()) == 0:
-            query = '*'
+            query = '*:*'
             
         # TODO: check type of start, end
         logger.debug('start=%s, end=%s', start, end)
@@ -265,6 +265,7 @@ class ESGSearch(object):
         for i in range(self.start_index, self.stop_index):
             f_ctx = datasets[i].file_context()
             f_ctx = f_ctx.constrain(**constraints.mixed())
+            f_ctx.freetext_constraint = "*:*"
             # fill job queue
             self.job_queue.put(dict(f_ctx=f_ctx, start_date=start_date, end_date=end_date))
 
@@ -291,6 +292,7 @@ class ESGSearch(object):
             self.count = self.count + 1
             agg_ctx = ds.aggregation_context()
             agg_ctx = agg_ctx.constrain(**constraints.mixed())
+            agg_ctx.freetext_constrain = "*:*"
             #logger.debug('num aggregations: %d', agg_ctx.hit_count)
             logger.debug('facet constraints=%s', agg_ctx.facet_constraints)
             if agg_ctx.hit_count == 0:
