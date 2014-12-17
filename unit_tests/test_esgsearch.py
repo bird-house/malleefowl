@@ -137,32 +137,40 @@ class EsgSearchTestCase(TestCase):
         nose.tools.ok_(summary['number_of_selected_files'] > 1, result)
 
     @attr('online')
-    def test_file_cordex_fly(self):
+    def test_file_cordex_many(self):
         #raise SkipTest
         constraints = []
         constraints.append( ('project', 'CORDEX') )
         constraints.append( ('time_frequency', 'day' ) )
-        constraints.append( ('variable', 'tas') )
-        constraints.append( ('variable', 'tasmax') )
-        constraints.append( ('variable', 'tasmin') )
-        constraints.append( ('variable', 'pr') )
-        constraints.append( ('variable', 'prsn') )
-        constraints.append( ('experiment', 'historical') )
-        constraints.append( ('experiment', 'rcp26') )
-        constraints.append( ('experiment', 'rcp45') )
-        constraints.append( ('experiment', 'rcp85') )
+
+        (result, summary, facet_counts) = self.esgsearch.search(
+            search_type='File',
+            limit=100,
+            offset=0,
+            temporal=False,
+            constraints = constraints)
+
+        nose.tools.ok_(len(result) > 1, result)
+        nose.tools.ok_(summary['number_of_selected_files'] > 1, result)
+        #nose.tools.ok_(False, len(result))
+
+    @attr('online')
+    def test_tds_file_cordex_many(self):
+        #raise SkipTest
+        constraints = []
+        constraints.append( ('project', 'CORDEX') )
+        constraints.append( ('time_frequency', 'day' ) )
 
         (result, summary, facet_counts) = self.esgsearch.search(
             search_type='File_Thredds',
             limit=100,
             offset=0,
-            temporal=True,
-            start='1960-01-01T12:00:00Z',
-            end='1970-12-31T12:00:00Z',
+            temporal=False,
             constraints = constraints)
 
         nose.tools.ok_(len(result) > 1, result)
         nose.tools.ok_(summary['number_of_selected_files'] > 1, result)
+        #nose.tools.ok_(False, len(result))
 
     @attr('online')
     def test_tds_file_cordex_fly(self):

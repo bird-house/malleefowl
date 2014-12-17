@@ -27,7 +27,7 @@ def test_esgsearch_workflow():
     result = esgsearch_workflow(
         SERVICE,
         esgsearch_params=dict(constraints=cs_str,
-                              limit=1, search_type='File', distrib=False, temporal=False,
+                              limit=1, search_type='File_Thredds', distrib=False, temporal=False,
                               start='2001-01-01T12:00:00Z', end='2005-12-31T12:00:00Z',
                           ),
         wget_params=dict(credentials=CREDENTIALS),
