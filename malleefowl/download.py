@@ -14,6 +14,7 @@ def download_files(urls=[], credentials=None, monitor=None):
         progress = count * 100.0 / max_count
         if monitor is not None:
             monitor("Downloading %d/%d" % (count+1, max_count), progress)
+        count = count + 1
 
         try:
             files.append(download_with_archive(url, credentials))
