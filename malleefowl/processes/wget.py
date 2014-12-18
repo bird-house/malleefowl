@@ -1,6 +1,6 @@
 from malleefowl.process import WPSProcess
 from malleefowl import config
-from malleefowl.download import wget_download_with_archive
+from malleefowl.download import download_with_archive
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
@@ -57,7 +57,7 @@ class Wget(WPSProcess):
             self.show_status("Downloading %d/%d" % (count, max_count), progress)
 
             try:
-                local_files.append(wget_download_with_archive(url, credentials))
+                local_files.append(download_with_archive(url, credentials))
             except:
                 logger.exception("Failed to download %s", url)
 

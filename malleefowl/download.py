@@ -9,7 +9,7 @@ def download_with_archive(url, credentials=None):
     from .utils import esgf_archive_path
     local_url = esgf_archive_path(url)
     if local_url is None:
-        local_url = wget_download(url, use_file_url=True, credentials=credentials)
+        local_url = download(url, use_file_url=True, credentials=credentials)
     return local_url
 
 def download(url, use_file_url=False, credentials=None):
