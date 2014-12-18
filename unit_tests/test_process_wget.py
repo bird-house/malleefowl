@@ -45,6 +45,7 @@ class WgetTestCase(WpsTestCase):
 
     @attr('online')
     def test_archive(self):
+        # TODO: set archive in custom.cfg
         inputs = []
         inputs.append((
             'resource',
