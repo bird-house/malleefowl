@@ -16,6 +16,7 @@ def my_monitor(execution):
 @attr('security')
 def test_esgsearch_workflow():
     # TODO: set environ with credentials
+    # export TEST_CREDENTIALS=http://localhost:8081/mycreds.pem 
     constraints = [('project', 'CORDEX'),
                    ('experiment', 'historical'),
                    ('variable', 'tasmax'),
