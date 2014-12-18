@@ -29,7 +29,7 @@ def wget_download(url, credentials=None):
     resource_name = basename(url)
     logger.debug('downloading %s', url)
 
-    from subprocess import check_call
+    from subprocess import check_output
     try:
         cmd = ["wget"]
         if credentials is not None:
@@ -39,12 +39,13 @@ def wget_download(url, credentials=None):
             cmd.append("--private-key")
             cmd.append(credentials)
         cmd.append("--no-check-certificate")
-        cmd.append("--quiet")
+        if not logger.isEnabledFor(logging.DEBUG):
+            cmd.append("--quiet")
         cmd.append("-N")
         cmd.append("-P")
         cmd.append(config.cache_path())
         cmd.append(url)
-        check_call(cmd)
+        check_output(cmd)
     except:
         msg = "wget failed on %s. Maybe not authorized? " % (resource_name)
         logger.exception(msg)
@@ -53,7 +54,6 @@ def wget_download(url, credentials=None):
     from os.path import join
     cached_file = join(config.cache_path(), resource_name)
     local_url = "file://" + cached_file
-    #external_url = config.cache_url() + '/' + resource_name
 
     return local_url
 
