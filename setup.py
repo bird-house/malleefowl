@@ -18,7 +18,6 @@ requires = [
     'ordereddict',
     'lxml',
     'owslib',
-    'wget',
     'esgf-pyclient',
 #    'pyOpenSSL',
 #    'netCDF4',
