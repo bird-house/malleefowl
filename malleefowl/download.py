@@ -1,11 +1,12 @@
-import os
-
 from malleefowl import config
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
 def download_with_archive(url, credentials=None):
+    """
+    Downloads file. Checks before downloading if file is already in local esgf archive.
+    """
     from .utils import esgf_archive_path
     local_url = esgf_archive_path(url)
     if local_url is None:
@@ -13,6 +14,14 @@ def download_with_archive(url, credentials=None):
     return local_url
 
 def download(url, use_file_url=False, credentials=None):
+    """
+    Downloads url and returns local filename.
+
+    :param url: url of file
+    :param use_file_url: True if result should be a file url "file://", otherwise use system path.
+    :param credentials: path to credentials if security is needed to download file
+    returns downloaded file with either file:// or system path
+    """
     from os.path import basename
     resource_name = basename(url)
     logger.debug('downloading %s', url)
