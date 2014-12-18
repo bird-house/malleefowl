@@ -1,6 +1,5 @@
 from malleefowl.process import WPSProcess
-from malleefowl import config
-from malleefowl.download import download_with_archive
+from malleefowl.download import download_files
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
@@ -44,32 +43,15 @@ class Wget(WPSProcess):
     def execute(self):
         self.show_status("Downloading ...", 0)
 
-        credentials = self.credentials.getValue()
-        resources = self.getInputValues(identifier='resource')
-
-        local_files = []
-
-        count = 0
-        max_count = len(resources)
-        for url in resources:
-            count = count + 1
-            progress = (count-1) * 100.0 / max_count
-            self.show_status("Downloading %d/%d" % (count, max_count), progress)
-
-            try:
-                local_files.append(download_with_archive(url, credentials))
-            except:
-                logger.exception("Failed to download %s", url)
-
-        if max_count > len(local_files):
-            logger.warn('Could not retrieve all files: %d from %d', len(local_files), max_count)
-            if len(local_files) == 0:
-                raise Exception("Could not retrieve any file. Check your permissions!")
+        files = download_files(
+            urls = self.getInputValues(identifier='resource'),
+            credentials = self.credentials.getValue(),
+            monitor=self.show_status)
 
         import json
         outfile = self.mktempfile(suffix='.json')
         with open(outfile, 'w') as fp:
-            json.dump(obj=local_files, fp=fp, indent=4, sort_keys=True)
+            json.dump(obj=files, fp=fp, indent=4, sort_keys=True)
         self.output.setValue( outfile )
 
         self.show_status("Downloading ... done", 100)
