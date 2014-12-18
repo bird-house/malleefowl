@@ -7,7 +7,7 @@ from os.path import basename
 
 from __init__ import TESTDATA, CREDENTIALS
 
-from malleefowl.download import download, download_with_archive
+from malleefowl.download import download, download_with_archive, download_files
 
 class DownloadTestCase(TestCase):
 
@@ -48,5 +48,11 @@ class DownloadTestCase(TestCase):
         nose.tools.ok_(
             basename(result) == "tasmax_WAS-44_MPI-M-MPI-ESM-LR_historical_r1i1p1_MPI-CSC-REMO2009_v1_day_20010101-20051231.nc",
             result)
+
+    @attr('online')
+    def test_download_files(self):
+        results = download_files(urls=[self.slp_1955_nc])
+        nose.tools.ok_(len(results) == 1, results)
+        
         
 

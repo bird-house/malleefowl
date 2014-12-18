@@ -3,6 +3,29 @@ from malleefowl import config
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
+
+def download_files(urls=[], credentials=None, monitor=None):
+    files = []
+
+    count = 0
+    max_count = len(urls)
+    for url in urls:
+        progress = count * 100.0 / max_count
+        if monitor is not None:
+            monitor("Downloading %d/%d" % (count+1, max_count), progress)
+
+        try:
+            files.append(download_with_archive(url, credentials))
+        except:
+            logger.exception("Failed to download %s", url)
+
+    if max_count > len(files):
+        logger.warn('Could not retrieve all files: %d from %d', len(local_files), max_count)
+        if len(local_files) == 0:
+            raise Exception("Could not retrieve any file. Check your permissions!")
+
+    return files
+
 def download_with_archive(url, credentials=None):
     """
     Downloads file. Checks before downloading if file is already in local esgf archive.
