@@ -1,4 +1,5 @@
 from malleefowl import config
+from .exceptions import DownloadException
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
@@ -22,7 +23,7 @@ def download_files(urls=[], credentials=None, monitor=None):
     if max_count > len(files):
         logger.warn('Could not retrieve all files: %d from %d', len(local_files), max_count)
         if len(local_files) == 0:
-            raise Exception("Could not retrieve any file. Check your permissions!")
+            raise DownloadException("Could not retrieve any file. Check your permissions!")
 
     return files
 

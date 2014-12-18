@@ -9,7 +9,7 @@ class Wget(WPSProcess):
         WPSProcess.__init__(self,
             identifier = "wget",
             title = "wget download",
-            version = "0.4",
+            version = "1.0",
             abstract="Downloads files with wget and provides file list as json document.")
 
         self.resource = self.addLiteralInput(
