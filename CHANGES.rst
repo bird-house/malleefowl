@@ -4,6 +4,7 @@ Change History
 0.1.7 ()
 ==================
 
+* refactored wget download.
 * added log-level to settings.
 * Disabled map processes.
 * wget process using local file archive.
