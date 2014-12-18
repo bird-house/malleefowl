@@ -22,8 +22,8 @@ def download_files(urls=[], credentials=None, monitor=None):
             logger.exception("Failed to download %s", url)
 
     if max_count > len(files):
-        logger.warn('Could not retrieve all files: %d from %d', len(local_files), max_count)
-        if len(local_files) == 0:
+        logger.warn('Could not retrieve all files: %d from %d', len(files), max_count)
+        if len(files) == 0:
             raise DownloadException("Could not retrieve any file. Check your permissions!")
 
     return files
