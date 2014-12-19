@@ -3,10 +3,15 @@ This module is used to get a proxy certificate from a myproxy server with an esg
 
 Some of the code is taken from esgf-pyclient:
 https://github.com/stephenpascoe/esgf-pyclient
+
+See also:
+
+* open climate workbench: https://github.com/apache/climate
+* MyProxyLogon: https://pypi.python.org/pypi/MyProxyClient
 """
 
 import os
-from .exceptions import MyProxyLogonError
+from malleefowl.exceptions import MyProxyLogonError
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
