@@ -251,9 +251,9 @@ class ESGSearch(object):
         self.count = 0
         # init threading
         self.job_queue = Queue()
-        # using max 5 thredds
-        num_thredds = min(5, self.max_count)
-        for x in range(num_thredds):
+        # using max 4 threads
+        num_threads = min(4, self.max_count)
+        for x in range(num_threads):
             t = threading.Thread(target=self.threader)
             # classifying as a daemon, so they will die when the main dies
             t.daemon = True
