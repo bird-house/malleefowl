@@ -4,7 +4,7 @@ Change History
 0.1.8 ()
 ==================
 
-
+* fixed buildout bootstrap.
 
 0.1.7 (2014-12-19)
 ==================
