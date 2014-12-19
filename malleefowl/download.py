@@ -12,10 +12,10 @@ def download_with_archive(url, credentials=None):
     Downloads file. Checks before downloading if file is already in local esgf archive.
     """
     from .utils import esgf_archive_path
-    local_url = esgf_archive_path(url)
-    if local_url is None:
-        local_url = download(url, use_file_url=True, credentials=credentials)
-    return local_url
+    file_url = esgf_archive_path(url)
+    if file_url is None:
+        file_url = download(url, use_file_url=True, credentials=credentials)
+    return file_url
 
 def download(url, use_file_url=False, credentials=None):
     """
@@ -53,37 +53,19 @@ def download(url, use_file_url=False, credentials=None):
         raise Exception(msg)
 
     from os.path import join
-    result = join(config.cache_path(), resource_name)
+    filename = join(config.cache_path(), resource_name)
     if use_file_url == True:
-        result = "file://" + result
-    return result
+        filename = "file://" + filename
+    return filename
 
 def download_files(urls=[], credentials=None, monitor=None):
-    files = []
+    dm = DownloadManager(monitor)
+    return dm.download(urls, credentials)
 
-    count = 0
-    max_count = len(urls)
-    for url in urls:
-        progress = count * 100.0 / max_count
-        if monitor is not None:
-            monitor("Downloading %d/%d" % (count+1, max_count), progress)
-        count = count + 1
-
-        try:
-            files.append(download_with_archive(url, credentials))
-        except:
-            logger.exception("Failed to download %s", url)
-
-    if max_count > len(files):
-        logger.warn('Could not retrieve all files: %d from %d', len(files), max_count)
-        if len(files) == 0:
-            raise DownloadException("Could not retrieve any file. Check your permissions!")
-
-    return files
 
 class DownloadManager(object):
     def __init__(self, monitor=None):
-        self.result = []
+        self.files = []
         self.count = 0
         self.monitor = monitor
         
@@ -103,27 +85,32 @@ class DownloadManager(object):
             try:
                 self.download_job(**worker)
             except Exception:
-                logger.exception('download job failed!')
-                progress = self.count * 100.0 / self.max_count
-                self.show_status('Query for Dataset failed.', progress)
+                logger.exception('download failed!')
+            # completed with the job
+            self.job_queue.task_done()
 
-        # completed with the job
-        self.job_queue.task_done()
-
-    def download_job(self):
+    def download_job(self, url, credentials):
+        file_url = download_with_archive(url, credentials)
         with self.result_lock:
-            self.result.append(f.download_url)
+            self.files.append(file_url)
+        progress = self.count * 100.0 / self.max_count
+        self.show_status('Downloaded %d/%d' % (self.count, self.max_count), progress)
 
-    def download(urls, credentials):
+    def download(self, urls, credentials):
+        # start ...
+        from datetime import datetime
         t0 = datetime.now()
+        self.show_status("start downloading of %d files" % len(urls), 0)
         # lock for parallel search
         self.result_lock = threading.Lock()
-        self.result = []
+        self.files = []
         self.count = 0
+        self.max_count = len(urls)
         # init threading
         self.job_queue = Queue()
-        # using 5 thredds
-        for x in range(5):
+        # using max 5 thredds
+        num_thredds = min(5, len(urls))
+        for x in range(num_thredds):
             t = threading.Thread(target=self.threader)
             # classifying as a daemon, so they will die when the main dies
             t.daemon = True
@@ -135,8 +122,11 @@ class DownloadManager(object):
 
         # wait until the thread terminates.
         self.job_queue.join()
-
+        # how long?
         duration = (datetime.now() - t0).seconds
+        self.show_status("downloaded %d files in %d seconds" % (len(urls), duration), 100)
+        # done
+        return self.files
 
 
 
