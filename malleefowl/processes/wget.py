@@ -4,20 +4,20 @@ from malleefowl.download import download_files
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
-class Wget(WPSProcess):
+class Download(WPSProcess):
     def __init__(self):
         WPSProcess.__init__(self,
             identifier = "wget",
-            title = "wget download",
+            title = "Download files",
             version = "1.0",
-            abstract="Downloads files with wget and provides file list as json document.")
+            abstract="Downloads files and provides file list as json document.")
 
         self.resource = self.addLiteralInput(
             identifier="resource",
             title="Resource",
             abstract="URL of your resource ...",
             minOccurs=1,
-            maxOccurs=1024,
+            maxOccurs=2048,
             type=type('')
             )
 
@@ -33,7 +33,7 @@ class Wget(WPSProcess):
 
         self.output = self.addComplexOutput(
             identifier="output",
-            title="Downloaded files for local access",
+            title="Downloaded files",
             abstract="Json document with list of downloaded files with file url.",
             metadata=[],
             formats=[{"mimeType":"test/json"}],
@@ -41,8 +41,6 @@ class Wget(WPSProcess):
             )
 
     def execute(self):
-        self.show_status("Downloading ...", 0)
-
         files = download_files(
             urls = self.getInputValues(identifier='resource'),
             credentials = self.credentials.getValue(),
@@ -54,6 +52,5 @@ class Wget(WPSProcess):
             json.dump(obj=files, fp=fp, indent=4, sort_keys=True)
         self.output.setValue( outfile )
 
-        self.show_status("Downloading ... done", 100)
 
 

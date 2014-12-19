@@ -93,6 +93,7 @@ class DownloadManager(object):
         file_url = download_with_archive(url, credentials)
         with self.result_lock:
             self.files.append(file_url)
+            self.count = self.count + 1
         progress = self.count * 100.0 / self.max_count
         self.show_status('Downloaded %d/%d' % (self.count, self.max_count), progress)
 
