@@ -110,8 +110,9 @@ class DownloadManager(object):
         # init threading
         self.job_queue = Queue()
         # using max 8 thredds
-        num_thredds = min(8, len(urls))
-        for x in range(num_thredds):
+        num_threads = min(8, len(urls))
+        logger.info('starting %d download threads', num_threads)
+        for x in range(num_threads):
             t = threading.Thread(target=self.threader)
             # classifying as a daemon, so they will die when the main dies
             t.daemon = True
