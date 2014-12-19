@@ -1,7 +1,7 @@
 Change History
 **************
 
-0.1.7 ()
+0.1.7 (2014-12-19)
 ==================
 
 * wget download with thredding.
