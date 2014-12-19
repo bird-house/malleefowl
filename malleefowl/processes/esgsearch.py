@@ -167,7 +167,7 @@ class ESGSearch(WPSProcess):
             )
         
     def execute(self):
-        from malleefowl.esgsearch import ESGSearch
+        from malleefowl.esgf.search import ESGSearch
         esgsearch = ESGSearch(
             url = self.url.getValue(),
             distrib = self.distrib.getValue(),

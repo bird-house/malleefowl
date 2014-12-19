@@ -9,7 +9,7 @@ class EsgSearchTestCase(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        from malleefowl.esgsearch import ESGSearch
+        from malleefowl.esgf.search import ESGSearch
         cls.esgsearch = ESGSearch('http://localhost:8081/esg-search', distrib=False,
                                   latest=True, replica=False)
 
