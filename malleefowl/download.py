@@ -42,8 +42,9 @@ def download(url, use_file_url=False, credentials=None):
         cmd.append("--no-check-certificate")
         if not logger.isEnabledFor(logging.DEBUG):
             cmd.append("--quiet")
-        cmd.append("-N")
-        cmd.append("-P")
+        cmd.append("-N")           # turn on timestamping
+        cmd.append("--continue")   # continue partial downloads
+        cmd.append("-P")           # directory prefix
         cmd.append(config.cache_path())
         cmd.append(url)
         check_output(cmd)
