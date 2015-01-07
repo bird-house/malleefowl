@@ -41,7 +41,6 @@ def app(environ, start_response):
             'SERVER_PROTOCOL',
             'SERVER_SOFTWARE',
             'REMOTE_ADDR',
-            'REMOTE_PORT',
             'SERVER_PORT',
             'SERVER_NAME'
             ]
