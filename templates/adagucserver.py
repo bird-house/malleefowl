@@ -2,6 +2,7 @@ import os
 
 def parse_output(output):
     lines = output.split('\n')
+    content_type = "text/plain"
     if 'Content-Type' in lines[0]:
         content_type = lines[0].split(':')[1]
         content_type = content_type.strip()
@@ -50,10 +51,6 @@ def app(environ, start_response):
         os.environ['GATEWAY_INTERFACE'] = 'CGI/1.1'
 
         # adaguc parameters
-        os.environ['ADAGUC_CONFIG'] = '${prefix}/etc/adagucserver/autowms.xml'
-        os.environ['ADAGUC_LOGFILE']= '${prefix}/var/log/adaguc.log'
-        os.environ['ADAGUC_ERRORFILE'] = '${prefix}/var/log/adaguc_error.log'
-        os.environ['ADAGUC_DATARESTRICTION'] = "SHOW_QUERYINFO|ALLOW_GFI|ALLOW_METADATA"
         output = check_output(['adagucserver'], stderr=STDOUT)
         content_type, data = parse_output(output)
         #raise Exception(str(data))
