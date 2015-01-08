@@ -11,7 +11,7 @@
   <Path value="${options['prefix']}/share/adagucserver/"/>
   <TempDir value="${options['prefix']}/var/tmp/"/>
   <OnlineResource value="${options['online_resource']}"/>
-  <DataBase parameters="dbname=${options['dbname']} host=${options['dbhost']} user=${options['dbuser']} password=${options['dbpassword']}"/>
+  <DataBase parameters="${options['db_params']}"/>
   <AutoResource enableautoopendap="true" enablelocalfile="true" enablecache="false" >
     <Dir basedir="${basedir()}" prefix="${basedir()}"/>
   </AutoResource>
