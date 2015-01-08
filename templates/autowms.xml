@@ -1,13 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Configuration>
-  
+
+  {% python
+    from os.path import realpath
+    def basedir():
+        return realpath(options['data_dir'])
+  %}
+
   <!-- General settings -->
-  <Path value="${prefix}/share/adagucserver/"/>
-  <TempDir value="${prefix}/var/tmp/"/>
-  <OnlineResource value="${online_resource}"/>
-  <DataBase parameters="dbname=${dbname} host=${dbhost} user=${dbuser} password=${dbpassword}"/>
+  <Path value="${options['prefix']}/share/adagucserver/"/>
+  <TempDir value="${options['prefix']}/var/tmp/"/>
+  <OnlineResource value="${options['online_resource']}"/>
+  <DataBase parameters="dbname=${options['dbname']} host=${options['dbhost']} user=${options['dbuser']} password=${options['dbpassword']}"/>
   <AutoResource enableautoopendap="true" enablelocalfile="true" enablecache="false" >
-    <Dir basedir="${data_dir}" prefix="${data_dir}"/>
+    <Dir basedir="${basedir()}" prefix="${basedir()}"/>
   </AutoResource>
 
   <!-- WMS settings -->
@@ -18,11 +24,11 @@
       <Title>ADAGUC</Title>
       <Abstract></Abstract>
     </RootLayer>
-    <TitleFont location="${font}" size="19"/>
-    <SubTitleFont location="${font}" size="10"/>
-    <DimensionFont location="${font}" size="7"/>
-    <ContourFont location="${font}" size="7"/>
-    <GridFont location="${font}" size="5"/>
+    <TitleFont location="${options['font']}" size="19"/>
+    <SubTitleFont location="${options['font']}" size="10"/>
+    <DimensionFont location="${options['font']}" size="7"/>
+    <ContourFont location="${options['font']}" size="7"/>
+    <GridFont location="${options['font']}" size="5"/>
     <WMSFormat name="image/png" format="image/png"/>
   </WMS>
   
