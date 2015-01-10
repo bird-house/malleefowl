@@ -132,7 +132,7 @@ conda_pinned:
 
 .PHONY: conda_pkgs
 conda_pkgs: anaconda
-	"$(ANACONDA_HOME)/bin/conda" install --yes pyopenssl
+	"$(ANACONDA_HOME)/bin/conda" install -c https://conda.binstar.org/birdhouse --yes pyopenssl genshi
 
 .PHONY: conda_config
 conda_config: anaconda
