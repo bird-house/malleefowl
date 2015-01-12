@@ -4,6 +4,7 @@ Change History
 0.1.8 ()
 ==================
 
+* adagucserver with postgres added.
 * fixed buildout bootstrap.
 
 0.1.7 (2014-12-19)
