@@ -13,6 +13,7 @@
   </head>
   <body>
     <h2>My Map</h2>
+    <input size="4" type='text' id='year' value="1986" onchange="update()"/>-<input size="2" type="text" id="month" value="01" onchange="update()"/>-<input size="2" type="text" id="day" value="01" onchange="update" />
     <div id="map" class="map"></div>
     <script type="text/javascript">
       var map = new ol.Map({
@@ -21,19 +22,36 @@
           new ol.layer.Tile({
             source: new ol.source.MapQuest({layer: 'sat'})
           }),
-          new ol.layer.Image({
-            source: new ol.source.ImageWMS({
-              url: 'http://localhost:9002/',
-              params: {'SOURCE': 'tasmax_EUR-11_MPI-M-MPI-ESM-LR_historical_r1i1p1_CLMcom-CCLM4-8-17_v1_mon_198101-199012.nc', 'LAYERS': 'tasmax', 'TIME': '1990-12-16T12:00:00Z', 'STYLES': 'auto_rainbow/nearestpoint'}
-              //serverType: 'geoserver'
-            })
-          }),
         ],
         view: new ol.View({
-          center: [20.0,50.0],
+          center: [0, 0],
           zoom: 4
         })
       });
+      
+      mysource = new ol.source.ImageWMS({
+              url: 'http://localhost:9002/',
+              params: {'SOURCE': 'tasmax_EUR-11_MPI-M-MPI-ESM-LR_historical_r1i1p1_CLMcom-CCLM4-8-17_v1_mon_198101-199012.nc', 'LAYERS': 'tasmax', 'TIME': '1990-12-16T12:00:00Z', 'STYLES': 'auto_rainbow/nearestpoint'}
+            })
+      //map.addControl(new ol.control.ZoomSlider());
+
+      var mylayer = new ol.layer.Image({source: mysource});
+      map.addLayer(mylayer);
+
+      function update() {
+         var year = document.getElementById('year').value;
+         var month = document.getElementById('month').value;
+         var day = document.getElementById('day').value;
+         var time = year + '-' + month + '-' + day + "T12:00:00Z";
+         //mysource.updateParams( {'TIME': '1986-03-01T12:00:00Z' });
+         mysource = new ol.source.ImageWMS({
+              url: 'http://localhost:9002/',
+              params: {'SOURCE': 'tasmax_EUR-11_MPI-M-MPI-ESM-LR_historical_r1i1p1_CLMcom-CCLM4-8-17_v1_mon_198101-199012.nc', 'LAYERS': 'tasmax', 'TIME': time, 'STYLES': 'auto_rainbow/nearestpoint'}
+            })
+         mylayer.setVisible(0);
+         mylayer.setSource(mysource);
+         mylayer.setVisible(1);
+      }
     </script>
   </body>
 </html>
