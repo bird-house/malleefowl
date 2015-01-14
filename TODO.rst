@@ -35,6 +35,14 @@ http://fe4.sic.rm.cnr.it:8080/thredds/docs/datasetScan/index.html
 Bugs
 ====
 
+* init supervisor log dir failed:
+Starting supervisor service ...
+/home/pingu/anaconda/etc/init.d/supervisord start
+Starting supervisord:
+Error: The directory named as part of the path /home/pingu/anaconda/var/log/supervisor/supervisord.log does not exist.
+For help, use /home/pingu/anaconda/bin/supervisord -h
+make: *** [start] Error 2
+
 * fix logging:
 Error in atexit._run_exitfuncs:
 Traceback (most recent call last):
