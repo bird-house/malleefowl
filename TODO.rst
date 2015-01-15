@@ -35,6 +35,8 @@ http://fe4.sic.rm.cnr.it:8080/thredds/docs/datasetScan/index.html
 Bugs
 ====
 
+* dispel workflow: exception after esgsearch with many result files:
+Failed to execute WPS process [dispel]: HTTP Error 413: Request Entity Too Large
 * init supervisor log dir failed:
 Starting supervisor service ...
 /home/pingu/anaconda/etc/init.d/supervisord start
