@@ -70,7 +70,8 @@ class DispelWorkflow(WPSProcess):
             esgsearch_params=dict(
                 constraints=esgsearch['facets'],
                 limit=100,
-                search_type='File_Thredds',
+                #search_type='File_Thredds',
+                search_type='File',
                 distrib=esgsearch['distrib'],
                 latest=esgsearch['latest'],
                 replica=esgsearch['replica'],
