@@ -4,8 +4,13 @@ from nose import SkipTest
 from malleefowl import utils
 
 import tempfile
-
 from netCDF4 import Dataset
+
+def test_esgf_archive_path():
+    cordex_url = "http://carbon.dkrz.de/thredds/fileServer/cordex/output/WAS-44/MPI-CSC/MPI-M-MPI-ESM-LR/historical/r1i1p1/MPI-CSC-REMO2009/v1/day/tasmax/v20140918/tasmax_WAS-44_MPI-M-MPI-ESM-LR_historical_r1i1p1_MPI-CSC-REMO2009_v1_day_20010101-20051231.nc"
+    cordex_path = "file:///home/Shared/pingu/data/esgf-archive/CORDEX/cordex/output/WAS-44/MPI-CSC/MPI-M-MPI-ESM-LR/historical/r1i1p1/MPI-CSC-REMO2009/v1/day/tasmax/v20140918/tasmax_WAS-44_MPI-M-MPI-ESM-LR_historical_r1i1p1_MPI-CSC-REMO2009_v1_day_20010101-20051231.nc"
+    archive_path = utils.esgf_archive_path(cordex_url)
+    nose.tools.ok_(archive_path == cordex_path, archive_path)
 
 def test_dupname():
     f = open('/tmp/_test_dupname.nc', 'w')

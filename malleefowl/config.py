@@ -42,10 +42,13 @@ def archive_root():
     archive_root = None
     try:
         archive_root = wpsconfig.getConfigValue("malleefowl", "archive_root")
-        archive_root = [path.strip() for path in archive_root.split(',')]
     except Exception:
+        archive_root = os.environ.get('ESGF_ARCHIVE_ROOT')
+        logger.warn("archive root not configured. Using environment variable ESGF_ARCHIVE_ROOT: %s", archive_root)
+    if archive_root is None:
         archive_root = []
-        logger.warn("archive root not configured")
+    else:
+        archive_root = [path.strip() for path in archive_root.split(',')]
     return archive_root
 
 def mako_cache():

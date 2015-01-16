@@ -1,6 +1,7 @@
 Todo list
 *********
 
+* setup esgf-archive for tests (test_dispel_dummy etc won't work otherwise) 
 * add sphinx documenation
 * fix pyesgf search to use q=*:* and facets for file-search
 * handle wget download failures in dispel workflow

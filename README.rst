@@ -66,3 +66,7 @@ To run all unit tests one needs to fetch tests with an esgf openid and start the
     $ bin/wpsfetch -u username
     $ make start
     $ make test
+
+Testdata is collected in ``testdata.json``::
+
+    $ vim testdata.json
