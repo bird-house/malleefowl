@@ -210,7 +210,7 @@ class ESGSearch(object):
         return (start_index, stop_index, max_count)
 
     def _file_context(self, dataset):
-        logger.debug('checking for local replica')
+        logger.debug('file_context: checking for local replica')
         f_ctx = dataset.file_context()
         # if distrib search check if we have a replica locally
         if self.conn.distrib:
@@ -222,6 +222,20 @@ class ESGSearch(object):
             else:
                 logger.info('no local replica found')
         return f_ctx
+
+    def _aggregation_context(self, dataset):
+        logger.debug('aggregation_context: checking for local replica')
+        agg_ctx = dataset.aggregation_context()
+        # if distrib search check if we have a replica locally
+        if self.conn.distrib:
+            ctx = self.local_ctx.constrain(instance_id=dataset.json.get('instance_id'))
+            if ctx.hit_count == 1:
+                logger.info('found local replica')
+                datasets = ctx.search()
+                agg_ctx = datasets[0].aggregation_context()
+            else:
+                logger.info('no local replica found')
+        return agg_ctx
 
     # The threader thread pulls an worker from the queue and processes it
     def threader(self):
@@ -306,7 +320,8 @@ class ESGSearch(object):
             progress = self.count * 100.0 / self.max_count
             self.show_status("Dataset %d/%d" % (self.count, self.max_count), progress)
             self.count = self.count + 1
-            agg_ctx = ds.aggregation_context()
+            #agg_ctx = ds.aggregation_context()
+            agg_ctx = self._aggregation_context(ds)
             agg_ctx = agg_ctx.constrain(**constraints.mixed())
             agg_ctx.freetext_constrain = "*:*"
             #logger.debug('num aggregations: %d', agg_ctx.hit_count)
