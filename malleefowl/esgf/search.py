@@ -120,9 +120,9 @@ class ESGSearch(object):
 
         logger.debug('constraints=%s', my_constraints)
 
-        logger.debug('query: %s', query)
         if query is None or len(query.strip()) == 0:
             query = '*:*'
+        logger.debug('query: %s', query)
             
         # TODO: check type of start, end
         logger.debug('start=%s, end=%s', start, end)
@@ -210,14 +210,17 @@ class ESGSearch(object):
         return (start_index, stop_index, max_count)
 
     def _file_context(self, dataset):
+        logger.debug('checking for local replica')
         f_ctx = dataset.file_context()
         # if distrib search check if we have a replica locally
         if self.conn.distrib:
             ctx = self.local_ctx.constrain(instance_id=dataset.json.get('instance_id'))
             if ctx.hit_count == 1:
-                logger.debug('found local replica')
+                logger.info('found local replica')
                 datasets = ctx.search()
                 f_ctx = datasets[0].file_context()
+            else:
+                logger.info('no local replica found')
         return f_ctx
 
     # The threader thread pulls an worker from the queue and processes it
