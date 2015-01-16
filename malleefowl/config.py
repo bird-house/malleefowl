@@ -48,7 +48,7 @@ def archive_root():
     if archive_root is None:
         archive_root = []
     else:
-        archive_root = [path.strip() for path in archive_root.split(',')]
+        archive_root = [path.strip() for path in archive_root.split(':')]
     return archive_root
 
 def mako_cache():
