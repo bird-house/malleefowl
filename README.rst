@@ -58,3 +58,11 @@ After any change to your ``custom.cfg`` you **need** to run ``make install`` aga
    $ make restart
    $ make status
 
+Running unit tests with testdata
+================================
+
+To run all unit tests one needs to fetch tests with an esgf openid and start the malleefowl service::
+
+    $ bin/wpsfetch -u username
+    $ make start
+    $ make test
