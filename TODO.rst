@@ -1,6 +1,7 @@
 Todo list
 *********
 
+* add sphinx documenation
 * fix pyesgf search to use q=*:* and facets for file-search
 * handle wget download failures in dispel workflow
 * fix python search path: buildout malleefowl should overwrite anaconda malleefowl
