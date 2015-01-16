@@ -20,10 +20,6 @@ def esgf_archive_path(url):
         url_path = url.split('thredds/fileServer/')[1]
         logger.debug('check thredds archive: url_path=%s', url_path)
         path_elements = url_path.split('/')
-        if 'root' in path_elements[0]:
-            url_path = '/'.join(path_elements[1:])
-            url_path = join("cmip5", "output1", url_path)
-            logger.warn('unexpected url! trying url_path=%s', url_path)
         for root_path in config.archive_root():
             file_path = join(root_path, url_path)
             logger.debug('file_path = %s', file_path)
