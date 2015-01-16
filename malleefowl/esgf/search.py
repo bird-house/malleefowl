@@ -96,7 +96,10 @@ class ESGSearch(object):
 
         from pyesgf.search import SearchConnection
         self.conn = SearchConnection(url, distrib=distrib)
-        self.fields = 'id,number_of_files,number_of_aggregations,size,url'
+        self.fields = 'id,instance_id,number_of_files,number_of_aggregations,size,url'
+        # local context has *all* local datasets
+        local_conn = SearchConnection(url, distrib=False)
+        self.local_ctx = local_conn.new_context(fields=self.fields, replica=True, latest=None)
 
     def show_status(self, message, progress):
         if self.monitor is None:
@@ -206,6 +209,17 @@ class ESGSearch(object):
 
         return (start_index, stop_index, max_count)
 
+    def _file_context(self, dataset):
+        f_ctx = dataset.file_context()
+        # if distrib search check if we have a replica locally
+        if self.conn.distrib:
+            ctx = self.local_ctx.constrain(instance_id=dataset.json.get('instance_id'))
+            if ctx.hit_count == 1:
+                logger.debug('found local replica')
+                datasets = ctx.search()
+                f_ctx = datasets[0].file_context
+        return f_ctx
+
     # The threader thread pulls an worker from the queue and processes it
     def threader(self):
         while True:
@@ -261,7 +275,8 @@ class ESGSearch(object):
             t.start()
 
         for i in range(self.start_index, self.stop_index):
-            f_ctx = datasets[i].file_context()
+            #f_ctx = datasets[i].file_context()
+            f_ctx = self._file_context(datasets[i])
             f_ctx = f_ctx.constrain(**constraints.mixed())
             f_ctx.freetext_constraint = "*:*"
             # fill job queue
