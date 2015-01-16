@@ -5,6 +5,38 @@ from nose.plugins.attrib import attr
 
 from __init__ import TESTDATA, SERVICE
 
+
+class EsgDistribSearchTestCase(TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        from malleefowl.esgf.search import ESGSearch
+        cls.esgsearch = ESGSearch('http://localhost:8081/esg-search', distrib=True,
+                                  latest=True, replica=False)
+
+    @attr('online')
+    def test_file_cmip5_with_local_replica(self):
+        #raise SkipTest
+        #NOAA-GFDL/GFDL-CM3/historical/mon/atmos/Amon/r1i1p1/v20110601/tasmax/tasmax_Amon_GFDL-CM3_historical_r1i1p1_200501-200512.nc
+        constraints = []
+        constraints.append( ('project', 'CMIP5') )
+        constraints.append( ('time_frequency', 'mon' ) )
+        constraints.append( ('variable', 'tasmax') )
+        constraints.append( ('experiment', 'historical') )
+        constraints.append( ('institute', 'NOAA-GFDL') )
+        constraints.append( ('ensemble', 'r1i1p1') )
+        constraints.append( ('model', 'GFDL-CM3') )
+
+        (result, summary, facet_counts) = self.esgsearch.search(
+            search_type='File',
+            limit=100,
+            offset=0,
+            constraints = constraints)
+
+        nose.tools.ok_(len(result) > 1, result)
+        # we want the local replica, not the original file
+        nose.tools.ok_(not ('gfdl.noaa.gov' in result[0]), result[0])
+        
 class EsgSearchTestCase(TestCase):
 
     @classmethod

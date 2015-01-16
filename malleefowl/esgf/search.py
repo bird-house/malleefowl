@@ -217,7 +217,7 @@ class ESGSearch(object):
             if ctx.hit_count == 1:
                 logger.debug('found local replica')
                 datasets = ctx.search()
-                f_ctx = datasets[0].file_context
+                f_ctx = datasets[0].file_context()
         return f_ctx
 
     # The threader thread pulls an worker from the queue and processes it
