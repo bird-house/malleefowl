@@ -1,11 +1,13 @@
 Change History
 **************
 
-0.1.8 ()
+0.1.8 (2015-01-17)
 ==================
 
 * adagucserver with postgres added.
 * fixed buildout bootstrap.
+* esgf search checks local replica
+* esgf archive_path changed
 
 0.1.7 (2014-12-19)
 ==================
