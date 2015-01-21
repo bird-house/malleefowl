@@ -37,6 +37,8 @@ http://fe4.sic.rm.cnr.it:8080/thredds/docs/datasetScan/index.html
 Bugs
 ====
 
+* search with replica=True returns nothing:
+constraints: [('project', 'CMIP5'), ('model', 'MPI-ESM-LR'), ('variable', 'ta'), ('cmor_table', 'Amon'), ('experiment', 'historical'), ('ensemble', 'r1i1p1')]
 * dispel workflow: exception after esgsearch with many result files:
 Failed to execute WPS process [dispel]: HTTP Error 413: Request Entity Too Large
 * init supervisor log dir failed:
