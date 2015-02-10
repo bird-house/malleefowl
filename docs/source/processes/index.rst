@@ -2,7 +2,7 @@
 WPS Processes
 *************
 
-We describe here the WPS processes available in Malleefowl.
+We describe here the WPS processes available in Malleefowl. These are supporting processes to provide access to climate data (currently from ESGF data nodes).
 
 Logon with ESGF OpenID
 ======================
