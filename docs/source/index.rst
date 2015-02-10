@@ -20,8 +20,8 @@ Contents:
    installation/index
    configuration/index
    testing/index
-   processes/index
    docker/index
+   processes/index
    api/index
 
 Indices and tables
