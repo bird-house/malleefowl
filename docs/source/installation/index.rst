@@ -27,3 +27,10 @@ Check the log files for errors::
    $ tail -f  ~/anaconda/var/log/pywps/malleefowl.log
    $ tail -f  ~/anaconda/var/log/pywps/malleefowl_trace.log
 
+Anaconda package
+================
+
+Malleefowl is also available as Anaconda package if you want to use it as a library::
+
+  $ conda install -c https://conda.binstar.org/birdhouse malleefowl
+

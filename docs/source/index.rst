@@ -21,6 +21,7 @@ Contents:
    configuration/index
    testing/index
    processes/index
+   docker/index
 
 Indices and tables
 ==================
