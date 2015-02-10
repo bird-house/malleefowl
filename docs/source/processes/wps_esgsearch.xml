@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wps:ProcessDescriptions xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd" service="WPS" version="1.0.0" xml:lang="en-CA">
+    <ProcessDescription wps:processVersion="1.0" storeSupported="true" statusSupported="true">
+        <ows:Identifier>esgsearch</ows:Identifier>
+        <ows:Title>ESGF Search</ows:Title>
+        <ows:Abstract>Search ESGF datasets, files and aggreations.</ows:Abstract>
+        <DataInputs>
+            <Input minOccurs="0" maxOccurs="1">
+                <ows:Identifier>url</ows:Identifier>
+                <ows:Title>URL</ows:Title>
+                <ows:Abstract>URL of ESGF Search Index. Example: http://esgf-data.dkrz.de/esg-search</ows:Abstract>
+                <LiteralData>
+                    <ows:DataType ows:reference="http://www.w3.org/TR/xmlschema-2/#string">string</ows:DataType>
+                    <ows:AnyValue />
+                    <DefaultValue>http://localhost:8081/esg-search</DefaultValue>
+                </LiteralData>
+            </Input>
+            <Input minOccurs="1" maxOccurs="1">
+                <ows:Identifier>distrib</ows:Identifier>
+                <ows:Title>Distributed</ows:Title>
+                <ows:Abstract>If flag is set then a distributed search will be run.</ows:Abstract>
+                <LiteralData>
+                    <ows:DataType ows:reference="http://www.w3.org/TR/xmlschema-2/#boolean">boolean</ows:DataType>
+                    <ows:AnyValue />
+                    <DefaultValue>False</DefaultValue>
+                </LiteralData>
+            </Input>
+            <Input minOccurs="1" maxOccurs="1">
+                <ows:Identifier>replica</ows:Identifier>
+                <ows:Title>Replica</ows:Title>
+                <ows:Abstract>If flag is set then search will include replicated datasets.</ows:Abstract>
+                <LiteralData>
+                    <ows:DataType ows:reference="http://www.w3.org/TR/xmlschema-2/#boolean">boolean</ows:DataType>
+                    <ows:AnyValue />
+                    <DefaultValue>False</DefaultValue>
+                </LiteralData>
+            </Input>
+            <Input minOccurs="0" maxOccurs="1">
+                <ows:Identifier>latest</ows:Identifier>
+                <ows:Title>Latest</ows:Title>
+                <ows:Abstract>If flag is set then search will include only latest datasets.</ows:Abstract>
+                <LiteralData>
+                    <ows:DataType ows:reference="http://www.w3.org/TR/xmlschema-2/#boolean">boolean</ows:DataType>
+                    <ows:AnyValue />
+                    <DefaultValue>True</DefaultValue>
+                </LiteralData>
+            </Input>
+            <Input minOccurs="1" maxOccurs="1">
+                <ows:Identifier>temporal</ows:Identifier>
+                <ows:Title>Temporal</ows:Title>
+                <ows:Abstract>If flag is set then search will use temporal filter.</ows:Abstract>
+                <LiteralData>
+                    <ows:DataType ows:reference="http://www.w3.org/TR/xmlschema-2/#boolean">boolean</ows:DataType>
+                    <ows:AnyValue />
+                    <DefaultValue>False</DefaultValue>
+                </LiteralData>
+            </Input>
+            <Input minOccurs="0" maxOccurs="1">
+                <ows:Identifier>search_type</ows:Identifier>
+                <ows:Title>Search Type</ows:Title>
+                <ows:Abstract>Search on Datasets, Files or Aggregations</ows:Abstract>
+                <LiteralData>
+                    <ows:DataType ows:reference="http://www.w3.org/TR/xmlschema-2/#string">string</ows:DataType>
+                    <ows:AllowedValues>
+                            <ows:Value>Dataset</ows:Value>
+                            <ows:Value>File</ows:Value>
+                            <ows:Value>Aggregation</ows:Value>
+                            <ows:Value>File_Thredds</ows:Value>
+                    </ows:AllowedValues>
+                    <DefaultValue>Dataset</DefaultValue>
+                </LiteralData>
+            </Input>
+            <Input minOccurs="1" maxOccurs="1">
+                <ows:Identifier>constraints</ows:Identifier>
+                <ows:Title>Constraints</ows:Title>
+                <ows:Abstract>Constraints as list of key/value pairs. Example: project:CORDEX, time_frequency:mon, variable:tas</ows:Abstract>
+                <LiteralData>
+                    <ows:DataType ows:reference="http://www.w3.org/TR/xmlschema-2/#string">string</ows:DataType>
+                    <ows:AnyValue />
+                </LiteralData>
+            </Input>
+            <Input minOccurs="0" maxOccurs="1">
+                <ows:Identifier>query</ows:Identifier>
+                <ows:Title>Query</ows:Title>
+                <ows:Abstract>Freetext query. For Example: temperatue</ows:Abstract>
+                <LiteralData>
+                    <ows:DataType ows:reference="http://www.w3.org/TR/xmlschema-2/#string">string</ows:DataType>
+                    <ows:AnyValue />
+                    <DefaultValue>*</DefaultValue>
+                </LiteralData>
+            </Input>
+            <Input minOccurs="0" maxOccurs="1">
+                <ows:Identifier>start</ows:Identifier>
+                <ows:Title>Start</ows:Title>
+                <ows:Abstract>Startime: 2000-01-11T12:00:00Z</ows:Abstract>
+                <LiteralData>
+                    <ows:DataType ows:reference="http://www.w3.org/TR/xmlschema-2/#string">string</ows:DataType>
+                    <ows:AnyValue />
+                </LiteralData>
+            </Input>
+            <Input minOccurs="0" maxOccurs="1">
+                <ows:Identifier>end</ows:Identifier>
+                <ows:Title>End</ows:Title>
+                <ows:Abstract>Endtime: 2005-12-31T12:00:00Z</ows:Abstract>
+                <LiteralData>
+                    <ows:DataType ows:reference="http://www.w3.org/TR/xmlschema-2/#string">string</ows:DataType>
+                    <ows:AnyValue />
+                </LiteralData>
+            </Input>
+            <Input minOccurs="0" maxOccurs="1">
+                <ows:Identifier>limit</ows:Identifier>
+                <ows:Title>Limit</ows:Title>
+                <ows:Abstract>Maximum number of datasets in search result</ows:Abstract>
+                <LiteralData>
+                    <ows:DataType ows:reference="http://www.w3.org/TR/xmlschema-2/#integer">integer</ows:DataType>
+                    <ows:AllowedValues>
+                            <ows:Value>0</ows:Value>
+                            <ows:Value>1</ows:Value>
+                            <ows:Value>2</ows:Value>
+                            <ows:Value>5</ows:Value>
+                            <ows:Value>10</ows:Value>
+                            <ows:Value>20</ows:Value>
+                            <ows:Value>50</ows:Value>
+                            <ows:Value>100</ows:Value>
+                            <ows:Value>200</ows:Value>
+                    </ows:AllowedValues>
+                    <DefaultValue>10</DefaultValue>
+                </LiteralData>
+            </Input>
+            <Input minOccurs="1" maxOccurs="1">
+                <ows:Identifier>offset</ows:Identifier>
+                <ows:Title>Offset</ows:Title>
+                <ows:Abstract>Start search of datasets at offset.</ows:Abstract>
+                <LiteralData>
+                    <ows:DataType ows:reference="http://www.w3.org/TR/xmlschema-2/#integer">integer</ows:DataType>
+                    <ows:AnyValue />
+                    <DefaultValue>0</DefaultValue>
+                </LiteralData>
+            </Input>
+        </DataInputs>
+        <ProcessOutputs>
+            <Output>
+                <ows:Identifier>facet_counts</ows:Identifier>
+                <ows:Title>Facet Counts</ows:Title>
+                <ows:Abstract>JSON document with facet counts for contstaints.</ows:Abstract>
+                <ComplexOutput>
+                    <Default>
+                        <Format>
+                            <MimeType>test/json</MimeType>
+                        </Format>
+                    </Default>
+                    <Supported>
+                        <Format>
+                            <MimeType>test/json</MimeType>
+                        </Format>
+                    </Supported>
+                </ComplexOutput>
+            </Output>
+            <Output>
+                <ows:Identifier>output</ows:Identifier>
+                <ows:Title>Search Result</ows:Title>
+                <ows:Abstract>JSON document with search result</ows:Abstract>
+                <ComplexOutput>
+                    <Default>
+                        <Format>
+                            <MimeType>test/json</MimeType>
+                        </Format>
+                    </Default>
+                    <Supported>
+                        <Format>
+                            <MimeType>test/json</MimeType>
+                        </Format>
+                    </Supported>
+                </ComplexOutput>
+            </Output>
+            <Output>
+                <ows:Identifier>summary</ows:Identifier>
+                <ows:Title>Search Result Summary</ows:Title>
+                <ows:Abstract>JSON document with search result summary</ows:Abstract>
+                <ComplexOutput>
+                    <Default>
+                        <Format>
+                            <MimeType>test/json</MimeType>
+                        </Format>
+                    </Default>
+                    <Supported>
+                        <Format>
+                            <MimeType>test/json</MimeType>
+                        </Format>
+                    </Supported>
+                </ComplexOutput>
+            </Output>
+        </ProcessOutputs>
+    </ProcessDescription>
+</wps:ProcessDescriptions>
