@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wps:ProcessDescriptions xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd" service="WPS" version="1.0.0" xml:lang="en-CA">
+    <ProcessDescription wps:processVersion="1.0" storeSupported="true" statusSupported="true">
+        <ows:Identifier>wget</ows:Identifier>
+        <ows:Title>Download files</ows:Title>
+        <ows:Abstract>Downloads files and provides file list as json document.</ows:Abstract>
+        <DataInputs>
+            <Input minOccurs="1" maxOccurs="2048">
+                <ows:Identifier>resource</ows:Identifier>
+                <ows:Title>Resource</ows:Title>
+                <ows:Abstract>URL of your resource ...</ows:Abstract>
+                <LiteralData>
+                    <ows:DataType ows:reference="http://www.w3.org/TR/xmlschema-2/#string">string</ows:DataType>
+                    <ows:AnyValue />
+                </LiteralData>
+            </Input>
+            <Input minOccurs="0" maxOccurs="1">
+                <ows:Identifier>credentials</ows:Identifier>
+                <ows:Title>X509 Certificate</ows:Title>
+                <ows:Abstract>X509 proxy certificate to access ESGF data.</ows:Abstract>
+                <ComplexData>
+                    <Default>
+                        <Format>
+                            <MimeType>application/x-pkcs7-mime</MimeType>
+                        </Format>
+                    </Default>
+                    <Supported>
+                        <Format>
+                            <MimeType>application/x-pkcs7-mime</MimeType>
+                        </Format>
+                    </Supported>
+                </ComplexData>
+            </Input>
+        </DataInputs>
+        <ProcessOutputs>
+            <Output>
+                <ows:Identifier>output</ows:Identifier>
+                <ows:Title>Downloaded files</ows:Title>
+                <ows:Abstract>Json document with list of downloaded files with file url.</ows:Abstract>
+                <ComplexOutput>
+                    <Default>
+                        <Format>
+                            <MimeType>test/json</MimeType>
+                        </Format>
+                    </Default>
+                    <Supported>
+                        <Format>
+                            <MimeType>test/json</MimeType>
+                        </Format>
+                    </Supported>
+                </ComplexOutput>
+            </Output>
+        </ProcessOutputs>
+    </ProcessDescription>
+</wps:ProcessDescriptions>
