@@ -149,7 +149,7 @@ conda_env: anaconda
 .PHONY: bootstrap
 bootstrap: init conda_env bootstrap-buildout.py
 	@echo "Bootstrap buildout ..."
-	@test -f bin/buildout || "$(ANACONDA_HOME)/envs/$(CONDA_ENV)/bin/python" bootstrap-buildout.py -c custom.cfg --allow-site-packages
+	@test -f bin/buildout || bash -c "source $(ANACONDA_HOME)/bin/activate $(CONDA_ENV);python bootstrap-buildout.py -c custom.cfg --allow-site-packages"
 
 .PHONY: sysinstall
 sysinstall: bootstrap.sh requirements.sh
