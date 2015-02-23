@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wps:ProcessDescriptions xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd" service="WPS" version="1.0.0" xml:lang="en-CA">
+    <ProcessDescription wps:processVersion="1.0" storeSupported="true" statusSupported="true">
+        <ows:Identifier>esgf_logon</ows:Identifier>
+        <ows:Title>Logon with ESGF OpenID</ows:Title>
+        <ows:Abstract>Logon with ESGF OpenID</ows:Abstract>
+        <ows:Metadata xlink:title="ESGF" xlink:href="http://esgf.org" />
+        <DataInputs>
+            <Input minOccurs="1" maxOccurs="1">
+                <ows:Identifier>openid</ows:Identifier>
+                <ows:Title>ESGF OpenID</ows:Title>
+                <ows:Abstract>Enter ESGF OpenID</ows:Abstract>
+                <LiteralData>
+                    <ows:DataType ows:reference="http://www.w3.org/TR/xmlschema-2/#string">string</ows:DataType>
+                    <ows:AnyValue />
+                </LiteralData>
+            </Input>
+            <Input minOccurs="1" maxOccurs="1">
+                <ows:Identifier>password</ows:Identifier>
+                <ows:Title>OpenID Password</ows:Title>
+                <ows:Abstract>Enter your Password</ows:Abstract>
+                <LiteralData>
+                    <ows:DataType ows:reference="http://www.w3.org/TR/xmlschema-2/#string">string</ows:DataType>
+                    <ows:AnyValue />
+                </LiteralData>
+            </Input>
+        </DataInputs>
+        <ProcessOutputs>
+            <Output>
+                <ows:Identifier>output</ows:Identifier>
+                <ows:Title>X509 Certificate</ows:Title>
+                <ows:Abstract>X509 Proxy Certificate</ows:Abstract>
+                <ComplexOutput>
+                    <Default>
+                        <Format>
+                            <MimeType>application/x-pkcs7-mime</MimeType>
+                        </Format>
+                    </Default>
+                    <Supported>
+                        <Format>
+                            <MimeType>application/x-pkcs7-mime</MimeType>
+                        </Format>
+                    </Supported>
+                </ComplexOutput>
+            </Output>
+            <Output>
+                <ows:Identifier>expires</ows:Identifier>
+                <ows:Title>Expires</ows:Title>
+                <ows:Abstract>Proxy Certificate will expire on given date</ows:Abstract>
+                <LiteralOutput>
+                    <ows:DataType ows:reference="http://www.w3.org/TR/xmlschema-2/#string">string</ows:DataType>
+                </LiteralOutput>
+            </Output>
+        </ProcessOutputs>
+    </ProcessDescription>
+</wps:ProcessDescriptions>
