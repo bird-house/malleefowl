@@ -11,6 +11,7 @@ CPU_ARCH := $(shell uname -m 2>/dev/null || uname -p 2>/dev/null || echo "unknow
 
 # Anaconda 
 ANACONDA_HOME := $(HOME)/anaconda
+CONDA_ENV := $(APP_NAME)
 
 # choose anaconda installer depending on your OS
 ANACONDA_URL = http://repo.continuum.io/miniconda
@@ -139,12 +140,16 @@ conda_config: anaconda
 	@echo "Update ~/.condarc"
 	@"$(ANACONDA_HOME)/bin/conda" config --add channels https://conda.binstar.org/birdhouse
 
+.PHONY: conda_env
+conda_env: anaconda
+	"$(ANACONDA_HOME)/bin/conda" create -n $(CONDA_ENV) -c birdhouse --yes python=2.7 setuptools pyopenssl genshi mako
+
 ## Build targets
 
 .PHONY: bootstrap
-bootstrap: init anaconda bootstrap-buildout.py
+bootstrap: init conda_env bootstrap-buildout.py
 	@echo "Bootstrap buildout ..."
-	@test -f bin/buildout || $(ANACONDA_HOME)/bin/python bootstrap-buildout.py -c custom.cfg --allow-site-packages --version=2.2.5 --setuptools-version=7.0
+	@test -f bin/buildout || "$(ANACONDA_HOME)/envs/$(CONDA_ENV)/bin/python" bootstrap-buildout.py -c custom.cfg --allow-site-packages
 
 .PHONY: sysinstall
 sysinstall: bootstrap.sh requirements.sh
@@ -154,7 +159,7 @@ sysinstall: bootstrap.sh requirements.sh
 	@bash requirements.sh
 
 .PHONY: install
-install: bootstrap conda_pinned conda_config conda_pkgs
+install: bootstrap conda_pinned conda_config
 	@echo "Installing application with buildout ..."
 	bin/buildout -c custom.cfg
 
