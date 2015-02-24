@@ -12,7 +12,8 @@ CPU_ARCH := $(shell uname -m 2>/dev/null || uname -p 2>/dev/null || echo "unknow
 # Anaconda 
 ANACONDA_HOME ?= $(HOME)/anaconda
 CONDA_ENV := birdhouse
-PREFIX := $(HOME)/.conda/envs/$(CONDA_ENV)
+CONDA_ENVS_DIR := $(HOME)/.conda/envs
+PREFIX := $(CONDA_ENVS_DIR)/$(CONDA_ENV)
 
 # choose anaconda installer depending on your OS
 ANACONDA_URL = http://repo.continuum.io/miniconda
@@ -136,6 +137,7 @@ anaconda:
 .PHONY: conda_config
 conda_config: anaconda
 	@echo "Update ~/.condarc"
+	@"$(ANACONDA_HOME)/bin/conda" config --add envs_dirs $(CONDA_ENVS_DIR)
 	@"$(ANACONDA_HOME)/bin/conda" config --set ssl_verify false
 	@"$(ANACONDA_HOME)/bin/conda" config --add channels defaults
 	@"$(ANACONDA_HOME)/bin/conda" config --add channels birdhouse
@@ -143,6 +145,10 @@ conda_config: anaconda
 .PHONY: conda_env
 conda_env: anaconda conda_config
 	@test -d $(PREFIX) || "$(ANACONDA_HOME)/bin/conda" create -m -p $(PREFIX) -c birdhouse --yes python setuptools pyopenssl genshi mako
+
+.PHONY: conda_clean
+conda_clean: anaconda conda_config
+	@test -d $(PREFIX) && "$(ANACONDA_HOME)/bin/conda" env remove -n $(CONDA_ENV) 
 
 ## Build targets
 
