@@ -126,19 +126,15 @@ anaconda:
 	@test -d $(ANACONDA_HOME) || bash "$(DOWNLOAD_CACHE)/$(FN)" -b -p $(ANACONDA_HOME)   
 	@echo "Add '$(ANACONDA_HOME)/bin' to your PATH variable in '.bashrc'."
 
-.PHONY: conda_pinned
-conda_pinned:
-	@echo "Update pinned conda packages ..."
-	@test -d $(ANACONDA_HOME) && wget -q -c -O "$(ANACONDA_HOME)/conda-meta/pinned" https://raw.githubusercontent.com/bird-house/birdhousebuilder.bootstrap/master/conda_pinned 
-
-.PHONY: conda_pkgs
-conda_pkgs: anaconda
-	"$(ANACONDA_HOME)/bin/conda" install -c https://conda.binstar.org/birdhouse --yes pyopenssl genshi
+#.PHONY: conda_pinned
+#conda_pinned:
+#	@echo "Update pinned conda packages ..."
+#	@test -d $(ANACONDA_HOME) && wget -q -c -O "$(ANACONDA_HOME)/conda-meta/pinned" https://raw.githubusercontent.com/bird-house/birdhousebuilder.bootstrap/master/conda_pinned 
 
 .PHONY: conda_config
 conda_config: anaconda
 	@echo "Update ~/.condarc"
-	@"$(ANACONDA_HOME)/bin/conda" config --add channels https://conda.binstar.org/birdhouse
+	@"$(ANACONDA_HOME)/bin/conda" config --add channels birdhouse
 
 .PHONY: conda_env
 conda_env: anaconda
@@ -159,9 +155,9 @@ sysinstall: bootstrap.sh requirements.sh
 	@bash requirements.sh
 
 .PHONY: install
-install: bootstrap conda_pinned conda_config
+install: bootstrap conda_config
 	@echo "Installing application with buildout ..."
-	bin/buildout -c custom.cfg
+	bash -c "source $(ANACONDA_HOME)/bin/activate $(CONDA_ENV);bin/buildout -c custom.cfg"
 
 .PHONY: build
 build: install
