@@ -10,7 +10,7 @@ OS_NAME := $(shell uname -s 2>/dev/null || echo "unknown")
 CPU_ARCH := $(shell uname -m 2>/dev/null || uname -p 2>/dev/null || echo "unknown")
 
 # Anaconda 
-ANACONDA_HOME := $(HOME)/anaconda
+ANACONDA_HOME ?= $(HOME)/anaconda
 CONDA_ENV := $(APP_NAME)
 
 # choose anaconda installer depending on your OS
@@ -134,11 +134,12 @@ anaconda:
 .PHONY: conda_config
 conda_config: anaconda
 	@echo "Update ~/.condarc"
+	@"$(ANACONDA_HOME)/bin/conda" config --set ssl_verify false
 	@"$(ANACONDA_HOME)/bin/conda" config --add channels birdhouse
 
 .PHONY: conda_env
-conda_env: anaconda
-	"$(ANACONDA_HOME)/bin/conda" create -n $(CONDA_ENV) -c birdhouse --yes python=2.7 setuptools pyopenssl genshi mako
+conda_env: anaconda conda_config
+	@-"$(ANACONDA_HOME)/bin/conda" create -n $(CONDA_ENV) -c birdhouse --yes python setuptools pyopenssl genshi mako
 
 ## Build targets
 
@@ -155,7 +156,7 @@ sysinstall: bootstrap.sh requirements.sh
 	@bash requirements.sh
 
 .PHONY: install
-install: bootstrap conda_config
+install: bootstrap
 	@echo "Installing application with buildout ..."
 	bash -c "source $(ANACONDA_HOME)/bin/activate $(CONDA_ENV);bin/buildout -c custom.cfg"
 
