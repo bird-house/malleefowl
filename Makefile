@@ -1,4 +1,4 @@
-VERSION := 0.1.2
+VERSION := 0.2.0
 RELEASE := master
 
 # Application
@@ -11,7 +11,8 @@ CPU_ARCH := $(shell uname -m 2>/dev/null || uname -p 2>/dev/null || echo "unknow
 
 # Anaconda 
 ANACONDA_HOME ?= $(HOME)/anaconda
-CONDA_ENV := $(APP_NAME)
+CONDA_ENV := birdhouse
+PREFIX := $(HOME)/.conda/envs/$(CONDA_ENV)
 
 # choose anaconda installer depending on your OS
 ANACONDA_URL = http://repo.continuum.io/miniconda
@@ -55,10 +56,10 @@ help:
 	@echo "\t docs        \t- Generates HTML documentation with Sphinx. Open in you browser: docs/build/html/index.html"
 	@echo "\t selfupdate  \t- Updates this Makefile."
 	@echo "\nSupervisor targets:\n"
-	@echo "\t start       \t- Starts supervisor service: $(ANACONDA_HOME)/etc/init.d/supervisord start"
-	@echo "\t stop        \t- Stops supervisor service: $(ANACONDA_HOME)/etc/init.d/supervisord stop"
-	@echo "\t restart     \t- Restarts supervisor service: $(ANACONDA_HOME)/etc/init.d/supervisord restart"
-	@echo "\t status      \t- Supervisor status: $(ANACONDA_HOME)/bin/supervisorctl status"
+	@echo "\t start       \t- Starts supervisor service: $(PREFIX)/etc/init.d/supervisord start"
+	@echo "\t stop        \t- Stops supervisor service: $(PREFIX)/etc/init.d/supervisord stop"
+	@echo "\t restart     \t- Restarts supervisor service: $(PREFIX)/etc/init.d/supervisord restart"
+	@echo "\t status      \t- Supervisor status: $(PREFIX)/bin/supervisorctl status"
 	@echo "\nDocker targets:\n"
 	@echo "\t Dockerfile  \t- Generates a Dockerfile for this application."
 	@echo "\t dockerbuild \t- Build a docker image for this application."
@@ -74,6 +75,7 @@ info:
 	@echo "\t CPU_ARCH         \t= $(CPU_ARCH)"
 	@echo "\t Anaconda         \t= $(FN)"
 	@echo "\t Anaconda Home    \t= $(ANACONDA_HOME)"
+	@echo "\t Birdhouse Env    \t= $(PREFIX)"
 	@echo "\t APP_NAME         \t= $(APP_NAME)"
 	@echo "\t APP_ROOT         \t= $(APP_ROOT)"
 	@echo "\t DOWNLOAD_CACHE   \t= $(DOWNLOAD_CACHE)"
@@ -135,11 +137,12 @@ anaconda:
 conda_config: anaconda
 	@echo "Update ~/.condarc"
 	@"$(ANACONDA_HOME)/bin/conda" config --set ssl_verify false
+	@"$(ANACONDA_HOME)/bin/conda" config --add channels defaults
 	@"$(ANACONDA_HOME)/bin/conda" config --add channels birdhouse
 
 .PHONY: conda_env
 conda_env: anaconda conda_config
-	@-"$(ANACONDA_HOME)/bin/conda" create -n $(CONDA_ENV) -c birdhouse --yes python setuptools pyopenssl genshi mako
+	@test -d $(PREFIX) || "$(ANACONDA_HOME)/bin/conda" create -m -p $(PREFIX) -c birdhouse --yes python setuptools pyopenssl genshi mako
 
 ## Build targets
 
@@ -201,22 +204,22 @@ selfupdate: bootstrap.sh
 .PHONY: start
 start:
 	@echo "Starting supervisor service ..."
-	$(ANACONDA_HOME)/etc/init.d/supervisord start
+	$(PREFIX)/etc/init.d/supervisord start
 
 .PHONY: stop
 stop:
 	@echo "Stopping supervisor service ..."
-	$(ANACONDA_HOME)/etc/init.d/supervisord stop
+	$(PREFIX)/etc/init.d/supervisord stop
 
 .PHONY: restart
 restart:
 	@echo "Restarting supervisor service ..."
-	$(ANACONDA_HOME)/etc/init.d/supervisord restart
+	$(PREFIX)/etc/init.d/supervisord restart
 
 .PHONY: status
 status:
 	@echo "Supervisor status ..."
-	$(ANACONDA_HOME)/bin/supervisorctl status
+	$(PREFIX)/bin/supervisorctl status
 
 
 ## Docker targets
