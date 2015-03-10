@@ -1,4 +1,5 @@
 .. _installation:
+
 Installation
 ************
 Check out code from the malleefowl github repo and start the installation::

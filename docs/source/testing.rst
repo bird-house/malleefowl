@@ -1,4 +1,5 @@
-.. _installation:
+.. _testing:
+
 Running tests
 *************
 To run all unit tests one needs to fetch testdata with an esgf openid and start the malleefowl service::
