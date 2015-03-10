@@ -17,10 +17,10 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   installation/index
-   configuration/index
-   testing/index
-   docker/index
+   installation
+   configuration
+   testing
+   docker
    processes/index
    api/index
 
