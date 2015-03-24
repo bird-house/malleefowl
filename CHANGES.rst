@@ -1,6 +1,13 @@
 Change History
 **************
 
+0.2.0 (2015-03-24)
+==================
+
+* update sphinx docs.
+* using birdhouse environment.
+* fixed mako_cache path.
+
 0.1.8 (2015-01-17)
 ==================
 
