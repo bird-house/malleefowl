@@ -3,7 +3,7 @@
 from setuptools import find_packages
 from setuptools import setup
 
-version = '0.222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222.0'
+version = '0.2.0'
 description = 'Malleefowl simplifies the usage of WPS and has some supporting WPS processes.'
 long_description = (
     open('README.rst').read() + '\n' +
