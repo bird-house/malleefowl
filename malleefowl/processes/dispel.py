@@ -2,7 +2,7 @@ from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
 from malleefowl.process import WPSProcess
-from malleefowl import restflow, config
+from malleefowl import config
 
 class DispelWorkflow(WPSProcess):
     def __init__(self):
