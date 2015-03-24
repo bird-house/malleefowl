@@ -38,6 +38,11 @@ def cache_path():
 def cache_url():
     return getConfigValue("cache", "cache_url")
 
+def mako_cache():
+    mako_cache = getConfigValue("cache", "mako_cache")
+    mkdir(mako_cache)
+    return mako_cache
+
 def archive_root():
     archive_root = None
     try:
@@ -51,8 +56,5 @@ def archive_root():
         archive_root = [path.strip() for path in archive_root.split(':')]
     return archive_root
 
-def mako_cache():
-    mako_cache = getConfigValue("malleefowl", "mako_cache")
-    mkdir(mako_cache)
-    return mako_cache
+
 
