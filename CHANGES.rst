@@ -1,6 +1,12 @@
 Change History
 **************
 
+0.2.1 (2015-mm-dd)
+==================
+
+* fixed adagucserver installation
+* using buildout recipes: birdhousebuilder.recipe.adagucserver, birdhousebuilder.recipe.postgres
+
 0.2.0 (2015-03-24)
 ==================
 
