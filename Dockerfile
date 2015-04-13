@@ -1,6 +1,7 @@
 FROM ubuntu:14.04
 MAINTAINER Malleefowl WPS Application
 
+
 # Add user phoenix
 RUN useradd -d /home/phoenix -m phoenix
 
