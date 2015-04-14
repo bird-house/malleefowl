@@ -56,5 +56,9 @@ def archive_root():
         archive_root = [path.strip() for path in archive_root.split(':')]
     return archive_root
 
+def swift_auth_version():
+    return 1
 
+def swift_auth_url():
+    return "https://swift.dkrz.de/auth/v1.0"
 

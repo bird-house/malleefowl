@@ -26,6 +26,9 @@ def getLogger(name):
         logger.setLevel(logging.DEBUG)
     else:
         logger.setLevel(logging.INFO)
+    # capture security warnings
+    # https://urllib3.readthedocs.org/en/latest/security.html#insecureplatformwarning
+    logging.captureWarnings(True)
 
     formatter = logging.Formatter('%(asctime)-15s - %(process)d - %(levelname)-8s %(message)s')
 
