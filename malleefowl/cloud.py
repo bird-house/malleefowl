@@ -64,3 +64,49 @@ def download(storage_url, auth_token, container):
         os.chdir(prevdir)
 
     return files
+
+def get_temp_key(storage_url, auth_token):
+    """ Tries to get meta-temp-url key from account.
+    If not set, generate tempurl and save it to acocunt.
+    This requires at least account owner rights. """
+    import string
+    import random
+    
+    try:
+        account = client.get_account(storage_url, auth_token)
+    except ClientException:
+        logger.exception("get_account failed.")
+        return None
+
+    key = account[0].get('x-account-meta-temp-url-key')
+
+    if not key:
+        chars = string.ascii_lowercase + string.digits
+        key = ''.join(random.choice(chars) for x in range(32))
+        headers = {'x-account-meta-temp-url-key': key}
+        try:
+            client.post_account(storage_url, auth_token, headers)
+        except ClientException as e:
+            logger.exception("post_account failed.")
+            return None
+    return key
+
+def get_temp_url(storage_url, auth_token, container, objectname, expires=600):
+    import time
+    import urlparse
+    import hmac
+    from hashlib import sha1
+    
+    key = get_temp_key(storage_url, auth_token)
+    if not key:
+        return None
+
+    expires += int(time.time())
+    url_parts = urlparse.urlparse(storage_url)
+    path = "%s/%s/%s" % (url_parts.path, container, objectname)
+    base = "%s://%s" % (url_parts.scheme, url_parts.netloc)
+    hmac_body = 'GET\n%s\n%s' % (expires, path)
+    sig = hmac.new(key, hmac_body.encode("utf-8"), sha1).hexdigest()
+    url = '%s%s?temp_url_sig=%s&temp_url_expires=%s' % (
+        base, path, sig, expires)
+    return url
