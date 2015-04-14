@@ -110,3 +110,35 @@ def get_temp_url(storage_url, auth_token, container, objectname, expires=600):
     url = '%s%s?temp_url_sig=%s&temp_url_expires=%s' % (
         base, path, sig, expires)
     return url
+
+def download_urls(storage_url, auth_token, container):
+    options = dict(
+        os_storage_url = storage_url,
+        os_auth_token = auth_token,
+        skip_identical = True,
+        prefix = None,
+        marker = '',
+        header = [],
+        object_thredds = 10,
+        object_dd_thredds = 10,
+        container_thredds = 10,
+        no_download = True,
+        insecure = True,
+        all = False)
+
+    urls = []
+    
+    try:
+        swift = SwiftService(options=options)
+        down_iter = swift.download(container=container)
+        for down in down_iter:
+            if down['path'].endswith('/'):
+                continue
+            if down['success']:
+                logger.info('success: %s %s', down['path'], down['container'])
+                urls.append(get_temp_url(storage_url, auth_token, container, down['path']))
+    except:
+        logger.exception('download failed.')
+    return urls
+
+     
