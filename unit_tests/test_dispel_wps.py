@@ -8,10 +8,6 @@ from owslib.wps import monitorExecution
 from __init__ import TESTDATA, SERVICE, CREDENTIALS
 
 class EsgfWorkflowTestCase(TestCase):
-    """
-    Base TestCase class, sets up a wps with esgf access
-    """
-
     @classmethod
     def setUpClass(cls):
         from owslib.wps import WebProcessingService
@@ -56,10 +52,8 @@ class EsgfWorkflowTestCase(TestCase):
         nodes = yaml.load(raw)
         return nodes
 
-class EsgfDispelTestCase(EsgfWorkflowTestCase):
-
     @attr('online')
-    def test_dispel_dummy(self):
+    def test_esgf_workflow_dummy(self):
         inputs = [('nodes', str(self.nodes))]
         execution = self.wps.execute(identifier="dispel", inputs=inputs, output=[('output', True)])
         monitorExecution(execution, sleepSecs=1)
