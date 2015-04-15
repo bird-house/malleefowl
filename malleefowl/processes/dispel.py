@@ -31,6 +31,23 @@ def esgsearch_workflow(nodes, monitor):
         )
     return result
 
+def cloud_workflow(nodes, monitor):
+    from malleefowl.dispel import cloud_workflow as cloudwf
+
+    result = cloudwf(
+        # TODO: fix parameter providing
+        url=nodes['source']['service'],
+        download_params=dict(storage_url=nodes['source']['storage_url'],
+                             auth_token=nodes['source']['auth_token'],
+                             container=nodes['source']['container']),
+        doit_params=dict(url=nodes['worker']['service'],
+                         identifier=nodes['worker']['identifier'],
+                         resource=nodes['worker']['resource'],
+                         inputs=nodes['worker']['inputs']),
+        monitor = monitor,
+        )
+    return result
+
 class DispelWorkflow(WPSProcess):
     def __init__(self):
         WPSProcess.__init__(self,
@@ -91,7 +108,7 @@ class DispelWorkflow(WPSProcess):
 
         result = None
         if self.name.getValue() == 'cloud_workflow':
-            result = None
+            result = cloud_workflow(nodes, monitor)
         else:
             result = esgsearch_workflow(nodes, monitor)
 

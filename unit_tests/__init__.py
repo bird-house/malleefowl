@@ -4,7 +4,8 @@ import os
 SERVICE = "http://localhost:8091/wps"
 TESTDATA = {}
 CREDENTIALS = os.environ.get('TEST_CREDENTIALS')
-
+SWIFT_STORAGE_URL = os.environ.get('OS_STORAGE_URL')
+SWIFT_AUTH_TOKEN = os.environ.get('OS_AUTH_TOKEN')
 
 from os.path import join, dirname
 __testdata_filename__ = join(dirname(__file__), 'testdata.json')

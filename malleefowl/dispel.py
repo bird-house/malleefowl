@@ -181,7 +181,7 @@ def esgsearch_workflow(url, esgsearch_params, wget_params, doit_params, monitor=
     
     return wf_result
 
-def swift_workflow(url, download_params, doit_params, monitor=None):
+def cloud_workflow(url, download_params, doit_params, monitor=None):
     graph = WorkflowGraph()
 
     download = CloudDownload(url, **download_params)
@@ -191,7 +191,7 @@ def swift_workflow(url, download_params, doit_params, monitor=None):
 
     graph.connect(download, 'output', doit, 'resource')
 
-    result = simple_process.process(graph, inputs={})
+    result = simple_process.process(graph, inputs={ download : [{}] })
     wf_result = dict(source=result[(download.id, 'status_location')],
                      worker=result[(doit.id, 'status_location')])
     
