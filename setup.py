@@ -20,13 +20,14 @@ requires = [
     'owslib',
     'esgf-pyclient',
 #    'pyOpenSSL',
-#    'netCDF4',
-#    'pyYAML',
+    'netCDF4',
+    'pyYAML',
     'ConcurrentLogHandler',
 #    'xmltodict',
 #    'images2gif',
 #    'dateutil',
-#    'dispel4py',
+    'dispel4py',
+    'python-swiftclient',
     'nose',
     ]
 
