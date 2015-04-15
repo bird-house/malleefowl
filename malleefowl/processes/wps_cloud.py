@@ -1,6 +1,8 @@
 from malleefowl.process import WPSProcess
 from malleefowl import cloud
 
+from malleefowl import config
+
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
@@ -11,6 +13,25 @@ class Login(WPSProcess):
             title = "Login to Swift Cloud",
             version = "1.0",
             abstract="Login to Swift Cloud and get Token.")
+
+        self.auth_url = self.addLiteralInput(
+            identifier="auth_url",
+            title="Auth URL",
+            minOccurs=1,
+            maxOccurs=1,
+            default=config.swift_auth_url(),
+            type=type(''),
+            )
+
+        self.auth_version = self.addLiteralInput(
+            identifier="auth_version",
+            title="Auth Version",
+            minOccurs=1,
+            maxOccurs=1,
+            default=config.swift_auth_version(),
+            allowedValues=[1,2],
+            type=type(1),
+            )
 
         self.username = self.addLiteralInput(
             identifier="username",
@@ -43,7 +64,9 @@ class Login(WPSProcess):
     def execute(self):
         (storage_url, auth_token) = cloud.login(
             self.username.getValue(),
-            self.password.getValue())
+            self.password.getValue(),
+            auth_url = self.auth_url.getValue(),
+            auth_version = self.auth_version.getValue())
 
         self.storage_url.setValue( storage_url )
         self.auth_token.setValue( auth_token )
