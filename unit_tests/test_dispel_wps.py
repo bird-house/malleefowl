@@ -56,7 +56,7 @@ class EsgfWorkflowTestCase(TestCase):
         nodes = yaml.load(raw)
         return nodes
 
-class EsgfDispelTestCase(WpsTestCase):
+class EsgfDispelTestCase(EsgfWorkflowTestCase):
 
     @attr('online')
     def test_dispel_dummy(self):
