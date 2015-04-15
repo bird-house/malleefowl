@@ -4,6 +4,33 @@ logger = logging.getLogger(__name__)
 from malleefowl.process import WPSProcess
 from malleefowl import config
 
+def esgsearch_workflow(nodes, monitor):
+    from malleefowl.dispel import esgsearch_workflow as esgwf
+    esgsearch = nodes['esgsearch']
+    logger.debug('nodes=%s', nodes)
+
+    result = esgwf(
+        url=nodes['source']['service'],
+        esgsearch_params=dict(
+            constraints=esgsearch['facets'],
+            limit=100,
+            #search_type='File_Thredds',
+            search_type='File',
+            distrib=esgsearch['distrib'],
+            latest=esgsearch['latest'],
+            replica=esgsearch['replica'],
+            temporal=esgsearch['temporal'],
+            start=esgsearch['start'],
+            end=esgsearch['end']),
+        wget_params=dict(credentials=nodes['source']['credentials']),
+        doit_params=dict(url=nodes['worker']['service'],
+                         identifier=nodes['worker']['identifier'],
+                         resource=nodes['worker']['resource'],
+                         inputs=nodes['worker']['inputs']),
+        monitor = monitor,
+        )
+    return result
+
 class DispelWorkflow(WPSProcess):
     def __init__(self):
         WPSProcess.__init__(self,
@@ -21,7 +48,7 @@ class DispelWorkflow(WPSProcess):
             type=type(''),
             minOccurs=1,
             maxOccurs=1,
-            allowedValues=['esgsearch_workflow']
+            allowedValues=['esgsearch_workflow', 'cloud_workflow']
             )
 
         self.nodes= self.addComplexInput(
@@ -62,30 +89,12 @@ class DispelWorkflow(WPSProcess):
 
         self.show_status("Prepared ...", 5)
 
-        esgsearch = nodes['esgsearch']
-        from malleefowl.dispel import esgsearch_workflow
-        logger.debug('nodes=%s', nodes)
-        result = esgsearch_workflow(
-            url=nodes['source']['service'],
-            esgsearch_params=dict(
-                constraints=esgsearch['facets'],
-                limit=100,
-                #search_type='File_Thredds',
-                search_type='File',
-                distrib=esgsearch['distrib'],
-                latest=esgsearch['latest'],
-                replica=esgsearch['replica'],
-                temporal=esgsearch['temporal'],
-                start=esgsearch['start'],
-                end=esgsearch['end']),
-            wget_params=dict(credentials=nodes['source']['credentials']),
-            doit_params=dict(url=nodes['worker']['service'],
-                             identifier=nodes['worker']['identifier'],
-                             resource=nodes['worker']['resource'],
-                             inputs=nodes['worker']['inputs']),
-            monitor = monitor,
-            )
-        
+        result = None
+        if self.name.getValue() == 'cloud_workflow':
+            result = None
+        else:
+            result = esgsearch_workflow(nodes, monitor)
+
         import json
         outfile = self.mktempfile(suffix='.json')
         with open(outfile, 'w') as fp:
@@ -93,5 +102,8 @@ class DispelWorkflow(WPSProcess):
         self.output.setValue( outfile )
 
         self.show_status("workflow ... done", 100)
+
+    
+        
 
 

@@ -73,9 +73,7 @@ class BaseWPS(GenericPE):
 
 class GenericWPS(BaseWPS):
     def _process(self, inputs):
-        print inputs
         result = self.execute()
-        print result
         return result
 
 class EsgSearch(BaseWPS):
@@ -141,6 +139,28 @@ class Wget(BaseWPS):
         result['output'] = urls
         return result
 
+class CloudDownload(BaseWPS):
+    def __init__(self, url, storage_url, auth_token, container):
+        BaseWPS.__init__(self, url, 'cloud_download', output='output')
+        self.storage_url = storage_url
+        self.auth_token = auth_token
+        self.container = container
+
+    def _process(self, inputs):
+        self.wps_inputs.append( ('storage_url', self.storage_url) )
+        self.wps_inputs.append( ('auth_token', self.auth_token) )
+        self.wps_inputs.append( ('container', self.container) )
+        result = self.execute()
+
+        # read json document with list of urls
+        import json
+        import urllib2
+        urls = json.load(urllib2.urlopen(result['output']))
+        if len(urls) == 0:
+            raise Exception('Could not retrieve any files')
+        result['output'] = urls
+        return result
+
 def esgsearch_workflow(url, esgsearch_params, wget_params, doit_params, monitor=None):
     graph = WorkflowGraph()
 
@@ -157,6 +177,22 @@ def esgsearch_workflow(url, esgsearch_params, wget_params, doit_params, monitor=
 
     result = simple_process.process(graph, inputs={ esgsearch : [{}] })
     wf_result = dict(source=result[(wget.id, 'status_location')],
+                     worker=result[(doit.id, 'status_location')])
+    
+    return wf_result
+
+def swift_workflow(url, download_params, doit_params, monitor=None):
+    graph = WorkflowGraph()
+
+    download = CloudDownload(url, **download_params)
+    download.set_monitor(monitor)
+    doit = GenericWPS(**doit_params)
+    doit.set_monitor(monitor)
+
+    graph.connect(download, 'output', doit, 'resource')
+
+    result = simple_process.process(graph, inputs={})
+    wf_result = dict(source=result[(download.id, 'status_location')],
                      worker=result[(doit.id, 'status_location')])
     
     return wf_result

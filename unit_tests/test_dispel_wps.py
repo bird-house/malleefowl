@@ -7,9 +7,9 @@ from owslib.wps import monitorExecution
 
 from __init__ import TESTDATA, SERVICE, CREDENTIALS
 
-class WpsTestCase(TestCase):
+class EsgfWorkflowTestCase(TestCase):
     """
-    Base TestCase class, sets up a wps
+    Base TestCase class, sets up a wps with esgf access
     """
 
     @classmethod
@@ -56,7 +56,7 @@ class WpsTestCase(TestCase):
         nodes = yaml.load(raw)
         return nodes
 
-class DispelTestCase(WpsTestCase):
+class EsgfDispelTestCase(WpsTestCase):
 
     @attr('online')
     def test_dispel_dummy(self):
