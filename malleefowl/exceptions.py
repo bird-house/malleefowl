@@ -4,3 +4,5 @@ class MyProxyLogonError(Exception):
 class DownloadException(Exception):
     pass
 
+class ConfigurationException(Exception):
+    pass
