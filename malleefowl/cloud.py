@@ -23,12 +23,12 @@ def login(username, password, auth_url=None, auth_version=None):
         raise
     return storage_url, auth_token
 
-def download(storage_url, auth_token, container):
+def download(storage_url, auth_token, container, prefix=None):
     options = dict(
         os_storage_url = storage_url,
         os_auth_token = auth_token,
         skip_identical = True,
-        prefix = None,
+        prefix = prefix,
         marker = '',
         header = [],
         object_thredds = 10,
@@ -115,12 +115,12 @@ def get_temp_url(storage_url, auth_token, container, objectname, expires=600):
         base, path, sig, expires)
     return url
 
-def download_urls(storage_url, auth_token, container):
+def download_urls(storage_url, auth_token, container, prefix=None):
     options = dict(
         os_storage_url = storage_url,
         os_auth_token = auth_token,
         skip_identical = True,
-        prefix = None,
+        prefix = prefix,
         marker = '',
         header = [],
         object_thredds = 10,

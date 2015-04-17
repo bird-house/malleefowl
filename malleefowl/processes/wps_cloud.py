@@ -100,7 +100,7 @@ class Login(WPSProcess):
 
 class Download(SwiftProcess):
     def __init__(self):
-        WPSProcess.__init__(self,
+        SwiftProcess.__init__(self,
             identifier = "cloud_download",
             title = "Download files from Swift Cloud",
             version = "1.0",
@@ -111,6 +111,15 @@ class Download(SwiftProcess):
             title = "Container",
             abstract = "Container",
             minOccurs=1,
+            maxOccurs=1,
+            type=type(''),
+            )
+
+        self.prefix = self.addLiteralInput(
+            identifier = "prefix",
+            title = "Prefix",
+            abstract = "Example: test/subfolder",
+            minOccurs=0,
             maxOccurs=1,
             type=type(''),
             )
@@ -128,7 +137,8 @@ class Download(SwiftProcess):
         files = cloud.download(
             self.storage_url.getValue(),
             self.auth_token.getValue(),
-            self.container.getValue())
+            self.container.getValue(),
+            self.prefix.getValue())
 
         import json
         outfile = self.mktempfile(suffix='.json')
@@ -139,7 +149,7 @@ class Download(SwiftProcess):
 
 class DownloadUrls(SwiftProcess):
     def __init__(self):
-        WPSProcess.__init__(self,
+        SwiftProcess.__init__(self,
             identifier = "cloud_download_urls",
             title = "Provide download URLs for files from Swift Cloud",
             version = "1.0",
@@ -150,6 +160,15 @@ class DownloadUrls(SwiftProcess):
             title = "Container",
             abstract = "Container",
             minOccurs=1,
+            maxOccurs=1,
+            type=type(''),
+            )
+
+        self.prefix = self.addLiteralInput(
+            identifier = "prefix",
+            title = "Prefix",
+            abstract = "Example: test/subfolder",
+            minOccurs=0,
             maxOccurs=1,
             type=type(''),
             )
@@ -167,7 +186,8 @@ class DownloadUrls(SwiftProcess):
         files = cloud.download_urls(
             self.storage_url.getValue(),
             self.auth_token.getValue(),
-            self.container.getValue())
+            self.container.getValue(),
+            self.prefix.getValue())
 
         import json
         outfile = self.mktempfile(suffix='.json')
