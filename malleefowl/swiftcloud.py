@@ -39,8 +39,16 @@ def download(storage_url, auth_token, container, prefix=None):
         all = False)
 
     # TODO: need a better download path
+    from urlparse import urlparse
+    parsed_url = urlparse(storage_url)
+    
     prevdir = os.getcwd()
-    download_path = os.path.join(config.cache_path(), container)
+    download_path = os.path.join(config.cache_path(),
+                                 os.path.basename(parsed_url.path))
+    if not os.path.exists(download_path):
+        os.mkdir(download_path)
+    download_path = os.path.join(download_path,
+                                 container)
     if not os.path.exists(download_path):
         os.mkdir(download_path)
     os.chdir(download_path)
