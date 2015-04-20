@@ -3,7 +3,7 @@ __all__ = [
            "esgf_logon",
            "esgsearch",
            "wget",
-           "dispel", 
+           "wps_dispel", 
 #           "restflow",
            "dummy",
 #           "map",

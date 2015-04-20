@@ -139,9 +139,9 @@ class Wget(BaseWPS):
         result['output'] = urls
         return result
 
-class CloudDownload(BaseWPS):
+class SwiftDownload(BaseWPS):
     def __init__(self, url, storage_url, auth_token, container):
-        BaseWPS.__init__(self, url, 'cloud_download', output='output')
+        BaseWPS.__init__(self, url, 'swift_download', output='output')
         self.storage_url = storage_url
         self.auth_token = auth_token
         self.container = container
@@ -181,10 +181,10 @@ def esgsearch_workflow(url, esgsearch_params, wget_params, doit_params, monitor=
     
     return wf_result
 
-def cloud_workflow(url, download_params, doit_params, monitor=None):
+def swift_workflow(url, download_params, doit_params, monitor=None):
     graph = WorkflowGraph()
 
-    download = CloudDownload(url, **download_params)
+    download = SwiftDownload(url, **download_params)
     download.set_monitor(monitor)
     doit = GenericWPS(**doit_params)
     doit.set_monitor(monitor)

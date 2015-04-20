@@ -6,6 +6,7 @@ Change History
 
 * fixed adagucserver installation
 * using buildout recipes: birdhousebuilder.recipe.adagucserver, birdhousebuilder.recipe.postgres
+* swift cloud access processes added.
 
 0.2.0 (2015-03-24)
 ==================

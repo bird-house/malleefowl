@@ -31,10 +31,10 @@ def esgsearch_workflow(nodes, monitor):
         )
     return result
 
-def cloud_workflow(nodes, monitor):
-    from malleefowl.dispel import cloud_workflow as cloudwf
+def swift_workflow(nodes, monitor):
+    from malleefowl.dispel import swift_workflow as swiftwf
 
-    result = cloudwf(
+    result = swiftwf(
         # TODO: fix parameter providing
         url=nodes['source']['service'],
         download_params=dict(storage_url=nodes['source']['storage_url'],
@@ -53,7 +53,7 @@ class DispelWorkflow(WPSProcess):
         WPSProcess.__init__(self,
             identifier = "dispel",
             title = "Run Dispel Workflow",
-            version = "0.1",
+            version = "0.2",
             metadata=[],
             abstract="Runs Workflow with dispel4py.")
 
@@ -65,7 +65,7 @@ class DispelWorkflow(WPSProcess):
             type=type(''),
             minOccurs=1,
             maxOccurs=1,
-            allowedValues=['esgsearch_workflow', 'cloud_workflow']
+            allowedValues=['esgsearch_workflow', 'swift_workflow']
             )
 
         self.nodes= self.addComplexInput(
@@ -107,8 +107,8 @@ class DispelWorkflow(WPSProcess):
         self.show_status("Prepared ...", 5)
 
         result = None
-        if self.name.getValue() == 'cloud_workflow':
-            result = cloud_workflow(nodes, monitor)
+        if self.name.getValue() == 'swift_workflow':
+            result = swift_workflow(nodes, monitor)
         else:
             result = esgsearch_workflow(nodes, monitor)
 
