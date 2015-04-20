@@ -8,5 +8,5 @@ __all__ = [
            "dummy",
 #           "map",
            "publish",
-           "wps_cloud"
+           "wps_swift"
            ]
