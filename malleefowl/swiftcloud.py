@@ -53,6 +53,7 @@ def download(storage_url, auth_token, container, prefix=None, content_type=['app
     files = []
     
     try:
+        # TODO: filter cloud download ... before download starts
         swift = SwiftService(options=options)
         down_iter = swift.download(container=container)
         for down in down_iter:
