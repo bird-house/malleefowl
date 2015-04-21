@@ -23,7 +23,7 @@ def login(username, password, auth_url=None, auth_version=None):
         raise
     return storage_url, auth_token
 
-def download(storage_url, auth_token, container, prefix=None):
+def download(storage_url, auth_token, container, prefix=None, content_type=['application/x-netcdf']):
     options = dict(
         os_storage_url = storage_url,
         os_auth_token = auth_token,
@@ -57,6 +57,9 @@ def download(storage_url, auth_token, container, prefix=None):
         down_iter = swift.download(container=container)
         for down in down_iter:
             if down['path'].endswith('/'):
+                continue
+            headers = down['response_dict']['headers']
+            if not (content_type is None or headers['content-type'] in content_type): # filter content-type
                 continue
             if down['success']:
                 logger.info('success: %s %s', down['path'], down['container'])
