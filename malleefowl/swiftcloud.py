@@ -44,13 +44,10 @@ def download(storage_url, auth_token, container, prefix=None):
     
     prevdir = os.getcwd()
     download_path = os.path.join(config.cache_path(),
-                                 os.path.basename(parsed_url.path))
-    if not os.path.exists(download_path):
-        os.mkdir(download_path)
-    download_path = os.path.join(download_path,
+                                 os.path.basename(parsed_url.path),
                                  container)
     if not os.path.exists(download_path):
-        os.mkdir(download_path)
+        os.makedirs(download_path)
     os.chdir(download_path)
 
     files = []

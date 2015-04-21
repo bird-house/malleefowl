@@ -140,16 +140,18 @@ class Wget(BaseWPS):
         return result
 
 class SwiftDownload(BaseWPS):
-    def __init__(self, url, storage_url, auth_token, container):
+    def __init__(self, url, storage_url, auth_token, container, prefix):
         BaseWPS.__init__(self, url, 'swift_download', output='output')
         self.storage_url = storage_url
         self.auth_token = auth_token
         self.container = container
+        self.prefix = prefix
 
     def _process(self, inputs):
         self.wps_inputs.append( ('storage_url', self.storage_url) )
         self.wps_inputs.append( ('auth_token', self.auth_token) )
         self.wps_inputs.append( ('container', self.container) )
+        self.wps_inputs.append( ('prefix', self.prefix) )
         result = self.execute()
 
         # read json document with list of urls
@@ -183,6 +185,8 @@ def esgsearch_workflow(url, esgsearch_params, wget_params, doit_params, monitor=
 
 def swift_workflow(url, download_params, doit_params, monitor=None):
     graph = WorkflowGraph()
+
+    logger.debug("download params = %s", download_params)
 
     download = SwiftDownload(url, **download_params)
     download.set_monitor(monitor)
