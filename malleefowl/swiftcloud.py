@@ -155,3 +155,28 @@ def download_urls(storage_url, auth_token, container, prefix=None):
     return urls
 
      
+def upload(storage_url, auth_token, container, prefix=None, files=[], monitor=None):
+    from swiftclient.service import SwiftUploadObject
+
+    options = dict(
+        os_storage_url = storage_url,
+        os_auth_token = auth_token,
+        skip_identical = True)
+
+    objects = []
+    for file_path in files:
+        objects.append( SwiftUploadObject(file_path, object_name=os.path.basename(file_path)) )
+
+    if prefix:
+        container = container + '/' + prefix.strip('/')
+
+    swift = SwiftService(options=options)
+    result = []
+    for upload in swift.upload(container, objects=objects):
+        result.append(upload)
+        if upload.has_key('object'):
+            if monitor:
+                progress = int(len(result)*100.0/len(objects))
+                monitor("uploaded %s" % upload['object'], progress)
+    return result
+    
