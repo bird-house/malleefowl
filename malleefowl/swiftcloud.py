@@ -165,10 +165,10 @@ def upload(storage_url, auth_token, container, prefix=None, files=[], monitor=No
 
     objects = []
     for file_path in files:
-        objects.append( SwiftUploadObject(file_path, object_name=os.path.basename(file_path)) )
-
-    if prefix:
-        container = container + '/' + prefix.strip('/')
+        object_name=os.path.basename(file_path)
+        if prefix:
+            object_name = prefix.strip('/') + '/' + object_name
+        objects.append( SwiftUploadObject(file_path, object_name=object_name ) )
 
     swift = SwiftService(options=options)
     result = []
