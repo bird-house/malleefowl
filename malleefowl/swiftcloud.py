@@ -170,13 +170,17 @@ def upload(storage_url, auth_token, container, prefix=None, files=[], monitor=No
             object_name = prefix.strip('/') + '/' + object_name
         objects.append( SwiftUploadObject(file_path, object_name=object_name ) )
 
-    swift = SwiftService(options=options)
     result = []
-    for upload in swift.upload(container, objects=objects):
-        result.append(upload)
-        if upload.has_key('object'):
-            if monitor:
-                progress = int(len(result)*100.0/len(objects))
-                monitor("uploaded %s" % upload['object'], progress)
+    with SwiftService(options=options) as swift:
+        try:
+            for upload in swift.upload(container, objects=objects):
+                result.append(upload)
+                if upload.has_key('object'):
+                    if monitor:
+                        progress = int(len(result)*100.0/len(objects))
+                        monitor("uploaded %s" % upload['object'], progress)
+        except:
+            logger.exception('could not upload files to swift cloud')
+            raise
     return result
     
