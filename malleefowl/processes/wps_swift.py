@@ -195,4 +195,62 @@ class SwiftDownloadUrls(SwiftProcess):
             json.dump(obj=files, fp=fp, indent=4, sort_keys=True)
         self.output.setValue( outfile )
 
+class SwiftUpload(SwiftProcess):
+    def __init__(self):
+        SwiftProcess.__init__(self,
+            identifier = "swift_upload",
+            title = "Upload files to Swift Cloud",
+            version = "1.0",
+            abstract="Upload files to Swift Cloud and provides upload status as JSON Document.")       
 
+        self.container = self.addLiteralInput(
+            identifier = "container",
+            title = "Container",
+            abstract = "Container",
+            minOccurs=1,
+            maxOccurs=1,
+            type=type(''),
+            )
+
+        self.prefix = self.addLiteralInput(
+            identifier = "prefix",
+            title = "Prefix",
+            abstract = "Example: test/subfolder",
+            minOccurs=0,
+            maxOccurs=1,
+            type=type(''),
+            )
+
+        self.resource = self.addComplexInput(
+            identifier="resource",
+            title="Files",
+            abstract="Files to upload",
+            minOccurs=0,
+            maxOccurs=1024,
+            maxmegabites=50000,
+            formats=[{"mimeType":"application/x-netcdf"}],
+            )
+
+        self.output = self.addComplexOutput(
+            identifier="output",
+            title="Status",
+            abstract="JSON document with list of upload status",
+            metadata=[],
+            formats=[{"mimeType":"test/json"}],
+            asReference=True,
+            )
+
+    def execute(self):
+        result = swiftcloud.upload(
+            storage_url = self.storage_url.getValue(),
+            auth_token = self.auth_token.getValue(),
+            container = self.container.getValue(),
+            prefix = self.prefix.getValue(),
+            files = self.getInputValues(identifier='resource'),
+            monitor = self.show_status)
+
+        import json
+        outfile = self.mktempfile(suffix='.json')
+        with open(outfile, 'w') as fp:
+            json.dump(obj=result, fp=fp, indent=4, sort_keys=True)
+        self.output.setValue( outfile )
