@@ -92,6 +92,8 @@ Research
   pypi/django-simple-elasticsearch
   http://spark.apache.org/
 * check cache for downloads
+conda caching
+buildout caching
 https://code.google.com/p/python-cache/
 memcache:
 https://cloud.google.com/appengine/docs/python/memcache/clientclass?csw=1
