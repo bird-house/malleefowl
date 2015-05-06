@@ -36,7 +36,7 @@ class Download(WPSProcess):
             title="Downloaded files",
             abstract="Json document with list of downloaded files with file url.",
             metadata=[],
-            formats=[{"mimeType":"test/json"}],
+            formats=[{"mimeType":"text/json"}],
             asReference=True,
             )
 
