@@ -3,7 +3,7 @@
 from setuptools import find_packages
 from setuptools import setup
 
-version = '0.2.0'
+version = '0.2.1'
 description = 'Malleefowl simplifies the usage of WPS and has some supporting WPS processes.'
 long_description = (
     open('README.rst').read() + '\n' +
@@ -22,7 +22,6 @@ requires = [
 #    'pyOpenSSL',
     'netCDF4',
     'pyYAML',
-    'ConcurrentLogHandler',
 #    'xmltodict',
 #    'images2gif',
 #    'dateutil',

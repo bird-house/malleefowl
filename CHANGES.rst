@@ -1,12 +1,13 @@
 Change History
 **************
 
-0.2.1 (2015-mm-dd)
+0.2.1 (2015-05-18)
 ==================
 
 * fixed adagucserver installation
 * using buildout recipes: birdhousebuilder.recipe.adagucserver, birdhousebuilder.recipe.postgres
 * swift cloud access processes added.
+* log to stderr/supervisor.
 
 0.2.0 (2015-03-24)
 ==================
