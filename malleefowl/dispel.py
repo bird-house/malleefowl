@@ -2,6 +2,9 @@ from dispel4py.workflow_graph import WorkflowGraph
 from dispel4py import simple_process
 from dispel4py.core import GenericPE, NAME, TYPE, GROUPING
 
+import os
+from malleefowl.config import mako_cache
+
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
@@ -162,6 +165,16 @@ class SwiftDownload(BaseWPS):
             raise Exception('Could not retrieve any files')
         result['output'] = urls
         return result
+
+def generate(nodes):
+    from mako.template import Template
+    mytemplate = Template(
+        filename=os.path.join(os.path.dirname(__file__), 'templates', 'simple_workflow.yaml'),
+        output_encoding='ascii',
+        input_encoding='utf-8',
+        encoding_errors='replace',
+        module_directory=mako_cache())
+    return mytemplate.render(nodes=nodes)
 
 def esgsearch_workflow(url, esgsearch_params, download_params, doit_params, monitor=None):
     graph = WorkflowGraph()

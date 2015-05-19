@@ -32,7 +32,7 @@ def timeout():
 
 def cache_path():
     mypath = getConfigValue("cache", "cache_path")
-    if len(mypath) == 0:
+    if mypath is None or len(mypath) == 0:
         mypath = os.path.join(os.sep, "tmp", "cache")
     mkdir(mypath)
     return mypath
@@ -41,7 +41,7 @@ def cache_url():
     return getConfigValue("cache", "cache_url")
 
 def mako_cache():
-    mako_cache = getConfigValue("cache", "mako_cache")
+    mako_cache = os.path.join(cache_path(), 'mako')
     mkdir(mako_cache)
     return mako_cache
 

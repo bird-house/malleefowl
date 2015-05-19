@@ -1,0 +1,18 @@
+workflow:
+  name: task_id
+
+source:
+  swift:
+    container: MyTest
+  esgf:
+    credentials: http
+    distrib: false
+    replica: false
+  files:
+    - http
+    - http 
+    
+worker:
+  identifier: cdo_sinfo
+  url: http://localhost:8092/wps
+  inputs: [['param1', 'value1'], ['param2', 'value2']]

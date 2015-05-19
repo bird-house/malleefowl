@@ -1,5 +1,4 @@
 import os
-import tempfile
 
 from malleefowl.config import mako_cache
 
