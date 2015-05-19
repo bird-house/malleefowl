@@ -1,5 +1,5 @@
 workflow:
-  name: task_id
+  name: ${workflow.get('name')}
 
 source:
   swift:
@@ -13,6 +13,6 @@ source:
     - http 
     
 worker:
-  identifier: cdo_sinfo
-  url: http://localhost:8092/wps
-  inputs: [['param1', 'value1'], ['param2', 'value2']]
+  identifier: ${workflow['worker']['identifier']}
+  url: ${workflow['worker']['url']}
+  inputs: ${workflow['worker']['inputs']}
