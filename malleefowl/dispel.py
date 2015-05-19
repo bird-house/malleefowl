@@ -120,9 +120,9 @@ class EsgSearch(BaseWPS):
         result['output'] = urls
         return result
 
-class Wget(BaseWPS):
+class Download(BaseWPS):
     def __init__(self, url, credentials=None):
-        BaseWPS.__init__(self, url, 'wget', output='output')
+        BaseWPS.__init__(self, url, 'download', output='output')
         self.credentials = credentials
 
     def _process(self, inputs):
@@ -163,22 +163,22 @@ class SwiftDownload(BaseWPS):
         result['output'] = urls
         return result
 
-def esgsearch_workflow(url, esgsearch_params, wget_params, doit_params, monitor=None):
+def esgsearch_workflow(url, esgsearch_params, download_params, doit_params, monitor=None):
     graph = WorkflowGraph()
 
     esgsearch = EsgSearch(url, **esgsearch_params)
     esgsearch.set_monitor(monitor)
-    wget = Wget(url, **wget_params)
-    wget.set_monitor(monitor)
+    download = Download(url, **download_params)
+    download.set_monitor(monitor)
     doit = GenericWPS(**doit_params)
     doit.set_monitor(monitor)
 
     # TODO: handle exceptions ... see dispel docs
-    graph.connect(esgsearch, 'output', wget, 'resource')
-    graph.connect(wget, 'output', doit, 'resource')
+    graph.connect(esgsearch, 'output', download, 'resource')
+    graph.connect(download, 'output', doit, 'resource')
 
     result = simple_process.process(graph, inputs={ esgsearch : [{}] })
-    wf_result = dict(source=result[(wget.id, 'status_location')],
+    wf_result = dict(source=result[(download.id, 'status_location')],
                      worker=result[(doit.id, 'status_location')])
     
     return wf_result

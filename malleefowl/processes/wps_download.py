@@ -7,9 +7,9 @@ logger = logging.getLogger(__name__)
 class Download(WPSProcess):
     def __init__(self):
         WPSProcess.__init__(self,
-            identifier = "wget",
+            identifier = "download",
             title = "Download files",
-            version = "1.0",
+            version = "0.2",
             abstract="Downloads files and provides file list as json document.")
 
         self.resource = self.addLiteralInput(

@@ -24,7 +24,7 @@ def esgsearch_workflow(nodes, monitor):
             temporal=esgsearch['temporal'],
             start=esgsearch['start'],
             end=esgsearch['end']),
-        wget_params=dict(credentials=nodes['source']['credentials']),
+        download_params=dict(credentials=nodes['source']['credentials']),
         doit_params=dict(url=nodes['worker']['service'],
                          identifier=nodes['worker']['identifier'],
                          resource=nodes['worker']['resource'],
@@ -57,7 +57,7 @@ class DispelWorkflow(WPSProcess):
         WPSProcess.__init__(self,
             identifier = "dispel",
             title = "Run Dispel Workflow",
-            version = "0.2",
+            version = "0.3",
             metadata=[],
             abstract="Runs Workflow with dispel4py.")
 
