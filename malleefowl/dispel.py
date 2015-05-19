@@ -2,6 +2,8 @@ from dispel4py.workflow_graph import WorkflowGraph
 from dispel4py import simple_process
 from dispel4py.core import GenericPE, NAME, TYPE, GROUPING
 
+from malleefowl.config import wps_url
+
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
@@ -86,7 +88,7 @@ class EsgSearch(BaseWPS):
                  latest=True,
                  temporal=False,
                  start=None,
-                 end=None,):
+                 end=None):
         BaseWPS.__init__(self, url, 'esgsearch', output='output')
         self.constraints = constraints
         self.distrib = distrib
@@ -163,14 +165,24 @@ class SwiftDownload(BaseWPS):
         result['output'] = urls
         return result
 
-def esgsearch_workflow(url, esgsearch_params, download_params, doit_params, monitor=None):
+def esgf_workflow(source, worker, monitor=None):
     graph = WorkflowGraph()
-
-    esgsearch = EsgSearch(url, **esgsearch_params)
+    
+    esgsearch = EsgSearch(
+        url=wps_url(),
+        constraints=source.get('facets'),
+        limit=100,
+        search_type='File_Thredds',
+        distrib=source.get('distrib'),
+        replica=source.get('replica'),
+        latest=source.get('latest'),
+        temporal=source.get('temporal'),
+        start=source.get('start'),
+        end=source.get('end'))
     esgsearch.set_monitor(monitor)
-    download = Download(url, **download_params)
+    download = Download(url=wps_url(), credentials=source.get('credentials'))
     download.set_monitor(monitor)
-    doit = GenericWPS(**doit_params)
+    doit = GenericWPS(**worker)
     doit.set_monitor(monitor)
 
     # TODO: handle exceptions ... see dispel docs
@@ -183,14 +195,12 @@ def esgsearch_workflow(url, esgsearch_params, download_params, doit_params, moni
     
     return wf_result
 
-def swift_workflow(url, download_params, doit_params, monitor=None):
+def swift_workflow(source, worker, monitor=None):
     graph = WorkflowGraph()
 
-    logger.debug("download params = %s", download_params)
-
-    download = SwiftDownload(url, **download_params)
+    download = SwiftDownload(url=wps_url(), **source)
     download.set_monitor(monitor)
-    doit = GenericWPS(**doit_params)
+    doit = GenericWPS(**worker)
     doit.set_monitor(monitor)
 
     graph.connect(download, 'output', doit, 'resource')
@@ -200,4 +210,12 @@ def swift_workflow(url, download_params, doit_params, monitor=None):
                      worker=result[(doit.id, 'status_location')])
     
     return wf_result
+
+def run(workflow, monitor=None):
+    if workflow['source'].has_key('swift'):
+        result = swift_workflow(source=workflow['source']['swift'], worker=workflow['worker'], monitor=monitor)
+    else:
+        result = esgf_workflow(source=workflow['source']['esgf'], worker=workflow['worker'], monitor=monitor)
+    return result
+    
 

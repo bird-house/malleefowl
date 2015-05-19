@@ -18,6 +18,9 @@ def getConfigValue(*args):
         logger.exception("Could not get config value for %s", args)
     return value
 
+def wps_url():
+    return wpsconfig.getConfigValue("wps", "serveraddress")
+
 def thredds_url():
     return wpsconfig.getConfigValue("malleefowl", "thredds_url")
     
