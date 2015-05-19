@@ -1,12 +1,9 @@
 
 __all__ = [
-           "esgf_logon",
-           "esgsearch",
-           "wget",
+           "wps_esgflogon",
+           "wps_esgsearch",
+           "wps_download",
            "wps_dispel", 
-#           "restflow",
-           "dummy",
-#           "map",
-           "publish",
+           "wps_dummy",
            "wps_swift"
            ]

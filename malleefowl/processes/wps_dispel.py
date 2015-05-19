@@ -1,8 +1,10 @@
-from malleefowl import wpslogging as logging
-logger = logging.getLogger(__name__)
+import yaml
 
 from malleefowl.process import WPSProcess
 from malleefowl import config
+
+from malleefowl import wpslogging as logging
+logger = logging.getLogger(__name__)
 
 def esgsearch_workflow(nodes, monitor):
     from malleefowl.dispel import esgsearch_workflow as esgwf
@@ -77,7 +79,7 @@ class DispelWorkflow(WPSProcess):
             metadata=[],
             minOccurs=1,
             maxOccurs=1,
-            formats=[{"mimeType":"text/json"}],
+            formats=[{"mimeType":"text/yaml"}],
             maxmegabites=20
             )
         
@@ -95,15 +97,10 @@ class DispelWorkflow(WPSProcess):
         
         self.show_status("Starting ...", 0)
 
-        import os
-        logger.debug('environ: %s', os.environ)
-
         # TODO: handle multiple values (fix in pywps)
         # http://pymotw.com/2/json/
         nodes = None
         with open(self.nodes.getValue()) as fp:
-            import yaml
-            # TODO: fix json encode to unicode
             nodes = yaml.load(fp)
 
         self.show_status("Prepared ...", 5)
