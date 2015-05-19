@@ -2,7 +2,7 @@ import yaml
 
 from malleefowl.process import WPSProcess
 from malleefowl import config
-from malleefowl.dispel import run
+from malleefowl.workflow import run
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 class DispelWorkflow(WPSProcess):
     def __init__(self):
         WPSProcess.__init__(self,
-            identifier = "dispel",
+            identifier = "workflow",
             title = "Workflow",
             version = "0.3",
             metadata=[],
