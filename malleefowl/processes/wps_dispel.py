@@ -33,6 +33,7 @@ def esgsearch_workflow(nodes, monitor):
 
 def swift_workflow(nodes, monitor):
     from malleefowl.dispel import swift_workflow as swiftwf
+    logger.debug('nodes=%s', nodes)
 
     result = swiftwf(
         # TODO: fix parameter providing
