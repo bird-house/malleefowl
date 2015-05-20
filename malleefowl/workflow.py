@@ -36,16 +36,20 @@ class BaseWPS(GenericPE):
         while execution.isComplete() == False:
             execution.checkStatus(sleepSecs=1)
             self._monitor(execution.statusMessage, execution.percentCompleted)
-        
+
+        self._monitor(execution.statusMessage, execution.percentCompleted)
         if execution.isSucceded():
             for output in execution.processOutputs:               
                 if output.reference is not None:
-                    logger.info('{0}.identifier={0}.reference ({0}.mimeType)'.format(output))
+                    msg = '{0}.identifier={0}.reference ({0}.mimeType)'.format(output)
+                    self._monitor(msg, execution.percentCompleted)
                 else:
-                    logger.info('{0}={1}'.format(output.identifier, ", ".join(output.data) ))
+                    msg = '{0}={1}'.format(output.identifier, ", ".join(output.data) )
+                    self._monitor(msg, execution.percentCompleted)
         else:
             for ex in execution.errors:
-                logger.error('code={0}.code, locator={0}.locator, text={0}.text'.format(ex))
+                msg = 'code={0}.code, locator={0}.locator, text={0}.text'.format(ex)
+                self._monitor(msg, execution.percentCompleted)
 
     def execute(self):
         output = [] # default: all outputs
