@@ -20,36 +20,36 @@ class BaseWPS(GenericPE):
         self.outputconnections['output'] = { NAME : 'output'}
         self.outputconnections['status'] = { NAME : 'status'}
         self.outputconnections['status_location'] = { NAME : 'status_location'}
-        self.monitor = None
+        self._monitor = None
 
     def set_monitor(self, monitor):
-        self.monitor = monitor
+        self._monitor = monitor
 
-    def _monitor(self, message, progress):
+    def monitor(self, message, progress):
         logger.info('Execution status={0}, progress={1}'.format(message, progress))
-        if self.monitor is not None:
-            self.monitor(message, progress)
+        if self._monitor:
+            self._monitor(message, progress)
 
     def monitor_execution(self, execution):
         logger.debug("status_location = %s", execution.statusLocation)
         
         while execution.isComplete() == False:
             execution.checkStatus(sleepSecs=1)
-            self._monitor(execution.statusMessage, execution.percentCompleted)
+            self.monitor(execution.statusMessage, execution.percentCompleted)
 
-        self._monitor(execution.statusMessage, execution.percentCompleted)
+        self.monitor(execution.statusMessage, execution.percentCompleted)
         if execution.isSucceded():
             for output in execution.processOutputs:               
                 if output.reference is not None:
                     msg = '{0}.identifier={0}.reference ({0}.mimeType)'.format(output)
-                    self._monitor(msg, execution.percentCompleted)
+                    self.monitor(msg, execution.percentCompleted)
                 else:
                     msg = '{0}={1}'.format(output.identifier, ", ".join(output.data) )
-                    self._monitor(msg, execution.percentCompleted)
+                    self.monitor(msg, execution.percentCompleted)
         else:
             for ex in execution.errors:
                 msg = 'code={0}.code, locator={0}.locator, text={0}.text'.format(ex)
-                self._monitor(msg, execution.percentCompleted)
+                self.monitor(msg, execution.percentCompleted)
 
     def execute(self):
         output = [] # default: all outputs
