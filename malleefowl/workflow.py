@@ -45,13 +45,13 @@ class BaseWPS(GenericPE):
         if execution.isSucceded():
             for output in execution.processOutputs:               
                 if output.reference is not None:
-                    msg = '{0}.identifier={0}.reference ({0}.mimeType)'.format(output)
+                    msg = '{0.identifier}={0.reference} ({0.mimeType})'.format(output)
                     self.monitor(msg, execution.percentCompleted)
                 else:
                     msg = '{0}={1}'.format(output.identifier, ", ".join(output.data) )
                     self.monitor(msg, execution.percentCompleted)
         else:
-            msg = '\n'.join(['code={0}.code, locator={0}.locator, text={0}.text'.format(ex) for ex in execution.errors])
+            msg = '\n'.join(['code={0.code}, locator={0.locator}, text={0.text}'.format(ex) for ex in execution.errors])
             self.monitor(msg, execution.percentCompleted, success=False)
 
     def execute(self):
@@ -180,7 +180,7 @@ def esgf_workflow(source, worker, monitor=None):
     esgsearch = EsgSearch(
         url=wps_url(),
         constraints=source.get('facets'),
-        limit=100,
+        limit=source.get('limit', 100),
         search_type='File_Thredds',
         distrib=source.get('distrib'),
         replica=source.get('replica'),
