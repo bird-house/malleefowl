@@ -9,7 +9,6 @@ from malleefowl import config
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
-
 class WPSProcess(PyWPSProcess):
     """This is the base class for all climdaps wps processes."""
 
@@ -53,43 +52,6 @@ class WPSProcess(PyWPSProcess):
             values = [values]
         return values
 
-class WorkerProcess(WPSProcess):
-    """This is the base class for all worker processes."""
-
-    def __init__(self, identifier, title, version, metadata=[], abstract=""):
-        WPSProcess.__init__(
-            self,
-            identifier = identifier,
-            title = title,
-            version = version,
-            metadata = metadata,
-            abstract = abstract)
-        
-        # complex input
-        # -------------
-
-        # TODO: needs some work ...
-        self.netcdf_url_in = self.addComplexInput(
-            identifier="file_identifier",
-            title="NetCDF File",
-            abstract="NetCDF File",
-            minOccurs=1,
-            maxOccurs=100,
-            maxmegabites=5000,
-            formats=[{"mimeType":"application/x-netcdf"}],
-            )
-
-    def get_nc_files(self):
-        nc_files = []
-        value = self.netcdf_url_in.getValue()
-        if value != None:
-            if type(value) == types.ListType:
-                nc_files = value
-            else:
-                nc_files = [value]
-
-        nc_files = map(os.path.abspath, nc_files)
-        return nc_files
 
 
 
