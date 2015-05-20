@@ -35,10 +35,7 @@ class DispelWorkflow(WPSProcess):
             )
        
     def execute(self):
-        def monitor(execution):
-            self.show_status(execution.statusMessage, execution.percentCompleted)
-        
-        self.show_status("starting ...", 0)
+        self.show_status("starting workflow ...", 0)
 
         # TODO: handle multiple values (fix in pywps)
         # http://pymotw.com/2/json/
@@ -46,7 +43,7 @@ class DispelWorkflow(WPSProcess):
         with open(self.workflow.getValue()) as fp:
             workflow = yaml.load(fp)
             self.show_status("workflow prepared", 0)
-            result = run(workflow, monitor)
+            result = run(workflow, monitor=self.show_status)
 
         if result is None:
             raise Exception("could not process workflow.")
@@ -57,7 +54,7 @@ class DispelWorkflow(WPSProcess):
             json.dump(obj=result, fp=fp, indent=4, sort_keys=True)
         self.output.setValue( outfile )
     
-        self.show_status("done", 100)
+        self.show_status("workflow done", 100)
 
     
         

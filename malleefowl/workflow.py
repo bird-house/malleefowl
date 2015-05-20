@@ -25,14 +25,17 @@ class BaseWPS(GenericPE):
     def set_monitor(self, monitor):
         self.monitor = monitor
 
+    def _monitor(self, message, progress):
+        logger.info('Execution status={0}, progress={1}'.format(message, progress))
+        if self.monitor is not None:
+            self.monitor(message, progress)
+
     def monitor_execution(self, execution):
         logger.debug("status_location = %s", execution.statusLocation)
         
         while execution.isComplete() == False:
             execution.checkStatus(sleepSecs=1)
-            logger.info('Execution status={0}.status, progress={0}.percentCompleted'.format(execution))
-            if self.monitor is not None:
-                self.monitor(execution)
+            self._monitor(execution.statusMessage, execution.percentCompleted)
         
         if execution.isSucceded():
             for output in execution.processOutputs:               

@@ -1,7 +1,3 @@
-"""
-Processes with cdo commands
-"""
-
 from malleefowl.process import WPSProcess
 
 from malleefowl import wpslogging as logging
@@ -65,7 +61,6 @@ class Dummy(WPSProcess):
             fp.write('job done')
             self.status_log.setValue( outfile )
 
-            
         self.show_status("done", 100)
 
         
