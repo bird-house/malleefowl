@@ -22,26 +22,32 @@ class BaseWPS(GenericPE):
         self.outputconnections['status_location'] = { NAME : 'status_location'}
         self._monitor = None
         self.progress = 0
+        self.start_progress = 0
+        self.end_progress = 100
 
-    def set_monitor(self, monitor):
+    def set_monitor(self, monitor, start_progress=0, end_progress=100):
         self._monitor = monitor
+        self.start_progress = start_progress
+        self.end_progress = end_progress
 
     def monitor(self, message):
         if self._monitor:
             self._monitor("{0}: {1}".format(self.identifier, message), self.progress)
         else:
             logger.info('STATUS ({0}: {2}/100) - {1}'.format(self.identifier, message, self.progress))
+
+    def update_progress(self, execution):
+        self.progress = execution.percentCompleted
             
     def monitor_execution(self, execution):
+        self.update_progress(execution)
         self.monitor("status_location={0.statusLocation}".format(execution))
         
         while execution.isComplete() == False:
             execution.checkStatus(sleepSecs=1)
-            self.progress = execution.percentCompleted
+            self.update_progress(execution)
             self.monitor(execution.statusMessage)
 
-        self.progress = execution.percentCompleted
-        self.monitor(execution.statusMessage)
         if execution.isSucceded():
             for output in execution.processOutputs:               
                 if output.reference is not None:
