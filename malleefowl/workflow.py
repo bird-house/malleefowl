@@ -50,6 +50,7 @@ class BaseWPS(GenericPE):
         else:
             msg = '\n'.join(['code={0.code}, locator={0.locator}, text={0.text}'.format(ex) for ex in execution.errors])
             self.monitor(execution, msg, execution.percentCompleted)
+            raise Exception(msg)
 
     def execute(self):
         output = [] # default: all outputs
@@ -74,15 +75,19 @@ class BaseWPS(GenericPE):
         return result
     
     def process(self, inputs):
-        if inputs.has_key('resource'):
-            for value in inputs['resource']:
-                self.wps_inputs.append((self.wps_resource, str(value)))
-        return self._process(inputs)
+        try:
+            if inputs.has_key('resource'):
+                for value in inputs['resource']:
+                    self.wps_inputs.append((self.wps_resource, str(value)))
+            result = self._process(inputs)
+            if result is not None:
+                return result
+        except Exception as e:
+            pass
 
 class GenericWPS(BaseWPS):
     def _process(self, inputs):
-        result = self.execute()
-        return result
+        return self.execute()
 
 class EsgSearch(BaseWPS):
     def __init__(self, url,
