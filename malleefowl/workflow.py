@@ -25,8 +25,12 @@ class BaseWPS(GenericPE):
     def set_monitor(self, monitor):
         self._monitor = monitor
 
-    def monitor(self, message, progress):
-        logger.info('Execution status={0}, progress={1}'.format(message, progress))
+    def monitor(self, message, progress, success=True):
+        msg='Execution status={0}, progress={1}'.format(message, progress)
+        if success:
+            logger.info(msg)
+        else:
+            logger.error(msg)
         if self._monitor:
             self._monitor(message, progress)
 
@@ -47,9 +51,8 @@ class BaseWPS(GenericPE):
                     msg = '{0}={1}'.format(output.identifier, ", ".join(output.data) )
                     self.monitor(msg, execution.percentCompleted)
         else:
-            for ex in execution.errors:
-                msg = 'code={0}.code, locator={0}.locator, text={0}.text'.format(ex)
-                self.monitor(msg, execution.percentCompleted)
+            msg = '\n'.join(['code={0}.code, locator={0}.locator, text={0}.text'.format(ex) for ex in execution.errors])
+            self.monitor(msg, execution.percentCompleted, success=False)
 
     def execute(self):
         output = [] # default: all outputs
