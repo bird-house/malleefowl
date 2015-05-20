@@ -196,11 +196,11 @@ def esgf_workflow(source, worker, monitor=None):
         temporal=source.get('temporal'),
         start=source.get('start'),
         end=source.get('end'))
-    esgsearch.set_monitor(monitor)
+    esgsearch.set_monitor(monitor, 0, 10)
     download = Download(url=wps_url(), credentials=source.get('credentials'))
-    download.set_monitor(monitor)
+    download.set_monitor(monitor, 10, 50)
     doit = GenericWPS(**worker)
-    doit.set_monitor(monitor)
+    doit.set_monitor(monitor, 50, 100)
 
     # TODO: handle exceptions ... see dispel docs
     graph.connect(esgsearch, 'output', download, 'resource')
@@ -210,7 +210,7 @@ def esgf_workflow(source, worker, monitor=None):
     if not result.has_key( (esgsearch.id, 'status_location') ):
         raise Exception("Failed to find files on ESGF.")
     if not result.has_key( (download.id, 'status_location') ):
-        raise Exception("Failed to retrieve input files.")
+        raise Exception("Failed to download files.")
     if not result.has_key( (doit.id, 'status_location') ):
         raise Exception("Failed to run process.")
     return dict(source=result.get( (download.id, 'status_location') ),
@@ -220,17 +220,19 @@ def swift_workflow(source, worker, monitor=None):
     graph = WorkflowGraph()
 
     download = SwiftDownload(url=wps_url(), **source)
-    download.set_monitor(monitor)
+    download.set_monitor(monitor, 0, 50)
     doit = GenericWPS(**worker)
-    doit.set_monitor(monitor)
+    doit.set_monitor(monitor, 50, 100)
 
     graph.connect(download, 'output', doit, 'resource')
 
     result = simple_process.process(graph, inputs={ download : [{}] })
-    wf_result = dict(source=result[(download.id, 'status_location')],
-                     worker=result[(doit.id, 'status_location')])
-    
-    return wf_result
+    if not result.has_key( (download.id, 'status_location') ):
+        raise Exception("Failed to download files.")
+    if not result.has_key( (doit.id, 'status_location') ):
+        raise Exception("Failed to run process.")
+    return dict(source=result[(download.id, 'status_location')],
+                worker=result[(doit.id, 'status_location')])
 
 def run(workflow, monitor=None):
     if workflow['source'].has_key('swift'):
