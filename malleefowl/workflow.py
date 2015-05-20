@@ -25,31 +25,31 @@ class BaseWPS(GenericPE):
     def set_monitor(self, monitor):
         self._monitor = monitor
 
-    def monitor(self, execution, message, progress):
+    def monitor(self, message, progress):
         if self._monitor:
-            self._monitor("{0.process.identifier}: {1}".format(execution, message), progress)
+            self._monitor(message, progress)
         else:
-            logger.info('{0.process.identifier}: STATUS ({2}/100) - {1}'.format(execution, message, progress))
+            logger.info('STATUS ({1}/100) - {0}'.format(message, progress))
             
     def monitor_execution(self, execution):
-        #self.monitor(execution, "status_location={0.statusLocation}".format(execution))
+        self.monitor("status_location={0.statusLocation}".format(execution), execution.percentCompleted)
         
         while execution.isComplete() == False:
             execution.checkStatus(sleepSecs=1)
-            self.monitor(execution, execution.statusMessage, execution.percentCompleted)
+            self.monitor(execution.statusMessage, execution.percentCompleted)
 
-        self.monitor(execution, execution.statusMessage, execution.percentCompleted)
+        self.monitor(execution.statusMessage, execution.percentCompleted)
         if execution.isSucceded():
             for output in execution.processOutputs:               
                 if output.reference is not None:
                     msg = '{0.identifier}={0.reference} ({0.mimeType})'.format(output)
-                    self.monitor(execution, msg, execution.percentCompleted)
+                    self.monitor(msg, execution.percentCompleted)
                 else:
                     msg = '{0}={1}'.format(output.identifier, ", ".join(output.data) )
-                    self.monitor(execution, msg, execution.percentCompleted)
+                    self.monitor(msg, execution.percentCompleted)
         else:
             msg = '\n'.join(['code={0.code}, locator={0.locator}, text={0.text}'.format(ex) for ex in execution.errors])
-            self.monitor(execution, msg, execution.percentCompleted)
+            self.monitor(msg, execution.percentCompleted)
             raise Exception(msg)
 
     def execute(self):
