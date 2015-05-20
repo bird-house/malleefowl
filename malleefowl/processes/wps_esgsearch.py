@@ -17,7 +17,7 @@ class ESGSearch(WPSProcess):
         WPSProcess.__init__(self,
             identifier = "esgsearch",
             title = "ESGF Search",
-            version = "1.0",
+            version = "0.2",
             abstract="Search ESGF datasets, files and aggreations.")
 
         self.url = self.addLiteralInput(
@@ -143,8 +143,7 @@ class ESGSearch(WPSProcess):
             identifier="output",
             title="Search Result",
             abstract="JSON document with search result",
-            metadata=[],
-            formats=[{"mimeType":"test/json"}],
+            formats=[{"mimeType":"application/json"}],
             asReference=True,
             )
 
@@ -152,8 +151,7 @@ class ESGSearch(WPSProcess):
             identifier="summary",
             title="Search Result Summary",
             abstract="JSON document with search result summary",
-            metadata=[],
-            formats=[{"mimeType":"test/json"}],
+            formats=[{"mimeType":"application/json"}],
             asReference=True,
             )
 
@@ -161,8 +159,7 @@ class ESGSearch(WPSProcess):
             identifier="facet_counts",
             title="Facet Counts",
             abstract="JSON document with facet counts for contstaints.",
-            metadata=[],
-            formats=[{"mimeType":"test/json"}],
+            formats=[{"mimeType":"application/json"}],
             asReference=True,
             )
         

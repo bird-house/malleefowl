@@ -25,34 +25,31 @@ class BaseWPS(GenericPE):
     def set_monitor(self, monitor):
         self._monitor = monitor
 
-    def monitor(self, message, progress, success=True):
-        msg='Execution status={0}, progress={1}'.format(message, progress)
-        if success:
-            logger.info(msg)
-        else:
-            logger.error(msg)
+    def monitor(self, execution, message, progress):
         if self._monitor:
-            self._monitor(message, progress)
-
+            self._monitor("{0.process.identifier}: {1}".format(execution, message), progress)
+        else:
+            logger.info('{0.process.identifier}: STATUS ({2}/100) - {1}'.format(execution, message, progress))
+            
     def monitor_execution(self, execution):
         logger.debug("status_location = %s", execution.statusLocation)
         
         while execution.isComplete() == False:
             execution.checkStatus(sleepSecs=1)
-            self.monitor(execution.statusMessage, execution.percentCompleted)
+            self.monitor(execution, execution.statusMessage, execution.percentCompleted)
 
-        self.monitor(execution.statusMessage, execution.percentCompleted)
+        self.monitor(execution, execution.statusMessage, execution.percentCompleted)
         if execution.isSucceded():
             for output in execution.processOutputs:               
                 if output.reference is not None:
                     msg = '{0.identifier}={0.reference} ({0.mimeType})'.format(output)
-                    self.monitor(msg, execution.percentCompleted)
+                    self.monitor(execution, msg, execution.percentCompleted)
                 else:
                     msg = '{0}={1}'.format(output.identifier, ", ".join(output.data) )
-                    self.monitor(msg, execution.percentCompleted)
+                    self.monitor(execution, msg, execution.percentCompleted)
         else:
             msg = '\n'.join(['code={0.code}, locator={0.locator}, text={0.text}'.format(ex) for ex in execution.errors])
-            self.monitor(msg, execution.percentCompleted, success=False)
+            self.monitor(execution, msg, execution.percentCompleted)
 
     def execute(self):
         output = [] # default: all outputs
@@ -127,7 +124,7 @@ class EsgSearch(BaseWPS):
         import urllib2
         urls = json.load(urllib2.urlopen(result['output']))
         if len(urls) == 0:
-            raise Exception('Could not retrieve any files')
+            raise Exception('Could not find any files.')
         result['output'] = urls
         return result
 

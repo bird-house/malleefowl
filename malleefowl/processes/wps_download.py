@@ -9,7 +9,7 @@ class Download(WPSProcess):
         WPSProcess.__init__(self,
             identifier = "download",
             title = "Download files",
-            version = "0.2",
+            version = "0.3",
             abstract="Downloads files and provides file list as json document.")
 
         self.resource = self.addLiteralInput(
@@ -36,7 +36,7 @@ class Download(WPSProcess):
             title="Downloaded files",
             abstract="Json document with list of downloaded files with file url.",
             metadata=[],
-            formats=[{"mimeType":"text/json"}],
+            formats=[{"mimeType":"application/json"}],
             asReference=True,
             )
 

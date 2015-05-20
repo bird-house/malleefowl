@@ -27,18 +27,14 @@ class Dummy(WPSProcess):
 
         self.output = self.addComplexOutput(
             identifier="output",
-            title="result",
-            abstract="result",
-            metadata=[],
+            title="output",
             formats=[{"mimeType":"text/plain"}],
             asReference=True,
             )
 
         self.status_log = self.addComplexOutput(
             identifier="log",
-            title="result",
-            abstract="result",
-            metadata=[],
+            title="log",
             formats=[{"mimeType":"text/plain"}],
             asReference=True,
             )
@@ -54,6 +50,11 @@ class Dummy(WPSProcess):
             fp.write('PYTHONPATH=%s\n' % (os.environ.get('PYTHONPATH')))
             fp.write('num input files=%s\n' % len(nc_files))
             self.output.setValue( outfile )
+
+        import time
+        for i in xrange(1, 5):
+            time.sleep(1)
+            self.show_status("Working ...", i*20) 
 
         outfile = self.mktempfile(suffix='.txt')
         with open(outfile, 'w') as fp:

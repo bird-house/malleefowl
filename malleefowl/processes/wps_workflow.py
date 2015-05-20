@@ -35,6 +35,9 @@ class DispelWorkflow(WPSProcess):
             )
        
     def execute(self):
+        def monitor(message, progress):
+            self.show_status(message, progress)
+        
         self.show_status("starting workflow ...", 0)
 
         # TODO: handle multiple values (fix in pywps)
@@ -42,19 +45,21 @@ class DispelWorkflow(WPSProcess):
         result = None
         with open(self.workflow.getValue()) as fp:
             workflow = yaml.load(fp)
-            self.show_status("workflow prepared", 0)
-            result = run(workflow, monitor=self.show_status)
+            workflow_name = workflow.get('name', 'unknown')
+            self.show_status("workflow {0} prepared.".format(workflow_name), 0)
+            result = run(workflow, monitor=monitor)
+            
+            import json
+            outfile = self.mktempfile(suffix='.json')
+            with open(outfile, 'w') as fp:
+                json.dump(obj=result, fp=fp, indent=4, sort_keys=True)
+                self.output.setValue( outfile )
+            self.show_status("workflow {0} done.".format(workflow_name), 100)
 
         if result is None:
             raise Exception("could not process workflow.")
 
-        import json
-        outfile = self.mktempfile(suffix='.json')
-        with open(outfile, 'w') as fp:
-            json.dump(obj=result, fp=fp, indent=4, sort_keys=True)
-        self.output.setValue( outfile )
-    
-        self.show_status("workflow done", 100)
+        
 
     
         
