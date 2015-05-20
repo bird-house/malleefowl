@@ -32,7 +32,7 @@ class BaseWPS(GenericPE):
             logger.info('{0.process.identifier}: STATUS ({2}/100) - {1}'.format(execution, message, progress))
             
     def monitor_execution(self, execution):
-        logger.debug("status_location = %s", execution.statusLocation)
+        #self.monitor(execution, "status_location={0.statusLocation}".format(execution))
         
         while execution.isComplete() == False:
             execution.checkStatus(sleepSecs=1)
@@ -62,7 +62,7 @@ class BaseWPS(GenericPE):
             output=output)
         self.monitor_execution(execution)
 
-        result = {}
+        result = dict(status=execution.status, status_location=execution.statusLocation)
         # only set output if specific output was requested
         # TODO: use generic dispel outputs matching process description?
         if self.wps_output is not None:
@@ -70,19 +70,18 @@ class BaseWPS(GenericPE):
                 result['output'] = execution.processOutputs[0].reference
             else:
                 raise Exception('Process %s could not produce output %s' % (self.identifier, self.wps_output))
-        result['status'] = execution.status
-        result['status_location'] = execution.statusLocation
         return result
     
     def process(self, inputs):
+        if inputs.has_key('resource'):
+            for value in inputs['resource']:
+                self.wps_inputs.append((self.wps_resource, str(value)))
         try:
-            if inputs.has_key('resource'):
-                for value in inputs['resource']:
-                    self.wps_inputs.append((self.wps_resource, str(value)))
             result = self._process(inputs)
             if result is not None:
                 return result
-        except Exception as e:
+        except Exception:
+            logger.exception('Failed to execute process.')
             pass
 
 class GenericWPS(BaseWPS):
@@ -201,10 +200,14 @@ def esgf_workflow(source, worker, monitor=None):
     graph.connect(download, 'output', doit, 'resource')
 
     result = simple_process.process(graph, inputs={ esgsearch : [{}] })
-    wf_result = dict(source=result[(download.id, 'status_location')],
-                     worker=result[(doit.id, 'status_location')])
-    
-    return wf_result
+    if not result.has_key( (esgsearch.id, 'status_location') ):
+        raise Exception("Failed to find files on ESGF.")
+    if not result.has_key( (download.id, 'status_location') ):
+        raise Exception("Failed to retrieve input files.")
+    if not result.has_key( (doit.id, 'status_location') ):
+        raise Exception("Failed to run process.")
+    return dict(source=result.get( (download.id, 'status_location') ),
+                worker=result.get( (doit.id, 'status_location') ))
 
 def swift_workflow(source, worker, monitor=None):
     graph = WorkflowGraph()
