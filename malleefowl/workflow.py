@@ -20,6 +20,13 @@ class BaseWPS(GenericPE):
         self.outputconnections['output'] = { NAME : 'output'}
         self.outputconnections['status'] = { NAME : 'status'}
         self.outputconnections['status_location'] = { NAME : 'status_location'}
+
+        def log(message):
+            if self._monitor:
+                self._monitor("{0}: {1}".format(self.identifier, message), self._progress)
+            else:
+                logger.info('STATUS ({0}: {2}/100) - {1}'.format(self.identifier, message, self._progress))
+        self.log = log
         self._monitor = None
         self._progress = 0
         self._pstart = 0
@@ -30,33 +37,27 @@ class BaseWPS(GenericPE):
         self._pstart = start_progress
         self._pend = end_progress
 
-    def monitor(self, message):
-        if self._monitor:
-            self._monitor("{0}: {1}".format(self.identifier, message), self._progress)
-        else:
-            logger.info('STATUS ({0}: {2}/100) - {1}'.format(self.identifier, message, self._progress))
-
     def update_progress(self, execution):
         self._progress = int( self._pstart + ( (self._pend - self._pstart) / 100.0 * execution.percentCompleted ) )
             
     def monitor_execution(self, execution):
         self.update_progress(execution)
-        self.monitor("status_location={0.statusLocation}".format(execution))
+        self.log("status_location={0.statusLocation}".format(execution))
         
         while execution.isComplete() == False:
             execution.checkStatus(sleepSecs=1)
             self.update_progress(execution)
-            self.monitor(execution.statusMessage)
+            self.log(execution.statusMessage)
 
         if execution.isSucceded():
             for output in execution.processOutputs:               
                 if output.reference is not None:
-                    self.monitor( '{0.identifier}={0.reference} ({0.mimeType})'.format(output) )
+                    self.log( '{0.identifier}={0.reference} ({0.mimeType})'.format(output) )
                 else:
-                    self.monitor( '{0}={1}'.format(output.identifier, ", ".join(output.data) ) )
+                    self.log( '{0}={1}'.format(output.identifier, ", ".join(output.data) ) )
         else:
             msg = '\n'.join(['code={0.code}, locator={0.locator}, text={0.text}'.format(ex) for ex in execution.errors])
-            self.monitor(msg)
+            self.log(msg)
             raise Exception(msg)
 
     def execute(self):
