@@ -1,6 +1,6 @@
 from dispel4py.workflow_graph import WorkflowGraph
 from dispel4py import simple_process
-from dispel4py.core import NAME, TYPE, GROUPING
+from dispel4py.core import GenericPE
 from dispel4py.base import BasePE
 
 from malleefowl.config import wps_url
@@ -28,14 +28,13 @@ class GenericWPS(BasePE):
         self.wps_inputs = inputs
         self.wps_output = output
 
-        def log(message):
+        def log(message, progress):
             if self._monitor:
-                self._monitor("{0}: {1}".format(self.identifier, message), self._progress)
+                self._monitor("{0}: {1}".format(self.identifier, message), progress)
             else:
-                logger.info('STATUS ({0}: {2}/100) - {1}'.format(self.identifier, message, self._progress))
-        self.log = log
+                logger.info('STATUS ({0}: {2}/100) - {1}'.format(self.identifier, message, progress))
+        self.monitor = log
         self._monitor = None
-        self._progress = 0
         self._pstart = 0
         self._pend = 100
 
@@ -44,26 +43,26 @@ class GenericWPS(BasePE):
         self._pstart = start_progress
         self._pend = end_progress
 
-    def update_progress(self, execution):
-        self._progress = int( self._pstart + ( (self._pend - self._pstart) / 100.0 * execution.percentCompleted ) )
+    def progress(self, execution):
+        return int( self._pstart + ( (self._pend - self._pstart) / 100.0 * execution.percentCompleted ) )
             
     def monitor_execution(self, execution):
-        self.update_progress(execution)
-        self.log("status_location={0.statusLocation}".format(execution))
+        progress = self.progress(execution)
+        self.monitor("status_location={0.statusLocation}".format(execution), progress)
         
-        while execution.isComplete() == False:
+        while execution.isNotComplete():
             execution.checkStatus(sleepSecs=1)
-            self.update_progress(execution)
-            self.log(execution.statusMessage)
+            progress = self.progress(execution)
+            self.monitor(execution.statusMessage, progress)
 
         if execution.isSucceded():
             for output in execution.processOutputs:               
                 if output.reference is not None:
-                    self.log( '{0.identifier}={0.reference} ({0.mimeType})'.format(output) )
+                    self.monitor( '{0.identifier}={0.reference} ({0.mimeType})'.format(output), progress )
                 else:
-                    self.log( '{0}={1}'.format(output.identifier, ", ".join(output.data) ) )
+                    self.monitor( '{0}={1}'.format(output.identifier, ", ".join(output.data) ), progress )
         else:
-            self.log('\n'.join(['ERROR: {0.text} (code={0.code}, locator={0.locator})'.format(ex) for ex in execution.errors]) )
+            self.monitor('\n'.join(['ERROR: {0.text} (code={0.code}, locator={0.locator})'.format(ex) for ex in execution.errors]), progress )
 
     def execute(self):
         execution = self.wps.execute(
@@ -96,7 +95,7 @@ class GenericWPS(BasePE):
                 return result
         except Exception:
             import traceback
-            self.log(traceback.format_exc())
+            logger.error(traceback.format_exc())
             raise
 
     def _process(self, inputs):
