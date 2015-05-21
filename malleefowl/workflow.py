@@ -92,8 +92,8 @@ class GenericWPS(BasePE):
             if result is not None:
                 return result
         except Exception:
-            logger.exception('Failed to execute process.')
-            pass
+            import traceback
+            self.log(traceback.format_exc())
 
     def _process(self, inputs):
         return self.execute()
