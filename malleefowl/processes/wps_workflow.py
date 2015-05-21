@@ -30,7 +30,14 @@ class DispelWorkflow(WPSProcess):
         self.output = self.addComplexOutput(
             identifier="output",
             title="Workflow result",
-            formats=[{"mimeType":"application/json"}],
+            formats=[{"mimeType":"text/yaml"}],
+            asReference=True,
+            )
+        
+        self.logfile = self.addComplexOutput(
+            identifier="logfile",
+            title="Workflow log file",
+            formats=[{"mimeType":"text/plain"}],
             asReference=True,
             )
        
@@ -42,22 +49,23 @@ class DispelWorkflow(WPSProcess):
 
         # TODO: handle multiple values (fix in pywps)
         # http://pymotw.com/2/json/
-        result = None
-        with open(self.workflow.getValue()) as fp:
-            workflow = yaml.load(fp)
-            workflow_name = workflow.get('name', 'unknown')
-            self.show_status("workflow {0} prepared.".format(workflow_name), 0)
-            result = run(workflow, monitor=monitor)
-            
-            import json
-            outfile = self.mktempfile(suffix='.json')
-            with open(outfile, 'w') as fp:
-                json.dump(obj=result, fp=fp, indent=4, sort_keys=True)
-                self.output.setValue( outfile )
-            self.show_status("workflow {0} done.".format(workflow_name), 100)
+        fp = open(self.workflow.getValue())
+        workflow = yaml.load(fp)
+        workflow_name = workflow.get('name', 'unknown')
+        self.show_status("workflow {0} prepared.".format(workflow_name), 0)
+        result = run(workflow, monitor=monitor)
 
-        if result is None:
-            raise Exception("could not process workflow.")
+        outfile = self.mktempfile(suffix='.json')
+        with open(outfile, 'w') as fp:
+            #json.dump(obj=result, fp=fp, indent=4, sort_keys=True)
+            yaml.dump(result, stream=fp)
+            self.output.setValue(outfile)
+        outfile = self.mktempfile(suffix='.txt')
+        with open(outfile, 'w') as fp:
+            fp.write("workflow log file")
+            self.logfile.setValue(outfile)
+        self.show_status("workflow {0} done.".format(workflow_name), 100)
+
 
         
 

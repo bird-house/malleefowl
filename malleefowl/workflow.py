@@ -214,14 +214,9 @@ def esgf_workflow(source, worker, monitor=None):
     graph.connect(download, download.OUTPUT_NAME, doit, doit.INPUT_NAME)
 
     result = simple_process.process(graph, inputs={ esgsearch : [{}] })
-    if not result.has_key( (esgsearch.id, esgsearch.STATUS_LOCATION_NAME) ):
-        raise Exception("Failed to find files on ESGF.")
-    if not result.has_key( (download.id, download.STATUS_LOCATION_NAME) ):
-        raise Exception("Failed to download files.")
     if not result.has_key( (doit.id, doit.STATUS_LOCATION_NAME) ):
         raise Exception("Failed to run worker process.")
-    return dict(source=result.get( (download.id, download.STATUS_LOCATION_NAME) ),
-                worker=result.get( (doit.id, doit.STATUS_LOCATION_NAME) ))
+    return dict(status_location=result.get( (doit.id, doit.STATUS_LOCATION_NAME) )[0], result=result)
 
 def swift_workflow(source, worker, monitor=None):
     graph = WorkflowGraph()
@@ -234,14 +229,12 @@ def swift_workflow(source, worker, monitor=None):
     graph.connect(download, download.OUTPUT_NAME, doit, doit.INPUT_NAME)
 
     result = simple_process.process(graph, inputs={ download : [{}] })
-    if not result.has_key( (download.id, 'status_location') ):
-        raise Exception("Failed to download files.")
     if not result.has_key( (doit.id, 'status_location') ):
         raise Exception("Failed to run worker process.")
-    return dict(source=result[(download.id, 'status_location')],
-                worker=result[(doit.id, 'status_location')])
+    return dict(status_location=result.get( (doit.id, doit.STATUS_LOCATION_NAME) )[0], result=result)
 
 def run(workflow, monitor=None):
+    result = None
     if workflow['source'].has_key('swift'):
         result = swift_workflow(source=workflow['source']['swift'], worker=workflow['worker'], monitor=monitor)
     else:
