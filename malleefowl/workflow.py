@@ -1,15 +1,20 @@
 from dispel4py.workflow_graph import WorkflowGraph
 from dispel4py import simple_process
-from dispel4py.core import GenericPE, NAME, TYPE, GROUPING
+from dispel4py.core import NAME, TYPE, GROUPING
+from dispel4py.base import BasePE
 
 from malleefowl.config import wps_url
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
-class BaseWPS(GenericPE):
+class GenericWPS(BasePE):
+    OUTPUT_NAME = 'output'
+    
     def __init__(self, url, identifier, resource='resource', inputs=[], output=None):
-        GenericPE.__init__(self)
+        BasePE.__init__(self)
+        self._add_output(GenericWPS.OUTPUT_NAME)
+        
         from owslib.wps import WebProcessingService
         self.wps = WebProcessingService(url)
         self.identifier = identifier
@@ -17,7 +22,6 @@ class BaseWPS(GenericPE):
         self.wps_inputs = inputs
         self.wps_output = output
         self.inputconnections['resource'] = { NAME : 'resource' }
-        self.outputconnections['output'] = { NAME : 'output'}
         self.outputconnections['status'] = { NAME : 'status'}
         self.outputconnections['status_location'] = { NAME : 'status_location'}
 
@@ -92,11 +96,10 @@ class BaseWPS(GenericPE):
             logger.exception('Failed to execute process.')
             pass
 
-class GenericWPS(BaseWPS):
     def _process(self, inputs):
         return self.execute()
 
-class EsgSearch(BaseWPS):
+class EsgSearch(GenericWPS):
     def __init__(self, url,
                  constraints='project:CORDEX',
                  limit=100,
@@ -107,7 +110,7 @@ class EsgSearch(BaseWPS):
                  temporal=False,
                  start=None,
                  end=None):
-        BaseWPS.__init__(self, url, 'esgsearch', output='output')
+        GenericWPS.__init__(self, url, 'esgsearch', output='output')
         self.constraints = constraints
         self.distrib = distrib
         self.replica = replica
@@ -140,9 +143,9 @@ class EsgSearch(BaseWPS):
         result['output'] = urls
         return result
 
-class Download(BaseWPS):
+class Download(GenericWPS):
     def __init__(self, url, credentials=None):
-        BaseWPS.__init__(self, url, 'download', output='output')
+        GenericWPS.__init__(self, url, 'download', output='output')
         self.credentials = credentials
 
     def _process(self, inputs):
@@ -159,9 +162,9 @@ class Download(BaseWPS):
         result['output'] = urls
         return result
 
-class SwiftDownload(BaseWPS):
+class SwiftDownload(GenericWPS):
     def __init__(self, url, storage_url, auth_token, container, prefix):
-        BaseWPS.__init__(self, url, 'swift_download', output='output')
+        GenericWPS.__init__(self, url, 'swift_download', output='output')
         self.storage_url = storage_url
         self.auth_token = auth_token
         self.container = container
