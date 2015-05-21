@@ -81,7 +81,10 @@ class GenericWPS(BasePE):
                     if self.wps_output == output.identifier:
                         result[self.OUTPUT_NAME] = output.reference
                         break
-        return result
+            return result
+        else:
+            failure_msg = '\n'.join(['{0.text}'.format(ex) for ex in execution.errors])
+            raise Exception(failure_msg)
     
     def process(self, inputs):
         if inputs.has_key(self.INPUT_NAME):
@@ -94,6 +97,7 @@ class GenericWPS(BasePE):
         except Exception:
             import traceback
             self.log(traceback.format_exc())
+            raise
 
     def _process(self, inputs):
         return self.execute()
@@ -157,7 +161,7 @@ class Download(GenericWPS):
         import urllib2
         urls = json.load(urllib2.urlopen(result['output']))
         if len(urls) == 0:
-            raise Exception('Could not retrieve any files')
+            raise Exception('Could not download any files.')
         result['output'] = urls
         return result
 
@@ -181,7 +185,7 @@ class SwiftDownload(GenericWPS):
         import urllib2
         urls = json.load(urllib2.urlopen(result['output']))
         if len(urls) == 0:
-            raise Exception('Could not retrieve any files')
+            raise Exception('Could not download any files.')
         result['output'] = urls
         return result
 
@@ -215,7 +219,7 @@ def esgf_workflow(source, worker, monitor=None):
     if not result.has_key( (download.id, download.STATUS_LOCATION_NAME) ):
         raise Exception("Failed to download files.")
     if not result.has_key( (doit.id, doit.STATUS_LOCATION_NAME) ):
-        raise Exception("Failed to run process.")
+        raise Exception("Failed to run worker process.")
     return dict(source=result.get( (download.id, download.STATUS_LOCATION_NAME) ),
                 worker=result.get( (doit.id, doit.STATUS_LOCATION_NAME) ))
 
@@ -233,7 +237,7 @@ def swift_workflow(source, worker, monitor=None):
     if not result.has_key( (download.id, 'status_location') ):
         raise Exception("Failed to download files.")
     if not result.has_key( (doit.id, 'status_location') ):
-        raise Exception("Failed to run process.")
+        raise Exception("Failed to run worker process.")
     return dict(source=result[(download.id, 'status_location')],
                 worker=result[(doit.id, 'status_location')])
 
