@@ -214,9 +214,10 @@ def esgf_workflow(source, worker, monitor=None):
     graph.connect(download, download.OUTPUT_NAME, doit, doit.INPUT_NAME)
 
     result = simple_process.process(graph, inputs={ esgsearch : [{}] })
-    if not result.has_key( (doit.id, doit.STATUS_LOCATION_NAME) ):
-        raise Exception("Failed to run worker process.")
-    return dict(status_location=result.get( (doit.id, doit.STATUS_LOCATION_NAME) )[0], result=result)
+    
+    status_location = result.get( (doit.id, doit.STATUS_LOCATION_NAME) )[0]
+    status = result.get( (doit.id, doit.STATUS_NAME) )[0]
+    return dict(worker=dict(status_location=status_location, status=status))
 
 def swift_workflow(source, worker, monitor=None):
     graph = WorkflowGraph()
@@ -228,17 +229,17 @@ def swift_workflow(source, worker, monitor=None):
 
     graph.connect(download, download.OUTPUT_NAME, doit, doit.INPUT_NAME)
 
-    result = simple_process.process(graph, inputs={ download : [{}] })
-    if not result.has_key( (doit.id, 'status_location') ):
-        raise Exception("Failed to run worker process.")
-    return dict(status_location=result.get( (doit.id, doit.STATUS_LOCATION_NAME) )[0], result=result)
+    result=simple_process.process(graph, inputs={ download : [{}] })
+    
+    status_location = result.get( (doit.id, doit.STATUS_LOCATION_NAME) )[0]
+    status = result.get( (doit.id, doit.STATUS_NAME) )[0]
+    return dict(worker=dict(status_location=status_location, status=status))
 
 def run(workflow, monitor=None):
-    result = None
     if workflow['source'].has_key('swift'):
-        result = swift_workflow(source=workflow['source']['swift'], worker=workflow['worker'], monitor=monitor)
+        return swift_workflow(source=workflow['source']['swift'], worker=workflow['worker'], monitor=monitor)
     else:
-        result = esgf_workflow(source=workflow['source']['esgf'], worker=workflow['worker'], monitor=monitor)
-    return result
+        return esgf_workflow(source=workflow['source']['esgf'], worker=workflow['worker'], monitor=monitor)
+
     
 

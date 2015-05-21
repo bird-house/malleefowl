@@ -47,17 +47,14 @@ class DispelWorkflow(WPSProcess):
         
         self.show_status("starting workflow ...", 0)
 
-        # TODO: handle multiple values (fix in pywps)
-        # http://pymotw.com/2/json/
         fp = open(self.workflow.getValue())
         workflow = yaml.load(fp)
         workflow_name = workflow.get('name', 'unknown')
         self.show_status("workflow {0} prepared.".format(workflow_name), 0)
         result = run(workflow, monitor=monitor)
 
-        outfile = self.mktempfile(suffix='.json')
+        outfile = self.mktempfile(suffix='.txt')
         with open(outfile, 'w') as fp:
-            #json.dump(obj=result, fp=fp, indent=4, sort_keys=True)
             yaml.dump(result, stream=fp)
             self.output.setValue(outfile)
         outfile = self.mktempfile(suffix='.txt')
