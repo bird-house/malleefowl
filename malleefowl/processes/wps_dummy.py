@@ -48,7 +48,7 @@ class CrashTestDummy(WPSProcess):
             self.show_status("Working ...", i*20)
 
         self.show_status('before crash', 90)
-        raise Exception('boooomm ... process crached!')
+        raise Exception('boooomm ... process crashed!')
 
 class Dummy(WPSProcess):
     def __init__(self):
