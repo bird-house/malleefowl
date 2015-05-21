@@ -63,9 +63,7 @@ class GenericWPS(BasePE):
                 else:
                     self.log( '{0}={1}'.format(output.identifier, ", ".join(output.data) ) )
         else:
-            msg = '\n'.join(['code={0.code}, locator={0.locator}, text={0.text}'.format(ex) for ex in execution.errors])
-            self.log(msg)
-            raise Exception(msg)
+            self.log('\n'.join(['ERROR: {0.text} (code={0.code}, locator={0.locator})'.format(ex) for ex in execution.errors]) )
 
     def execute(self):
         output = [] # default: all outputs
@@ -77,14 +75,15 @@ class GenericWPS(BasePE):
             output=output)
         self.monitor_execution(execution)
 
-        result = dict(status=execution.status, status_location=execution.statusLocation)
-        # only set output if specific output was requested
-        # TODO: use generic dispel outputs matching process description?
-        if self.wps_output is not None:
-            if len(execution.processOutputs) > 0:
-                result[self.OUTPUT_NAME] = execution.processOutputs[0].reference
-            else:
-                raise Exception('Process %s could not produce output %s' % (self.identifier, self.wps_output))
+        result = {self.STATUS_NAME:execution.status,
+                  self.STATUS_LOCATION_NAME:execution.statusLocation}
+        if execution.isSucceded():
+            # NOTE: only set workflow output if specific output was requested
+            if self.wps_output is not None:
+                for output in execution.processOutputs:
+                    if self.wps_output == output.identifier:
+                        result[self.OUTPUT_NAME] = output.reference
+                        break
         return result
     
     def process(self, inputs):
