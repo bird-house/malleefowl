@@ -9,21 +9,24 @@ from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
 class GenericWPS(BasePE):
+    INPUT_NAME = 'input'
     OUTPUT_NAME = 'output'
+    STATUS_NAME = 'status'
+    STATUS_LOCATION_NAME = 'status_location'
     
     def __init__(self, url, identifier, resource='resource', inputs=[], output=None):
         BasePE.__init__(self)
+        self._add_input(GenericWPS.INPUT_NAME)
         self._add_output(GenericWPS.OUTPUT_NAME)
+        self._add_output(GenericWPS.STATUS_NAME)
+        self._add_output(GenericWPS.STATUS_LOCATION_NAME)
         
         from owslib.wps import WebProcessingService
-        self.wps = WebProcessingService(url)
+        self.wps = WebProcessingService(url=url, skip_caps=True)
         self.identifier = identifier
         self.wps_resource = resource
         self.wps_inputs = inputs
         self.wps_output = output
-        self.inputconnections['resource'] = { NAME : 'resource' }
-        self.outputconnections['status'] = { NAME : 'status'}
-        self.outputconnections['status_location'] = { NAME : 'status_location'}
 
         def log(message):
             if self._monitor:
@@ -79,14 +82,14 @@ class GenericWPS(BasePE):
         # TODO: use generic dispel outputs matching process description?
         if self.wps_output is not None:
             if len(execution.processOutputs) > 0:
-                result['output'] = execution.processOutputs[0].reference
+                result[self.OUTPUT_NAME] = execution.processOutputs[0].reference
             else:
                 raise Exception('Process %s could not produce output %s' % (self.identifier, self.wps_output))
         return result
     
     def process(self, inputs):
-        if inputs.has_key('resource'):
-            for value in inputs['resource']:
+        if inputs.has_key(self.INPUT_NAME):
+            for value in inputs[self.INPUT_NAME]:
                 self.wps_inputs.append((self.wps_resource, str(value)))
         try:
             result = self._process(inputs)
@@ -207,18 +210,18 @@ def esgf_workflow(source, worker, monitor=None):
     doit.set_monitor(monitor, 50, 100)
 
     # TODO: handle exceptions ... see dispel docs
-    graph.connect(esgsearch, 'output', download, 'resource')
-    graph.connect(download, 'output', doit, 'resource')
+    graph.connect(esgsearch, esgsearch.OUTPUT_NAME, download, download.INPUT_NAME)
+    graph.connect(download, download.OUTPUT_NAME, doit, doit.INPUT_NAME)
 
     result = simple_process.process(graph, inputs={ esgsearch : [{}] })
-    if not result.has_key( (esgsearch.id, 'status_location') ):
+    if not result.has_key( (esgsearch.id, esgsearch.STATUS_LOCATION_NAME) ):
         raise Exception("Failed to find files on ESGF.")
-    if not result.has_key( (download.id, 'status_location') ):
+    if not result.has_key( (download.id, download.STATUS_LOCATION_NAME) ):
         raise Exception("Failed to download files.")
-    if not result.has_key( (doit.id, 'status_location') ):
+    if not result.has_key( (doit.id, doit.STATUS_LOCATION_NAME) ):
         raise Exception("Failed to run process.")
-    return dict(source=result.get( (download.id, 'status_location') ),
-                worker=result.get( (doit.id, 'status_location') ))
+    return dict(source=result.get( (download.id, download.STATUS_LOCATION_NAME) ),
+                worker=result.get( (doit.id, doit.STATUS_LOCATION_NAME) ))
 
 def swift_workflow(source, worker, monitor=None):
     graph = WorkflowGraph()
@@ -228,7 +231,7 @@ def swift_workflow(source, worker, monitor=None):
     doit = GenericWPS(**worker)
     doit.set_monitor(monitor, 50, 100)
 
-    graph.connect(download, 'output', doit, 'resource')
+    graph.connect(download, download.OUTPUT_NAME, doit, doit.INPUT_NAME)
 
     result = simple_process.process(graph, inputs={ download : [{}] })
     if not result.has_key( (download.id, 'status_location') ):
