@@ -168,7 +168,7 @@ class Download(GenericWPS):
         return result
 
 class SwiftDownload(GenericWPS):
-    def __init__(self, url, storage_url, auth_token, container, prefix):
+    def __init__(self, url, storage_url, auth_token, container, prefix=None):
         GenericWPS.__init__(self, url, 'swift_download', output='output')
         self.storage_url = storage_url
         self.auth_token = auth_token
@@ -179,7 +179,8 @@ class SwiftDownload(GenericWPS):
         self.wps_inputs.append( ('storage_url', self.storage_url) )
         self.wps_inputs.append( ('auth_token', self.auth_token) )
         self.wps_inputs.append( ('container', self.container) )
-        self.wps_inputs.append( ('prefix', self.prefix) )
+        if self.prefix is not None:
+            self.wps_inputs.append( ('prefix', self.prefix) )
         result = self.execute()
 
         # read json document with list of urls
