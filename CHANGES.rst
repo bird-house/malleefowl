@@ -1,6 +1,12 @@
 Change History
 **************
 
+0.3.0 (2015-05-22)
+==================
+
+* cleaned up processes ... download, esgsearch ...
+* refactored workflow with dispel4py ... improved logging.
+
 0.2.1 (2015-05-18)
 ==================
 
