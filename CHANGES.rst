@@ -1,6 +1,11 @@
 Change History
 **************
 
+0.3.x (2015-mm-dd)
+==================
+
+* fixed workflow process output parameter.
+
 0.3.0 (2015-05-22)
 ==================
 
