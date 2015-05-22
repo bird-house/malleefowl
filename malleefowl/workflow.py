@@ -14,7 +14,7 @@ class GenericWPS(BasePE):
     STATUS_NAME = 'status'
     STATUS_LOCATION_NAME = 'status_location'
     
-    def __init__(self, url, identifier, resource='resource', inputs=[], output='output'):
+    def __init__(self, url, identifier, resource='resource', inputs=[], output=None):
         BasePE.__init__(self)
         self._add_input(GenericWPS.INPUT_NAME)
         self._add_output(GenericWPS.OUTPUT_NAME)
@@ -65,10 +65,13 @@ class GenericWPS(BasePE):
             self.monitor('\n'.join(['ERROR: {0.text} (code={0.code}, locator={0.locator})'.format(ex) for ex in execution.errors]), progress )
 
     def execute(self):
+        output = []
+        if self.wps_output is not None:
+            output=[ (self.wps_output, True) ]
         execution = self.wps.execute(
             identifier=self.identifier,
             inputs=self.wps_inputs,
-            output=[ (self.wps_output, True) ])
+            output=output)
         self.monitor_execution(execution)
 
         result = {self.STATUS_NAME:execution.status,
