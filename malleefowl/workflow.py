@@ -212,7 +212,6 @@ def esgf_workflow(source, worker, monitor=None):
     doit = GenericWPS(**worker)
     doit.set_monitor(monitor, 50, 100)
 
-    # TODO: handle exceptions ... see dispel docs
     graph.connect(esgsearch, esgsearch.OUTPUT_NAME, download, download.INPUT_NAME)
     graph.connect(download, download.OUTPUT_NAME, doit, doit.INPUT_NAME)
 
@@ -238,9 +237,28 @@ def swift_workflow(source, worker, monitor=None):
     status = result.get( (doit.id, doit.STATUS_NAME) )[0]
     return dict(worker=dict(status_location=status_location, status=status))
 
+def thredds_workflow(source, worker, monitor=None):
+    graph = WorkflowGraph()
+    
+    download = Download(url=wps_url())
+    download.set_monitor(monitor, 10, 50)
+    doit = GenericWPS(**worker)
+    doit.set_monitor(monitor, 50, 100)
+
+    graph.connect(download, download.OUTPUT_NAME, doit, doit.INPUT_NAME)
+    logger.debug("source = %s", source)
+
+    result = simple_process.process(graph, inputs={ download : [{download.INPUT_NAME: source}] })
+    
+    status_location = result.get( (doit.id, doit.STATUS_LOCATION_NAME) )[0]
+    status = result.get( (doit.id, doit.STATUS_NAME) )[0]
+    return dict(worker=dict(status_location=status_location, status=status))
+
 def run(workflow, monitor=None):
     if workflow['source'].has_key('swift'):
         return swift_workflow(source=workflow['source']['swift'], worker=workflow['worker'], monitor=monitor)
+    elif workflow['source'].has_key('thredds'):
+        return thredds_workflow(source=workflow['source']['thredds'], worker=workflow['worker'], monitor=monitor)
     else:
         return esgf_workflow(source=workflow['source']['esgf'], worker=workflow['worker'], monitor=monitor)
 
