@@ -44,6 +44,7 @@ def download(url, use_file_url=False, credentials=None):
             cmd.append("--quiet")
         cmd.append("-N")           # turn on timestamping
         cmd.append("--continue")   # continue partial downloads
+        cmd.appned("-x")           # force creation of directories
         cmd.append("-P")           # directory prefix
         cmd.append(config.cache_path())
         cmd.append(url)
