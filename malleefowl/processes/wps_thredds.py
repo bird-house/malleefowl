@@ -34,7 +34,7 @@ class ThreddsDownload(WPSProcess):
             )
 
     def execute(self):
-        files = thredds.download(url=self.prefix.getValue())
+        files = thredds.download(url=self.url.getValue(), monitor=self.show_status)
 
         import json
         outfile = self.mktempfile(suffix='.json')

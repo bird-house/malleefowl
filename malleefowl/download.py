@@ -26,8 +26,6 @@ def download(url, use_file_url=False, credentials=None):
     :param credentials: path to credentials if security is needed to download file
     returns downloaded file with either file:// or system path
     """
-    from os.path import basename
-    resource_name = basename(url)
     logger.debug('downloading %s', url)
 
     from subprocess import check_output
@@ -44,18 +42,20 @@ def download(url, use_file_url=False, credentials=None):
             cmd.append("--quiet")
         cmd.append("-N")           # turn on timestamping
         cmd.append("--continue")   # continue partial downloads
-        cmd.appned("-x")           # force creation of directories
+        cmd.append("-x")           # force creation of directories
         cmd.append("-P")           # directory prefix
         cmd.append(config.cache_path())
         cmd.append(url)
         check_output(cmd)
     except:
-        msg = "wget failed on %s. Maybe not authorized? " % (resource_name)
+        msg = "wget failed on {0}. Maybe not authorized?".format(url)
         logger.exception(msg)
         raise Exception(msg)
 
+    import urllib
+    parsed_url = urllib.urllib(url)
     from os.path import join
-    filename = join(config.cache_path(), resource_name)
+    filename = join(config.cache_path(), parsed_url.netloc, parsed_url.path.strip('/'))
     if use_file_url == True:
         filename = "file://" + filename
     return filename
@@ -129,6 +129,8 @@ class DownloadManager(object):
         # how long?
         duration = (datetime.now() - t0).seconds
         self.show_status("downloaded %d files in %d seconds" % (len(urls), duration), 100)
+        if len(self.files) != len(urls):
+            raise Exception("could not download all files %d/%d" % (len(self.files), len(urls)))
         # done
         return self.files
 
