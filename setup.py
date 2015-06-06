@@ -27,6 +27,7 @@ requires = [
 #    'dateutil',
     'dispel4py',
     'python-swiftclient',
+    'threddsclient',
     'nose',
     ]
 
