@@ -52,8 +52,8 @@ def download(url, use_file_url=False, credentials=None):
         logger.exception(msg)
         raise Exception(msg)
 
-    import urllib
-    parsed_url = urllib.urllib(url)
+    import urlparse
+    parsed_url = urlparse.urlparse(url)
     from os.path import join
     filename = join(config.cache_path(), parsed_url.netloc, parsed_url.path.strip('/'))
     if use_file_url == True:

@@ -29,7 +29,7 @@ class ThreddsDownload(WPSProcess):
             title="Downloaded files",
             abstract="JSON document with list of downloaded files with file url.",
             metadata=[],
-            formats=[{"mimeType":"test/json"}],
+            formats=[{"mimeType":"application/json"}],
             asReference=True,
             )
 

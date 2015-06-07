@@ -192,6 +192,24 @@ class SwiftDownload(GenericWPS):
         result['output'] = urls
         return result
 
+class ThreddsDownload(GenericWPS):
+    def __init__(self, url, catalog_url):
+        GenericWPS.__init__(self, url, 'thredds_download', output='output')
+        self.catalog_url = catalog_url
+
+    def _process(self, inputs):
+        self.wps_inputs.append( ('url', self.catalog_url) )
+        result = self.execute()
+
+        # read json document with list of urls
+        import json
+        import urllib2
+        urls = json.load(urllib2.urlopen(result['output']))
+        if len(urls) == 0:
+            raise Exception('Could not download any files.')
+        result['output'] = urls
+        return result
+
 def esgf_workflow(source, worker, monitor=None):
     graph = WorkflowGraph()
     
@@ -199,7 +217,7 @@ def esgf_workflow(source, worker, monitor=None):
         url=wps_url(),
         constraints=source.get('facets'),
         limit=source.get('limit', 100),
-        search_type='File_Thredds',
+        search_type='File',
         distrib=source.get('distrib'),
         replica=source.get('replica'),
         latest=source.get('latest'),
@@ -240,15 +258,14 @@ def swift_workflow(source, worker, monitor=None):
 def thredds_workflow(source, worker, monitor=None):
     graph = WorkflowGraph()
     
-    download = Download(url=wps_url())
+    download = ThreddsDownload(url=wps_url(), **source)
     download.set_monitor(monitor, 10, 50)
     doit = GenericWPS(**worker)
     doit.set_monitor(monitor, 50, 100)
 
     graph.connect(download, download.OUTPUT_NAME, doit, doit.INPUT_NAME)
-    logger.debug("source = %s", source)
 
-    result = simple_process.process(graph, inputs={ download : [{download.INPUT_NAME: source}] })
+    result = simple_process.process(graph, inputs={ download : [{}] })
     
     status_location = result.get( (doit.id, doit.STATUS_LOCATION_NAME) )[0]
     status = result.get( (doit.id, doit.STATUS_NAME) )[0]
