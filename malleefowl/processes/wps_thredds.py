@@ -1,5 +1,5 @@
 from malleefowl.process import WPSProcess
-from malleefowl import thredds
+from malleefowl import download
 
 from malleefowl import config
 
@@ -34,7 +34,7 @@ class ThreddsDownload(WPSProcess):
             )
 
     def execute(self):
-        files = thredds.download(url=self.url.getValue(), monitor=self.show_status)
+        files = download.download_files_from_thredds(url=self.url.getValue(), monitor=self.show_status)
 
         import json
         outfile = self.mktempfile(suffix='.json')
