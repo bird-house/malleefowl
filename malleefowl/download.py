@@ -66,7 +66,7 @@ def download_files(urls=[], credentials=None, monitor=None):
 
 def download_files_from_thredds(url, recursive=False, monitor=None):
     import threddsclient
-    return download_files(urls=threddsclient.download_urls(url, recursive=recursive), monitor=monitor)
+    return download_files(urls=threddsclient.download_urls(url), monitor=monitor)
 
 class DownloadManager(object):
     def __init__(self, monitor=None):
