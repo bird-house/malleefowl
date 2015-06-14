@@ -2,7 +2,7 @@
 Malleefowl
 **********
 
-.. image:: https://travis-ci.org/bird-house/threddsclient.svg?branch=master
+.. image:: https://travis-ci.org/bird-house/malleefowl.svg?branch=master
    :alt: Travis Build
 
 
