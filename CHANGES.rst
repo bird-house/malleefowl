@@ -1,9 +1,11 @@
 Change History
 **************
 
-0.3.x (2015-mm-dd)
+0.3.1 (2015-06-14)
 ==================
 
+* added thredds workflow
+* download with `wget -x` to create directories in cache. 
 * fixed workflow process output parameter.
 
 0.3.0 (2015-05-22)
