@@ -2,6 +2,10 @@
 Malleefowl
 **********
 
+.. image:: https://travis-ci.org/bird-house/threddsclient.svg?branch=master
+   :alt: Travis Build
+
+
 Malleefowl (the bird)
    *Malleefowl are shy, wary, solitary birds that usually fly only to escape danger or reach a tree to roost in. Although very active, they are seldom seen [..]* (`Wikipedia <https://en.wikipedia.org/wiki/Malleefowl>`_).
 
