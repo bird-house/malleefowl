@@ -1,0 +1,10 @@
+language: python
+python:
+  - "2.7"
+install:
+  - make sysinstall
+  - make install
+#script:
+# - py.test -v tests --cov threddsclient --cov-report term-missing
+#after_success:
+# - coveralls
