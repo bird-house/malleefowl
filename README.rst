@@ -3,6 +3,7 @@ Malleefowl
 **********
 
 .. image:: https://travis-ci.org/bird-house/malleefowl.svg?branch=master
+   :target: https://travis-ci.org/bird-house/malleefowl
    :alt: Travis Build
 
 
