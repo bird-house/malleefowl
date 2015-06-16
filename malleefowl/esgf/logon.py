@@ -155,7 +155,7 @@ def myproxy_logon(username, hostname, port=7512, password=None, interactive=Fals
         logger.debug("env PATH=%s", env.get('PATH'))
         logger.debug("env LD_LIBRARY_PATH=%s", env.get('LD_LIBRARY_PATH'))
         certfile = os.path.join(outdir, "cert.pem")
-        cmd=["myproxy-logon", "-l", username, "-s", hostname, "-p", port, "-b", "-T", "-S", "-o", certfile, "-v"]
+        cmd=["myproxy-logon", "-l", username, "-s", hostname, "-p", port, "-b", "-S", "-o", certfile, "-v"]
         logger.debug("cmd=%s", cmd)
         p = subprocess.Popen(
             cmd,
