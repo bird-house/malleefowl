@@ -21,9 +21,11 @@ logger = logging.getLogger(__name__)
 
 def openid_logon(openid, password=None, interactive=False, outdir=None):
     """
-    Uses the OpenID logon at an ESGF identity provider to get the credentials (cookie)
+    Uses the OpenID logon at an ESGF identity provider to get the credentials (cookies)
 
     TODO: move this code to esgf pyclient
+
+    :return: cookies file
     """
     (username, hostname, port) = parse_openid(openid)
 
@@ -47,7 +49,11 @@ def openid_logon(openid, password=None, interactive=False, outdir=None):
     logger.debug("openid logon: status=%s, num cookies=%s", response.status_code, len(response.cookies))
     response.raise_for_status()
    
-    return response.cookies.get('esg.openid.saml.cookie')
+    cookies = os.path.join(outdir, 'wcookies.txt')
+    with open(cookies, 'w') as fp:
+        fp.write('esg.openid.saml.cookie {0}'.format(response.cookies.get('esg.openid.saml.cookie')))
+    return cookies
+    
 
 def myproxy_logon_with_openid(openid, password=None, interactive=False, outdir=None):
     """

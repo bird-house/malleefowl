@@ -9,7 +9,7 @@ class Download(WPSProcess):
         WPSProcess.__init__(self,
             identifier = "download",
             title = "Download files",
-            version = "0.3",
+            version = "0.4",
             abstract="Downloads files and provides file list as json document.")
 
         self.resource = self.addLiteralInput(
@@ -31,6 +31,16 @@ class Download(WPSProcess):
             formats=[{"mimeType":"application/x-pkcs7-mime"}],
             )
 
+        self.cookies = self.addComplexInput(
+            identifier = "cookies",
+            title = "Cookie with credentials",
+            abstract = "Cookie with credentials to access ESGF data.",
+            minOccurs=0,
+            maxOccurs=1,
+            maxmegabites=1,
+            formats=[{"mimeType":"text/plain"}],
+            )
+
         self.output = self.addComplexOutput(
             identifier="output",
             title="Downloaded files",
@@ -44,6 +54,7 @@ class Download(WPSProcess):
         files = download_files(
             urls = self.getInputValues(identifier='resource'),
             credentials = self.credentials.getValue(),
+            cookies = self.cookies.getValue(),
             monitor=self.show_status)
 
         import json
