@@ -3,7 +3,6 @@ from Queue import Queue
 
 from malleefowl import config
 from .exceptions import DownloadException
-from .esgf.logon import openid_logon
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
@@ -40,7 +39,9 @@ def download(url, use_file_url=False, credentials=None, openid=None, password=No
             cmd.append("--private-key")
             cmd.append(credentials)
         elif openid:
-            cookies = openid_logon(openid, password, url=url)
+            from .esgf.logon import openid_logon_with_wget
+            cookies = openid_logon_with_wget(openid, password, url=url)
+            logger.error(cookies)
             #cmd.append('--ca-directory={0}'.format('certificates'))
             cmd.append('--cookies=on')
             cmd.append('--keep-session-cookies')
