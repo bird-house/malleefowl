@@ -20,7 +20,12 @@ from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
 def openid_logon(openid, password=None, interactive=False, outdir=None):
-    (username, hostname, port) = parse(openid)
+    """
+    Uses the OpenID logon at an ESGF identity provider to get the credentials (cookie)
+
+    TODO: move this code to esgf pyclient
+    """
+    (username, hostname, port) = parse_openid(openid)
 
     if interactive:
         if password is None:
@@ -44,16 +49,16 @@ def openid_logon(openid, password=None, interactive=False, outdir=None):
    
     return response.cookies.get('esg.openid.saml.cookie')
 
-def logon_with_openid(openid, password=None, interactive=False, outdir=None):
+def myproxy_logon_with_openid(openid, password=None, interactive=False, outdir=None):
     """
     Trys to get MyProxy parameters from OpenID and calls :meth:`logon`.
 
     :param openid: OpenID used to login at ESGF node.
     """
-    (username, hostname, port) = parse(openid)
+    (username, hostname, port) = parse_openid(openid)
     return logon(username, hostname, port, password, interactive, outdir)
 
-def logon(username, hostname, port=7512, password=None, interactive=False, outdir=None):
+def myproxy_logon(username, hostname, port=7512, password=None, interactive=False, outdir=None):
     """
     Runs myproxy logon with username and password.
 
@@ -102,7 +107,7 @@ def logon(username, hostname, port=7512, password=None, interactive=False, outdi
         raise MyProxyLogonError("myproxy-logon process failed! %s" % (e.message))
     return certfile
     
-def parse(openid):
+def parse_openid(openid):
     """
     parse openid document to get myproxy service
     """

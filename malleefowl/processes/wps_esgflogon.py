@@ -60,7 +60,7 @@ class Logon(WPSProcess):
         
         logger.debug('openid=%s' % (openid))
 
-        certfile = logon.logon_with_openid(openid=openid, password=password, interactive=False)
+        certfile = logon.myproxy_logon_with_openid(openid=openid, password=password, interactive=False)
         
         self.show_status("logon successful", 100)
 
