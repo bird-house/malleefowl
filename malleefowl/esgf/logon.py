@@ -44,43 +44,6 @@ def openid_logon(openid, password=None, interactive=False, outdir=None):
    
     return response.cookies.get('esg.openid.saml.cookie')
 
-def openid_logon_with_wget(openid, password=None, interactive=False, outdir=None):
-    (username, hostname, port) = parse(openid)
-
-    if interactive:
-        if password is None:
-            from getpass import getpass
-            password = getpass('Enter password for %s: ' % username)
-
-    if outdir == None:
-        outdir = os.curdir
-     
-    cmd = ['wget']
-    cmd.append('--post-data')
-    cmd.append('"openid_identifier=https://{0}/esgf-idp/openid/&rememberOpenid=on"'.format(hostname))
-    cmd.append('--header="esgf-idea-agent-type:basic_auth"')
-    cmd.append('--http-user="{0}"'.format(username))
-    cmd.append('--http-password="{0}"'.format(password))
-    certs = os.path.join(outdir, 'certificates')
-    cmd.append('--ca-directory={0}'.format(certs))
-    cmd.append('--cookies=on')
-    cmd.append('--keep-session-cookies')
-    cmd.append('--save-cookies')
-    cookies = os.path.join(outdir, 'wcookies.txt')
-    cmd.append(cookies)
-    cmd.append('--load-cookies')
-    cmd.append(cookies)
-    cmd.append('-v')
-    cmd.append('-O')
-    output = os.path.join(outdir, 'out.html')
-    cmd.append(output)
-    cmd.append('https://{0}/esg-orp/j_spring_openid_security_check.htm'.format(hostname))
-    print ' '.join(cmd)
-    
-    import subprocess
-    subprocess.call(' '.join(cmd), shell=True)
-    
-
 def logon_with_openid(openid, password=None, interactive=False, outdir=None):
     """
     Trys to get MyProxy parameters from OpenID and calls :meth:`logon`.
