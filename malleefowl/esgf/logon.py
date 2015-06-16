@@ -19,7 +19,8 @@ from malleefowl.exceptions import MyProxyLogonError
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
-def openid_logon(openid, password=None, interactive=False, outdir=None):
+
+def openid_logon(openid, password=None, interactive=False, outdir=None, url=None):
     """
     Uses the OpenID logon at an ESGF identity provider to get the credentials (cookies)
 
@@ -27,7 +28,11 @@ def openid_logon(openid, password=None, interactive=False, outdir=None):
 
     :return: cookies file
     """
-    (username, hostname, port) = parse_openid(openid)
+    (username, provider, port) = parse_openid(openid)
+    consumer = provider
+    if url:
+        from urlparse import urlparse
+        consumer = urlparse(url).netloc
 
     if interactive:
         if password is None:
@@ -39,19 +44,29 @@ def openid_logon(openid, password=None, interactive=False, outdir=None):
 
     import requests
     from requests.auth import HTTPBasicAuth
+    from cookielib import MozillaCookieJar
 
-    url = 'https://{0}/esg-orp/j_spring_openid_security_check.htm'.format(hostname)
-    data = dict(openid_identifier='https://{0}/esgf-idp/openid/'.format(hostname), rememberOpenid='on')
+    url = 'https://{0}/esg-orp/j_spring_openid_security_check.htm'.format(consumer)
+    data = dict(openid_identifier='https://{0}/esgf-idp/openid/'.format(provider), rememberOpenid='on')
     auth = HTTPBasicAuth(username, password)
     headers = {'esgf-idea-agent-type': 'basic_auth'}
-    
-    response = requests.post(url, auth=auth, data=data, headers=headers, verify=True)
-    logger.debug("openid logon: status=%s, num cookies=%s", response.status_code, len(response.cookies))
+
+    session = requests.Session()
+    cookies = os.path.join(outdir, 'cookies.txt')
+    session.cookies = MozillaCookieJar(cookies)
+    if not os.path.exists(cookies):
+        # Create a new cookies file and set our Session's cookies
+        logger.debug("setting cookies")
+        session.cookies.save()
+    else:
+        # Load saved cookies from the file and use them in a request
+        logger.debug("loading saved cookies")
+        session.cookies.load(ignore_discard=True)
+    response = session.post(url, auth=auth, data=data, headers=headers, verify=True)
+    logger.debug("openid logon: status=%s", response.status_code)
     response.raise_for_status()
+    session.cookies.save(ignore_discard=True)
    
-    cookies = os.path.join(outdir, 'wcookies.txt')
-    with open(cookies, 'w') as fp:
-        fp.write('esg.openid.saml.cookie {0}'.format(response.cookies.get('esg.openid.saml.cookie')))
     return cookies
     
 
