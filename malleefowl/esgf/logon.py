@@ -56,7 +56,7 @@ def myproxy_logon_with_openid(openid, password=None, interactive=False, outdir=N
     :param openid: OpenID used to login at ESGF node.
     """
     (username, hostname, port) = parse_openid(openid)
-    return logon(username, hostname, port, password, interactive, outdir)
+    return myproxy_logon(username, hostname, port, password, interactive, outdir)
 
 def myproxy_logon(username, hostname, port=7512, password=None, interactive=False, outdir=None):
     """
