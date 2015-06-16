@@ -1,5 +1,8 @@
 """
-This module is used to get a proxy certificate from a myproxy server with an esgf openid.
+This module is used to get esgf logon credentials. There are two choices:
+
+* a proxy certificate from a myproxy server with an ESGF openid.
+* OpenID login as used in browsers.
 
 Some of the code is taken from esgf-pyclient:
 https://github.com/stephenpascoe/esgf-pyclient
@@ -16,8 +19,32 @@ from malleefowl.exceptions import MyProxyLogonError
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
+def openid_logon(openid, password=None, interactive=False, outdir=None):
+    (username, hostname, port) = parse(openid)
 
-def browser_openid_logon(openid, password=None, interactive=False, outdir=None):
+    if interactive:
+        if password is None:
+            from getpass import getpass
+            password = getpass('Enter password for %s: ' % username)
+
+    if outdir == None:
+        outdir = os.curdir
+
+    import requests
+    from requests.auth import HTTPBasicAuth
+
+    url = 'https://{0}/esg-orp/j_spring_openid_security_check.htm'.format(hostname)
+    data = dict(openid_identifier='https://{0}/esgf-idp/openid/'.format(hostname), rememberOpenid='on')
+    auth = HTTPBasicAuth(username, password)
+    headers = {'esgf-idea-agent-type': 'basic_auth'}
+    
+    response = requests.post(url, auth=auth, data=data, headers=headers, verify=True)
+    logger.debug("openid logon: status=%s, num cookies=%s", response.status_code, len(response.cookies))
+    response.raise_for_status()
+   
+    return response.cookies.get('esg.openid.saml.cookie')
+
+def openid_logon_with_wget(openid, password=None, interactive=False, outdir=None):
     (username, hostname, port) = parse(openid)
 
     if interactive:
