@@ -5,22 +5,18 @@ from datetime import date
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
-class Logon(WPSProcess):
+class MyProxyLogon(WPSProcess):
     def __init__(self):
         WPSProcess.__init__(
             self,
             identifier = "esgf_logon",
-            title = "Logon with ESGF OpenID",
-            version = "1.0",
-            metadata=[
-                {"title":"ESGF","href":"http://esgf.org"},
-                ],
-            abstract="Logon with ESGF OpenID")
+            title = "ESGF MyProxy Logon",
+            version = "0.2")
 
         self.openid = self.addLiteralInput(
             identifier = "openid",
             title = "ESGF OpenID",
-            abstract = "Enter ESGF OpenID",
+            abstract = "For example: https://esgf-data.dkrz.de/esgf-idp/openid/username",
             minOccurs = 1,
             maxOccurs = 1,
             type = type('')
@@ -58,9 +54,7 @@ class Logon(WPSProcess):
         openid=self.openid.getValue()
         password=self.password.getValue()
         
-        logger.debug('openid=%s' % (openid))
-
-        certfile = logon.logon_with_openid(openid=openid, password=password, interactive=False)
+        certfile = logon.myproxy_logon_with_openid(openid=openid, password=password, interactive=False)
         
         self.show_status("logon successful", 100)
 

@@ -1,6 +1,13 @@
 Change History
 **************
 
+0.3.2 (2015-06-17)
+==================
+
+* added download with openid.
+* renamed myproxy_logon().
+* updated tomcat/thredds recipe.
+
 0.3.1 (2015-06-14)
 ==================
 

@@ -62,3 +62,6 @@ docs/build/
 # tests
 *.log
 *.lock
+
+# IPython
+.ipynb_checkpoints

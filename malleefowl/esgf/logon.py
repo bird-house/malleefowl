@@ -1,5 +1,8 @@
 """
-This module is used to get a proxy certificate from a myproxy server with an esgf openid.
+This module is used to get esgf logon credentials. There are two choices:
+
+* a proxy certificate from a myproxy server with an ESGF openid.
+* OpenID login as used in browsers.
 
 Some of the code is taken from esgf-pyclient:
 https://github.com/stephenpascoe/esgf-pyclient
@@ -16,16 +19,110 @@ from malleefowl.exceptions import MyProxyLogonError
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
-def logon_with_openid(openid, password=None, interactive=False, outdir=None):
+
+def _consumer(provider, url):
+    consumer = provider
+    if url:
+        from urlparse import urlparse
+        consumer = urlparse(url).netloc
+    return consumer
+
+def _password(interactive, password):
+    if interactive:
+        if password is None:
+            from getpass import getpass
+            password = getpass('Enter password for %s: ' % username)
+    return password
+
+def _outdir(outdir):
+    if outdir == None:
+        outdir = os.curdir
+    return outdir
+
+def openid_logon(openid, password=None, interactive=False, outdir=None, url=None):
+    """
+    Uses the OpenID logon at an ESGF identity provider to get the credentials (cookies)
+
+    TODO: move this code to esgf pyclient
+
+    :return: cookies file
+    """
+    (username, provider, port) = parse_openid(openid)
+    consumer = _consumer(provider, url)
+    password = _password(interactive, password)
+    outdir = _outdir(outdir)
+
+    import requests
+    from requests.auth import HTTPBasicAuth
+    from cookielib import MozillaCookieJar
+
+    url = 'https://{0}/esg-orp/j_spring_openid_security_check.htm'.format(consumer)
+    data = dict(openid_identifier='https://{0}/esgf-idp/openid/'.format(provider), rememberOpenid='on')
+    auth = HTTPBasicAuth(username, password)
+    headers = {'esgf-idea-agent-type': 'basic_auth'}
+
+    session = requests.Session()
+    cookies = os.path.join(outdir, 'cookies.txt')
+    session.cookies = MozillaCookieJar(cookies)
+    if not os.path.exists(cookies):
+        # Create a new cookies file and set our Session's cookies
+        logger.debug("setting cookies")
+        session.cookies.save()
+    else:
+        # Load saved cookies from the file and use them in a request
+        logger.debug("loading saved cookies")
+        session.cookies.load(ignore_discard=True)
+    response = session.post(url, auth=auth, data=data, headers=headers, verify=True)
+    logger.debug("openid logon: status=%s", response.status_code)
+    response.raise_for_status()
+    session.cookies.save(ignore_discard=True)
+   
+    return cookies
+
+
+def openid_logon_with_wget(openid, password=None, interactive=False, outdir=None, url=None):
+    (username, provider, port) = parse_openid(openid)
+    consumer = _consumer(provider, url)
+    password = _password(interactive, password)
+    outdir = _outdir(outdir)
+     
+    cmd = ['wget']
+    cmd.append('--post-data')
+    cmd.append('"openid_identifier=https://{0}/esgf-idp/openid/&rememberOpenid=on"'.format(provider))
+    cmd.append('--header="esgf-idea-agent-type:basic_auth"')
+    cmd.append('--http-user="{0}"'.format(username))
+    cmd.append('--http-password="{0}"'.format(password))
+    #certs = os.path.join(outdir, 'certificates')
+    #cmd.append('--ca-directory={0}'.format(certs))
+    cmd.append('--cookies=on')
+    cmd.append('--keep-session-cookies')
+    cmd.append('--save-cookies')
+    cookies = os.path.join(outdir, 'wcookies.txt')
+    cmd.append(cookies)
+    cmd.append('--load-cookies')
+    cmd.append(cookies)
+    #cmd.append('-v')
+    cmd.append('-O-')
+    cmd.append('https://{0}/esg-orp/j_spring_openid_security_check.htm'.format(consumer))
+    cmd_str = ' '.join(cmd)
+    logger.debug('execute: %s', cmd_str)
+    
+    import subprocess
+    subprocess.check_output(cmd_str, shell=True)
+
+    return cookies
+
+
+def myproxy_logon_with_openid(openid, password=None, interactive=False, outdir=None):
     """
     Trys to get MyProxy parameters from OpenID and calls :meth:`logon`.
 
     :param openid: OpenID used to login at ESGF node.
     """
-    (username, hostname, port) = parse(openid)
-    return logon(username, hostname, port, password, interactive, outdir)
+    (username, hostname, port) = parse_openid(openid)
+    return myproxy_logon(username, hostname, port, password, interactive, outdir)
 
-def logon(username, hostname, port=7512, password=None, interactive=False, outdir=None):
+def myproxy_logon(username, hostname, port=7512, password=None, interactive=False, outdir=None):
     """
     Runs myproxy logon with username and password.
 
@@ -58,7 +155,7 @@ def logon(username, hostname, port=7512, password=None, interactive=False, outdi
         logger.debug("env PATH=%s", env.get('PATH'))
         logger.debug("env LD_LIBRARY_PATH=%s", env.get('LD_LIBRARY_PATH'))
         certfile = os.path.join(outdir, "cert.pem")
-        cmd=["myproxy-logon", "-l", username, "-s", hostname, "-p", port, "-b", "-T", "-S", "-o", certfile, "-v"]
+        cmd=["myproxy-logon", "-l", username, "-s", hostname, "-p", port, "-b", "-S", "-o", certfile, "-v"]
         logger.debug("cmd=%s", cmd)
         p = subprocess.Popen(
             cmd,
@@ -74,7 +171,7 @@ def logon(username, hostname, port=7512, password=None, interactive=False, outdi
         raise MyProxyLogonError("myproxy-logon process failed! %s" % (e.message))
     return certfile
     
-def parse(openid):
+def parse_openid(openid):
     """
     parse openid document to get myproxy service
     """
