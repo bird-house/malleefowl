@@ -14,7 +14,6 @@ See also:
 """
 
 import os
-from malleefowl.exceptions import MyProxyLogonError
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
@@ -122,6 +121,7 @@ def myproxy_logon_with_openid(openid, password=None, interactive=False, outdir=N
     (username, hostname, port) = parse_openid(openid)
     return myproxy_logon(username, hostname, port, password, interactive, outdir)
 
+
 def myproxy_logon(username, hostname, port=7512, password=None, interactive=False, outdir=None):
     """
     Runs myproxy logon with username and password.
@@ -144,32 +144,17 @@ def myproxy_logon(username, hostname, port=7512, password=None, interactive=Fals
 
     if outdir == None:
         outdir = os.curdir
+
+    from myproxy.client import MyProxyClient
+    myproxy_clnt = MyProxyClient(hostname=hostname, port=port, caCertDir=outdir, proxyCertLifetime=43200)
+    creds = myproxy_clnt.logon(username, password, bootstrap=True)
+
+    outfile = os.path.join(outdir, 'cert.pem')
+    with open('cert.pem', 'w') as fout:
+        for cred in creds:
+            fout.write(cred)
             
-    try:
-        import subprocess
-        from subprocess import PIPE
-        env = os.environ.copy()
-        env['X509_CERT_DIR'] = outdir
-        env['LD_LIBRARY_PATH'] = ''
-        logger.debug("env=%s", env)
-        logger.debug("env PATH=%s", env.get('PATH'))
-        logger.debug("env LD_LIBRARY_PATH=%s", env.get('LD_LIBRARY_PATH'))
-        certfile = os.path.join(outdir, "cert.pem")
-        cmd=["myproxy-logon", "-l", username, "-s", hostname, "-p", port, "-b", "-S", "-o", certfile, "-v"]
-        logger.debug("cmd=%s", cmd)
-        p = subprocess.Popen(
-            cmd,
-            stdin=PIPE,
-            stdout=PIPE,
-            stderr=PIPE,
-            env=env)
-        (stdoutstr, stderrstr) = p.communicate(password)
-        if p.returncode != 0:
-            raise MyProxyLogonError("logon failed! %s %s" % (stdoutstr, stderrstr))
-    except Exception as e:
-        logger.exception("myproxy logon failed")
-        raise MyProxyLogonError("myproxy-logon process failed! %s" % (e.message))
-    return certfile
+    return outfile
     
 def parse_openid(openid):
     """

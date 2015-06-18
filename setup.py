@@ -18,6 +18,7 @@ requires = [
     'lxml',
     'owslib',
     'esgf-pyclient',
+    'myproxyclient',
 #    'pyOpenSSL',
     'netCDF4',
     'pyYAML',
