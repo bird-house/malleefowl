@@ -1,7 +1,7 @@
 Change History
 **************
 
-0.3.3 (2015-06-dd)
+0.3.3 (2015-06-18)
 ==================
 
 * using python myproxyclient.
