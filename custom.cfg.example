@@ -8,7 +8,4 @@ http-port = 8091
 log-level = INFO
 # esgf archive root path, separated by ":" like PATH
 archive-root =
-# swift cloud access
-swift-auth-url = http://localhost/auth/v1.0
-swift-auth-version = 1
 

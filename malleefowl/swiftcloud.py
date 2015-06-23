@@ -11,11 +11,6 @@ from swiftclient.service import SwiftService
 def login(username, password, auth_url=None, auth_version=None):
     storage_url = auth_token = None
 
-    if auth_url is None:
-        auth_url = config.swift_auth_url()
-    if auth_version is None:
-        auth_version = config.swift_auth_version()
-    
     try:
         (storage_url, auth_token) = client.get_auth(auth_url, username, password, auth_version=auth_version)
     except ClientException:
