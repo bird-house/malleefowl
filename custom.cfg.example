@@ -5,7 +5,7 @@ extends = buildout.cfg
 [settings]
 hostname = localhost
 http-port = 8091
-log-level = INFO
+log-level = WARN
 # esgf archive root path, separated by ":" like PATH
 archive-root =
 
