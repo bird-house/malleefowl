@@ -33,5 +33,5 @@ Anaconda package
 
 Malleefowl is also available as Anaconda package if you want to use it as a library::
 
-  $ conda install -c https://conda.binstar.org/birdhouse malleefowl
+  $ conda install -c birdhouse malleefowl
 
