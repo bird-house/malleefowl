@@ -1,6 +1,11 @@
 Change History
 **************
 
+0.3.4 (2015-07-23)
+==================
+
+* disabled "File_Thredds" search type ... using "File" search instead.
+
 0.3.3 (2015-06-18)
 ==================
 
