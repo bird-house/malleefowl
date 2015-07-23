@@ -108,7 +108,7 @@ class EsgSearch(GenericWPS):
     def __init__(self, url,
                  constraints='project:CORDEX',
                  limit=100,
-                 search_type='File_Thredds',
+                 search_type='File',
                  distrib=False,
                  replica=False,
                  latest=True,

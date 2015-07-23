@@ -65,7 +65,6 @@
                             <ows:Value>Dataset</ows:Value>
                             <ows:Value>File</ows:Value>
                             <ows:Value>Aggregation</ows:Value>
-                            <ows:Value>File_Thredds</ows:Value>
                     </ows:AllowedValues>
                     <DefaultValue>Dataset</DefaultValue>
                 </LiteralData>

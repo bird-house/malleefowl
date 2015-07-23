@@ -187,7 +187,7 @@ class EsgSearchTestCase(TestCase):
         constraints.append( ('experiment', 'historical') )
 
         (result, summary, facet_counts) = self.esgsearch.search(
-            search_type='File_Thredds',
+            search_type='File',
             limit=10,
             offset=0,
             constraints = constraints)
@@ -204,7 +204,7 @@ class EsgSearchTestCase(TestCase):
         constraints.append( ('experiment', 'historical') )
 
         (result, summary, facet_counts) = self.esgsearch.search(
-            search_type='File_Thredds',
+            search_type='File',
             limit=10,
             offset=0,
             temporal=True,
@@ -241,7 +241,7 @@ class EsgSearchTestCase(TestCase):
         constraints.append( ('time_frequency', 'day' ) )
 
         (result, summary, facet_counts) = self.esgsearch.search(
-            search_type='File_Thredds',
+            search_type='File',
             limit=100,
             offset=0,
             temporal=False,
@@ -289,7 +289,7 @@ class EsgSearchTestCase(TestCase):
         constraints.append( ('experiment', 'historical') )
 
         (result, summary, facet_counts) = self.esgsearch.search(
-            search_type='File_Thredds',
+            search_type='File',
             limit=10,
             offset=0,
             constraints = constraints)
@@ -307,7 +307,7 @@ class EsgSearchTestCase(TestCase):
         constraints.append( ('experiment', 'historical') )
 
         (result, summary, facet_counts) = self.esgsearch.search(
-            search_type='File_Thredds',
+            search_type='File',
             limit=20,
             offset=0,
             constraints = constraints,

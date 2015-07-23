@@ -194,8 +194,12 @@ class ESGSearch(object):
             self._file_search(datasets, my_constraints, start_date, end_date)
 
         # search files on thredds (optional)
-        elif search_type == 'File_Thredds':
-            self._tds_file_search(datasets, my_constraints, start_date, end_date)
+        # TODO: not used anymore ... remove code
+        #elif search_type == 'File_Thredds':
+        #    self._tds_file_search(datasets, my_constraints, start_date, end_date)
+
+        else:
+            raise Exception('unknown search type: %s', search_type)
             
         logger.debug('summary=%s', self.summary)
         self.show_status('Done', 100)

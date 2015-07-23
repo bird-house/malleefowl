@@ -17,7 +17,7 @@ class ESGSearch(WPSProcess):
         WPSProcess.__init__(self,
             identifier = "esgsearch",
             title = "ESGF Search",
-            version = "0.2",
+            version = "0.3",
             abstract="Search ESGF datasets, files and aggreations.")
 
         self.url = self.addLiteralInput(
@@ -78,7 +78,7 @@ class ESGSearch(WPSProcess):
             minOccurs=1,
             maxOccurs=1,
             type=type(''),
-            allowedValues=['Dataset', 'File', 'Aggregation', 'File_Thredds']
+            allowedValues=['Dataset', 'File', 'Aggregation']
             )
 
         self.constraints = self.addLiteralInput(
