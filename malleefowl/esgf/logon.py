@@ -197,7 +197,7 @@ def parse_openid(openid):
         username = mo.group(1)
                 
     if port is None:
-        port == "7512"
+        port = "7512"
             
     return username, hostname, port
 
