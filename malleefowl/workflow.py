@@ -155,22 +155,19 @@ class SolrSearch(GenericWPS):
     """
     TODO: not using wps here ...
     """
-    def __init__(self, url, query, category=None, source=None):
+    def __init__(self, url, query, filter_query=None):
         GenericWPS.__init__(self, url, 'solrsearch', output='output')
         self.query= query
-        self.category = category
-        self.source = source
+        self.filter_query = filter_query
 
+        
     def _process(self, inputs):
         import pysolr
-        solr = pysolr.Solr('http://localhost:8983/solr/birdhouse/', timeout=10)
+        solr = pysolr.Solr('http://localhost:8983/solr/birdhouse/', timeout=60)
         options = {'start':0, 'rows':1024}
-        if self.category or self.source:
-            options['fq'] = []
-            if self.category:
-                options['fq'].append('category:{0}'.format(self.category))
-            if self.source:
-                options['fq'].append('source:{0}'.format(self.source))
+        if self.filter_query:
+            options['fq'] = self.filter_query
+        logger.debug(options)
         search_result = solr.search(self.query, **options)
         urls = []
         for item in search_result:
@@ -320,8 +317,7 @@ def solr_workflow(source, worker, monitor=None):
     solrsearch = SolrSearch(
         url=wps_url(),
         query=source.get('query'),
-        category=source.get('category'),
-        source=source.get('source'))
+        filter_query=source.get('filter_query'))
     solrsearch.set_monitor(monitor, 0, 10)
     download = Download(url=wps_url())
     download.set_monitor(monitor, 10, 50)
