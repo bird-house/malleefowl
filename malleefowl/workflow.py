@@ -1,6 +1,5 @@
 from dispel4py.workflow_graph import WorkflowGraph
 from dispel4py import simple_process
-from dispel4py.core import GenericPE
 from dispel4py.base import BasePE
 
 from malleefowl.config import wps_url
@@ -8,26 +7,14 @@ from malleefowl.config import wps_url
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
-
-class GenericWPS(BasePE):
+class MonitorPE(BasePE):
     INPUT_NAME = 'input'
     OUTPUT_NAME = 'output'
-    STATUS_NAME = 'status'
-    STATUS_LOCATION_NAME = 'status_location'
-    
-    def __init__(self, url, identifier, resource='resource', inputs=[], output=None):
+
+    def __init__(self, output=None):
         BasePE.__init__(self)
-        self._add_input(GenericWPS.INPUT_NAME)
-        self._add_output(GenericWPS.OUTPUT_NAME)
-        self._add_output(GenericWPS.STATUS_NAME)
-        self._add_output(GenericWPS.STATUS_LOCATION_NAME)
-        
-        from owslib.wps import WebProcessingService
-        self.wps = WebProcessingService(url=url, skip_caps=True)
-        self.identifier = identifier
-        self.wps_resource = resource
-        self.wps_inputs = inputs
-        self.wps_output = output
+        self._add_input(self.INPUT_NAME)  
+        self._add_output(self.OUTPUT_NAME)
 
         def log(message, progress):
             if self._monitor:
@@ -43,6 +30,23 @@ class GenericWPS(BasePE):
         self._monitor = monitor
         self._pstart = start_progress
         self._pend = end_progress
+
+
+class GenericWPS(MonitorPE):
+    STATUS_NAME = 'status'
+    STATUS_LOCATION_NAME = 'status_location'
+    
+    def __init__(self, url, identifier, resource='resource', inputs=[], output=None):
+        MonitorPE.__init__(self)
+        self._add_output(self.STATUS_NAME)
+        self._add_output(self.STATUS_LOCATION_NAME)
+        
+        from owslib.wps import WebProcessingService
+        self.wps = WebProcessingService(url=url, skip_caps=True)
+        self.identifier = identifier
+        self.wps_resource = resource
+        self.wps_inputs = inputs
+        self.wps_output = output
 
     def progress(self, execution):
         return int( self._pstart + ( (self._pend - self._pstart) / 100.0 * execution.percentCompleted ) )
@@ -147,39 +151,38 @@ class EsgSearch(GenericWPS):
         urls = json.load(urllib2.urlopen(result['output']))
         if len(urls) == 0:
             raise Exception('Could not find any files.')
-        result['output'] = urls
+        result[self.OUTPUT_NAME] = urls
         return result
 
 
-class SolrSearch(GenericWPS):
+class SolrSearch(MonitorPE):
     """
-    TODO: not using wps here ...
+    Run search against birdhouse solr index and return a list of download urls.
     """
-    def __init__(self, url, solr_url, query, filter_query=None):
-        GenericWPS.__init__(self, url, 'solrsearch', output='output')
-        self.solr_url = solr_url
+    def __init__(self, url, query, filter_query=None):
+        MonitorPE.__init__(self)
+        self.url = url
         self.query= query
         self.filter_query = filter_query
 
         
-    def _process(self, inputs):
+    def process(self, inputs):
         import pysolr
-        solr = pysolr.Solr(self.solr_url, timeout=60)
+        solr = pysolr.Solr(self.url, timeout=60)
         options = {'start':0, 'rows':1024}
         if self.filter_query:
             options['fq'] = self.filter_query
-        logger.debug(options)
         search_result = solr.search(self.query, **options)
         urls = []
         for item in search_result:
             if 'url' in item:
                 urls.append(item['url'])
-
         if len(urls) == 0:
             raise Exception('Could not find any files.')
         elif len(urls) != search_result.hits:
             logger.warn('Not all found items from solr search have a download url.')
-        result = dict(output=urls)
+        result = {}
+        result[self.OUTPUT_NAME] = urls
         return result
 
         
@@ -316,8 +319,7 @@ def solr_workflow(source, worker, monitor=None):
     graph = WorkflowGraph()
 
     solrsearch = SolrSearch(
-        url=wps_url(),
-        solr_url = source.get('url'),
+        url = source.get('url'),
         query=source.get('query'),
         filter_query=source.get('filter_query'))
     solrsearch.set_monitor(monitor, 0, 10)
