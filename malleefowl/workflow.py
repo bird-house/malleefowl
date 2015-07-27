@@ -155,15 +155,16 @@ class SolrSearch(GenericWPS):
     """
     TODO: not using wps here ...
     """
-    def __init__(self, url, query, filter_query=None):
+    def __init__(self, url, solr_url, query, filter_query=None):
         GenericWPS.__init__(self, url, 'solrsearch', output='output')
+        self.solr_url = solr_url
         self.query= query
         self.filter_query = filter_query
 
         
     def _process(self, inputs):
         import pysolr
-        solr = pysolr.Solr('http://localhost:8983/solr/birdhouse/', timeout=60)
+        solr = pysolr.Solr(self.solr_url, timeout=60)
         options = {'start':0, 'rows':1024}
         if self.filter_query:
             options['fq'] = self.filter_query
@@ -316,6 +317,7 @@ def solr_workflow(source, worker, monitor=None):
 
     solrsearch = SolrSearch(
         url=wps_url(),
+        solr_url = source.get('url'),
         query=source.get('query'),
         filter_query=source.get('filter_query'))
     solrsearch.set_monitor(monitor, 0, 10)
