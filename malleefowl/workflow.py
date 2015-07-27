@@ -165,14 +165,22 @@ class SolrSearch(GenericWPS):
         import pysolr
         solr = pysolr.Solr('http://localhost:8983/solr/birdhouse/', timeout=10)
         options = {'start':0, 'rows':1024}
-        items = solr.search(self.query, **options)
+        if self.category or self.source:
+            options['fq'] = []
+            if self.category:
+                options['fq'].append('category:{0}'.format(self.category))
+            if self.source:
+                options['fq'].append('source:{0}'.format(self.source))
+        search_result = solr.search(self.query, **options)
         urls = []
-        for item in items:
-            logger.debug(item)
-            urls.append(item['url'])
+        for item in search_result:
+            if 'url' in item:
+                urls.append(item['url'])
 
         if len(urls) == 0:
             raise Exception('Could not find any files.')
+        elif len(urls) != search_result.hits:
+            logger.warn('Not all found items from solr search have a download url.')
         result = dict(output=urls)
         return result
 
