@@ -8,6 +8,7 @@ from malleefowl.config import wps_url
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
 
+
 class GenericWPS(BasePE):
     INPUT_NAME = 'input'
     OUTPUT_NAME = 'output'
@@ -104,6 +105,7 @@ class GenericWPS(BasePE):
     def _process(self, inputs):
         return self.execute()
 
+    
 class EsgSearch(GenericWPS):
     def __init__(self, url,
                  constraints='project:CORDEX',
@@ -148,6 +150,33 @@ class EsgSearch(GenericWPS):
         result['output'] = urls
         return result
 
+
+class SolrSearch(GenericWPS):
+    """
+    TODO: not using wps here ...
+    """
+    def __init__(self, url, query, category=None, source=None):
+        GenericWPS.__init__(self, url, 'solrsearch', output='output')
+        self.query= query
+        self.category = category
+        self.source = source
+
+    def _process(self, inputs):
+        import pysolr
+        solr = pysolr.Solr('http://localhost:8983/solr/birdhouse/', timeout=10)
+        options = {'start':0, 'rows':1024}
+        items = solr.search(self.query, **options)
+        urls = []
+        for item in items:
+            logger.debug(item)
+            urls.append(item['url'])
+
+        if len(urls) == 0:
+            raise Exception('Could not find any files.')
+        result = dict(output=urls)
+        return result
+
+        
 class Download(GenericWPS):
     def __init__(self, url, credentials=None):
         GenericWPS.__init__(self, url, 'download', output='output')
@@ -167,6 +196,7 @@ class Download(GenericWPS):
         result['output'] = urls
         return result
 
+    
 class SwiftDownload(GenericWPS):
     def __init__(self, url, storage_url, auth_token, container, prefix=None):
         GenericWPS.__init__(self, url, 'swift_download', output='output')
@@ -192,6 +222,7 @@ class SwiftDownload(GenericWPS):
         result['output'] = urls
         return result
 
+    
 class ThreddsDownload(GenericWPS):
     def __init__(self, url, catalog_url):
         GenericWPS.__init__(self, url, 'thredds_download', output='output')
@@ -210,6 +241,7 @@ class ThreddsDownload(GenericWPS):
         result['output'] = urls
         return result
 
+    
 def esgf_workflow(source, worker, monitor=None):
     graph = WorkflowGraph()
     
@@ -239,6 +271,7 @@ def esgf_workflow(source, worker, monitor=None):
     status = result.get( (doit.id, doit.STATUS_NAME) )[0]
     return dict(worker=dict(status_location=status_location, status=status))
 
+
 def swift_workflow(source, worker, monitor=None):
     graph = WorkflowGraph()
 
@@ -254,6 +287,7 @@ def swift_workflow(source, worker, monitor=None):
     status_location = result.get( (doit.id, doit.STATUS_LOCATION_NAME) )[0]
     status = result.get( (doit.id, doit.STATUS_NAME) )[0]
     return dict(worker=dict(status_location=status_location, status=status))
+
 
 def thredds_workflow(source, worker, monitor=None):
     graph = WorkflowGraph()
@@ -271,13 +305,42 @@ def thredds_workflow(source, worker, monitor=None):
     status = result.get( (doit.id, doit.STATUS_NAME) )[0]
     return dict(worker=dict(status_location=status_location, status=status))
 
+
+def solr_workflow(source, worker, monitor=None):
+    graph = WorkflowGraph()
+
+    solrsearch = SolrSearch(
+        url=wps_url(),
+        query=source.get('query'),
+        category=source.get('category'),
+        source=source.get('source'))
+    solrsearch.set_monitor(monitor, 0, 10)
+    download = Download(url=wps_url())
+    download.set_monitor(monitor, 10, 50)
+    doit = GenericWPS(**worker)
+    doit.set_monitor(monitor, 50, 100)
+
+    graph.connect(solrsearch, solrsearch.OUTPUT_NAME, download, download.INPUT_NAME)
+    graph.connect(download, download.OUTPUT_NAME, doit, doit.INPUT_NAME)
+
+    result = simple_process.process(graph, inputs={ solrsearch : [{}] })
+    
+    status_location = result.get( (doit.id, doit.STATUS_LOCATION_NAME) )[0]
+    status = result.get( (doit.id, doit.STATUS_NAME) )[0]
+    return dict(worker=dict(status_location=status_location, status=status))
+
+
 def run(workflow, monitor=None):
-    if workflow['source'].has_key('swift'):
+    if 'swift' in workflow['source']:
         return swift_workflow(source=workflow['source']['swift'], worker=workflow['worker'], monitor=monitor)
-    elif workflow['source'].has_key('thredds'):
+    elif 'thredds' in workflow['source']:
         return thredds_workflow(source=workflow['source']['thredds'], worker=workflow['worker'], monitor=monitor)
-    else:
+    elif 'esgf' in workflow['source']:
         return esgf_workflow(source=workflow['source']['esgf'], worker=workflow['worker'], monitor=monitor)
+    elif 'solr' in workflow['source']:
+        return solr_workflow(source=workflow['source']['solr'], worker=workflow['worker'], monitor=monitor)
+    else:
+        raise Exception("Unknown workflow type")
 
     
 
