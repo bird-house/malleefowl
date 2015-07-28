@@ -19,15 +19,12 @@ requires = [
     'owslib',
     'esgf-pyclient',
     'myproxyclient',
-#    'pyOpenSSL',
     'netCDF4',
     'pyYAML',
-#    'xmltodict',
-#    'images2gif',
-#    'dateutil',
     'dispel4py',
     'python-swiftclient',
     'threddsclient',
+    'pysolr',
     'nose',
     ]
 
