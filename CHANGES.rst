@@ -1,6 +1,12 @@
 Change History
 **************
 
+0.3.5 (2015-07-28)
+==================
+
+* added solr search workflow.
+* fixed esgf logon: port = "7512"
+
 0.3.4 (2015-07-23)
 ==================
 
