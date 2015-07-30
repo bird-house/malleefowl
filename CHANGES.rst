@@ -1,6 +1,11 @@
 Change History
 **************
 
+0.3.6 (2015-07-30)
+==================
+
+* download: checks if url has "file" schema. Those files can be returned directly.
+
 0.3.5 (2015-07-28)
 ==================
 
