@@ -29,6 +29,26 @@ def download(url, use_file_url=False, credentials=None, openid=None, password=No
     """
     logger.debug('downloading %s', url)
 
+    import urlparse
+    parsed_url = urlparse.urlparse(url)
+    if parsed_url.scheme == 'file':
+        result = url
+    else:
+        result = wget(url=url, use_file_url=use_file_url, credentials=credentials, openid=openid, password=password)
+    return result
+
+def wget(url, use_file_url=False, credentials=None, openid=None, password=None):
+    """
+    Downloads url and returns local filename.
+
+    :param url: url of file
+    :param use_file_url: True if result should be a file url "file://", otherwise use system path.
+    :param credentials: path to credentials if security is needed to download file
+    :param openid: download with you openid and password
+    :returns: downloaded file with either file:// or system path
+    """
+    logger.debug('downloading %s', url)
+
     from subprocess import check_output
     try:
         cmd = ["wget"]
