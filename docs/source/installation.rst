@@ -25,8 +25,9 @@ http://localhost:8091/wps?service=WPS&version=1.0.0&request=GetCapabilities.
 
 Check the log files for errors::
 
-   $ tail -f  ~/anaconda/var/log/pywps/malleefowl.log
-   $ tail -f  ~/anaconda/var/log/pywps/malleefowl_trace.log
+   $ cd ~/.conda/envs/birdhouse
+   $ tail -f var/log/supervisor/malleefowl.log
+
 
 Anaconda package
 ================
