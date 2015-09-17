@@ -7,12 +7,14 @@ import tempfile
 from netCDF4 import Dataset
 
 def test_esgf_archive_path_cordex():
+    raise SkipTest
     url = "http://carbon.dkrz.de/thredds/fileServer/cordex/output/WAS-44/MPI-CSC/MPI-M-MPI-ESM-LR/historical/r1i1p1/MPI-CSC-REMO2009/v1/day/tasmax/v20140918/tasmax_WAS-44_MPI-M-MPI-ESM-LR_historical_r1i1p1_MPI-CSC-REMO2009_v1_day_20010101-20051231.nc"
     local_path = "WAS-44/MPI-CSC/MPI-M-MPI-ESM-LR/historical/r1i1p1/MPI-CSC-REMO2009/v1/day/tasmax/v20140918/tasmax_WAS-44_MPI-M-MPI-ESM-LR_historical_r1i1p1_MPI-CSC-REMO2009_v1_day_20010101-20051231.nc"
     archive_path = utils.esgf_archive_path(url)
     nose.tools.ok_(local_path in archive_path, archive_path)
 
 def test_esgf_archive_path_cmip5():
+    raise SkipTest
     url = "http://bmbf-ipcc-ar5.dkrz.de/thredds/fileServer/cmip5/output1/MPI-M/MPI-ESM-LR/historical/mon/atmos/Amon/r1i1p1/v20111006/tasmax/tasmax_Amon_MPI-ESM-LR_historical_r1i1p1_185001-200512.nc"
     local_path = "MPI-M/MPI-ESM-LR/historical/mon/atmos/Amon/r1i1p1/v20111006/tasmax/tasmax_Amon_MPI-ESM-LR_historical_r1i1p1_185001-200512.nc"
     archive_path = utils.esgf_archive_path(url)
