@@ -8,4 +8,6 @@ http-port = 8091
 log-level = WARN
 # esgf archive root path, separated by ":" like PATH
 archive-root =
+# tomcat
+tomcat-ncwms-password =
 
