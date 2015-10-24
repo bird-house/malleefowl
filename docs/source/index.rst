@@ -24,7 +24,6 @@ Contents:
    testing
    docker
    processes/index
-   api/index
 
 Indices and tables
 ==================
