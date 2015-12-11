@@ -1,6 +1,11 @@
 Change History
 **************
 
+next
+==================
+
+* updated dockerfile and recipe.
+
 0.3.6 (2015-07-30)
 ==================
 
