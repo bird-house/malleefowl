@@ -37,7 +37,7 @@ VOLUME /data/cache
 VOLUME /data/lib
 
 # Ports used in birdhouse
-EXPOSE 9001 8091 28091 $OUTPUT_PORT
+EXPOSE 8091 28091 $OUTPUT_PORT
 
 # Start supervisor in foreground
 ENV DAEMON_OPTS --nodaemon --user $USER
