@@ -2,12 +2,15 @@ language: python
 branches:
   only:
     - master
+    - develop
 python:
   - "2.7"
 sudo: false
 install:
   - make install
+  - make start
 script:
+  - make docs
   - make test
 #after_success:
 # - coveralls
