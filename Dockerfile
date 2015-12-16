@@ -20,6 +20,7 @@ COPY . /opt/birdhouse
 WORKDIR /opt/birdhouse
 
 
+
 # Install system dependencies
 RUN bash bootstrap.sh -i && bash requirements.sh
 
@@ -42,6 +43,6 @@ EXPOSE 8091 28091 $OUTPUT_PORT
 # Start supervisor in foreground
 ENV DAEMON_OPTS --nodaemon --user $USER
 
-# Update config and start supervisor ...
-CMD ["make", "update-config", "start"]
+# Start service ...
+CMD ['make', 'update-config', 'start']
 
