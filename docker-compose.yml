@@ -2,6 +2,7 @@ malleefowl:
   image: birdhouse/malleefowl
   ports:
     - "38091:38091"
+    - "28091:28091"
     - "8091:8091"
   environment:
     HOSTNAME: localhost
