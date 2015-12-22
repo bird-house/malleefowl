@@ -15,4 +15,12 @@ For installation and configuration read the `documentation <http://malleefowl.re
 
 Malleefowl is part of the `Birdhouse <http://bird-house.github.io>`_ project.
 
+Using docker-compose
+====================
+
+Start malleefowl with docker-compose (port 8091) on localhost:
+
+.. code-block:: sh
+
+   $ docker-compose run --service-ports -e HOSTNAME=localhost malleefowl
 
