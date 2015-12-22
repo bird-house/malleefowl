@@ -262,7 +262,7 @@ restart:
 .PHONY: status
 status:
 	@echo "Supervisor status ..."
-	$(PREFIX)/bin/supervisorctl status
+	$(PREFIX)/bin/supervisorctl -c ${PREFIX}/etc/supervisor/supervisord.conf status
 
 
 ## Docker targets
