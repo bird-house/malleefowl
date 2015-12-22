@@ -7,3 +7,6 @@ malleefowl:
   environment:
     HOSTNAME: localhost
     OUTPUT_PORT: 38091
+  volumes:
+    - data:/data
+  volume_driver: local
