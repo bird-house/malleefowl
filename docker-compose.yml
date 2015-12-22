@@ -7,4 +7,3 @@ malleefowl:
   environment:
     HOSTNAME: localhost
     OUTPUT_PORT: 38091
-
