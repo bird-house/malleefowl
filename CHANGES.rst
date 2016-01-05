@@ -1,9 +1,11 @@
 Change History
 **************
 
-next
+0.3.7 (2016-01-05)
 ==================
 
+* use pywps.process.WPSProcess instead of malleefowl.process.WPSProcess.
+* cleaned up malleefowl.config.
 * updated dockerfile and recipe.
 
 0.3.6 (2015-07-30)
