@@ -1,6 +1,7 @@
-from malleefowl.process import WPSProcess
-from malleefowl import download
+from pywps.Process import WPSProcess
 
+from malleefowl.process import mktempfile
+from malleefowl import download
 from malleefowl import config
 
 from malleefowl import wpslogging as logging
@@ -13,7 +14,9 @@ class ThreddsDownload(WPSProcess):
             identifier = "thredds_download",
             title = "Download files from Thredds Catalog",
             version = "0.1",
-            abstract="Downloads files from Thredds Catalog and provides file list as JSON Document.")       
+            abstract="Downloads files from Thredds Catalog and provides file list as JSON Document.",
+            statusSupported=True,
+            storeSupported=True)       
 
         self.url = self.addLiteralInput(
             identifier = "url",
@@ -37,7 +40,7 @@ class ThreddsDownload(WPSProcess):
         files = download.download_files_from_thredds(url=self.url.getValue(), monitor=self.show_status)
 
         import json
-        outfile = self.mktempfile(suffix='.json')
+        outfile = mktempfile(suffix='.json')
         with open(outfile, 'w') as fp:
             json.dump(obj=files, fp=fp, indent=4, sort_keys=True)
         self.output.setValue( outfile )

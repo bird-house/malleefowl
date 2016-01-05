@@ -1,6 +1,8 @@
-from malleefowl.process import WPSProcess
+from pywps.Process import WPSProcess
 
 from datetime import date
+
+from malleefowl.process import show_status
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
@@ -11,7 +13,9 @@ class MyProxyLogon(WPSProcess):
             self,
             identifier = "esgf_logon",
             title = "ESGF MyProxy Logon",
-            version = "0.2")
+            version = "0.2",
+            statusSupported=True,
+            storeSupported=True)
 
         self.openid = self.addLiteralInput(
             identifier = "openid",
@@ -49,14 +53,14 @@ class MyProxyLogon(WPSProcess):
     def execute(self):
         from malleefowl.esgf import logon
         
-        self.show_status("start logon ...", 0)
+        show_status(self, "start logon ...", 0)
 
-        openid=self.openid.getValue()
-        password=self.password.getValue()
+        openid = self.openid.getValue()
+        password = self.password.getValue()
         
         certfile = logon.myproxy_logon_with_openid(openid=openid, password=password, interactive=False)
         
-        self.show_status("logon successful", 100)
+        show_status(self, "logon successful", 100)
 
         self.output.setValue( certfile )
         self.expires.setValue(logon.cert_infos(certfile)['expires'])

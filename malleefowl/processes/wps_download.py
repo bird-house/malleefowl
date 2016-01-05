@@ -1,4 +1,6 @@
-from malleefowl.process import WPSProcess
+from pywps.Process import WPSProcess
+
+from malleefowl.process import getInputValues, show_status, mktempfile
 from malleefowl.download import download_files
 
 from malleefowl import wpslogging as logging
@@ -7,10 +9,12 @@ logger = logging.getLogger(__name__)
 class Download(WPSProcess):
     def __init__(self):
         WPSProcess.__init__(self,
-            identifier = "download",
-            title = "Download files",
-            version = "0.4",
-            abstract="Downloads files and provides file list as json document.")
+            identifier="download",
+            title="Download files",
+            version="0.4",
+            abstract="Downloads files and provides file list as json document.",
+            statusSupported=True,
+            storeSupported=True)
 
         self.resource = self.addLiteralInput(
             identifier="resource",
@@ -58,16 +62,19 @@ class Download(WPSProcess):
             asReference=True,
             )
 
+    def monitor(self, msg, progress):
+        show_status(self, msg, progress)
+
     def execute(self):
         files = download_files(
-            urls = self.getInputValues(identifier='resource'),
-            credentials = self.credentials.getValue(),
-            openid = self.openid.getValue(),
-            password = self.password.getValue(),
-            monitor=self.show_status)
+            urls=getInputValues(self, identifier='resource'),
+            credentials=self.credentials.getValue(),
+            openid=self.openid.getValue(),
+            password=self.password.getValue(),
+            monitor=self.monitor)
 
         import json
-        outfile = self.mktempfile(suffix='.json')
+        outfile = mktempfile(suffix='.json')
         with open(outfile, 'w') as fp:
             json.dump(obj=files, fp=fp, indent=4, sort_keys=True)
         self.output.setValue( outfile )

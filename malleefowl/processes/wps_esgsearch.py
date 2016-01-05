@@ -1,7 +1,8 @@
+from pywps.Process import WPSProcess
+
 from datetime import datetime
 from dateutil import parser as date_parser
 
-from malleefowl.process import WPSProcess
 from malleefowl import config
 
 from malleefowl import wpslogging as logging
@@ -18,7 +19,9 @@ class ESGSearch(WPSProcess):
             identifier = "esgsearch",
             title = "ESGF Search",
             version = "0.3",
-            abstract="Search ESGF datasets, files and aggreations.")
+            abstract="Search ESGF datasets, files and aggreations.",
+            statusSupported=True,
+            storeSupported=True)
 
         self.url = self.addLiteralInput(
             identifier="url",
