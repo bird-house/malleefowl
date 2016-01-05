@@ -7,6 +7,7 @@ LABEL Description="Malleefowl WPS Application" Vendor="Birdhouse" Version="0.3.6
 # Configure hostname and user for services 
 ENV OUTPUT_PORT 38091
 ENV HOSTNAME localhost
+ENV LOG_LEVEL warn
 ENV USER www-data
 
 
