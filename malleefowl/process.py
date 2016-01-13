@@ -41,8 +41,8 @@ class WPSProcess(PyWPSProcess):
             version = version,
             abstract = abstract,
             metadata = metadata,
-            storeSupported = "true",  # async
-            statusSupported = "true"  # retrieve status, needs to be true for async
+            storeSupported = True,  # async
+            statusSupported = True  # retrieve status, needs to be true for async
             )
 
      
