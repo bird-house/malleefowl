@@ -4,6 +4,7 @@ from datetime import datetime
 from dateutil import parser as date_parser
 
 from malleefowl import config
+from malleefowl.process import mktempfile
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
@@ -173,7 +174,6 @@ class ESGSearch(WPSProcess):
             distrib = self.distrib.getValue(),
             replica = self.replica.getValue(),
             latest = self.replica.getValue(),
-            monitor = self.show_status,
         )
 
         constraints = []
@@ -192,17 +192,17 @@ class ESGSearch(WPSProcess):
             temporal = self.temporal.getValue())
 
         import json
-        outfile = self.mktempfile(suffix='.json')
+        outfile = mktempfile(suffix='.json')
         with open(outfile, 'w') as fp:
             json.dump(obj=result, fp=fp, indent=4, sort_keys=True)
             self.output.setValue( outfile )
 
-        outfile = self.mktempfile(suffix='.json')
+        outfile = mktempfile(suffix='.json')
         with open(outfile, 'w') as fp:
             json.dump(obj=summary, fp=fp, indent=4, sort_keys=True)
             self.summary.setValue( outfile )
 
-        outfile = self.mktempfile(suffix='.json')
+        outfile = mktempfile(suffix='.json')
         with open(outfile, 'w') as fp:
             json.dump(obj=facet_counts, fp=fp, indent=4, sort_keys=True)
             self.facet_counts.setValue( outfile )
