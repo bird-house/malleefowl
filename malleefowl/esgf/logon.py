@@ -156,22 +156,24 @@ def myproxy_logon(username, hostname, port=7512, password=None, interactive=Fals
             
     return outfile
     
-def parse_openid(openid):
+def parse_openid(openid, ssl_verify=False):
     """
     parse openid document to get myproxy service
     """
-    from xml.etree import ElementTree
-    import urllib2
+    import requests
     import re
+    from lxml import etree
+    from io import BytesIO
 
     XRI_NS = 'xri://$xrd*($v*2.0)'
     MYPROXY_URN = 'urn:esg:security:myproxy-service'
     ESGF_OPENID_REXP = r'https://.*/esgf-idp/openid/(.*)'
     MYPROXY_URI_REXP = r'socket://([^:]*):?(\d+)?'
-    
-    openid_doc = urllib2.urlopen(openid).read()
-    xml = ElementTree.fromstring(openid_doc)
 
+    kwargs = {'verify': ssl_verify}
+    response = requests.get(openid, **kwargs)
+    xml = etree.parse(BytesIO(response.content))
+    
     hostname = None
     port = None
     username = None
