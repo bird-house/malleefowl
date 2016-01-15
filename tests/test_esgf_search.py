@@ -11,7 +11,7 @@ class EsgDistribSearchTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
         from malleefowl.esgf.search import ESGSearch
-        cls.esgsearch = ESGSearch('http://localhost:8081/esg-search', distrib=True,
+        cls.esgsearch = ESGSearch('http://esgf-data.dkrz.de/esg-search', distrib=True,
                                   latest=True, replica=False)
 
     @attr('online')
@@ -39,7 +39,7 @@ class EsgDistribSearchTestCase(TestCase):
 
     @attr('online')
     def test_file_cmip5_with_local_replica(self):
-        #raise SkipTest
+        raise SkipTest
         #NOAA-GFDL/GFDL-CM3/historical/mon/atmos/Amon/r1i1p1/v20110601/tasmax/tasmax_Amon_GFDL-CM3_historical_r1i1p1_200501-200512.nc
         constraints = []
         constraints.append( ('project', 'CMIP5') )
@@ -89,7 +89,7 @@ class EsgSearchTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
         from malleefowl.esgf.search import ESGSearch
-        cls.esgsearch = ESGSearch('http://localhost:8081/esg-search', distrib=False,
+        cls.esgsearch = ESGSearch('http://esgf-data.dkrz.de/esg-search', distrib=False,
                                   latest=True, replica=False)
 
     @attr('online')
