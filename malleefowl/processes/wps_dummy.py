@@ -1,4 +1,6 @@
-from malleefowl.process import WPSProcess
+from pywps.Process import WPSProcess
+
+from malleefowl.process import show_status
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
@@ -9,8 +11,10 @@ class CrashTestDummy(WPSProcess):
             self,
             identifier = "crashtestdummy",
             title = "Crash Test Dummy",
-            version = "0.1",
+            version = "0.2",
             abstract="See what happens when a process fails.",
+            statusSupported=True,
+            storeSupported=True,
             )
 
         self.netcdf_file = self.addComplexInput(
@@ -31,7 +35,7 @@ class CrashTestDummy(WPSProcess):
             )
 
     def execute(self):
-        self.show_status("starting ...", 0)
+        show_status(self, "starting ...", 0)
 
         nc_files = self.getInputValues(identifier='resource')
 
@@ -47,7 +51,7 @@ class CrashTestDummy(WPSProcess):
             time.sleep(1)
             self.show_status("Working ...", i*20)
 
-        self.show_status('before crash', 90)
+        show_status(self, 'before crash', 90)
         raise Exception('boooomm ... process crashed!')
 
 class Dummy(WPSProcess):
@@ -56,9 +60,10 @@ class Dummy(WPSProcess):
             self,
             identifier = "dummy",
             title = "Dummy",
-            version = "0.1",
-            metadata=[],
+            version = "0.2",
             abstract="Dummy process for testing.",
+            statusSupported=True,
+            storeSupported=True,
             )
 
         self.netcdf_file = self.addComplexInput(
@@ -86,7 +91,7 @@ class Dummy(WPSProcess):
             )
 
     def execute(self):
-        self.show_status("starting ...", 0)
+        show_status(self, "starting ...", 0)
 
         nc_files = self.getInputValues(identifier='resource')
 
@@ -108,7 +113,7 @@ class Dummy(WPSProcess):
             fp.write('job done')
             self.status_log.setValue( outfile )
 
-        self.show_status("done", 100)
+        show_status(self, "done", 100)
 
         
 
