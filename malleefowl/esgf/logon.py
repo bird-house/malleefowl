@@ -14,6 +14,14 @@ See also:
 """
 
 import os
+import requests
+from requests.auth import HTTPBasicAuth
+from cookielib import MozillaCookieJar
+import re
+from lxml import etree
+from io import BytesIO
+import OpenSSL
+from dateutil import parser as date_parser
 
 from malleefowl import wpslogging as logging
 logger = logging.getLogger(__name__)
@@ -50,10 +58,6 @@ def openid_logon(openid, password=None, interactive=False, outdir=None, url=None
     consumer = _consumer(provider, url)
     password = _password(interactive, password)
     outdir = _outdir(outdir)
-
-    import requests
-    from requests.auth import HTTPBasicAuth
-    from cookielib import MozillaCookieJar
 
     url = 'https://{0}/esg-orp/j_spring_openid_security_check.htm'.format(consumer)
     data = dict(openid_identifier='https://{0}/esgf-idp/openid/'.format(provider), rememberOpenid='on')
@@ -160,11 +164,6 @@ def parse_openid(openid, ssl_verify=False):
     """
     parse openid document to get myproxy service
     """
-    import requests
-    import re
-    from lxml import etree
-    from io import BytesIO
-
     XRI_NS = 'xri://$xrd*($v*2.0)'
     MYPROXY_URN = 'urn:esg:security:myproxy-service'
     ESGF_OPENID_REXP = r'https://.*/esgf-idp/openid/(.*)'
@@ -204,8 +203,6 @@ def parse_openid(openid, ssl_verify=False):
     return username, hostname, port
 
 def cert_infos(filename):
-    import OpenSSL
-    from dateutil import parser as date_parser
     with open(filename) as fh:
         data = fh.read()
         cert = OpenSSL.crypto.load_certificate(OpenSSL.SSL.FILETYPE_PEM, data)
