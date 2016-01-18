@@ -28,7 +28,7 @@ class ESGSearch(WPSProcess):
             identifier="url",
             title="URL",
             abstract="URL of ESGF Search Index. Example: http://esgf-data.dkrz.de/esg-search",
-            default='http://localhost:8081/esg-search',
+            default='https://esgf-data.dkrz.de/esg-search',
             minOccurs=1,
             maxOccurs=1,
             type=type('')
@@ -89,6 +89,7 @@ class ESGSearch(WPSProcess):
             identifier = "constraints",
             title = "Constraints",
             abstract = "Constraints as list of key/value pairs. Example: project:CORDEX, time_frequency:mon, variable:tas",
+            default = "project:CORDEX, time_frequency:mon, variable:tas",
             minOccurs=1,
             maxOccurs=1,
             type=type('')
