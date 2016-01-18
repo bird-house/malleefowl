@@ -192,12 +192,6 @@ class ESGSearch(object):
         # search files (optional)
         elif search_type == 'File':
             self._file_search(datasets, my_constraints, start_date, end_date)
-
-        # search files on thredds (optional)
-        # TODO: not used anymore ... remove code
-        #elif search_type == 'File_Thredds':
-        #    self._tds_file_search(datasets, my_constraints, start_date, end_date)
-
         else:
             raise Exception('unknown search type: %s', search_type)
             
@@ -341,87 +335,6 @@ class ESGSearch(object):
         self.summary['aggregation_size_mb'] = self.summary['aggregation_size'] / 1024 / 1024
         self.show_status("Aggregations found=%d" % len(self.result), 100)
 
-    def _tds_url_of_dataset(self, dataset):
-        tds_url = None
-        for url in dataset.json.get('url', []):
-            (tds_url, mime_type, service) = url.split('|')
-            if service == 'Catalog':
-                if '#' in tds_url:
-                    tds_url = tds_url.split('#')[0]
-                logger.debug('found tds_url =%s', tds_url)
-                break
-        if tds_url is None:
-            logger.warn('no thredds url found in dataset %s', dataset.dataset_id)
-        return tds_url
-
-    def _tds_parse_dataset_urls(self, tds_url, constraints, start_date, end_date):
-        from urllib2 import urlparse
-        from os.path import basename
-        
-        from lxml import etree
-        ns = etree.FunctionNamespace("http://www.unidata.ucar.edu/namespaces/thredds/InvCatalog/v1.0")
-        ns.prefix = 'tds'
-        tree = None
-        try:
-            tree=etree.parse(tds_url)
-        except Exception:
-            logger.exception('could not load thredds url %s', tds_url)
-
-        if tree is not None:
-            for el in tree.xpath('/tds:catalog/tds:dataset/tds:dataset'):
-                try:
-                    url_path = el.attrib.get('urlPath')
-                    if url_path is None or 'aggregation' in url_path:
-                        logger.debug('skip aggregation %s', url_path)
-                        continue
-                    if not temporal_filter(basename(url_path), start_date, end_date):
-                        continue
-                    property = {}
-                    for p in el.xpath('tds:property'):
-                        property[p.attrib.get('name')] = p.attrib.get('value')
-                    variables = {}
-                    for v in el.xpath('tds:variables/tds:variable'):
-                        variables['variable'] = v.attrib.get('name')
-                        variables['cf_standard_name'] = v.attrib.get('vocabulary_name')
-                        variables['variable_long_name'] = v.text
-                    if not variable_filter(constraints, variables):
-                        logger.debug('skip variables %s', variables)
-                        continue
-                    self.summary['file_size'] = self.summary['file_size'] + int(property.get('size', 0))
-                    url_parts = urlparse.urlparse(tds_url)
-                    url = url_parts.scheme + '://' + url_parts.netloc + '/thredds/fileServer/' + url_path
-                    self.result.append(url)
-                except Exception:
-                    logger.exception('could not load parse urlPath')
-        
-        
-    def _tds_file_search(self, datasets, constraints, start_date, end_date):
-        self.show_status("thredds file search ...", 0)
-
-        t0 = datetime.now()
-        self.summary['file_size'] = 0
-        self.summary['number_of_selected_files'] = 0
-        self.summary['number_of_invalid_files'] = 0
-        self.result = []
-        self.count = 0
-        total_files = 0
-        for i in range(self.start_index, self.stop_index):
-            progress = 10 + int( ((95.0 - 10.0) / self.max_count) * self.count )
-            self.show_status("Dataset %d/%d" % (self.count, self.max_count), progress)
-            self.count = self.count + 1
-
-            ds = datasets[i]
-            total_files = total_files + ds.number_of_files
-            tds_url = self._tds_url_of_dataset(ds)
-            if tds_url is None:
-                logger.warn('skipping dataset %s. No thredds catalog found', ds.dataset_id)
-            else:
-                self._tds_parse_dataset_urls(tds_url, constraints, start_date, end_date)
-        self.summary['number_of_selected_files'] = len(self.result)
-        self.summary['number_of_invalid_files'] = total_files - len(self.result)
-        self.summary['tds_file_search_duration_secs'] = (datetime.now() - t0).seconds
-        self.summary['file_size_mb'] = self.summary['file_size'] / 1024 / 1024
-        self.show_status("Files found=%d" % len(self.result), 100)
             
             
             
