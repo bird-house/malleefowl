@@ -111,7 +111,6 @@ class EsgSearchTestCase(TestCase):
 
     @attr('online')
     def test_file(self):
-        #raise SkipTest
         constraints = []
         constraints.append( ('project', 'CORDEX') )
         constraints.append( ('time_frequency', 'mon' ) )
@@ -128,7 +127,6 @@ class EsgSearchTestCase(TestCase):
 
     @attr('online')
     def test_file_cmip5_many(self):
-        #raise SkipTest
         constraints = []
         constraints.append( ('project', 'CMIP5') )
         constraints.append( ('time_frequency', 'mon' ) )
@@ -145,7 +143,6 @@ class EsgSearchTestCase(TestCase):
 
     @attr('online')
     def test_file_more_than_one(self):
-        #raise SkipTest
         constraints = []
         constraints.append( ('project', 'CORDEX') )
         constraints.append( ('time_frequency', 'mon' ) )
@@ -162,7 +159,6 @@ class EsgSearchTestCase(TestCase):
 
     @attr('online')
     def test_aggregation(self):
-        #raise SkipTest
         constraints = []
         constraints.append( ('project', 'CORDEX') )
         constraints.append( ('time_frequency', 'mon' ) )
@@ -178,8 +174,7 @@ class EsgSearchTestCase(TestCase):
         nose.tools.ok_(len(result) == 0, result)
 
     @attr('online')
-    def test_tds_file_cordex(self):
-        #raise SkipTest
+    def test_file_cordex(self):
         constraints = []
         constraints.append( ('project', 'CORDEX') )
         constraints.append( ('time_frequency', 'mon' ) )
@@ -195,8 +190,7 @@ class EsgSearchTestCase(TestCase):
         nose.tools.ok_(len(result) > 1, result)
 
     @attr('online')
-    def test_tds_file_cordex_date(self):
-        #raise SkipTest
+    def test_file_cordex_date(self):
         constraints = []
         constraints.append( ('project', 'CORDEX') )
         constraints.append( ('time_frequency', 'mon' ) )
@@ -217,7 +211,6 @@ class EsgSearchTestCase(TestCase):
 
     @attr('online')
     def test_file_cordex_many(self):
-        #raise SkipTest
         constraints = []
         constraints.append( ('project', 'CORDEX') )
         constraints.append( ('time_frequency', 'day' ) )
@@ -234,8 +227,7 @@ class EsgSearchTestCase(TestCase):
         #nose.tools.ok_(False, len(result))
 
     @attr('online')
-    def test_tds_file_cordex_many(self):
-        #raise SkipTest
+    def test_file_cordex_many(self):
         constraints = []
         constraints.append( ('project', 'CORDEX') )
         constraints.append( ('time_frequency', 'day' ) )
@@ -252,8 +244,7 @@ class EsgSearchTestCase(TestCase):
         #nose.tools.ok_(False, len(result))
 
     @attr('online')
-    def test_tds_file_cordex_fly(self):
-        #raise SkipTest
+    def test_file_cordex_fly(self):
         constraints = []
         constraints.append( ('project', 'CORDEX') )
         constraints.append( ('time_frequency', 'day' ) )
@@ -280,8 +271,7 @@ class EsgSearchTestCase(TestCase):
         nose.tools.ok_(summary['number_of_selected_files'] > 1, result)
 
     @attr('online')
-    def test_tds_file_cmip5(self):
-        #raise SkipTest
+    def test_file_cmip5(self):
         constraints = []
         constraints.append( ('project', 'CMIP5') )
         constraints.append( ('time_frequency', 'mon' ) )
@@ -298,8 +288,7 @@ class EsgSearchTestCase(TestCase):
         nose.tools.ok_(summary['number_of_selected_files'] > 1, result)
 
     @attr('online')
-    def test_tds_file_cmip5_date(self):
-        #raise SkipTest
+    def test_file_cmip5_date(self):
         constraints = []
         constraints.append( ('project', 'CMIP5') )
         constraints.append( ('time_frequency', 'mon' ) )

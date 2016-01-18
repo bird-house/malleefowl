@@ -184,14 +184,15 @@ class ESGSearch(object):
         self.summary['size_gb'] = self.summary.get('size_mb', 0) / 1024
 
         logger.debug('search_type = %s ', search_type)
-            
-        # search aggregations (optional)
-        if search_type == 'Aggregation':
-            self._aggregation_search(datasets, my_constraints)
 
+        if search_type == 'Dataset':
+            pass
         # search files (optional)
         elif search_type == 'File':
             self._file_search(datasets, my_constraints, start_date, end_date)
+        # search aggregations (optional)
+        elif search_type == 'Aggregation':
+            self._aggregation_search(datasets, my_constraints)
         else:
             raise Exception('unknown search type: %s', search_type)
             
