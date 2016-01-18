@@ -1,6 +1,11 @@
 Change History
 **************
 
+0.3.8 (2016-01-18)
+==================
+
+* fixed esgsearch and esgf_logon process.
+
 0.3.7 (2016-01-05)
 ==================
 
