@@ -27,8 +27,6 @@ def download(url, use_file_url=False, credentials=None, openid=None, password=No
     :param openid: download with you openid and password
     :returns: downloaded file with either file:// or system path
     """
-    logger.debug('downloading %s', url)
-
     import urlparse
     parsed_url = urlparse.urlparse(url)
     if parsed_url.scheme == 'file':
@@ -57,6 +55,8 @@ def wget(url, use_file_url=False, credentials=None, openid=None, password=None):
             cmd.append("--certificate")
             cmd.append(credentials) 
             cmd.append("--private-key")
+            cmd.append(credentials) 
+            cmd.append("--ca-certificate")
             cmd.append(credentials)
         elif openid:
             from .esgf.logon import openid_logon_with_wget
