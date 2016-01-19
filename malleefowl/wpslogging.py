@@ -1,17 +1,14 @@
 import logging
+from pywps import config as wpsconfig
 
 @property
 def DEBUG():
     return logging.DEBUG
 
 def getLogger(name):
-    # get log level from wps config
-    from pywps import config as wpsconfig
-    log_level = wpsconfig.getConfigValue("server", "logLevel")
-
     # create logger
     logger = logging.getLogger(name)
-    if 'DEBUG' in log_level:
+    if 'DEBUG' ==  wpsconfig.getConfigValue("server", "logLevel"):
         logger.setLevel(logging.DEBUG)
     else:
         logger.setLevel(logging.INFO)
@@ -19,7 +16,7 @@ def getLogger(name):
     # https://urllib3.readthedocs.org/en/latest/security.html#insecureplatformwarning
     logging.captureWarnings(True)
 
-    # create console handler and set level to debug
+    # create stream handler and set level to debug
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
 
