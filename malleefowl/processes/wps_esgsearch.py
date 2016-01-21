@@ -1,13 +1,10 @@
 from pywps.Process import WPSProcess
 
+import tempfile
 from datetime import datetime
 from dateutil import parser as date_parser
 
 from malleefowl import config
-from malleefowl.process import mktempfile
-
-from malleefowl import wpslogging as logging
-logger = logging.getLogger(__name__)
 
 class ESGSearch(WPSProcess):
     """
@@ -19,7 +16,7 @@ class ESGSearch(WPSProcess):
         WPSProcess.__init__(self,
             identifier = "esgsearch",
             title = "ESGF Search",
-            version = "0.3",
+            version = "0.4",
             abstract="Search ESGF datasets, files and aggreations.",
             statusSupported=True,
             storeSupported=True)
@@ -193,17 +190,17 @@ class ESGSearch(WPSProcess):
             temporal = self.temporal.getValue())
 
         import json
-        outfile = mktempfile(suffix='.json')
+        _,outfile = tempfile.mkstemp(suffix='.json')
         with open(outfile, 'w') as fp:
             json.dump(obj=result, fp=fp, indent=4, sort_keys=True)
             self.output.setValue( outfile )
 
-        outfile = mktempfile(suffix='.json')
+        _,outfile = tempfile.mkstemp(suffix='.json')
         with open(outfile, 'w') as fp:
             json.dump(obj=summary, fp=fp, indent=4, sort_keys=True)
             self.summary.setValue( outfile )
 
-        outfile = mktempfile(suffix='.json')
+        _,outfile = tempfile.mkstemp(suffix='.json')
         with open(outfile, 'w') as fp:
             json.dump(obj=facet_counts, fp=fp, indent=4, sort_keys=True)
             self.facet_counts.setValue( outfile )
