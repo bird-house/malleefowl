@@ -1,6 +1,12 @@
 Change History
 **************
 
+0.3.10 (2016-01-21)
+===================
+
+* removed mktempfile and working_dir form malleefowl.process.
+* using status.set instead of show_status in processes/
+
 0.3.9 (2016-01-19)
 ==================
 
