@@ -32,7 +32,8 @@ class MyProxyLogon(WPSProcess):
             abstract = "Enter your Password",
             minOccurs = 1,
             maxOccurs = 1,
-            type = type('')
+            type = type(''),
+            restrictedCharacters=[]
             )
 
         self.output = self.addComplexOutput(
