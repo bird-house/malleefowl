@@ -54,7 +54,6 @@ setup(name='malleefowl',
       install_requires=requires,
       entry_points = {
           'console_scripts': [
-              'wpsclient=malleefowl.wpsclient:main',
               'wpsfetch=malleefowl.fetch:main',
               ]}     
       ,
