@@ -23,7 +23,7 @@ from io import BytesIO
 import OpenSSL
 from dateutil import parser as date_parser
 
-from malleefowl import wpslogging as logging
+import logging
 logger = logging.getLogger(__name__)
 
 

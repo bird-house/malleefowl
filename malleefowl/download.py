@@ -2,9 +2,8 @@ import threading
 from Queue import Queue
 
 from malleefowl import config
-from .exceptions import DownloadException
 
-from malleefowl import wpslogging as logging
+import logging
 logger = logging.getLogger(__name__)
 
 def download_with_archive(url, credentials=None, openid=None, password=None):

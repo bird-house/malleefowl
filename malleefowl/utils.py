@@ -8,7 +8,7 @@ import os
 
 from malleefowl import config
 
-from malleefowl import wpslogging as logging
+import logging
 logger = logging.getLogger(__name__)
 
 def esgf_archive_path(url):

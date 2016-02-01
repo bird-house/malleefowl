@@ -4,9 +4,7 @@ from dateutil import parser as date_parser
 import threading
 from Queue import Queue
 
-from malleefowl import config
-
-from malleefowl import wpslogging as logging
+import logging
 logger = logging.getLogger(__name__)
 
 def date_from_filename(filename):

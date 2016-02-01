@@ -2,7 +2,7 @@ import os
 
 from malleefowl import config
 
-from malleefowl import wpslogging as logging
+import logging
 logger = logging.getLogger(__name__)
 
 from swiftclient import client, ClientException
