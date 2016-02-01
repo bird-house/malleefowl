@@ -9,7 +9,7 @@ class ThreddsDownload(WPSProcess):
             self,
             identifier="thredds_download",
             title="Download files from Thredds Catalog",
-            version="0.3",
+            version="0.4",
             abstract="Downloads files from Thredds Catalog and provides file list as JSON Document.",
             statusSupported=True,
             storeSupported=True)       
@@ -41,7 +41,7 @@ class ThreddsDownload(WPSProcess):
             monitor=self.monitor)
 
         import json
-        _,outfile = self.mkstemp(suffix='.json')
+        outfile = 'out.json'
         with open(outfile, 'w') as fp:
             json.dump(obj=files, fp=fp, indent=4, sort_keys=True)
         self.output.setValue( outfile )
