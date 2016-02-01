@@ -1,18 +1,24 @@
 import nose.tools
 from nose import SkipTest
 
+import os
 import pywps
 from xml.dom import minidom
 
 caps_request = "service=wps&request=getcapabilities"
 wpsns = "http://www.opengis.net/wps/1.0.0"
 
-def test_caps():
-    #raise SkipTest
+import logging
 
-    mypywps = pywps.Pywps(pywps.METHOD_GET)
-    inputs = mypywps.parseRequest(caps_request)
-    mypywps.performRequest(inputs)
-    xmldom = minidom.parseString(mypywps.response)
-    nose.tools.ok_(len(xmldom.getElementsByTagNameNS(wpsns,"Process")) > 0)
+def test_caps():
+    pywps_path = os.path.dirname(pywps.__file__)
+    os.environ['PYWPS_CFG'] = os.path.abspath(os.path.join(pywps_path, '..', '..', '..', '..', 'etc', 'pywps', 'malleefowl.cfg'))
+    os.environ['REQUEST_METHOD'] = pywps.METHOD_GET
+  
+    wps = pywps.Pywps(os.environ)
+    logging.info(os.environ)
+    inputs = wps.parseRequest(caps_request)
+    wps.performRequest(inputs)
+    xmldom = minidom.parseString(wps.response)
+    nose.tools.ok_(len(xmldom.getElementsByTagNameNS(wpsns,"Process")) == 9)
 
