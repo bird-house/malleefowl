@@ -4,7 +4,6 @@ __all__ = [
            "wps_esgsearch",
            "wps_download",
            "wps_workflow", 
-           "wps_dummy",
            "wps_swift",
            "wps_thredds"
            ]
