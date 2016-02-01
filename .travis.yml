@@ -13,6 +13,6 @@ before_script:
   - sleep 15
 script:
   - make docs
-  - make test
+  - make testall
 #after_success:
 # - coveralls
