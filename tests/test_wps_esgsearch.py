@@ -79,23 +79,6 @@ class EsgSearchTestCase(WpsTestCase):
         nose.tools.ok_(execution.status == 'ProcessSucceeded', execution.status)
 
     @attr('online')
-    def test_dataset_replica(self):
-        inputs = []
-        inputs.append(('search_type', 'Dataset'))
-        inputs.append(('limit', '100'))
-        inputs.append(('offset', '0'))
-        inputs.append(('replica', 'True'))
-        inputs.append(
-            ('constraints', 'project:CORDEX,time_frequency:mon,variable:tas,experiment:historical'))
-
-        output=[('output', True), ('summary', True)]
-        execution = self.wps.execute(identifier="esgsearch", inputs=inputs, output=output)
-        monitorExecution(execution, sleepSecs=1)
-
-        nose.tools.ok_(execution.status == 'ProcessSucceeded', execution.status)
-        #nose.tools.ok_(False, "TODO: check replica")
-
-    @attr('online')
     def test_dataset_latest(self):
         inputs = []
         inputs.append(('search_type', 'Dataset'))
