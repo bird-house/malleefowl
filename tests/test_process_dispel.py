@@ -5,7 +5,7 @@ from nose.plugins.attrib import attr
 
 from owslib.wps import monitorExecution
 
-from __init__ import TESTDATA, SERVICE, CREDENTIALS, SWIFT_STORAGE_URL, SWIFT_AUTH_TOKEN
+from __init__ import SERVICE, SWIFT_STORAGE_URL, SWIFT_AUTH_TOKEN
 
 class EsgfWorkflowTestCase(TestCase):
     @classmethod
@@ -37,7 +37,6 @@ class EsgfWorkflowTestCase(TestCase):
         )
         source = dict(
             service = SERVICE,
-            credentials = CREDENTIALS,
             )
         worker = dict(
             service = SERVICE,

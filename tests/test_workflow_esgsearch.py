@@ -5,7 +5,7 @@ from unittest import TestCase
 from nose import SkipTest
 from nose.plugins.attrib import attr
 
-from __init__ import SERVICE, TESTDATA, CREDENTIALS
+from __init__ import SERVICE
 
 def my_monitor(execution):
     print execution.status
@@ -32,7 +32,7 @@ def test_esgsearch_workflow():
                               limit=1, search_type='File', distrib=False, temporal=False,
                               start='2001-01-01T12:00:00Z', end='2005-12-31T12:00:00Z',
                           ),
-        wget_params=dict(credentials=CREDENTIALS),
+        wget_params=dict(),
         doit_params=dict(url=SERVICE,
                          identifier='dummy', resource='resource', inputs=[]),
         monitor = my_monitor,

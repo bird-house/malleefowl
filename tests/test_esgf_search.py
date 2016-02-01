@@ -3,7 +3,7 @@ from unittest import TestCase
 from nose import SkipTest
 from nose.plugins.attrib import attr
 
-from __init__ import TESTDATA, SERVICE
+from __init__ import SERVICE
 
 
 class EsgDistribSearchTestCase(TestCase):
