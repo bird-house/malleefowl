@@ -1,6 +1,5 @@
 import nose.tools
 from unittest import TestCase
-from nose import SkipTest
 from nose.plugins.attrib import attr
 
 from owslib.wps import monitorExecution
