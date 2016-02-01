@@ -4,7 +4,7 @@ from nose.plugins.attrib import attr
 
 from owslib.wps import monitorExecution
 
-from __init__ import SERVICE
+from tests.common import SERVICE
 
 class WpsTestCase(TestCase):
     """

@@ -3,8 +3,7 @@ from unittest import TestCase
 from nose import SkipTest
 from nose.plugins.attrib import attr
 
-from __init__ import SERVICE
-
+from tests.common import SERVICE
 
 class EsgDistribSearchTestCase(TestCase):
 
@@ -13,29 +12,6 @@ class EsgDistribSearchTestCase(TestCase):
         from malleefowl.esgf.search import ESGSearch
         cls.esgsearch = ESGSearch('http://esgf-data.dkrz.de/esg-search', distrib=True,
                                   latest=True, replica=False)
-
-    @attr('online')
-    def test_file_cordex_with_local_replica(self):
-        raise SkipTest
-        # TODO: no cordex replica yet
-        constraints = []
-        constraints.append( ('project', 'CORDEX') )
-        constraints.append( ('time_frequency', 'mon' ) )
-        constraints.append( ('variable', 'tasmax') )
-        constraints.append( ('experiment', 'historical') )
-        constraints.append( ('ensemble', 'r1i1p1') )
-        constraints.append( ('institute', 'SMHI') )
-        constraints.append( ('domain', 'EUR-11') )
-
-        (result, summary, facet_counts) = self.esgsearch.search(
-            search_type='File',
-            limit=3,
-            offset=0,
-            constraints = constraints)
-
-        nose.tools.ok_(len(result) > 1, result)
-        # we want the local replica, not the original file
-        nose.tools.ok_(not ("nsc.liu.se/thredds/fileServer" in result[0]), result[0])
 
     @attr('online')
     def test_file_cmip5_with_local_replica(self):
@@ -59,31 +35,7 @@ class EsgDistribSearchTestCase(TestCase):
         nose.tools.ok_(len(result) > 1, result)
         # we want the local replica, not the original file
         nose.tools.ok_(not ('gfdl.noaa.gov/thredds/fileServer' in result[0]), result[0])
-
-    @attr('online')
-    def test_aggregation_cmip5_with_local_replica(self):
-        raise SkipTest
-        # TODO: find dataset with aggregation
-        #NOAA-GFDL/GFDL-CM3/historical/mon/atmos/Amon/r1i1p1/v20110601/tasmax/tasmax_Amon_GFDL-CM3_historical_r1i1p1_200501-200512.nc
-        constraints = []
-        constraints.append( ('project', 'CMIP5') )
-        constraints.append( ('time_frequency', 'mon' ) )
-        constraints.append( ('variable', 'tasmax') )
-        constraints.append( ('experiment', 'historical') )
-        constraints.append( ('institute', 'NOAA-GFDL') )
-        constraints.append( ('ensemble', 'r1i1p1') )
-        constraints.append( ('model', 'GFDL-CM3') )
-
-        (result, summary, facet_counts) = self.esgsearch.search(
-            search_type='Aggregation',
-            limit=100,
-            offset=0,
-            constraints = constraints)
-
-        nose.tools.ok_(len(result) > 0, result)
-        # we want the local replica, not the original file
-        nose.tools.ok_(not ('gfdl.noaa.gov' in result[0]), result[0])
-        
+     
 class EsgSearchTestCase(TestCase):
 
     @classmethod
@@ -94,7 +46,6 @@ class EsgSearchTestCase(TestCase):
 
     @attr('online')
     def test_dataset(self):
-        #raise SkipTest
         constraints = []
         constraints.append( ('project', 'CORDEX') )
         constraints.append( ('time_frequency', 'mon' ) )

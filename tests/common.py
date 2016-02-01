@@ -10,6 +10,9 @@ NAMESPACES = {
     'xsi': "http://www.w3.org/2001/XMLSchema-instance"
 }
 
+SERVICE = "http://localhost:8091/wps"
+SWIFT_STORAGE_URL = os.environ.get('OS_STORAGE_URL')
+SWIFT_AUTH_TOKEN = os.environ.get('OS_AUTH_TOKEN')
 
 TESTDATA = { 
     'noaa_nc_1': "http://www.esrl.noaa.gov/psd/thredds/fileServer/Datasets/ncep.reanalysis.dailyavgs/surface/slp.1955.nc",

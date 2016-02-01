@@ -5,7 +5,7 @@ from unittest import TestCase
 from nose import SkipTest
 from nose.plugins.attrib import attr
 
-from __init__ import SERVICE
+from tests.common import SERVICE
 
 def my_monitor(execution):
     print execution.status
