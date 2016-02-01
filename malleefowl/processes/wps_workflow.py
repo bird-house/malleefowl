@@ -1,5 +1,4 @@
 import yaml
-import tempfile
 
 from pywps.Process import WPSProcess
 from malleefowl import config
@@ -10,7 +9,7 @@ class DispelWorkflow(WPSProcess):
         WPSProcess.__init__(self,
             identifier="workflow",
             title="Workflow",
-            version="0.4",
+            version="0.5",
             abstract="Runs Workflow with dispel4py.",
             statusSupported=True,
             storeSupported=True)
@@ -54,11 +53,11 @@ class DispelWorkflow(WPSProcess):
 
         result = run(workflow, monitor=monitor)
 
-        _,outfile = tempfile.mkstemp(suffix='.txt')
+        outfile = 'output.txt'
         with open(outfile, 'w') as fp:
             yaml.dump(result, stream=fp)
             self.output.setValue(outfile)
-        _,outfile = tempfile.mkstemp(suffix='.txt')
+        outfile = 'logfile.txt'
         with open(outfile, 'w') as fp:
             fp.write("workflow log file")
             self.logfile.setValue(outfile)

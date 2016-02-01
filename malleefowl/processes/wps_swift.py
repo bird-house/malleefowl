@@ -1,6 +1,5 @@
+import json
 from pywps.Process import WPSProcess
-
-import tempfile
 
 from malleefowl import swiftcloud
 from malleefowl import config
@@ -10,7 +9,7 @@ class SwiftLogin(WPSProcess):
         WPSProcess.__init__(self,
             identifier="swift_login",
             title="Login to Swift Cloud",
-            version="0.2",
+            version="0.3",
             abstract="Login to Swift Cloud and get Token.",
             storeSupported=True,
             statusSupported=True)
@@ -131,8 +130,7 @@ class SwiftDownload(WPSProcess):
             self.container.getValue(),
             self.prefix.getValue())
 
-        import json
-        _,outfile = tempfile.mkstemp(suffix='.json')
+        outfile = 'out.json'
         with open(outfile, 'w') as fp:
             json.dump(obj=files, fp=fp, indent=4, sort_keys=True)
         self.output.setValue( outfile )
@@ -198,8 +196,7 @@ class SwiftDownloadUrls(WPSProcess):
             self.container.getValue(),
             self.prefix.getValue())
 
-        import json
-        _,outfile = tempfile.mkstemp(suffix='.json')
+        outfile = 'out.json'
         with open(outfile, 'w') as fp:
             json.dump(obj=files, fp=fp, indent=4, sort_keys=True)
         self.output.setValue( outfile )
@@ -273,11 +270,10 @@ class SwiftUpload(WPSProcess):
             auth_token = self.auth_token.getValue(),
             container = self.container.getValue(),
             prefix = self.prefix.getValue(),
-            files = getInputValues(self, identifier='resource'),
+            files = self.getInputValues(self, identifier='resource'),
             monitor = self.status.set)
 
-        import json
-        _, outfile = tempfile.mkstemp(suffix='.json')
+        outfile = 'out.json'
         with open(outfile, 'w') as fp:
             json.dump(obj=result, fp=fp, indent=4, sort_keys=True)
         self.output.setValue( outfile )

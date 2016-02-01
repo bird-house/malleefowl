@@ -1,6 +1,5 @@
+import json
 from pywps.Process import WPSProcess
-
-import tempfile
 
 from malleefowl.download import download_files
 
@@ -71,8 +70,7 @@ class Download(WPSProcess):
             password=self.password.getValue(),
             monitor=self.monitor)
 
-        import json
-        _, outfile = tempfile.mkstemp(suffix='.json')
+        outfile = 'out.json'
         with open(outfile, 'w') as fp:
             json.dump(obj=files, fp=fp, indent=4, sort_keys=True)
         self.output.setValue( outfile )
