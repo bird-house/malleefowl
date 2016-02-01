@@ -4,6 +4,8 @@ from pywps.Process import WPSProcess
 from malleefowl import config
 from malleefowl.workflow import run
 
+import logging
+
 class DispelWorkflow(WPSProcess):
     def __init__(self):
         WPSProcess.__init__(self,
@@ -47,6 +49,7 @@ class DispelWorkflow(WPSProcess):
 
         fp = open(self.workflow.getValue())
         workflow = yaml.load(fp)
+
         workflow_name = workflow.get('name', 'unknown')
         
         self.status.set("workflow {0} prepared.".format(workflow_name), 0)
