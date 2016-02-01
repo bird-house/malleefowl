@@ -1,6 +1,12 @@
 Change History
 **************
 
+0.3.11 (2016-02-01)
+===================
+
+* cleaned up tests.
+* fixed thredds download process.
+
 0.3.10 (2016-01-21)
 ===================
 
