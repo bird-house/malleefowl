@@ -1,7 +1,5 @@
 from pywps.Process import WPSProcess
-
 from malleefowl import download
-from malleefowl import config
 
 class ThreddsDownload(WPSProcess):
     def __init__(self):
