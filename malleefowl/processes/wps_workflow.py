@@ -92,7 +92,7 @@ class DummyProcess(WPSProcess):
 
 
     def execute(self):
-        self.status.set(self, "starting ...", 0)
+        self.status.set("starting ...", 0)
         datasets = self.getInputValues(identifier='dataset')
         outfile = 'out.txt'
         with open(outfile, 'w') as fp:
