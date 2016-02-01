@@ -8,5 +8,5 @@ def test_caps():
                             '/wps:ProcessOfferings'
                             '/wps:Process'
                             '/ows:Identifier')
-    assert sorted(names.split()) == ['download', 'esgf_logon', 'esgsearch', 'swift_download', 'swift_download_urls', 'swift_login', 'swift_upload', 'thredds_download', 'workflow']
+    assert sorted(names.split()) == ['download', 'dummy', 'esgf_logon', 'esgsearch', 'swift_download', 'swift_download_urls', 'swift_login', 'swift_upload', 'thredds_download', 'workflow']
 

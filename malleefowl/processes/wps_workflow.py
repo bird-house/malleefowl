@@ -63,8 +63,43 @@ class DispelWorkflow(WPSProcess):
             self.logfile.setValue(outfile)
         self.status.set("workflow {0} done.".format(workflow_name), 100)
 
+class DummyProcess(WPSProcess):
+    def __init__(self):
+        WPSProcess.__init__(self,
+            identifier="dummy",
+            title="Dummy Process",
+            version="1.0",
+            abstract="Dummy Process used by Workflow Tests.",
+            statusSupported=True,
+            storeSupported=True)
 
-        
+        self.dataset = self.addComplexInput(
+            identifier="dataset",
+            title="Dataset (NetCDF)",
+            minOccurs=1,
+            maxOccurs=10,
+            maxmegabites=5000,
+            formats=[{"mimeType":"application/x-netcdf"}],
+            )
+
+        self.output = self.addComplexOutput(
+            identifier="output",
+            title="Output",
+            abstract="Output",
+            formats=[{"mimeType":"text/plain"}],
+            asReference=True,
+            )
+
+
+    def execute(self):
+        self.status.set(self, "starting ...", 0)
+        datasets = self.getInputValues(identifier='dataset')
+        outfile = 'out.txt'
+        with open(outfile, 'w') as fp:
+            fp.write('we got %d files.' % len(datasets))
+        self.output.setValue( outfile )
+
+        self.status.set("done", 100)
 
     
         
