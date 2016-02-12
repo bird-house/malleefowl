@@ -9,3 +9,5 @@ log-level = INFO
 # esgf archive root path, separated by ":" like PATH
 archive-root =
 
+[pywps]
+maxoperations = 100
