@@ -11,7 +11,7 @@ Check out code from the malleefowl github repo and start the installation::
 For other install options run ``make help`` and read the documention for the `Makefile <https://github.com/bird-house/birdhousebuilder.bootstrap/blob/master/README.rst>`_.
 
 After successful installation you need to start the
-services. Malleefowl is using `Anaconda <http://www.continuum.io/>`_
+services. Malleefowl is using `Anaconda <https://www.continuum.io/>`_
 Python distribution system. All installed files (config etc ...) are
 below the Anaconda root folder which is by default in your home
 directory ``~/anaconda``. Now, start the services::

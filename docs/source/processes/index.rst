@@ -27,14 +27,14 @@ The XML response of the WPS service is the following document:
 The WPS Parameters are:
 
 *openid*
-    Is an input parameter for your OpenID (https://esgf-data-node/esgf-idp/openid/myopenid). It is a WPS `LiteralData <http://pywps.wald.intevation.org/documentation/course/ogc-wps/index.html#literaldata>`_ string type.
+    Is an input parameter for your OpenID (``https://esgf-data-node/esgf-idp/openid/myopenid``). It is a WPS `LiteralData <http://geopython.github.io/pywps/doc/build/html/process/puts.html#literalvalue-input-and-output>`_ string type.
 
 *password*
      Is an input parameter to provide the password for the openid. It is a WPS LiteralData string type.
 
 *output*
      Is the output parameter to provide the X509 proxy certificate. 
-     It is a WPS `ComplexData <http://pywps.wald.intevation.org/documentation/course/ogc-wps/index.html#complexdata>`_ type with MIME-type ``application/x-pkcs7-mime``.
+     It is a WPS `ComplexData <http://geopython.github.io/pywps/doc/build/html/process/puts.html#complexvalue-input-and-output>`_ type with MIME-type ``application/x-pkcs7-mime``.
 
 ESGF Logon: WPS process execution
 ---------------------------------

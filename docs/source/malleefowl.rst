@@ -79,7 +79,7 @@ Worker processes are derived from the Python class malleefowl.WorkerProcess.
 
 See the cdo process as an example of a worker process in `processes/cdo.py`.
 
-.. _`OGC WPS`: http://www.opengeospatial.org/standards/wps
-.. _`PyWPS`: http://pywps.wald.intevation.org/index.html
-.. _`PyWPS Tutorial`: http://pywps.wald.intevation.org/documentation/course/process/index.html
+.. _`OGC WPS`: http://www.opengeospatial.org/standards/wps/
+.. _`PyWPS`: http://pywps.org/
+.. _`PyWPS Tutorial`: http://pywps.org/docs/
 .. _`OWSLib WPS`: http://geopython.github.io/OWSLib/#wps
