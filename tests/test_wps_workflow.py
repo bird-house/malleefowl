@@ -26,6 +26,7 @@ def test_wps_thredds_workflow():
       identifier: dummy
       url: http://localhost:8091/wps
       resource: dataset
+      inputs: []
     """.format(TESTDATA['noaa_catalog_1'])
     fp = tempfile.NamedTemporaryFile(suffix=".txt")
     yaml.dump(yaml.load(doc), fp)
