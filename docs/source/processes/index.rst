@@ -142,7 +142,7 @@ An example result JSON document could look like this::
 Run Dispel Workflow
 ===================
 
-The workflow process is usually called by the `Phoenix <http://pyramid-phoenix.readthedocs.org>`_ WPS web client to run WPS process for climate data (like cfchecker, climate indices with ocgis, ...) with a given selection of input data (currently NetCDF files from ESGF data nodes). Currently the `Dispel4Py <http://www2.epcc.ed.ac.uk/~amrey/VERCE/Dispel4Py/index.html>`_ workflow engine is used.
+The workflow process is usually called by the `Phoenix <http://pyramid-phoenix.readthedocs.org/en/latest/>`_ WPS web client to run WPS process for climate data (like cfchecker, climate indices with ocgis, ...) with a given selection of input data (currently NetCDF files from ESGF data nodes). Currently the `Dispel4Py <http://www2.epcc.ed.ac.uk/~amrey/VERCE/Dispel4Py/index.html>`_ workflow engine is used.
 
 The Workflow for ESGF input data is as follows::
 
