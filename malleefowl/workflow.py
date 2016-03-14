@@ -56,7 +56,7 @@ class GenericWPS(MonitorPE):
         self.monitor("status_location={0.statusLocation}".format(execution), progress)
         
         while execution.isNotComplete():
-            execution.checkStatus(sleepSecs=1)
+            execution.checkStatus(sleepSecs=2)
             progress = self.progress(execution)
             self.monitor(execution.statusMessage, progress)
 
@@ -73,6 +73,7 @@ class GenericWPS(MonitorPE):
         output = []
         if self.wps_output is not None:
             output=[ (self.wps_output, True) ]
+        logger.info("execute inputs=%s", self.wps_inputs)
         execution = self.wps.execute(
             identifier=self.identifier,
             inputs=self.wps_inputs,
@@ -253,7 +254,8 @@ class ThreddsDownload(GenericWPS):
     
 def esgf_workflow(source, worker, monitor=None):
     graph = WorkflowGraph()
-    
+
+    # TODO: configure limit
     esgsearch = EsgSearch(
         url=wps_url(),
         constraints=source.get('facets'),
