@@ -1,5 +1,6 @@
 import threading
 from Queue import Queue
+import subprocess
 
 from malleefowl import config
 
@@ -46,7 +47,6 @@ def wget(url, use_file_url=False, credentials=None, openid=None, password=None):
     """
     logger.debug('downloading %s', url)
 
-    from subprocess import check_output
     try:
         cmd = ["wget"]
         if credentials is not None:
@@ -77,10 +77,14 @@ def wget(url, use_file_url=False, credentials=None, openid=None, password=None):
         cmd.append("-P")           # directory prefix
         cmd.append(config.cache_path())
         cmd.append(url)
-        check_output(cmd)
-    except:
-        msg = "wget failed on {0}. Maybe not authorized?".format(url)
+        logger.debug("cmd: %s", cmd)
+        output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+        logger.debug("Output: %s", output)
+    except Exception as e:
+        msg = "wget failed on {0}.".format(url)
         logger.exception(msg)
+        if hasattr(e, 'output'):
+            logger.error("Ouptut: %s", output)
         raise Exception(msg)
 
     import urlparse
