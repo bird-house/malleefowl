@@ -84,7 +84,7 @@ def wget(url, use_file_url=False, credentials=None, openid=None, password=None):
         msg = "wget failed on {0}.".format(url)
         logger.exception(msg)
         if hasattr(e, 'output'):
-            logger.error("Ouptut: %s", output)
+            logger.error("Ouptut: %s", e.output)
         raise Exception(msg)
 
     import urlparse
