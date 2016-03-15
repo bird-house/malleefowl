@@ -42,7 +42,7 @@ def wget(url, use_file_url=False, credentials=None, openid=None, password=None):
     :param url: url of file
     :param use_file_url: True if result should be a file url "file://", otherwise use system path.
     :param credentials: path to credentials if security is needed to download file
-    :param openid: download with you openid and password
+    :param openid: download with your openid and password
     :returns: downloaded file with either file:// or system path
     """
     logger.debug('downloading %s', url)
@@ -77,15 +77,16 @@ def wget(url, use_file_url=False, credentials=None, openid=None, password=None):
         cmd.append("-P")           # directory prefix
         cmd.append(config.cache_path())
         cmd.append(url)
-        logger.debug("cmd: %s", cmd)
+        logger.debug("cmd: %s", ' '.join(cmd))
         output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
-        logger.debug("Output: %s", output)
-    except Exception as e:
-        msg = "wget failed on {0}.".format(url)
-        logger.exception(msg)
-        if hasattr(e, 'output'):
-            logger.error("Ouptut: %s", e.output)
-        raise Exception(msg)
+        logger.debug("output: %s", output)
+    except subprocess.CalledProcessError as e:
+        logger.error("wget failed on {0}.".format(url))
+        logger.error("returncode=%s, output=%s", e.returncode, e.output)
+        raise
+    except:
+        logger.error("wget failed on {0}.".format(url))
+        raise
 
     import urlparse
     parsed_url = urlparse.urlparse(url)
@@ -149,8 +150,8 @@ class DownloadManager(object):
         self.max_count = len(urls)
         # init threading
         self.job_queue = Queue()
-        # using max 8 thredds
-        num_threads = min(8, len(urls))
+        # using max 4 thredds
+        num_threads = min(4, len(urls))
         logger.info('starting %d download threads', num_threads)
         for x in range(num_threads):
             t = threading.Thread(target=self.threader)
