@@ -56,9 +56,13 @@ class GenericWPS(MonitorPE):
         self.monitor("status_location={0.statusLocation}".format(execution), progress)
         
         while execution.isNotComplete():
-            execution.checkStatus(sleepSecs=2)
-            progress = self.progress(execution)
-            self.monitor(execution.statusMessage, progress)
+            try:
+                execution.checkStatus(sleepSecs=3)
+            except:
+                logger.exception("Could not read status xml document.")
+            else:
+                progress = self.progress(execution)
+                self.monitor(execution.statusMessage, progress)
 
         if execution.isSucceded():
             for output in execution.processOutputs:               
