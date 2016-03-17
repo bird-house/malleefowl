@@ -1,1 +1,2 @@
-33 22 * * * su - phoenix -c 'find /home/phoenix/anaconda/var/cache/pywps -name "*.nc" -atime +14 | xargs rm > /dev/null 2>&1'
+33 22 * * * su - phoenix -c 'find /home/phoenix/anaconda/var/lib/cache/pywps -name "*.nc" -atime +3 | xargs rm > /dev/null 2>&1'
+33 23 * * * su - phoenix -c 'find /home/phoenix/anaconda/var/lib/pywps/outputs -type f -ctime +14 | xargs rm > /dev/null 2>&1'
