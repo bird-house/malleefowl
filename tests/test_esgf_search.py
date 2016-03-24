@@ -178,20 +178,22 @@ class EsgSearchTestCase(TestCase):
         #nose.tools.ok_(False, len(result))
 
     @attr('online')
-    def test_file_cordex_many(self):
+    def test_file_cordex_fx(self):
         constraints = []
         constraints.append( ('project', 'CORDEX') )
-        constraints.append( ('time_frequency', 'day' ) )
+        constraints.append( ('time_frequency', 'fx' ) )
 
         (result, summary, facet_counts) = self.esgsearch.search(
             search_type='File',
-            limit=100,
+            limit=1,
             offset=0,
             temporal=False,
-            constraints = constraints)
+            start='1960-01-01T12:00:00Z',
+            end='1970-12-31T12:00:00Z',
+            constraints=constraints)
 
-        nose.tools.ok_(len(result) > 1, result)
-        nose.tools.ok_(summary['number_of_selected_files'] > 1, result)
+        nose.tools.ok_(len(result) == 1, result)
+        nose.tools.ok_(summary['number_of_selected_files'] == 1, result)
         #nose.tools.ok_(False, len(result))
 
     @attr('online')
@@ -218,8 +220,8 @@ class EsgSearchTestCase(TestCase):
             end='1970-12-31T12:00:00Z',
             constraints = constraints)
 
-        nose.tools.ok_(len(result) > 1, result)
-        nose.tools.ok_(summary['number_of_selected_files'] > 1, result)
+        nose.tools.ok_(len(result) >= 1, result)
+        nose.tools.ok_(summary['number_of_selected_files'] >= 1, result)
 
     @attr('online')
     def test_file_cmip5(self):

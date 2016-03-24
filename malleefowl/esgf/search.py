@@ -12,15 +12,18 @@ def date_from_filename(filename):
     tas_EUR-44i_ECMWF-ERAINT_evaluation_r1i1p1_HMS-ALADIN52_v1_mon_200101-200812.nc
     """
     logger.debug('filename=%s', filename)
+    result = None
     value = filename.split('.')
     value.pop() # remove .nc
     value = value[-1] # part with date
     value = value.split('_')[-1] # only date part
     logger.debug('date part = %s', value)
-    value = value.split('-') # split start-end
-    start_year = int(value[0][:4]) # keep only the year
-    end_year = int(value[1][:4])
-    return (start_year, end_year)
+    if value != 'fx':
+        value = value.split('-') # split start-end
+        start_year = int(value[0][:4]) # keep only the year
+        end_year = int(value[1][:4])
+        result = (start_year, end_year)
+    return result
 
 def variable_filter(constraints, variables):
     """return True if variable fulfills contraints"""
@@ -57,7 +60,11 @@ def temporal_filter(filename, start_date=None, end_date=None):
             
     if start_date is None or end_date is None:
         return True
-    start_year, end_year = date_from_filename(filename)
+    start_end = date_from_filename(filename)
+    if start_end is None: # fixed field
+        return True
+    start_year = start_end[0]
+    end_year = start_end[1]
     if start_year > end_date.year:
         logger.debug('skip: %s > %s', start_year, end_date.year)
         return False
@@ -126,6 +133,7 @@ class ESGSearch(object):
         logger.debug('start=%s, end=%s', start, end)
 
         start_date = end_date = None
+        # TODO: maybe only use start/end if temporal=True
         if start is not None and end is not None:
             start_date = date_parser.parse(start)
             end_date = date_parser.parse(end)

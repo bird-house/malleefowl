@@ -129,7 +129,6 @@ class EsgSearchTestCase(WpsTestCase):
 
         nose.tools.ok_(execution.status == 'ProcessSucceeded', execution.status)
         #nose.tools.ok_(False, "TODO: check facets")
-
         
     @attr('online')
     def test_aggregation(self):
