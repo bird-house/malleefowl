@@ -42,7 +42,7 @@ class GenericWPS(MonitorPE):
         self._add_output(self.STATUS_LOCATION_NAME)
         
         from owslib.wps import WebProcessingService
-        self.wps = WebProcessingService(url=url, skip_caps=True)
+        self.wps = WebProcessingService(url=url, skip_caps=True, verify=False)
         self.identifier = identifier
         self.wps_resource = resource
         self.wps_inputs = inputs
