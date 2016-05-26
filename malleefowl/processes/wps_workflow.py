@@ -11,7 +11,7 @@ class DispelWorkflow(WPSProcess):
         WPSProcess.__init__(self,
             identifier="workflow",
             title="Workflow",
-            version="0.5",
+            version="0.6",
             abstract="Runs Workflow with dispel4py.",
             statusSupported=True,
             storeSupported=True)
