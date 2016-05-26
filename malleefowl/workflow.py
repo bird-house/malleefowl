@@ -118,6 +118,7 @@ class GenericWPS(MonitorPE):
     
 class EsgSearch(GenericWPS):
     def __init__(self, url,
+                 search_url='https://esgf-data.dkrz.de/esg-search',
                  constraints='project:CORDEX',
                  limit=100,
                  search_type='File',
@@ -128,6 +129,7 @@ class EsgSearch(GenericWPS):
                  start=None,
                  end=None):
         GenericWPS.__init__(self, url, 'esgsearch', output='output')
+        self.search_url = search_url
         self.constraints = constraints
         self.distrib = distrib
         self.replica = replica
@@ -139,6 +141,7 @@ class EsgSearch(GenericWPS):
         self.search_type = search_type
 
     def _process(self, inputs):
+        self.wps_inputs.append( ('url', self.search_url) )
         self.wps_inputs.append( ('constraints', self.constraints) )
         self.wps_inputs.append( ('limit', str(self.limit)) )
         self.wps_inputs.append( ('search_type', self.search_type) )
@@ -263,6 +266,7 @@ def esgf_workflow(source, worker, monitor=None):
     # TODO: configure limit
     esgsearch = EsgSearch(
         url=wps_url(),
+        search_url=source.get('url', 'https://esgf-data.dkrz.de/esg-search'),
         constraints=source.get('facets'),
         limit=source.get('limit', 100),
         search_type='File',
