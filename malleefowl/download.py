@@ -1,8 +1,13 @@
+"""
+TODO: handle parallel download process
+"""
+
 import threading
-from Queue import Queue
+from Queue import Queue, Empty
 import subprocess
 
 from malleefowl import config
+from malleefowl.exceptions import ProcessFailed
 
 import logging
 logger = logging.getLogger(__name__)
@@ -51,18 +56,15 @@ def wget(url, use_file_url=False, credentials=None, openid=None, password=None):
         cmd = ["wget"]
         if credentials is not None:
             logger.debug('using credentials')
-            cmd.append("--certificate")
-            cmd.append(credentials) 
-            cmd.append("--private-key")
-            cmd.append(credentials) 
-            cmd.append("--ca-certificate")
-            cmd.append(credentials)
+            cmd.extend(["--certificate", credentials])
+            cmd.extend(["--private-key", credentials])
+            cmd.extend(["--ca-certificate", credentials])
         elif openid:
             from .esgf.logon import openid_logon_with_wget
             cookies = openid_logon_with_wget(openid, password, url=url)
             logger.error(cookies)
             #cmd.append('--ca-directory={0}'.format('certificates'))
-            cmd.append('--cookies=on')
+            #cmd.append('--cookies=on')
             cmd.append('--keep-session-cookies')
             cmd.append('--save-cookies')
             cmd.append(cookies)
@@ -71,22 +73,23 @@ def wget(url, use_file_url=False, credentials=None, openid=None, password=None):
         cmd.append("--no-check-certificate")
         if not logger.isEnabledFor(logging.DEBUG):
             cmd.append("--quiet")
-        cmd.append("-N")           # turn on timestamping
-        cmd.append("--continue")   # continue partial downloads
-        cmd.append("-x")           # force creation of directories
-        cmd.append("-P")           # directory prefix
-        cmd.append(config.cache_path())
-        cmd.append(url)
+        cmd.append("--tries=2")                  # max 2 retries
+        cmd.append("-N")                         # turn on timestamping
+        cmd.append("--continue")                 # continue partial downloads
+        cmd.append("-x")                         # force creation of directories
+        cmd.extend(["-P", config.cache_path()])  # directory prefix
+        cmd.append(url)                          # download url
         logger.debug("cmd: %s", ' '.join(cmd))
         output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
         logger.debug("output: %s", output)
     except subprocess.CalledProcessError as e:
-        logger.error("wget failed on {0}.".format(url))
-        logger.error("returncode=%s, output=%s", e.returncode, e.output)
-        raise
+        msg = "wget failed on {0}: {1.output}".format(url, e)
+        logger.error(msg)
+        raise ProcessFailed(msg)
     except:
-        logger.error("wget failed on {0}.".format(url))
-        raise
+        msg = "wget failed on {0}.".format(url)
+        logger.exception(msg)
+        raise ProcessFailed(msg)
 
     import urlparse
     parsed_url = urlparse.urlparse(url)
@@ -118,17 +121,22 @@ class DownloadManager(object):
 
     # The threader thread pulls an worker from the queue and processes it
     def threader(self):
-        while True:
-            # gets an worker from the queue
-            worker = self.job_queue.get()
-
+        queue_full = True
+        while queue_full:
             # Run the example job with the avail worker in queue (thread)
+            # TODO: handle exception ... maybe download job should stop.
             try:
+                # gets an worker from the queue
+                worker = self.job_queue.get()
                 self.download_job(**worker)
+            except Empty:
+                queue_full = False
             except Exception:
                 logger.exception('download failed!')
-            # completed with the job
-            self.job_queue.task_done()
+                queue_full = False
+            finally:
+                # completed with the job
+                self.job_queue.task_done()
 
     def download_job(self, url, credentials, openid, password):
         file_url = download_with_archive(url, credentials, openid, password)
@@ -169,7 +177,7 @@ class DownloadManager(object):
         duration = (datetime.now() - t0).seconds
         self.show_status("downloaded %d files in %d seconds" % (len(urls), duration), 100)
         if len(self.files) != len(urls):
-            raise Exception("could not download all files %d/%d" % (len(self.files), len(urls)))
+            raise ProcessFailed("could not download all files %d/%d" % (len(self.files), len(urls)))
         # done
         return self.files
 
