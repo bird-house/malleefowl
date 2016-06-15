@@ -4,11 +4,12 @@ from pywps.Process import WPSProcess
 from malleefowl.download import download_files
 
 class Download(WPSProcess):
+   
     def __init__(self):
         WPSProcess.__init__(self,
             identifier="download",
             title="Download files",
-            version="0.5",
+            version="0.6",
             abstract="Downloads files and provides file list as json document.",
             statusSupported=True,
             storeSupported=True)
