@@ -3,7 +3,7 @@ from unittest import TestCase
 
 from owslib.wps import monitorExecution
 
-from tests.common import SERVICE
+from malleefowl.tests.common import SERVICE
 
 class WpsTestCase(TestCase):
     """

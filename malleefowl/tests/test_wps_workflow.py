@@ -1,6 +1,6 @@
 import pytest
 
-from tests.common import WpsTestClient, TESTDATA, assert_response_success
+from malleefowl.tests.common import WpsTestClient, TESTDATA, assert_response_success
 
 import tempfile
 import yaml

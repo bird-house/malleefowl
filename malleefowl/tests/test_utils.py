@@ -24,7 +24,7 @@ def test_esgf_archive_path_cmip5_noaa():
     url = "http://esgdata.gfdl.noaa.gov/thredds/fileServer/gfdl_dataroot/NOAA-GFDL/GFDL-CM3/historical/mon/atmos/Amon/r1i1p1/v20110601/tasmax/tasmax_Amon_GFDL-CM3_historical_r1i1p1_200501-200512.nc"
     local_path= "NOAA-GFDL/GFDL-CM3/historical/mon/atmos/Amon/r1i1p1/v20110601/tasmax/tasmax_Amon_GFDL-CM3_historical_r1i1p1_200501-200512.nc"
     archive_path = utils.esgf_archive_path(url)
-    nose.tools.assert_is_not_none(archive_path)
+    assert archive_path is not None
     assert local_path in archive_path
 
 def test_dupname():
