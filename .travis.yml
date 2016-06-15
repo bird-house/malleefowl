@@ -5,6 +5,10 @@ branches:
     - develop
 python:
   - "2.7"
+  - "3.5"
+matrix:
+  - allow_failures:
+    - python: 3.5
 sudo: false
 install:
   - make install
@@ -12,7 +16,6 @@ install:
 before_script:
   - sleep 15
 script:
-  - make docs
   - make testall
 #after_success:
 # - coveralls
