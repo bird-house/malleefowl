@@ -5,12 +5,12 @@ This module is used to get esgf logon credentials. There are two choices:
 * OpenID login as used in browsers.
 
 Some of the code is taken from esgf-pyclient:
-https://github.com/stephenpascoe/esgf-pyclient
+https://github.com/ESGF/esgf-pyclient
 
 See also:
 
 * open climate workbench: https://github.com/apache/climate
-* MyProxyLogon: https://pypi.python.org/pypi/MyProxyClient
+* MyProxyLogon: https://github.com/cedadev/MyProxyClient
 """
 
 import os
