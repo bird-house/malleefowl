@@ -1,10 +1,8 @@
-import nose.tools
-from nose import SkipTest
-from nose.plugins.attrib import attr
+import pytest
 
 from tests.common import WpsTestClient, TESTDATA, assert_response_success
 
-@attr('online')
+@pytest.mark.online
 def test_wps_thredds_download():
     wps = WpsTestClient()
     datainputs = "[url={0}]".format(TESTDATA['noaa_catalog_1'])

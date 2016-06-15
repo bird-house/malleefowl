@@ -1,7 +1,6 @@
-import nose.tools
+import pytest
+
 from unittest import TestCase
-from nose import SkipTest
-from nose.plugins.attrib import attr
 
 from tests.common import SERVICE
 
@@ -13,9 +12,9 @@ class EsgDistribSearchTestCase(TestCase):
         cls.esgsearch = ESGSearch('http://esgf-data.dkrz.de/esg-search', distrib=True,
                                   latest=True, replica=False)
 
-    @attr('online')
+    @pytest.mark.skipif(reason="no way of currently testing this")
+    @pytest.mark.online
     def test_file_cmip5_with_local_replica(self):
-        raise SkipTest
         #NOAA-GFDL/GFDL-CM3/historical/mon/atmos/Amon/r1i1p1/v20110601/tasmax/tasmax_Amon_GFDL-CM3_historical_r1i1p1_200501-200512.nc
         constraints = []
         constraints.append( ('project', 'CMIP5') )
@@ -32,9 +31,9 @@ class EsgDistribSearchTestCase(TestCase):
             offset=0,
             constraints = constraints)
 
-        nose.tools.ok_(len(result) > 1, result)
+        assert len(result) > 1
         # we want the local replica, not the original file
-        nose.tools.ok_(not ('gfdl.noaa.gov/thredds/fileServer' in result[0]), result[0])
+        assert not ('gfdl.noaa.gov/thredds/fileServer' in result[0])
      
 class EsgSearchTestCase(TestCase):
 
@@ -44,7 +43,7 @@ class EsgSearchTestCase(TestCase):
         cls.esgsearch = ESGSearch('http://esgf-data.dkrz.de/esg-search', distrib=False,
                                   latest=True, replica=False)
 
-    @attr('online')
+    @pytest.mark.online
     def test_dataset(self):
         constraints = []
         constraints.append( ('project', 'CORDEX') )
@@ -58,9 +57,9 @@ class EsgSearchTestCase(TestCase):
             offset=0,
             constraints = constraints)
 
-        nose.tools.ok_(len(result) == 1, result)
+        assert len(result) == 1
 
-    @attr('online')
+    @pytest.mark.online
     def test_file(self):
         constraints = []
         constraints.append( ('project', 'CORDEX') )
@@ -74,9 +73,9 @@ class EsgSearchTestCase(TestCase):
             offset=0,
             constraints = constraints)
 
-        nose.tools.ok_(len(result) > 1, result)
+        assert len(result) > 1
 
-    @attr('online')
+    @pytest.mark.online
     def test_file_cmip5_many(self):
         constraints = []
         constraints.append( ('project', 'CMIP5') )
@@ -90,9 +89,9 @@ class EsgSearchTestCase(TestCase):
             offset=0,
             constraints = constraints)
 
-        nose.tools.ok_(len(result) > 1, result)
+        assert len(result) > 1
 
-    @attr('online')
+    @pytest.mark.online
     def test_file_more_than_one(self):
         constraints = []
         constraints.append( ('project', 'CORDEX') )
@@ -106,9 +105,9 @@ class EsgSearchTestCase(TestCase):
             offset=0,
             constraints = constraints)
 
-        nose.tools.ok_(len(result) > 1, result)
+        assert len(result) > 1
 
-    @attr('online')
+    @pytest.mark.online
     def test_aggregation(self):
         constraints = []
         constraints.append( ('project', 'CORDEX') )
@@ -122,9 +121,9 @@ class EsgSearchTestCase(TestCase):
             offset=0,
             constraints = constraints)
 
-        nose.tools.ok_(len(result) == 0, result)
+        assert len(result) == 0
 
-    @attr('online')
+    @pytest.mark.online
     def test_file_cordex(self):
         constraints = []
         constraints.append( ('project', 'CORDEX') )
@@ -138,9 +137,9 @@ class EsgSearchTestCase(TestCase):
             offset=0,
             constraints = constraints)
 
-        nose.tools.ok_(len(result) > 1, result)
+        assert len(result) > 1
 
-    @attr('online')
+    @pytest.mark.online
     def test_file_cordex_date(self):
         constraints = []
         constraints.append( ('project', 'CORDEX') )
@@ -157,10 +156,10 @@ class EsgSearchTestCase(TestCase):
             end='2005-12-31T12:00:00Z',
             constraints = constraints)
 
-        nose.tools.ok_(len(result) > 1, result)
-        nose.tools.ok_(summary['number_of_selected_files'] > 1, result)
+        assert len(result) > 1
+        assert summary['number_of_selected_files'] > 1
 
-    @attr('online')
+    @pytest.mark.online
     def test_file_cordex_many(self):
         constraints = []
         constraints.append( ('project', 'CORDEX') )
@@ -173,11 +172,10 @@ class EsgSearchTestCase(TestCase):
             temporal=False,
             constraints = constraints)
 
-        nose.tools.ok_(len(result) > 1, result)
-        nose.tools.ok_(summary['number_of_selected_files'] > 1, result)
-        #nose.tools.ok_(False, len(result))
+        assert len(result) > 1
+        assert summary['number_of_selected_files'] > 1
 
-    @attr('online')
+    @pytest.mark.online
     def test_file_cordex_fx(self):
         constraints = []
         constraints.append( ('project', 'CORDEX') )
@@ -192,11 +190,10 @@ class EsgSearchTestCase(TestCase):
             end='1970-12-31T12:00:00Z',
             constraints=constraints)
 
-        nose.tools.ok_(len(result) == 1, result)
-        nose.tools.ok_(summary['number_of_selected_files'] == 1, result)
-        #nose.tools.ok_(False, len(result))
+        assert len(result) == 1
+        assert summary['number_of_selected_files'] == 1
 
-    @attr('online')
+    @pytest.mark.online
     def test_file_cordex_fly(self):
         constraints = []
         constraints.append( ('project', 'CORDEX') )
@@ -220,10 +217,10 @@ class EsgSearchTestCase(TestCase):
             end='1970-12-31T12:00:00Z',
             constraints = constraints)
 
-        nose.tools.ok_(len(result) >= 1, result)
-        nose.tools.ok_(summary['number_of_selected_files'] >= 1, result)
+        assert len(result) >= 1
+        assert summary['number_of_selected_files'] >= 1
 
-    @attr('online')
+    @pytest.mark.online
     def test_file_cmip5(self):
         constraints = []
         constraints.append( ('project', 'CMIP5') )
@@ -237,10 +234,10 @@ class EsgSearchTestCase(TestCase):
             offset=0,
             constraints = constraints)
 
-        nose.tools.ok_(len(result) > 1, result)
-        nose.tools.ok_(summary['number_of_selected_files'] > 1, result)
+        assert len(result) > 1
+        assert summary['number_of_selected_files'] > 1
 
-    @attr('online')
+    @pytest.mark.online
     def test_file_cmip5_date(self):
         constraints = []
         constraints.append( ('project', 'CMIP5') )
@@ -257,8 +254,8 @@ class EsgSearchTestCase(TestCase):
             start='1960-01-01T12:00:00Z',
             end='1995-12-31T12:00:00Z')
 
-        nose.tools.ok_(len(result) > 1, result)
-        nose.tools.ok_(summary['number_of_selected_files'] > 1, result)
+        assert len(result) > 1
+        assert summary['number_of_selected_files'] > 1
 
     
 
