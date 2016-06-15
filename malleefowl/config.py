@@ -44,3 +44,10 @@ def archive_root():
     return archive_root
 
 
+def timeout():
+    try:
+        t = int(getConfigValue("malleefowl", "timeout"))
+    except Exception:
+        t = 3600
+        pass
+    return t
