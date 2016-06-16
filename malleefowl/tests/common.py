@@ -22,7 +22,7 @@ TESTDATA = {
 class WpsTestClient(object):
     def __init__(self):
         pywps_path = os.path.dirname(pywps.__file__)
-        os.environ['PYWPS_CFG'] = os.path.abspath(os.path.join(pywps_path, '..', '..', '..', '..', 'etc', 'pywps', 'malleefowl.cfg'))
+        os.environ['PYWPS_CFG'] = os.path.abspath(os.path.join(os.environ['HOME'], 'birdhouse', 'etc', 'pywps', 'malleefowl.cfg'))
         os.environ['REQUEST_METHOD'] = pywps.METHOD_GET
         self.wps = pywps.Pywps(os.environ["REQUEST_METHOD"], os.environ.get("PYWPS_CFG"))
    
