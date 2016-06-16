@@ -1,0 +1,11 @@
+pywps
+owslib
+esgf-pyclient
+myproxyclient
+netCDF4
+pyYAML
+dispel4py
+python-swiftclient
+threddsclient
+pysolr
+pytest
