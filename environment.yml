@@ -1,14 +1,114 @@
-name: malleefowl 
-channels:
-  - defaults
+name: malleefowl
+channels: 
+  - ioos
   - birdhouse
+  - defaults
 dependencies:
-  - python=2 
-  - setuptools=23.0.0
-  - curl=7.45.0 
-  - pyopenssl=0.15.1 
-  - cryptography=1.0.2 
-  - mako=1.0.4
-  - pyyaml=3.11
-  - pip:
-      - genshi==0.7
+- alabaster=0.7.8=py27_0
+- babel=2.3.3=py27_0
+- backports=1.0=py27_0
+- beautiful-soup=4.3.2=py27_0
+- dispel4py=1.0.1=py27_0
+- esgf-pyclient=0.1.6=py27_51
+- eventlet=0.16.1=py27_0
+- htmltmpl=1.22=py27_1
+- jasper=1.900.1=4
+- myproxyclient=1.4.3=py27_0
+- nginx=1.8.0=0
+- owslib=0.11.2=py27_59
+- pbr=0.10.7=py27_0
+- pysolr=3.3.2=py27_0
+- python-magic=0.4.6=py27_1
+- python-swiftclient=2.4.0=py27_0
+- pywps=3.2.5=py27_4
+- simplejson=3.6.5=py27_0
+- threddsclient=0.3.4=py27_0
+- wget=1.15=1
+- cffi=1.6.0=py27_0
+- cryptography=1.4=py27_0
+- curl=7.45.0=0
+- dateutil=2.4.1=py27_0
+- decorator=4.0.10=py27_0
+- docutils=0.12=py27_2
+- enum34=1.1.6=py27_0
+- get_terminal_size=1.0.0=py27_0
+- gevent=1.1.1=py27_0
+- greenlet=0.4.10=py27_0
+- gunicorn=19.1.0=py27_0
+- hdf4=4.2.11=0
+- hdf5=1.8.15.1=2
+- icu=54.1=0
+- idna=2.0=py27_0
+- imagesize=0.7.1=py27_0
+- expat=2.1.0=1
+- freexl=1.0.2=0
+- gdal=1.11.4=np110py27_7
+- geos=3.4.2=4
+- giflib=5.1.2=1
+- json-c=0.12=0
+- libiconv=1.14=1
+- libspatialite=4.3.0a=3
+- libxml2=2.9.3=5
+- netcdf4=1.2.4=np110py27_1
+- openjpeg=2.1.0=3
+- proj.4=4.9.1=2
+- python-dateutil=2.4.2=py27_1
+- ipaddress=1.0.14=py27_0
+- ipython=4.2.0=py27_0
+- ipython_genutils=0.1.0=py27_0
+- jbig=2.1=0
+- jinja2=2.8=py27_1
+- jpeg=8d=0
+- krb5=1.13.2=0
+- libffi=3.2.1=0
+- libgcc=5.2.0=0
+- libnetcdf=4.3.3.1=3
+- libpng=1.6.22=0
+- libtiff=4.0.6=1
+- libxslt=1.1.28=0
+- lxml=3.6.0=py27_0
+- mako=1.0.4=py27_0
+- markupsafe=0.23=py27_2
+- meld3=1.0.2=py27_0
+- mkl=11.3.3=0
+- mpi4py=2.0.0=py27_1
+- mpich2=1.4.1p1=0
+- networkx=1.11=py27_0
+- numpy=1.10.4=py27_2
+- openssl=1.0.2h=1
+- pastedeploy=1.5.2=py27_1
+- path.py=8.2.1=py27_0
+- pathlib2=2.1.0=py27_0
+- pcre=8.31=0
+- pexpect=4.0.1=py27_0
+- pickleshare=0.7.2=py27_0
+- pip=8.1.2=py27_0
+- postgresql=9.1.4=1
+- ptyprocess=0.5.1=py27_0
+- py=1.4.31=py27_0
+- pyasn1=0.1.9=py27_0
+- pycparser=2.14=py27_1
+- pygments=2.1.3=py27_0
+- pyopenssl=0.16.0=py27_0
+- pyproj=1.9.5.1=py27_0
+- pytest=2.9.2=py27_0
+- python=2.7.11=5
+- pytz=2016.4=py27_0
+- pyyaml=3.11=py27_4
+- readline=6.2=2
+- requests=2.10.0=py27_0
+- setuptools=23.0.0=py27_0
+- simplegeneric=0.8.1=py27_1
+- six=1.10.0=py27_0
+- snowballstemmer=1.2.1=py27_0
+- sphinx=1.4.1=py27_0
+- sphinx_rtd_theme=0.1.9=py27_0
+- sqlite=3.13.0=0
+- supervisor=3.1.3=py27_1
+- tk=8.5.18=0
+- traitlets=4.2.1=py27_0
+- wheel=0.29.0=py27_0
+- xerces-c=3.1.2=0
+- xz=5.0.5=1
+- yaml=0.1.6=0
+- zlib=1.2.8=3
