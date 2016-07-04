@@ -20,7 +20,7 @@ dependencies:
 - pysolr=3.3.2=py27_0
 - python-magic=0.4.6=py27_1
 - python-swiftclient=2.4.0=py27_0
-- pywps=3.2.5=py27_4
+- pywps=3.2.6=py27_0
 - simplejson=3.6.5=py27_0
 - threddsclient=0.3.4=py27_0
 - wget=1.15=1
