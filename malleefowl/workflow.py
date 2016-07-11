@@ -81,7 +81,8 @@ class GenericWPS(MonitorPE):
         execution = self.wps.execute(
             identifier=self.identifier,
             inputs=self.wps_inputs,
-            output=output)
+            output=output,
+            lineage=True)
         self.monitor_execution(execution)
 
         result = {self.STATUS_NAME:execution.status,

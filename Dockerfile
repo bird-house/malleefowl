@@ -2,7 +2,7 @@
 FROM birdhouse/bird-base:latest
 MAINTAINER https://github.com/bird-house/malleefowl
 
-LABEL Description="Malleefowl WPS Application" Vendor="Birdhouse" Version="0.3.12"
+LABEL Description="Malleefowl WPS Application" Vendor="Birdhouse" Version="0.4.0"
 
 # Configure hostname and user for services 
 ENV OUTPUT_PORT 38091

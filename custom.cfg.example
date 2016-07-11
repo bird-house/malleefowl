@@ -9,5 +9,10 @@ log-level = INFO
 # esgf archive root path, separated by ":" like PATH
 archive-root =
 
+## deployment options
+#prefix =  /opt/birdhouse
+#user = www-data
+#etc-user = root
+
 [pywps]
 maxoperations = 100

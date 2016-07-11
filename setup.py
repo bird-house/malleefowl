@@ -3,7 +3,7 @@
 from setuptools import find_packages
 from setuptools import setup
 
-version = '0.3.12'
+version = '0.4.0'
 description = 'Malleefowl simplifies the usage of WPS and has some supporting WPS processes.'
 long_description = (
     open('README.rst').read() + '\n' +
@@ -11,22 +11,7 @@ long_description = (
     open('CHANGES.rst').read()
 )
 
-requires = [
-    'PyWPS',
-    'htmltmpl',
-    'python-magic',
-    'lxml',
-    'owslib',
-    'esgf-pyclient',
-    'myproxyclient',
-    'netCDF4',
-    'pyYAML',
-    'dispel4py',
-    'python-swiftclient',
-    'threddsclient',
-    'pysolr',
-    'nose',
-    ]
+reqs = [line.strip() for line in open('requirements/deploy.txt')]
 
 classifiers=[
         'Development Status :: 3 - Alpha',
@@ -50,7 +35,7 @@ setup(name='malleefowl',
       packages=find_packages(),
       include_package_data=True,
       zip_safe=False,
-      test_suite='nose.collector',
-      install_requires=requires,
+      test_suite='malleefowl',
+      install_requires=reqs,
       #entry_points = {},
       )
