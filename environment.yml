@@ -7,6 +7,7 @@ dependencies:
 - python=2.7.12
 - pyopenssl=0.16.0
 - cryptography=1.4
+- libffi
 - pyyaml=3.11
 - curl=7.45.0
 # buildout
