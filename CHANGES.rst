@@ -1,6 +1,13 @@
 Change History
 **************
 
+0.4.1 (2016-09-28)
+==================
+
+* pep8 
+* using owslib.wps.ComplexDataInput in workflow
+* update conda env: owslib=0.13.0, removed gdal
+
 0.4.0 (2016-07-11)
 ==================
 
