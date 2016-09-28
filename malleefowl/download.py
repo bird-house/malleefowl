@@ -12,17 +12,22 @@ from malleefowl.exceptions import ProcessFailed
 import logging
 logger = logging.getLogger(__name__)
 
+
 def download_with_archive(url, credentials=None, openid=None, password=None):
     """
-    Downloads file. Checks before downloading if file is already in local esgf archive.
+    Downloads file. Checks before downloading if file is already in
+    local esgf archive.
     """
     from .utils import esgf_archive_path
     file_url = esgf_archive_path(url)
     if file_url is None:
-        file_url = download(url, use_file_url=True, credentials=credentials, openid=openid, password=password)
+        file_url = download(url, use_file_url=True, credentials=credentials,
+                            openid=openid, password=password)
     return file_url
 
-def download(url, use_file_url=False, credentials=None, openid=None, password=None):
+
+def download(url, use_file_url=False, credentials=None,
+             openid=None, password=None):
     """
     Downloads url and returns local filename.
 
@@ -37,10 +42,14 @@ def download(url, use_file_url=False, credentials=None, openid=None, password=No
     if parsed_url.scheme == 'file':
         result = url
     else:
-        result = wget(url=url, use_file_url=use_file_url, credentials=credentials, openid=openid, password=password)
+        result = wget(url=url, use_file_url=use_file_url,
+                      credentials=credentials,
+                      openid=openid, password=password)
     return result
 
-def wget(url, use_file_url=False, credentials=None, openid=None, password=None):
+
+def wget(url, use_file_url=False, credentials=None,
+         openid=None, password=None):
     """
     Downloads url and returns local filename.
 
@@ -94,25 +103,32 @@ def wget(url, use_file_url=False, credentials=None, openid=None, password=None):
     import urlparse
     parsed_url = urlparse.urlparse(url)
     from os.path import join
-    filename = join(config.cache_path(), parsed_url.netloc, parsed_url.path.strip('/'))
-    if use_file_url == True:
+    filename = join(config.cache_path(),
+                    parsed_url.netloc,
+                    parsed_url.path.strip('/'))
+    if use_file_url is True:
         filename = "file://" + filename
     return filename
 
-def download_files(urls=[], credentials=None, openid=None, password=None, monitor=None):
+
+def download_files(urls=[], credentials=None,
+                   openid=None, password=None, monitor=None):
     dm = DownloadManager(monitor)
     return dm.download(urls, credentials, openid, password)
 
+
 def download_files_from_thredds(url, recursive=False, monitor=None):
     import threddsclient
-    return download_files(urls=threddsclient.download_urls(url), monitor=monitor)
+    return download_files(urls=threddsclient.download_urls(url),
+                          monitor=monitor)
+
 
 class DownloadManager(object):
     def __init__(self, monitor=None):
         self.files = []
         self.count = 0
         self.monitor = monitor
-        
+
     def show_status(self, message, progress):
         if self.monitor is None:
             logger.info("%s, progress=%d/100", message, progress)
@@ -144,7 +160,8 @@ class DownloadManager(object):
             self.files.append(file_url)
             self.count = self.count + 1
         progress = self.count * 100.0 / self.max_count
-        self.show_status('Downloaded %d/%d' % (self.count, self.max_count), progress)
+        self.show_status('Downloaded %d/%d' % (self.count, self.max_count),
+                         progress)
 
     def download(self, urls, credentials=None, openid=None, password=None):
         # start ...
@@ -169,18 +186,18 @@ class DownloadManager(object):
             t.start()
         for url in urls:
             # fill job queue
-            self.job_queue.put(dict(url=url, credentials=credentials, openid=openid, password=password))
+            self.job_queue.put(dict(url=url, credentials=credentials,
+                                    openid=openid, password=password))
 
         # wait until the thread terminates.
         self.job_queue.join()
         # how long?
         duration = (datetime.now() - t0).seconds
-        self.show_status("downloaded %d files in %d seconds" % (len(urls), duration), 100)
+        self.show_status(
+            "downloaded %d files in %d seconds" % (len(urls), duration), 100)
         if len(self.files) != len(urls):
-            raise ProcessFailed("could not download all files %d/%d" % (len(self.files), len(urls)))
+            raise ProcessFailed(
+                "could not download all files %d/%d" %
+                (len(self.files), len(urls)))
         # done
         return self.files
-
-
-
-
