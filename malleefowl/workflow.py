@@ -1,3 +1,6 @@
+from owslib.wps import WebProcessingService
+from owslib.wps import ComplexDataInput
+
 from dispel4py.workflow_graph import WorkflowGraph
 from dispel4py import simple_process
 from dispel4py.base import BasePE
@@ -46,7 +49,6 @@ class GenericWPS(MonitorPE):
         self._add_output(self.STATUS_NAME)
         self._add_output(self.STATUS_LOCATION_NAME)
 
-        from owslib.wps import WebProcessingService
         self.wps = WebProcessingService(url=url, skip_caps=True, verify=False)
         self.identifier = identifier
         self.wps_resource = resource
@@ -93,7 +95,7 @@ class GenericWPS(MonitorPE):
         output = []
         if self.wps_output is not None:
             output = [(self.wps_output, True)]
-        logger.info("execute inputs=%s", self.wps_inputs)
+        logger.debug("execute inputs=%s", self.wps_inputs)
         execution = self.wps.execute(
             identifier=self.identifier,
             inputs=self.wps_inputs,
@@ -117,16 +119,16 @@ class GenericWPS(MonitorPE):
             raise Exception(failure_msg)
 
     def process(self, inputs):
-        if inputs in self.INPUT_NAME:
+        if self.INPUT_NAME in inputs:
             for value in inputs[self.INPUT_NAME]:
-                self.wps_inputs.append((self.wps_resource, str(value)))
+                self.wps_inputs.append(
+                    (self.wps_resource, ComplexDataInput(value)))
         try:
             result = self._process(inputs)
             if result is not None:
                 return result
         except Exception:
-            import traceback
-            logger.error(traceback.format_exc())
+            logger.exception("process failed!")
             raise
 
     def _process(self, inputs):
