@@ -6,9 +6,11 @@ from malleefowl.workflow import run
 
 import logging
 
+
 class DispelWorkflow(WPSProcess):
     def __init__(self):
-        WPSProcess.__init__(self,
+        WPSProcess.__init__(
+            self,
             identifier="workflow",
             title="Workflow",
             version="0.6",
@@ -16,42 +18,42 @@ class DispelWorkflow(WPSProcess):
             statusSupported=True,
             storeSupported=True)
 
-        self.workflow= self.addComplexInput(
+        self.workflow = self.addComplexInput(
             identifier="workflow",
             title="Workflow description",
             abstract="Workflow description in YAML",
             metadata=[],
             minOccurs=1,
             maxOccurs=1,
-            formats=[{"mimeType":"text/yaml"}],
+            formats=[{"mimeType": "text/yaml"}],
             maxmegabites=20
-            )
-        
+        )
+
         self.output = self.addComplexOutput(
             identifier="output",
             title="Workflow result",
-            formats=[{"mimeType":"text/yaml"}],
+            formats=[{"mimeType": "text/yaml"}],
             asReference=True,
-            )
-        
+        )
+
         self.logfile = self.addComplexOutput(
             identifier="logfile",
             title="Workflow log file",
-            formats=[{"mimeType":"text/plain"}],
+            formats=[{"mimeType": "text/plain"}],
             asReference=True,
-            )
-       
+        )
+
     def execute(self):
         def monitor(message, progress):
             self.status.set(message, progress)
-        
+
         self.status.set("starting workflow ...", 0)
 
         fp = open(self.workflow.getValue())
         workflow = yaml.load(fp)
 
         workflow_name = workflow.get('name', 'unknown')
-        
+
         self.status.set("workflow {0} prepared.".format(workflow_name), 0)
 
         result = run(workflow, monitor=monitor)
@@ -66,9 +68,11 @@ class DispelWorkflow(WPSProcess):
             self.logfile.setValue(outfile)
         self.status.set("workflow {0} done.".format(workflow_name), 100)
 
+
 class DummyProcess(WPSProcess):
     def __init__(self):
-        WPSProcess.__init__(self,
+        WPSProcess.__init__(
+            self,
             identifier="dummy",
             title="Dummy Process",
             version="1.0",
@@ -82,17 +86,16 @@ class DummyProcess(WPSProcess):
             minOccurs=1,
             maxOccurs=10,
             maxmegabites=5000,
-            formats=[{"mimeType":"application/x-netcdf"}],
-            )
+            formats=[{"mimeType": "application/x-netcdf"}],
+        )
 
         self.output = self.addComplexOutput(
             identifier="output",
             title="Output",
             abstract="Output",
-            formats=[{"mimeType":"text/plain"}],
+            formats=[{"mimeType": "text/plain"}],
             asReference=True,
-            )
-
+        )
 
     def execute(self):
         self.status.set("starting ...", 0)
@@ -100,11 +103,6 @@ class DummyProcess(WPSProcess):
         outfile = 'out.txt'
         with open(outfile, 'w') as fp:
             fp.write('we got %d files.' % len(datasets))
-        self.output.setValue( outfile )
+        self.output.setValue(outfile)
 
         self.status.set("done", 100)
-
-    
-        
-
-

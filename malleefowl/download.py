@@ -72,8 +72,8 @@ def wget(url, use_file_url=False, credentials=None,
             from .esgf.logon import openid_logon_with_wget
             cookies = openid_logon_with_wget(openid, password, url=url)
             logger.error(cookies)
-            #cmd.append('--ca-directory={0}'.format('certificates'))
-            #cmd.append('--cookies=on')
+            # cmd.append('--ca-directory={0}'.format('certificates'))
+            # cmd.append('--cookies=on')
             cmd.append('--keep-session-cookies')
             cmd.append('--save-cookies')
             cmd.append(cookies)

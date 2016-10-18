@@ -11,6 +11,7 @@ from malleefowl import config
 import logging
 logger = logging.getLogger(__name__)
 
+
 def esgf_archive_path(url):
     from os.path import join, isfile
 
@@ -32,6 +33,7 @@ def esgf_archive_path(url):
             logger.info('not found in archive: %s', url)
     return archive_path
 
+
 def dupname(path, filename):
     """
     avoid dupliate filenames
@@ -41,13 +43,14 @@ def dupname(path, filename):
     count = sum(1 for fname in os.listdir(path) if filename in fname)
     if count > 0:
         return newname + '_' + str(count)
-    return newname 
+    return newname
+
 
 def user_id(openid):
     """generate user_id from openid"""
 
     import re
-    
+
     ESGF_OPENID_REXP = r'https://(.*)/esgf-idp/openid/(.*)'
 
     user_id = None
@@ -60,40 +63,42 @@ def user_id(openid):
         raise Exception("unsupported openid")
     return user_id
 
+
 def within_date_range(timesteps, start=None, end=None):
     from dateutil.parser import parse as date_parser
     start_date = None
-    if start != None:
+    if start is not None:
         start_date = date_parser(start)
     end_date = None
-    if end != None:
+    if end is not None:
         end_date = date_parser(end)
     new_timesteps = []
     for timestep in timesteps:
         candidate = date_parser(timestep)
         # within time range?
-        if start_date != None and candidate < start_date:
+        if start_date is not None and candidate < start_date:
             continue
-        if end_date != None and candidate > end_date:
+        if end_date is not None and candidate > end_date:
             break
         new_timesteps.append(timestep)
     return new_timesteps
-    
+
+
 def filter_timesteps(timesteps, aggregation="monthly", start=None, end=None):
     from dateutil.parser import parse as date_parser
     logger.debug("aggregation: %s", aggregation)
-    
-    if (timesteps == None or len(timesteps) == 0):
+
+    if (timesteps is None or len(timesteps) == 0):
         return []
     timesteps.sort()
     work_timesteps = within_date_range(timesteps, start, end)
-    
+
     new_timesteps = [work_timesteps[0]]
 
-    for index in range(1,len(work_timesteps)):
+    for index in range(1, len(work_timesteps)):
         current = date_parser(new_timesteps[-1])
         candidate = date_parser(work_timesteps[index])
-    
+
         if current.year < candidate.year:
             new_timesteps.append(work_timesteps[index])
         elif current.year == candidate.year:
@@ -114,7 +119,8 @@ def filter_timesteps(timesteps, aggregation="monthly", start=None, end=None):
         else:
             continue
     return new_timesteps
-    
+
+
 def nc_copy(source, target, overwrite=True, time_dimname='time', nchunk=10, istart=0, istop=-1, format='NETCDF3_64BIT'):
     """copy netcdf file from opendap to netcdf3 file
 
@@ -128,38 +134,39 @@ def nc_copy(source, target, overwrite=True, time_dimname='time', nchunk=10, ista
 
      :param chunk:
 
-          number of records along unlimited dimension to 
-          write at once. Default 10. Ignored if there is no unlimited 
+          number of records along unlimited dimension to
+          write at once. Default 10. Ignored if there is no unlimited
           dimension. chunk=0 means write all the data at once.
 
      :param istart:
 
-          number of record to start at along unlimited dimension. 
+          number of record to start at along unlimited dimension.
           Default 0.  Ignored if there is no unlimited dimension.
-          
+
      :param istop:
 
-          number of record to stop at along unlimited dimension. 
+          number of record to stop at along unlimited dimension.
           Default -1.  Ignored if there is no unlimited dimension.
     """
 
     nc_in = Dataset(source, 'r')
     nc_out = Dataset(target, 'w', clobber=overwrite, format=format)
-    
+
     # create dimensions. Check for unlimited dim.
     unlimdimname = False
     unlimdim = None
 
     # create global attributes.
     logger.info('copying global attributes ...')
-    nc_out.setncatts(nc_in.__dict__) 
+    nc_out.setncatts(nc_in.__dict__)
     logger.info('copying dimensions ...')
     for dimname, dim in nc_in.dimensions.items():
         if dim.isunlimited() or dimname == time_dimname:
             unlimdimname = dimname
             unlimdim = dim
-            if istop == -1: istop=len(unlimdim)
-            nc_out.createDimension(dimname, istop-istart)
+            if istop == -1:
+                istop = len(unlimdim)
+            nc_out.createDimension(dimname, istop - istart)
             logger.debug('unlimited dimension = %s, length = %d', unlimdimname, len(unlimdim))
         else:
             nc_out.createDimension(dimname, len(dim))
@@ -175,31 +182,36 @@ def nc_copy(source, target, overwrite=True, time_dimname='time', nchunk=10, ista
         if hasattr(ncvar, '_FillValue'):
             FillValue = ncvar._FillValue
         else:
-            FillValue = None 
+            FillValue = None
         var = nc_out.createVariable(varname, ncvar.dtype, ncvar.dimensions, fill_value=FillValue)
         # fill variable attributes.
         attdict = ncvar.__dict__
-        if '_FillValue' in attdict: del attdict['_FillValue']
+        if '_FillValue' in attdict:
+            del attdict['_FillValue']
         var.setncatts(attdict)
-        if hasunlimdim: # has an unlim dim, loop over unlim dim index.
+        if hasunlimdim:  # has an unlim dim, loop over unlim dim index.
             # range to copy
             if nchunk:
-                start = istart; stop = istop; step = nchunk
-                if step < 1: step = 1
+                start = istart
+                stop = istop
+                step = nchunk
+                if step < 1:
+                    step = 1
                 for n in range(start, stop, step):
-                    nmax = n+nchunk
-                    if nmax > istop: nmax=istop
+                    nmax = n + nchunk
+                    if nmax > istop:
+                        nmax = istop
                     logger.debug('copy chunk [%d:%d]', n, nmax)
                     try:
-                        var[n-istart:nmax-istart] = ncvar[n:nmax]
+                        var[n - istart:nmax - istart] = ncvar[n:nmax]
                     except:
                         msg = "n=%d nmax=%d istart=%d istop=%d" % (n, nmax, istart, istop)
                         raise Exception(msg)
             else:
-                var[0:istop-istart] = ncvar[:]
-        else: # no unlim dim or 1-d variable, just copy all data at once.
+                var[0:istop - istart] = ncvar[:]
+        else:  # no unlim dim or 1-d variable, just copy all data at once.
             var[:] = ncvar[:]
-        nc_out.sync() # flush data to disk
+        nc_out.sync()  # flush data to disk
     # close files.
     nc_out.close()
     nc_in.close()

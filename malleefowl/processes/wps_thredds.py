@@ -1,6 +1,7 @@
 from pywps.Process import WPSProcess
 from malleefowl import download
 
+
 class ThreddsDownload(WPSProcess):
     def __init__(self):
         WPSProcess.__init__(
@@ -10,7 +11,8 @@ class ThreddsDownload(WPSProcess):
             version="0.4",
             abstract="Downloads files from Thredds Catalog and provides file list as JSON Document.",
             statusSupported=True,
-            storeSupported=True)       
+            storeSupported=True,
+        )
 
         self.url = self.addLiteralInput(
             identifier="url",
@@ -19,16 +21,16 @@ class ThreddsDownload(WPSProcess):
             minOccurs=1,
             maxOccurs=1,
             type=type(''),
-            )
+        )
 
         self.output = self.addComplexOutput(
             identifier="output",
             title="Downloaded files",
             abstract="JSON document with list of downloaded files with file url.",
             metadata=[],
-            formats=[{"mimeType":"application/json"}],
+            formats=[{"mimeType": "application/json"}],
             asReference=True,
-            )
+        )
 
     def monitor(self, msg, percent_done):
         self.status.set(msg, percent_done)
@@ -42,6 +44,4 @@ class ThreddsDownload(WPSProcess):
         outfile = 'out.json'
         with open(outfile, 'w') as fp:
             json.dump(obj=files, fp=fp, indent=4, sort_keys=True)
-        self.output.setValue( outfile )
-
-
+        self.output.setValue(outfile)
