@@ -1,6 +1,13 @@
 Change History
 **************
 
+0.4.2 (2016-10-19)
+==================
+
+* enabled pep8 check in travis.
+* updated docker recipe.
+* updated setuptools and buildout version.
+
 0.4.1 (2016-09-28)
 ==================
 
