@@ -37,5 +37,5 @@ setup(name='malleefowl',
       zip_safe=False,
       test_suite='malleefowl',
       install_requires=reqs,
-      #entry_points = {},
+      # entry_points = {},
       )
