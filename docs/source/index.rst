@@ -10,7 +10,7 @@ Introduction
 Malleefowl (the bird)
    *Malleefowl are shy, wary, solitary birds that usually fly only to escape danger or reach a tree to roost in. Although very active, they are seldom seen [..]* (`Wikipedia <https://en.wikipedia.org/wiki/Malleefowl>`_).
 
-`Malleefowl`_ is a Python package to simplify the usage of Web Processing Services (WPS). Currently it is using the `PyWPS <http://pywps.org/>`_ server. It comes with some WPS processes which are used by the `Phoenix`_ WPS web-application. These processes are used to support climate data processing with WPS. For example it provides access to climate data (ESGF, ...). These functions are available as WPS service and as a Python library.
+`Malleefowl`_ is a Python package to simplify the usage of Web Processing Services (WPS). Currently it is using the `PyWPS 3.x <http://pywps.org/>`_ server. It comes with some WPS processes which are used by the `Phoenix`_ WPS web-application. These processes are used to support climate data processing with WPS. For example it provides access to climate data (ESGF, ...). These functions are available as WPS service and as a Python library.
 
 Malleefowl is part of the `Birdhouse`_ project.
 
@@ -31,4 +31,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-

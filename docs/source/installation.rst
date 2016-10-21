@@ -2,8 +2,9 @@
 
 Installation
 ************
+
 Check out code from the malleefowl github repo and start the installation::
- 
+
    $ git clone https://github.com/bird-house/malleefowl.git
    $ cd malleefowl
    $ make clean install
@@ -19,29 +20,32 @@ directory ``~/anaconda``. Now, start the services::
    $ make start   # starts supervisor services
    $ make status  # show supervisor status
 
-The depolyed WPS service is available on: 
+The depolyed WPS service is available on:
 
 http://localhost:8091/wps?service=WPS&version=1.0.0&request=GetCapabilities.
 
-Check the log files for errors::
+Check the log files for errors:
 
-   $ cd ~/.conda/envs/birdhouse
-   $ tail -f var/log/supervisor/malleefowl.log
+.. code-block:: sh
 
-
-Anaconda package
-================
-
-Malleefowl is also available as Anaconda package if you want to use it as a library::
-
-  $ conda install -c birdhouse malleefowl
-
+   $ tail -f  ~/birdhouse/var/log/pywps/malleefowl.log
+   $ tail -f  ~/birdhouse/var/log/supervisor/malleefowl.log
 
 Using docker-compose
 ====================
 
-Start malleefowl with docker-compose (port 8091) on localhost:
+Start malleefowl with docker-compose (docker-compose version > 1.7):
 
 .. code-block:: sh
 
-   $ docker-compose run --service-ports -e HOSTNAME=localhost malleefowl
+  $ docker-compose up
+
+By default the WPS is available on port 8080: http://localhost:8080/wps?service=WPS&version=1.0.0&request=GetCapabilities.
+
+You can change the ports and hostname with environment variables:
+
+.. code-block:: sh
+
+  $ HOSTNAME=malleefowl HTTP_PORT=8091 SUPERVISOR_PORT=48091 docker-compose up
+
+Now the WPS is available on port 8091: http://hummingbird:8091/wps?service=WPS&version=1.0.0&request=GetCapabilities.
