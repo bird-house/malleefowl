@@ -5,9 +5,9 @@ MAINTAINER https://github.com/bird-house/malleefowl
 LABEL Description="hummingbird application" Vendor="Birdhouse" Version="0.4.2"
 
 # Configure hostname and ports for services
-ENV HTTP_PORT 8091
-ENV HTTPS_PORT 28091
-ENV OUTPUT_PORT 38091
+ENV HTTP_PORT 8080
+ENV HTTPS_PORT 8443
+ENV OUTPUT_PORT 8000
 ENV HOSTNAME localhost
 
 # Set current home
@@ -29,8 +29,8 @@ RUN bash bootstrap.sh -i && bash requirements.sh
 ENV ANACONDA_HOME /opt/conda
 ENV CONDA_ENVS_DIR /opt/conda/envs
 
-# Run install
-RUN make clean install
+# Run install and fix permissions
+RUN make clean install && chmod 755 /opt/birdhouse/etc && chmod 755 /opt/birdhouse/var/run
 
 # Volume for data, cache, logfiles, ...
 VOLUME /opt/birdhouse/var/lib
