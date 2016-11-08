@@ -2,7 +2,7 @@
 FROM birdhouse/bird-base:latest
 MAINTAINER https://github.com/bird-house/malleefowl
 
-LABEL Description="hummingbird application" Vendor="Birdhouse" Version="0.4.2"
+LABEL Description="malleefowl application" Vendor="Birdhouse" Version="0.4.2"
 
 # Configure hostname and ports for services
 ENV HTTP_PORT 8080
@@ -14,10 +14,10 @@ ENV HOSTNAME localhost
 ENV HOME /root
 
 # Copy application sources
-COPY . /opt/birdhouse/src/hummingbird
+COPY . /opt/birdhouse/src/malleefowl
 
 # cd into application
-WORKDIR /opt/birdhouse/src/hummingbird
+WORKDIR /opt/birdhouse/src/malleefowl
 
 # Provide custom.cfg with settings for docker image
 RUN printf "[buildout]\nextends=profiles/docker.cfg" > custom.cfg
