@@ -33,7 +33,7 @@ dependencies:
 - python-dateutil=2.5.3
 - netcdf4=1.2.4
 - esgf-pyclient=0.1.6
-- myproxyclient=1.4.3
+- myproxyclient=1.4.4
 - dispel4py=1.0.1
 - python-swiftclient=2.4.0
 - threddsclient=0.3.4
