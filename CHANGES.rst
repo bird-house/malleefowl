@@ -1,7 +1,7 @@
 Change History
 **************
 
-0.4.3 (2016-12-xx)
+0.4.3 (2016-12-06)
 ==================
 
 * update wget=2.2 from conda defaults.
