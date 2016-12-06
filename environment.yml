@@ -38,7 +38,7 @@ dependencies:
 - python-swiftclient=2.4.0
 - threddsclient=0.3.4
 - pysolr=3.3.2
-- wget=1.18
+- wget=2.2
 - pip:
   - genshi==0.7
   - sphinx-autoapi==0.4.0
