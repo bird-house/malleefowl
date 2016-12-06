@@ -4,7 +4,7 @@ Change History
 0.4.3 (2016-12-xx)
 ==================
 
-* update wget=1.18 from defaults.
+* update wget=2.2 from conda defaults.
 
 0.4.2 (2016-10-19)
 ==================
