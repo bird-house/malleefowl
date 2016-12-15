@@ -5,12 +5,12 @@ This module is used to get esgf logon credentials. There are two choices:
 * OpenID login as used in browsers.
 
 Some of the code is taken from esgf-pyclient:
-https://github.com/stephenpascoe/esgf-pyclient
+https://github.com/ESGF/esgf-pyclient
 
 See also:
 
 * open climate workbench: https://github.com/apache/climate
-* MyProxyLogon: https://pypi.python.org/pypi/MyProxyClient
+* MyProxyLogon: https://github.com/cedadev/MyProxyClient
 """
 
 import os
@@ -34,17 +34,20 @@ def _consumer(provider, url):
         consumer = urlparse(url).netloc
     return consumer
 
+
 def _password(interactive, password):
     if interactive:
         if password is None:
             from getpass import getpass
-            password = getpass('Enter password for %s: ' % username)
+            password = getpass('Enter password: ')
     return password
 
+
 def _outdir(outdir):
-    if outdir == None:
+    if outdir is None:
         outdir = os.curdir
     return outdir
+
 
 def openid_logon(openid, password=None, interactive=False, outdir=None, url=None):
     """
@@ -79,7 +82,7 @@ def openid_logon(openid, password=None, interactive=False, outdir=None, url=None
     logger.debug("openid logon: status=%s", response.status_code)
     response.raise_for_status()
     session.cookies.save(ignore_discard=True)
-   
+
     return cookies
 
 
@@ -88,15 +91,15 @@ def openid_logon_with_wget(openid, password=None, interactive=False, outdir=None
     consumer = _consumer(provider, url)
     password = _password(interactive, password)
     outdir = _outdir(outdir)
-     
+
     cmd = ['wget']
     cmd.append('--post-data')
     cmd.append('"openid_identifier=https://{0}/esgf-idp/openid/&rememberOpenid=on"'.format(provider))
     cmd.append('--header="esgf-idea-agent-type:basic_auth"')
     cmd.append('--http-user="{0}"'.format(username))
     cmd.append('--http-password="{0}"'.format(password))
-    #certs = os.path.join(outdir, 'certificates')
-    #cmd.append('--ca-directory={0}'.format(certs))
+    # certs = os.path.join(outdir, 'certificates')
+    # cmd.append('--ca-directory={0}'.format(certs))
     cmd.append('--cookies=on')
     cmd.append('--keep-session-cookies')
     cmd.append('--save-cookies')
@@ -104,12 +107,12 @@ def openid_logon_with_wget(openid, password=None, interactive=False, outdir=None
     cmd.append(cookies)
     cmd.append('--load-cookies')
     cmd.append(cookies)
-    #cmd.append('-v')
+    # cmd.append('-v')
     cmd.append('-O-')
     cmd.append('https://{0}/esg-orp/j_spring_openid_security_check.htm'.format(consumer))
     cmd_str = ' '.join(cmd)
     logger.debug('execute: %s', cmd_str)
-    
+
     import subprocess
     subprocess.check_output(cmd_str, shell=True)
 
@@ -146,7 +149,7 @@ def myproxy_logon(username, hostname, port=7512, password=None, interactive=Fals
             from getpass import getpass
             password = getpass('Enter password for %s: ' % username)
 
-    if outdir == None:
+    if outdir is None:
         outdir = os.curdir
 
     from myproxy.client import MyProxyClient
@@ -157,9 +160,10 @@ def myproxy_logon(username, hostname, port=7512, password=None, interactive=Fals
     with open('cert.pem', 'w') as fout:
         for cred in creds:
             fout.write(cred)
-            
+
     return outfile
-    
+
+
 def parse_openid(openid, ssl_verify=False):
     """
     parse openid document to get myproxy service
@@ -172,7 +176,7 @@ def parse_openid(openid, ssl_verify=False):
     kwargs = {'verify': ssl_verify}
     response = requests.get(openid, **kwargs)
     xml = etree.parse(BytesIO(response.content))
-    
+
     hostname = None
     port = None
     username = None
@@ -196,11 +200,12 @@ def parse_openid(openid, ssl_verify=False):
     mo = re.match(ESGF_OPENID_REXP, openid)
     if mo:
         username = mo.group(1)
-                
+
     if port is None:
         port = "7512"
-            
+
     return username, hostname, port
+
 
 def cert_infos(filename):
     with open(filename) as fh:

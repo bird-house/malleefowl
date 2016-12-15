@@ -1,12 +1,16 @@
 malleefowl:
   image: birdhouse/malleefowl
-  command: make update-config update-user start
+  environment:
+    HOSTNAME: $HOSTNAME
+    HTTP_PORT: $HTTP_PORT
+    HTTPS_PORT: $HTTPS_PORT
+    OUTPUT_PORT: $OUTPUT_PORT
   ports:
-    - "48091:9001"
-    - "38091:38091"
-    - "28091:28091"
-    - "8091:8091"
-  volumes:
-    - data:/data
-  volume_driver: local
-
+    - "$SUPERVISOR_PORT:9001"
+    - "$HTTP_PORT:$HTTP_PORT"
+    - "$HTTPS_PORT:$HTTPS_PORT"
+    - "$OUTPUT_PORT:$OUTPUT_PORT"
+#  volumes:
+#    - /tmp/data:/opt/birdhouse/var/lib
+#    - /tmp/log:/opt/birdhouse/var/log
+#  volume_driver: local

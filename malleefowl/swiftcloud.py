@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 from swiftclient import client, ClientException
 from swiftclient.service import SwiftService
 
+
 def login(username, password, auth_url=None, auth_version=None):
     storage_url = auth_token = None
 
@@ -18,25 +19,26 @@ def login(username, password, auth_url=None, auth_version=None):
         raise
     return storage_url, auth_token
 
+
 def download(storage_url, auth_token, container, prefix=None, content_type=['application/x-netcdf']):
     options = dict(
-        os_storage_url = storage_url,
-        os_auth_token = auth_token,
-        skip_identical = True,
-        prefix = prefix,
-        marker = '',
-        header = [],
-        object_thredds = 10,
-        object_dd_thredds = 10,
-        container_thredds = 10,
-        no_download = False,
-        insecure = True,
-        all = False)
+        os_storage_url=storage_url,
+        os_auth_token=auth_token,
+        skip_identical=True,
+        prefix=prefix,
+        marker='',
+        header=[],
+        object_thredds=10,
+        object_dd_thredds=10,
+        container_thredds=10,
+        no_download=False,
+        insecure=True,
+        all=False)
 
     # TODO: need a better download path
     from urlparse import urlparse
     parsed_url = urlparse(storage_url)
-    
+
     prevdir = os.getcwd()
     download_path = os.path.join(config.cache_path(),
                                  os.path.basename(parsed_url.path),
@@ -46,7 +48,7 @@ def download(storage_url, auth_token, container, prefix=None, content_type=['app
     os.chdir(download_path)
 
     files = []
-    
+
     try:
         # TODO: filter cloud download ... before download starts
         swift = SwiftService(options=options)
@@ -55,7 +57,7 @@ def download(storage_url, auth_token, container, prefix=None, content_type=['app
             if down['path'].endswith('/'):
                 continue
             headers = down['response_dict']['headers']
-            if not (content_type is None or headers['content-type'] in content_type): # filter content-type
+            if not (content_type is None or headers['content-type'] in content_type):  # filter content-type
                 continue
             if down['success']:
                 logger.info('success: %s %s', down['path'], down['container'])
@@ -73,13 +75,14 @@ def download(storage_url, auth_token, container, prefix=None, content_type=['app
 
     return files
 
+
 def get_temp_key(storage_url, auth_token):
     """ Tries to get meta-temp-url key from account.
     If not set, generate tempurl and save it to acocunt.
     This requires at least account owner rights. """
     import string
     import random
-    
+
     try:
         account = client.get_account(storage_url, auth_token)
     except ClientException:
@@ -94,17 +97,18 @@ def get_temp_key(storage_url, auth_token):
         headers = {'x-account-meta-temp-url-key': key}
         try:
             client.post_account(storage_url, auth_token, headers)
-        except ClientException as e:
+        except ClientException:
             logger.exception("post_account failed.")
             return None
     return key
+
 
 def get_temp_url(storage_url, auth_token, container, objectname, expires=600):
     import time
     import urlparse
     import hmac
     from hashlib import sha1
-    
+
     key = get_temp_key(storage_url, auth_token)
     if not key:
         return None
@@ -119,23 +123,24 @@ def get_temp_url(storage_url, auth_token, container, objectname, expires=600):
         base, path, sig, expires)
     return url
 
+
 def download_urls(storage_url, auth_token, container, prefix=None):
     options = dict(
-        os_storage_url = storage_url,
-        os_auth_token = auth_token,
-        skip_identical = True,
-        prefix = prefix,
-        marker = '',
-        header = [],
-        object_thredds = 10,
-        object_dd_thredds = 10,
-        container_thredds = 10,
-        no_download = True,
-        insecure = True,
-        all = False)
+        os_storage_url=storage_url,
+        os_auth_token=auth_token,
+        skip_identical=True,
+        prefix=prefix,
+        marker='',
+        header=[],
+        object_thredds=10,
+        object_dd_thredds=10,
+        container_thredds=10,
+        no_download=True,
+        insecure=True,
+        all=False)
 
     urls = []
-    
+
     try:
         swift = SwiftService(options=options)
         down_iter = swift.download(container=container)
@@ -149,33 +154,32 @@ def download_urls(storage_url, auth_token, container, prefix=None):
         logger.exception('download failed.')
     return urls
 
-     
+
 def upload(storage_url, auth_token, container, prefix=None, files=[], monitor=None):
     from swiftclient.service import SwiftUploadObject
 
     options = dict(
-        os_storage_url = storage_url,
-        os_auth_token = auth_token,
-        skip_identical = True)
+        os_storage_url=storage_url,
+        os_auth_token=auth_token,
+        skip_identical=True)
 
     objects = []
     for file_path in files:
-        object_name=os.path.basename(file_path)
+        object_name = os.path.basename(file_path)
         if prefix:
             object_name = prefix.strip('/') + '/' + object_name
-        objects.append( SwiftUploadObject(file_path, object_name=object_name ) )
+        objects.append(SwiftUploadObject(file_path, object_name=object_name))
 
     result = []
     with SwiftService(options=options) as swift:
         try:
             for upload in swift.upload(container, objects=objects):
                 result.append(upload)
-                if upload.has_key('object'):
+                if 'object' in upload:
                     if monitor:
-                        progress = int(len(result)*100.0/len(objects))
+                        progress = int(len(result) * 100.0 / len(objects))
                         monitor("uploaded %s" % upload['object'], progress)
         except:
             logger.exception('could not upload files to swift cloud')
             raise
     return result
-    

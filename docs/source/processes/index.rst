@@ -1,4 +1,5 @@
 .. _processes:
+
 WPS Processes
 *************
 
@@ -51,7 +52,7 @@ The resulting document is a X509 certificate.
 ESGF Search
 ===========
 
-The ESGF search process runs a ESGF search request with constraints (project, experiment, ...) to get a list of matching files on ESGF data nodes. It is using `esgf-pyclient <https://github.com/stephenpascoe/esgf-pyclient>`_ Python client for the ESGF search API. 
+The ESGF search process runs a ESGF search request with constraints (project, experiment, ...) to get a list of matching files on ESGF data nodes. It is using `esgf-pyclient <https://github.com/ESGF/esgf-pyclient>`_ Python client for the ESGF search API. 
 
 In addition to the esgf-pyclient the process checks if local replicas are available and would return the replica files instead of the original one.
 
@@ -142,7 +143,7 @@ An example result JSON document could look like this::
 Run Dispel Workflow
 ===================
 
-The workflow process is usually called by the `Phoenix <http://pyramid-phoenix.readthedocs.org/en/latest/>`_ WPS web client to run WPS process for climate data (like cfchecker, climate indices with ocgis, ...) with a given selection of input data (currently NetCDF files from ESGF data nodes). Currently the `Dispel4Py <http://www2.epcc.ed.ac.uk/~amrey/VERCE/Dispel4Py/index.html>`_ workflow engine is used.
+The workflow process is usually called by the `Phoenix`_ WPS web client to run WPS process for climate data (like cfchecker, climate indices with ocgis, ...) with a given selection of input data (currently NetCDF files from ESGF data nodes). Currently the `Dispel4Py <https://github.com/dispel4py/dispel4py>`_ workflow engine is used.
 
 The Workflow for ESGF input data is as follows::
 

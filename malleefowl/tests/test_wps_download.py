@@ -1,9 +1,8 @@
-import nose.tools
-from nose.plugins.attrib import attr
+import pytest
 
-from tests.common import WpsTestClient, TESTDATA, assert_response_success
+from malleefowl.tests.common import WpsTestClient, TESTDATA, assert_response_success
 
-@attr('online')
+@pytest.mark.online
 def test_wps_download():
     wps = WpsTestClient()
     datainputs = "[resource={0}]".format(TESTDATA['noaa_catalog_1'])

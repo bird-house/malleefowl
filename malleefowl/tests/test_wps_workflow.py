@@ -1,12 +1,11 @@
-import nose.tools
-from nose.plugins.attrib import attr
+import pytest
 
-from tests.common import WpsTestClient, TESTDATA, assert_response_success
+from malleefowl.tests.common import WpsTestClient, TESTDATA, assert_response_success
 
 import tempfile
 import yaml
 
-@attr('online')
+@pytest.mark.online
 def test_wps_dummy():
     wps = WpsTestClient()
     datainputs = "[dataset={0}]".format(TESTDATA['noaa_nc_1'])
@@ -14,7 +13,7 @@ def test_wps_dummy():
                    datainputs=datainputs)
     assert_response_success(resp)
 
-@attr('online')
+@pytest.mark.online
 def test_wps_thredds_workflow():
     doc = """
     workflow:

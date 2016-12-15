@@ -1,5 +1,4 @@
-import nose.tools
-from tests.common import WpsTestClient
+from malleefowl.tests.common import WpsTestClient
 
 def test_caps():
     wps = WpsTestClient()

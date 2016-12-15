@@ -1,4 +1,5 @@
 .. _malleefowl:
+
 Malleefowl WPS Processes
 ========================
 
@@ -7,17 +8,11 @@ processes. Birdhouse uses PyWPS as the default web processing server
 (There are alternatives like GeoServer, Cows, deegree, 52-North). The
 Malleefowl component contains the currently available processes for
 Birdhouse. Malleefowl has also some Python classes to simplify the
-creation of new WPS processes and to define `source` and `worker`
+creation of new WPS processes and to define ``source`` and ``worker``
 processes which are used by the `Wizard` component in Phoenix. The
-`Wizard` of Phoenix builds a workflow script with a `source` process
-(retrievWing input files for `worker` processes) and a `worker` process
+``Wizard`` of Phoenix builds a workflow script with a ``source`` process
+(retrievWing input files for `worker` processes) and a ``worker`` process
 (processing one or more input files).
-
-Important Note
---------------
-
-The Malleefowl component has currently a *prototype*
-status. Everything might change in the future.
 
 Web Processing Services
 -----------------------
@@ -37,23 +32,16 @@ Creating a WPS Process
 ======================
 
 You can derive your WPS process directly from the PyWPS class
-pywps.Process.WPSProcess. But it is recommended to use the adapted
-Malleefowl class malleefowl.WPSProcess which simplifies the creation
-of a new process.
+pywps.Process.WPSProcess.
 
 Currently the Birdhouse components assumes that all process are run
 asynchronus (read more about this in the WPS and PyWPS
-documentation). The malleefowl WPSProcess class sets this by default.
+documentation).
 
 To see an example of how to implement a WPS process check the already
 available processes in the folder::
 
-        $ cd $HOME/sandbox/src/Malleefowl/processes
-
-To get startet see the process InOutProcess in testing.py which does
-nothing special but defines all input and output types available in
-PyWPS.
-
+        $ cd malleefowl/processes
 
 Creating a Source WPS Process
 -----------------------------

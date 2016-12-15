@@ -3,7 +3,7 @@
 from setuptools import find_packages
 from setuptools import setup
 
-version = '0.3.11'
+version = '0.4.3'
 description = 'Malleefowl simplifies the usage of WPS and has some supporting WPS processes.'
 long_description = (
     open('README.rst').read() + '\n' +
@@ -11,32 +11,17 @@ long_description = (
     open('CHANGES.rst').read()
 )
 
-requires = [
-    'PyWPS',
-    'htmltmpl',
-    'python-magic',
-    'lxml',
-    'owslib',
-    'esgf-pyclient',
-    'myproxyclient',
-    'netCDF4',
-    'pyYAML',
-    'dispel4py',
-    'python-swiftclient',
-    'threddsclient',
-    'pysolr',
-    'nose',
-    ]
+reqs = [line.strip() for line in open('requirements/deploy.txt')]
 
-classifiers=[
-        'Development Status :: 3 - Alpha',
-        'Intended Audience :: Science/Research',
-        'Operating System :: MacOS :: MacOS X',
-        'Operating System :: Microsoft :: Windows',
-        'Operating System :: POSIX',
-        'Programming Language :: Python',
-        'Topic :: Scientific/Engineering :: Atmospheric Science',
-        ]
+classifiers = [
+    'Development Status :: 3 - Alpha',
+    'Intended Audience :: Science/Research',
+    'Operating System :: MacOS :: MacOS X',
+    'Operating System :: Microsoft :: Windows',
+    'Operating System :: POSIX',
+    'Programming Language :: Python',
+    'Topic :: Scientific/Engineering :: Atmospheric Science',
+]
 
 setup(name='malleefowl',
       version=version,
@@ -46,11 +31,11 @@ setup(name='malleefowl',
       keywords='wps pywps python malleefowl netcdf esgf',
       author='Birdhouse',
       url='https://github.com/bird-house/malleefowl',
-      license = "Apache License v2.0",
+      license="Apache License v2.0",
       packages=find_packages(),
       include_package_data=True,
       zip_safe=False,
-      test_suite='nose.collector',
-      install_requires=requires,
-      #entry_points = {},
+      test_suite='malleefowl',
+      install_requires=reqs,
+      # entry_points = {},
       )

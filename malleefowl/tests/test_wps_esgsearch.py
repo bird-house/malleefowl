@@ -1,10 +1,9 @@
-import nose.tools
+import pytest
 from unittest import TestCase
-from nose.plugins.attrib import attr
 
 from owslib.wps import monitorExecution
 
-from tests.common import SERVICE
+from malleefowl.tests.common import SERVICE
 
 class WpsTestCase(TestCase):
     """
@@ -18,7 +17,7 @@ class WpsTestCase(TestCase):
 
 class EsgSearchTestCase(WpsTestCase):
 
-    @attr('online')
+    @pytest.mark.online
     def test_dataset(self):
         inputs = []
         inputs.append(('search_type', 'Dataset'))
@@ -31,9 +30,9 @@ class EsgSearchTestCase(WpsTestCase):
         execution = self.wps.execute(identifier="esgsearch", inputs=inputs, output=output)
         monitorExecution(execution, sleepSecs=1)
 
-        nose.tools.ok_(execution.status == 'ProcessSucceeded', execution.status)
+        assert execution.status == 'ProcessSucceeded'
 
-    @attr('online')
+    @pytest.mark.online
     def test_dataset_with_spaces(self):
         inputs = []
         inputs.append(('search_type', 'Dataset'))
@@ -46,9 +45,9 @@ class EsgSearchTestCase(WpsTestCase):
         execution = self.wps.execute(identifier="esgsearch", inputs=inputs, output=output)
         monitorExecution(execution, sleepSecs=1)
 
-        nose.tools.ok_(execution.status == 'ProcessSucceeded', execution.status)
+        assert execution.status == 'ProcessSucceeded'
 
-    @attr('online')
+    @pytest.mark.online
     def test_dataset_out_of_limit(self):
         inputs = []
         inputs.append(('search_type', 'Dataset'))
@@ -61,9 +60,9 @@ class EsgSearchTestCase(WpsTestCase):
         execution = self.wps.execute(identifier="esgsearch", inputs=inputs, output=output)
         monitorExecution(execution, sleepSecs=1)
 
-        nose.tools.ok_(execution.status == 'ProcessSucceeded', execution.status)
+        assert execution.status == 'ProcessSucceeded'
 
-    @attr('online')
+    @pytest.mark.online
     def test_dataset_out_of_offset(self):
         inputs = []
         inputs.append(('search_type', 'Dataset'))
@@ -76,9 +75,9 @@ class EsgSearchTestCase(WpsTestCase):
         execution = self.wps.execute(identifier="esgsearch", inputs=inputs, output=output)
         monitorExecution(execution, sleepSecs=1)
 
-        nose.tools.ok_(execution.status == 'ProcessSucceeded', execution.status)
+        assert execution.status == 'ProcessSucceeded'
 
-    @attr('online')
+    @pytest.mark.online
     def test_dataset_latest(self):
         inputs = []
         inputs.append(('search_type', 'Dataset'))
@@ -92,11 +91,10 @@ class EsgSearchTestCase(WpsTestCase):
         execution = self.wps.execute(identifier="esgsearch", inputs=inputs, output=output)
         monitorExecution(execution, sleepSecs=1)
 
-        nose.tools.ok_(execution.status == 'ProcessSucceeded', execution.status)
-        #nose.tools.ok_(False, "TODO: check latest")
+        assert execution.status == 'ProcessSucceeded'
 
 
-    @attr('online')
+    @pytest.mark.online
     def test_dataset_facet_counts(self):
         inputs = []
         inputs.append(('search_type', 'Dataset'))
@@ -110,10 +108,9 @@ class EsgSearchTestCase(WpsTestCase):
         execution = self.wps.execute(identifier="esgsearch", inputs=inputs, output=output)
         monitorExecution(execution, sleepSecs=1)
 
-        nose.tools.ok_(execution.status == 'ProcessSucceeded', execution.status)
-        #nose.tools.ok_(False, "TODO: check facets")
+        assert execution.status == 'ProcessSucceeded'
 
-    @attr('online')
+    @pytest.mark.online
     def test_dataset_query(self):
         inputs = []
         inputs.append(('search_type', 'Dataset'))
@@ -127,10 +124,9 @@ class EsgSearchTestCase(WpsTestCase):
         execution = self.wps.execute(identifier="esgsearch", inputs=inputs, output=output)
         monitorExecution(execution, sleepSecs=1)
 
-        nose.tools.ok_(execution.status == 'ProcessSucceeded', execution.status)
-        #nose.tools.ok_(False, "TODO: check facets")
+        assert execution.status == 'ProcessSucceeded'
         
-    @attr('online')
+    @pytest.mark.online
     def test_aggregation(self):
         inputs = []
         inputs.append(('search_type', 'Aggregation'))
@@ -142,9 +138,9 @@ class EsgSearchTestCase(WpsTestCase):
         execution = self.wps.execute(identifier="esgsearch", inputs=inputs, output=output)
         monitorExecution(execution, sleepSecs=1)
 
-        nose.tools.ok_(execution.status == 'ProcessSucceeded', execution.status)
+        assert execution.status == 'ProcessSucceeded'
 
-    @attr('online')
+    @pytest.mark.online
     def test_file(self):
         inputs = []
         inputs.append(('search_type', 'File'))
@@ -156,7 +152,7 @@ class EsgSearchTestCase(WpsTestCase):
         execution = self.wps.execute(identifier="esgsearch", inputs=inputs, output=output)
         monitorExecution(execution, sleepSecs=1)
 
-        nose.tools.ok_(execution.status == 'ProcessSucceeded', execution.status)
+        assert execution.status == 'ProcessSucceeded'
     
 
 

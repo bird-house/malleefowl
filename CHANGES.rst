@@ -1,6 +1,37 @@
 Change History
 **************
 
+0.4.3 (2016-12-06)
+==================
+
+* update wget=2.2 from conda defaults.
+
+0.4.2 (2016-10-19)
+==================
+
+* enabled pep8 check in travis.
+* updated docker recipe.
+* updated setuptools and buildout version.
+
+0.4.1 (2016-09-28)
+==================
+
+* pep8 
+* using owslib.wps.ComplexDataInput in workflow
+* update conda env: owslib=0.13.0, removed gdal
+
+0.4.0 (2016-07-11)
+==================
+
+* using new buildout recipes.
+* using conda environment.yml.
+
+0.3.12 (2016-06-15)
+===================
+
+* using pytest.
+* pinned wget=1.15.
+
 0.3.11 (2016-02-01)
 ===================
 

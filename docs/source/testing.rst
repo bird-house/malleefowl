@@ -1,14 +1,16 @@
 .. _testing:
 
-Running tests
-*************
-To run all unit tests one needs to fetch testdata with an esgf openid and start the malleefowl service::
+Running unit tests
+******************
 
-    $ bin/wpsfetch -u username
-    $ make start
-    $ make test
+Run quick tests::
 
-Testdata is collected in ``testdata.json``::
+   $ make test
 
-    $ vim testdata.json
+Run all tests (slow, online)::
 
+  $ make testall
+
+Check pep8::
+
+  $ make pep8
