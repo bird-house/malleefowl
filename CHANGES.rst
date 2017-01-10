@@ -1,6 +1,12 @@
 Change History
 **************
 
+0.4.4 (2017-01-04)
+==================
+
+* using __version__ constant.
+* fixed install on ubuntu 16.04: updated conda environment (lxml, icu).
+
 0.4.3 (2016-12-06)
 ==================
 
