@@ -5,6 +5,7 @@ from owslib.wps import monitorExecution
 
 from malleefowl.tests.common import SERVICE
 
+
 class WpsTestCase(TestCase):
     """
     Base TestCase class, sets up a wps
@@ -14,6 +15,7 @@ class WpsTestCase(TestCase):
     def setUpClass(cls):
         from owslib.wps import WebProcessingService
         cls.wps = WebProcessingService(SERVICE, verbose=False, skip_caps=False)
+
 
 class EsgSearchTestCase(WpsTestCase):
 
@@ -26,7 +28,7 @@ class EsgSearchTestCase(WpsTestCase):
         inputs.append(
             ('constraints', 'project:CORDEX,time_frequency:mon,variable:tas,experiment:historical'))
 
-        output=[('output', True), ('summary', True)]
+        output = [('output', True), ('summary', True)]
         execution = self.wps.execute(identifier="esgsearch", inputs=inputs, output=output)
         monitorExecution(execution, sleepSecs=1)
 
@@ -41,7 +43,7 @@ class EsgSearchTestCase(WpsTestCase):
         inputs.append(
             ('constraints', ' project: CORDEX, time_frequency : mon,variable:tas,  experiment:historical  '))
 
-        output=[('output', True), ('summary', True)]
+        output = [('output', True), ('summary', True)]
         execution = self.wps.execute(identifier="esgsearch", inputs=inputs, output=output)
         monitorExecution(execution, sleepSecs=1)
 
@@ -56,7 +58,7 @@ class EsgSearchTestCase(WpsTestCase):
         inputs.append(
             ('constraints', 'project:CORDEX,time_frequency:mon,variable:tas,experiment:historical'))
 
-        output=[('output', True), ('summary', True)]
+        output = [('output', True), ('summary', True)]
         execution = self.wps.execute(identifier="esgsearch", inputs=inputs, output=output)
         monitorExecution(execution, sleepSecs=1)
 
@@ -71,7 +73,7 @@ class EsgSearchTestCase(WpsTestCase):
         inputs.append(
             ('constraints', 'project:CORDEX,time_frequency:mon,variable:tas,experiment:historical'))
 
-        output=[('output', True), ('summary', True)]
+        output = [('output', True), ('summary', True)]
         execution = self.wps.execute(identifier="esgsearch", inputs=inputs, output=output)
         monitorExecution(execution, sleepSecs=1)
 
@@ -87,12 +89,11 @@ class EsgSearchTestCase(WpsTestCase):
         inputs.append(
             ('constraints', 'project:CORDEX,time_frequency:mon,variable:tas,experiment:historical'))
 
-        output=[('output', True), ('summary', True)]
+        output = [('output', True), ('summary', True)]
         execution = self.wps.execute(identifier="esgsearch", inputs=inputs, output=output)
         monitorExecution(execution, sleepSecs=1)
 
         assert execution.status == 'ProcessSucceeded'
-
 
     @pytest.mark.online
     def test_dataset_facet_counts(self):
@@ -104,7 +105,7 @@ class EsgSearchTestCase(WpsTestCase):
         inputs.append(
             ('constraints', 'project:CORDEX,time_frequency:mon'))
 
-        output=[('facet_counts', True)]
+        output = [('facet_counts', True)]
         execution = self.wps.execute(identifier="esgsearch", inputs=inputs, output=output)
         monitorExecution(execution, sleepSecs=1)
 
@@ -120,12 +121,12 @@ class EsgSearchTestCase(WpsTestCase):
         inputs.append(('constraints', 'project:CORDEX'))
         inputs.append(('query', 'geopotential'))
 
-        output=[('facet_counts', True)]
+        output = [('facet_counts', True)]
         execution = self.wps.execute(identifier="esgsearch", inputs=inputs, output=output)
         monitorExecution(execution, sleepSecs=1)
 
         assert execution.status == 'ProcessSucceeded'
-        
+
     @pytest.mark.online
     def test_aggregation(self):
         inputs = []
@@ -134,7 +135,7 @@ class EsgSearchTestCase(WpsTestCase):
         inputs.append(('offset', '20'))
         inputs.append(
             ('constraints', 'project:CORDEX,time_frequency:mon,variable:tas,experiment:historical'))
-        output=[('output', True), ('summary', True)]
+        output = [('output', True), ('summary', True)]
         execution = self.wps.execute(identifier="esgsearch", inputs=inputs, output=output)
         monitorExecution(execution, sleepSecs=1)
 
@@ -148,13 +149,8 @@ class EsgSearchTestCase(WpsTestCase):
         inputs.append(('offset', '30'))
         inputs.append(
             ('constraints', 'project:CORDEX,time_frequency:mon,variable:tas,experiment:historical'))
-        output=[('output', True), ('summary', True)]
+        output = [('output', True), ('summary', True)]
         execution = self.wps.execute(identifier="esgsearch", inputs=inputs, output=output)
         monitorExecution(execution, sleepSecs=1)
 
         assert execution.status == 'ProcessSucceeded'
-    
-
-
-
-

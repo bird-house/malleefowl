@@ -2,6 +2,7 @@ import pytest
 
 from malleefowl.tests.common import WpsTestClient, TESTDATA, assert_response_success
 
+
 @pytest.mark.online
 def test_wps_thredds_download():
     wps = WpsTestClient()

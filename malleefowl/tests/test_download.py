@@ -12,7 +12,7 @@ class DownloadTestCase(TestCase):
     def test_download(self):
         result = download(TESTDATA['noaa_nc_1'])
         assert os.path.basename(result) == "slp.1955.nc"
-        assert not 'file:///' in result
+        assert 'file:///' not in result
 
     @pytest.mark.online
     def test_download_with_file_url(self):

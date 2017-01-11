@@ -5,6 +5,7 @@ from malleefowl.tests.common import WpsTestClient, TESTDATA, assert_response_suc
 import tempfile
 import yaml
 
+
 @pytest.mark.online
 def test_wps_dummy():
     wps = WpsTestClient()
@@ -12,6 +13,7 @@ def test_wps_dummy():
     resp = wps.get(service='wps', request='execute', version='1.0.0', identifier='dummy',
                    datainputs=datainputs)
     assert_response_success(resp)
+
 
 @pytest.mark.online
 def test_wps_thredds_workflow():
@@ -29,7 +31,7 @@ def test_wps_thredds_workflow():
     """.format(TESTDATA['noaa_catalog_1'])
     fp = tempfile.NamedTemporaryFile(suffix=".txt")
     yaml.dump(yaml.load(doc), fp)
-    
+
     wps = WpsTestClient()
     datainputs = "[workflow=file://{0}]".format(fp.name)
     resp = wps.get(service='wps', request='execute', version='1.0.0', identifier='workflow',
