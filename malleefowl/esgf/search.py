@@ -176,7 +176,7 @@ class ESGSearch(object):
         self.count = 0
         # search datasets
         # we always do this to get the summary document
-        datasets = ctx.search()
+        datasets = ctx.search(ignore_facet_check=True)
 
         (self.start_index, self.stop_index, self.max_count) = self._index(datasets, limit, offset)
         self.summary['number_of_datasets'] = max(0, self.max_count)
@@ -228,7 +228,7 @@ class ESGSearch(object):
             ctx = self.local_ctx.constrain(instance_id=dataset.json.get('instance_id'))
             if ctx.hit_count == 1:
                 logger.info('found local replica')
-                datasets = ctx.search()
+                datasets = ctx.search(ignore_facet_check=True)
                 f_ctx = datasets[0].file_context()
             else:
                 logger.info('no local replica found')
@@ -242,7 +242,7 @@ class ESGSearch(object):
             ctx = self.local_ctx.constrain(instance_id=dataset.json.get('instance_id'))
             if ctx.hit_count == 1:
                 logger.info('found local replica')
-                datasets = ctx.search()
+                datasets = ctx.search(ignore_facet_check=True)
                 agg_ctx = datasets[0].aggregation_context()
             else:
                 logger.info('no local replica found')
@@ -265,7 +265,7 @@ class ESGSearch(object):
     def _file_search_job(self, f_ctx, start_date, end_date):
         # logger.debug('num files: %d', f_ctx.hit_count)
         logger.debug('facet constraints=%s', f_ctx.facet_constraints)
-        for f in f_ctx.search():
+        for f in f_ctx.search(ignore_facet_check=True):
             if not temporal_filter(f.filename, start_date, end_date):
                 continue
             with self.result_lock:
@@ -340,7 +340,7 @@ class ESGSearch(object):
             if agg_ctx.hit_count == 0:
                 logger.warn('dataset %s has no aggregations!', ds.dataset_id)
                 continue
-            for agg in agg_ctx.search():
+            for agg in agg_ctx.search(ignore_facet_check=True):
                 self.summary['number_of_selected_aggregations'] = self.summary['number_of_selected_aggregations'] + 1
                 self.summary['aggregation_size'] = self.summary['aggregation_size'] + agg.size
                 self.result.append(agg.opendap_url)
