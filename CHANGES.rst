@@ -6,6 +6,7 @@ Change History
 
 * moved old swift code to examples.
 * removed esgf download with openid.
+* pep8 checks on tests.
 
 0.4.4 (2017-01-04)
 ==================
