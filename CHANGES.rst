@@ -1,6 +1,12 @@
 Change History
 **************
 
+0.5.0 (2017-01-12)
+==================
+
+* moved old swift code to examples.
+* removed esgf download with openid.
+
 0.4.4 (2017-01-04)
 ==================
 
