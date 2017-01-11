@@ -3,6 +3,7 @@ branches:
   only:
     - master
     - develop
+    - pingudev
 python:
   - "2.7"
 matrix:
