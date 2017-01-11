@@ -7,6 +7,7 @@ Change History
 * moved old swift code to examples.
 * removed esgf download with openid.
 * pep8 checks on tests.
+* using ``ignore_facet_check=True`` option in esgf.search. 
 
 0.4.4 (2017-01-04)
 ==================
