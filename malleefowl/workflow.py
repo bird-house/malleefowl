@@ -234,32 +234,6 @@ class Download(GenericWPS):
         return result
 
 
-class SwiftDownload(GenericWPS):
-    def __init__(self, url, storage_url, auth_token, container, prefix=None):
-        GenericWPS.__init__(self, url, 'swift_download', output='output')
-        self.storage_url = storage_url
-        self.auth_token = auth_token
-        self.container = container
-        self.prefix = prefix
-
-    def _process(self, inputs):
-        self.wps_inputs.append(('storage_url', self.storage_url))
-        self.wps_inputs.append(('auth_token', self.auth_token))
-        self.wps_inputs.append(('container', self.container))
-        if self.prefix is not None:
-            self.wps_inputs.append(('prefix', self.prefix))
-        result = self.execute()
-
-        # read json document with list of urls
-        import json
-        import urllib2
-        urls = json.load(urllib2.urlopen(result['output']))
-        if len(urls) == 0:
-            raise Exception('Could not download any files.')
-        result['output'] = urls
-        return result
-
-
 class ThreddsDownload(GenericWPS):
     def __init__(self, url, catalog_url):
         GenericWPS.__init__(self, url, 'thredds_download', output='output')
@@ -312,23 +286,6 @@ def esgf_workflow(source, worker, monitor=None):
     return dict(worker=dict(status_location=status_location, status=status))
 
 
-def swift_workflow(source, worker, monitor=None):
-    graph = WorkflowGraph()
-
-    download = SwiftDownload(url=wps_url(), **source)
-    download.set_monitor(monitor, 0, 50)
-    doit = GenericWPS(**worker)
-    doit.set_monitor(monitor, 50, 100)
-
-    graph.connect(download, download.OUTPUT_NAME, doit, doit.INPUT_NAME)
-
-    result = simple_process.process(graph, inputs={download: [{}]})
-
-    status_location = result.get((doit.id, doit.STATUS_LOCATION_NAME))[0]
-    status = result.get((doit.id, doit.STATUS_NAME))[0]
-    return dict(worker=dict(status_location=status_location, status=status))
-
-
 def thredds_workflow(source, worker, monitor=None):
     graph = WorkflowGraph()
 
@@ -371,10 +328,7 @@ def solr_workflow(source, worker, monitor=None):
 
 
 def run(workflow, monitor=None):
-    if 'swift' in workflow['source']:
-        return swift_workflow(source=workflow['source']['swift'],
-                              worker=workflow['worker'], monitor=monitor)
-    elif 'thredds' in workflow['source']:
+    if 'thredds' in workflow['source']:
         return thredds_workflow(source=workflow['source']['thredds'],
                                 worker=workflow['worker'], monitor=monitor)
     elif 'esgf' in workflow['source']:

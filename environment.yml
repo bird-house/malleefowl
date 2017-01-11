@@ -36,7 +36,6 @@ dependencies:
 - esgf-pyclient=0.1.6
 - myproxyclient=1.4.4
 - dispel4py=1.0.1
-- python-swiftclient=2.4.0
 - threddsclient=0.3.4
 - pysolr=3.3.2
 - wget=2.2
