@@ -43,12 +43,6 @@ def _password(interactive, password):
     return password
 
 
-def _outdir(outdir):
-    if outdir is None:
-        outdir = os.curdir
-    return outdir
-
-
 def openid_logon(openid, password=None, interactive=False, outdir=None, url=None):
     """
     Uses the OpenID logon at an ESGF identity provider to get the credentials (cookies)
@@ -60,7 +54,7 @@ def openid_logon(openid, password=None, interactive=False, outdir=None, url=None
     (username, provider, port) = parse_openid(openid)
     consumer = _consumer(provider, url)
     password = _password(interactive, password)
-    outdir = _outdir(outdir)
+    outdir = outdir or os.path.curdir
 
     url = 'https://{0}/esg-orp/j_spring_openid_security_check.htm'.format(consumer)
     data = dict(openid_identifier='https://{0}/esgf-idp/openid/'.format(provider), rememberOpenid='on')
@@ -82,39 +76,6 @@ def openid_logon(openid, password=None, interactive=False, outdir=None, url=None
     logger.debug("openid logon: status=%s", response.status_code)
     response.raise_for_status()
     session.cookies.save(ignore_discard=True)
-
-    return cookies
-
-
-def openid_logon_with_wget(openid, password=None, interactive=False, outdir=None, url=None):
-    (username, provider, port) = parse_openid(openid)
-    consumer = _consumer(provider, url)
-    password = _password(interactive, password)
-    outdir = _outdir(outdir)
-
-    cmd = ['wget']
-    cmd.append('--post-data')
-    cmd.append('"openid_identifier=https://{0}/esgf-idp/openid/&rememberOpenid=on"'.format(provider))
-    cmd.append('--header="esgf-idea-agent-type:basic_auth"')
-    cmd.append('--http-user="{0}"'.format(username))
-    cmd.append('--http-password="{0}"'.format(password))
-    # certs = os.path.join(outdir, 'certificates')
-    # cmd.append('--ca-directory={0}'.format(certs))
-    cmd.append('--cookies=on')
-    cmd.append('--keep-session-cookies')
-    cmd.append('--save-cookies')
-    cookies = os.path.join(outdir, 'wcookies.txt')
-    cmd.append(cookies)
-    cmd.append('--load-cookies')
-    cmd.append(cookies)
-    # cmd.append('-v')
-    cmd.append('-O-')
-    cmd.append('https://{0}/esg-orp/j_spring_openid_security_check.htm'.format(consumer))
-    cmd_str = ' '.join(cmd)
-    logger.debug('execute: %s', cmd_str)
-
-    import subprocess
-    subprocess.check_output(cmd_str, shell=True)
 
     return cookies
 

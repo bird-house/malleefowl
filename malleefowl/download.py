@@ -13,7 +13,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def download_with_archive(url, credentials=None, openid=None, password=None):
+def download_with_archive(url, credentials=None):
     """
     Downloads file. Checks before downloading if file is already in
     local esgf archive.
@@ -21,20 +21,17 @@ def download_with_archive(url, credentials=None, openid=None, password=None):
     from .utils import esgf_archive_path
     file_url = esgf_archive_path(url)
     if file_url is None:
-        file_url = download(url, use_file_url=True, credentials=credentials,
-                            openid=openid, password=password)
+        file_url = download(url, use_file_url=True, credentials=credentials)
     return file_url
 
 
-def download(url, use_file_url=False, credentials=None,
-             openid=None, password=None):
+def download(url, use_file_url=False, credentials=None):
     """
     Downloads url and returns local filename.
 
     :param url: url of file
     :param use_file_url: True if result should be a file url "file://", otherwise use system path.
     :param credentials: path to credentials if security is needed to download file
-    :param openid: download with you openid and password
     :returns: downloaded file with either file:// or system path
     """
     import urlparse
@@ -43,20 +40,17 @@ def download(url, use_file_url=False, credentials=None,
         result = url
     else:
         result = wget(url=url, use_file_url=use_file_url,
-                      credentials=credentials,
-                      openid=openid, password=password)
+                      credentials=credentials)
     return result
 
 
-def wget(url, use_file_url=False, credentials=None,
-         openid=None, password=None):
+def wget(url, use_file_url=False, credentials=None):
     """
     Downloads url and returns local filename.
 
     :param url: url of file
     :param use_file_url: True if result should be a file url "file://", otherwise use system path.
     :param credentials: path to credentials if security is needed to download file
-    :param openid: download with your openid and password
     :returns: downloaded file with either file:// or system path
     """
     logger.debug('downloading %s', url)
@@ -68,17 +62,6 @@ def wget(url, use_file_url=False, credentials=None,
             cmd.extend(["--certificate", credentials])
             cmd.extend(["--private-key", credentials])
             cmd.extend(["--ca-certificate", credentials])
-        elif openid:
-            from .esgf.logon import openid_logon_with_wget
-            cookies = openid_logon_with_wget(openid, password, url=url)
-            logger.error(cookies)
-            # cmd.append('--ca-directory={0}'.format('certificates'))
-            # cmd.append('--cookies=on')
-            cmd.append('--keep-session-cookies')
-            cmd.append('--save-cookies')
-            cmd.append(cookies)
-            cmd.append('--load-cookies')
-            cmd.append(cookies)
         cmd.append("--no-check-certificate")
         if not logger.isEnabledFor(logging.DEBUG):
             cmd.append("--quiet")
@@ -111,16 +94,14 @@ def wget(url, use_file_url=False, credentials=None,
     return filename
 
 
-def download_files(urls=[], credentials=None,
-                   openid=None, password=None, monitor=None):
+def download_files(urls=[], credentials=None, monitor=None):
     dm = DownloadManager(monitor)
-    return dm.download(urls, credentials, openid, password)
+    return dm.download(urls, credentials)
 
 
 def download_files_from_thredds(url, recursive=False, monitor=None):
     import threddsclient
-    return download_files(urls=threddsclient.download_urls(url),
-                          monitor=monitor)
+    return download_files(urls=threddsclient.download_urls(url), monitor=monitor)
 
 
 class DownloadManager(object):
@@ -154,8 +135,8 @@ class DownloadManager(object):
                 # completed with the job
                 self.job_queue.task_done()
 
-    def download_job(self, url, credentials, openid, password):
-        file_url = download_with_archive(url, credentials, openid, password)
+    def download_job(self, url, credentials):
+        file_url = download_with_archive(url, credentials)
         with self.result_lock:
             self.files.append(file_url)
             self.count = self.count + 1
@@ -163,7 +144,7 @@ class DownloadManager(object):
         self.show_status('Downloaded %d/%d' % (self.count, self.max_count),
                          progress)
 
-    def download(self, urls, credentials=None, openid=None, password=None):
+    def download(self, urls, credentials=None):
         # start ...
         from datetime import datetime
         t0 = datetime.now()
@@ -186,8 +167,7 @@ class DownloadManager(object):
             t.start()
         for url in urls:
             # fill job queue
-            self.job_queue.put(dict(url=url, credentials=credentials,
-                                    openid=openid, password=password))
+            self.job_queue.put(dict(url=url, credentials=credentials))
 
         # wait until the thread terminates.
         self.job_queue.join()

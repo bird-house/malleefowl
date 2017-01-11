@@ -35,24 +35,6 @@ class Download(WPSProcess):
             formats=[{"mimeType": "application/x-pkcs7-mime"}],
         )
 
-        self.openid = self.addLiteralInput(
-            identifier="openid",
-            title="ESGF OpenID",
-            abstract="For example: https://esgf-data.dkrz.de/esgf-idp/openid/username",
-            minOccurs=0,
-            maxOccurs=1,
-            type=type('')
-        )
-
-        self.password = self.addLiteralInput(
-            identifier="password",
-            title="OpenID Password",
-            abstract="Enter your Password",
-            minOccurs=0,
-            maxOccurs=1,
-            type=type('')
-        )
-
         self.output = self.addComplexOutput(
             identifier="output",
             title="Downloaded files",
@@ -69,8 +51,6 @@ class Download(WPSProcess):
         files = download_files(
             urls=self.getInputValues(identifier='resource'),
             credentials=self.credentials.getValue(),
-            openid=self.openid.getValue(),
-            password=self.password.getValue(),
             monitor=self.monitor)
 
         outfile = 'out.json'
