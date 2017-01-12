@@ -107,7 +107,7 @@ class DummyProcess(Process):
     def _handler(self, request, response):
         response.update_status("starting ...", 0)
         with open('out.txt', 'w') as fp:
-            fp.write('we got {} files.'.format(len(request.inputs['datasets'])))
+            fp.write('we got {} files.'.format(len(request.inputs['dataset'])))
             response.outputs['output'].file = fp.name
         response.update_status("done", 100)
         return response
