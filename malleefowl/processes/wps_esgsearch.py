@@ -34,35 +34,35 @@ class ESGSearchProcess(Process):
             LiteralInput('distrib', 'Distributed',
                          data_type='boolean',
                          abstract="If flag is set then a distributed search will be run.",
-                         min_occurs=1,
+                         min_occurs=0,
                          max_occurs=1,
                          default='0',
                          ),
             LiteralInput('replica', 'Replica',
                          data_type='boolean',
                          abstract="If flag is set then search will include replicated datasets.",
-                         min_occurs=1,
+                         min_occurs=0,
                          max_occurs=1,
                          default='False',
                          ),
             LiteralInput('latest', 'Latest',
                          data_type='boolean',
                          abstract="If flag is set then search will include only latest datasets.",
-                         min_occurs=1,
+                         min_occurs=0,
                          max_occurs=1,
                          default='True',
                          ),
             LiteralInput('temporal', 'Temporal',
                          data_type='boolean',
                          abstract="If flag is set then search will use temporal filter.",
-                         min_occurs=1,
+                         min_occurs=0,
                          max_occurs=1,
                          default='1',
                          ),
             LiteralInput('search_type', 'Search Type',
                          data_type='string',
                          abstract="Search on Datasets, Files or Aggregations.",
-                         min_occurs=1,
+                         min_occurs=0,
                          max_occurs=1,
                          default='Dataset',
                          allowed_values=['Dataset', 'File', 'Aggregation']
@@ -143,11 +143,20 @@ class ESGSearchProcess(Process):
         )
 
     def _handler(self, request, response):
+        distrib = False
+        if 'distrib' in request.inputs:
+            distrib = request.inputs['distrib'][0].data
+        replica = False
+        if 'replica' in request.inputs:
+            replica = request.inputs['replica'][0].data
+        latest = True
+        if 'latest' in request.inputs:
+            latest = request.inputs['latest'][0].data
         esgsearch = ESGSearch(
             url=request.inputs['url'][0].data,
-            distrib=request.inputs['distrib'][0].data,
-            replica=request.inputs['replica'][0].data,
-            latest=request.inputs['latest'][0].data,
+            distrib=distrib,
+            replica=replica,
+            latest=latest,
         )
 
         constrains_str = request.inputs['constraints'][0].data.strip()
@@ -176,15 +185,22 @@ class ESGSearchProcess(Process):
             query = request.inputs['query'][0].data
         else:
             query = '*'
+        if 'search_type' in request.inputs:
+            search_type = request.inputs['search_type'][0].data
+        else:
+            search_type = 'Dataset'
+        temporal = True
+        if 'temporal' in request.inputs:
+            temporal = request.inputs['temporal'][0].data
 
         (result, summary, facet_counts) = esgsearch.search(
             constraints=constraints,
             query=query,
             start=start, end=end,
-            search_type=request.inputs['search_type'][0].data,
+            search_type=search_type,
             limit=limit,
             offset=offset,
-            temporal=request.inputs['temporal'][0].data)
+            temporal=temporal)
 
         with open('out.json', 'w') as fp:
             json.dump(obj=result, fp=fp, indent=4, sort_keys=True)
