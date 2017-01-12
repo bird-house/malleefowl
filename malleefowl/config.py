@@ -1,35 +1,28 @@
 import os
-from pywps import configuration as wpsconfig
+import tempfile
+from pywps import configuration
 
 import logging
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 def wps_url():
-    return wpsconfig.get_config_value("server", "url")
+    return configuration.get_config_value("server", "url")
 
 
 def cache_path():
-    mypath = wpsconfig.get_config_value("cache", "cache_path")
-    if mypath is None or len(mypath) == 0:
-        mypath = os.path.join(os.sep, "tmp", "cache")
-    if not os.path.exists(mypath):
-        try:
-            os.makedirs(mypath)
-        except OSError:
-            pass
+    mypath = configuration.get_config_value("cache", "cache_path")
+    if not os.path.isdir(mypath):
+        mypath = tempfile.mkdtemp(prefix='cache')
+    LOGGER.debug("using cache %s", mypath)
     return mypath
 
 
 def archive_root():
-    archive_root = None
-    try:
-        archive_root = wpsconfig.get_config_value("cache", "archive_root")
-    except Exception:
-        archive_root = os.environ.get('ESGF_ARCHIVE_ROOT')
-        logger.warn("archive root not configured. Using environment variable ESGF_ARCHIVE_ROOT: %s", archive_root)
-    if archive_root is None:
-        archive_root = []
+    value = configuration.get_config_value("cache", "archive_root")
+    if value:
+        path_list = [path.strip() for path in value.split(':')]
+        LOGGER.debug("using archive root %s", path_list)
     else:
-        archive_root = [path.strip() for path in archive_root.split(':')]
-    return archive_root
+        path_list = []
+    return path_list
