@@ -72,38 +72,40 @@ class DispelWorkflow(Process):
 
 class DummyProcess(Process):
     def __init__(self):
-        WPSProcess.__init__(
-            self,
+        inputs = [
+            ComplexInput('dataset', 'NetCDF File',
+                         abstract='You may provide a URL or upload a NetCDF file.',
+                         metadata=[Metadata('Info')],
+                         min_occurs=1,
+                         max_occurs=10,
+                         supported_formats=[Format('application/x-netcdf')]),
+        ]
+        outputs = [
+            ComplexOutput('output', 'Output',
+                          abstract="Short info about your datasets.",
+                          as_reference=True,
+                          supported_formats=[Format('text/plain')]),
+        ]
+
+        super(DummyProcess, self).__init__(
+            self._handler,
             identifier="dummy",
             title="Dummy Process",
-            version="1.0",
+            version="1.1",
             abstract="Dummy Process used by Workflow Tests.",
-            statusSupported=True,
-            storeSupported=True)
-
-        self.dataset = self.addComplexInput(
-            identifier="dataset",
-            title="Dataset (NetCDF)",
-            minOccurs=1,
-            maxOccurs=10,
-            maxmegabites=5000,
-            formats=[{"mimeType": "application/x-netcdf"}],
+            metadata=[
+                Metadata('Birdhouse', 'http://bird-house.github.io/'),
+                Metadata('User Guide', 'http://malleefowl.readthedocs.io/en/latest/'),
+            ],
+            inputs=inputs,
+            outputs=outputs,
+            status_supported=True,
+            store_supported=True,
         )
 
-        self.output = self.addComplexOutput(
-            identifier="output",
-            title="Output",
-            abstract="Output",
-            formats=[{"mimeType": "text/plain"}],
-            asReference=True,
-        )
-
-    def execute(self):
-        self.status.set("starting ...", 0)
-        datasets = self.getInputValues(identifier='dataset')
-        outfile = 'out.txt'
-        with open(outfile, 'w') as fp:
-            fp.write('we got %d files.' % len(datasets))
-        self.output.setValue(outfile)
-
-        self.status.set("done", 100)
+    def _handler(self, request, response):
+        response.update_status("starting ...", 0)
+        with open('out.txt', 'w') as fp:
+            fp.write('we got {} files.'.format(len(request.inputs['datasets'])))
+            request.outputs['output'].file = fp.name
+        response.update_status("done", 100)
