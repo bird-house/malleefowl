@@ -69,3 +69,4 @@ class Download(Process):
         with open('out.json', 'w') as fp:
             json.dump(obj=files, fp=fp, indent=4, sort_keys=True)
             response.outputs['output'].file = fp.name
+        return response

@@ -68,6 +68,7 @@ class DispelWorkflow(Process):
             fp.write("workflow log file")
             request.outputs['logfile'].file = fp.name
         response.update_status("workflow {0} done.".format(workflow_name), 100)
+        return response
 
 
 class DummyProcess(Process):
@@ -109,3 +110,4 @@ class DummyProcess(Process):
             fp.write('we got {} files.'.format(len(request.inputs['datasets'])))
             request.outputs['output'].file = fp.name
         response.update_status("done", 100)
+        return response
