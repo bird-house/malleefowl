@@ -39,8 +39,7 @@ def download(url, use_file_url=False, credentials=None):
     if parsed_url.scheme == 'file':
         result = url
     else:
-        result = wget(url=url, use_file_url=use_file_url,
-                      credentials=credentials)
+        result = wget(url=url, use_file_url=use_file_url, credentials=credentials)
     return result
 
 
