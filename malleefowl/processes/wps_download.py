@@ -53,7 +53,7 @@ class Download(Process):
 
     def _handler(self, request, response):
         urls = [resource.data for resource in request.inputs['resource']]
-        if 'credentials' in reqest.inputs:
+        if 'credentials' in request.inputs:
             credentials = request.inputs['credentials'].data
         else:
             credentials = None
