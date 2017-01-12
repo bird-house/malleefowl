@@ -26,34 +26,35 @@ class ESGSearchProcess(Process):
                          abstract="URL of ESGF Search Index. Example: http://esgf-data.dkrz.de/esg-search",
                          min_occurs=1,
                          max_occurs=1,
+                         default="http://esgf-data.dkrz.de/esg-search",
                          ),
             LiteralInput('distrib', 'Distributed',
                          data_type='boolean',
                          abstract="If flag is set then a distributed search will be run.",
                          min_occurs=1,
                          max_occurs=1,
-                         default=False,
+                         default='0',
                          ),
             LiteralInput('replica', 'Replica',
                          data_type='boolean',
                          abstract="If flag is set then search will include replicated datasets.",
                          min_occurs=1,
                          max_occurs=1,
-                         default=False,
+                         default='False',
                          ),
             LiteralInput('latest', 'Latest',
                          data_type='boolean',
                          abstract="If flag is set then search will include only latest datasets.",
                          min_occurs=1,
                          max_occurs=1,
-                         default=True,
+                         default='True',
                          ),
             LiteralInput('temporal', 'Temporal',
                          data_type='boolean',
                          abstract="If flag is set then search will use temporal filter.",
                          min_occurs=1,
                          max_occurs=1,
-                         default=True,
+                         default='1',
                          ),
             LiteralInput('search_type', 'Search Type',
                          data_type='string',
@@ -95,7 +96,7 @@ class ESGSearchProcess(Process):
                          abstract="Maximum number of datasets in search result",
                          min_occurs=1,
                          max_occurs=1,
-                         default=10,
+                         default='10',
                          allowed_values=[0, 1, 2, 5, 10, 20, 50, 100, 200]
                          ),
             LiteralInput('offset', 'Offset',
@@ -103,7 +104,7 @@ class ESGSearchProcess(Process):
                          abstract="Start search of datasets at offset.",
                          min_occurs=1,
                          max_occurs=1,
-                         default=0,
+                         default='0',
                          ),
         ]
         outputs = [
@@ -152,14 +153,21 @@ class ESGSearchProcess(Process):
             key, value = constrain.split(':')
             constraints.append((key.strip(), value.strip()))
 
+        if 'start' in request.inputs:
+            start = request.inputs['start'][0].data
+        else:
+            start = None
+        if 'end' in request.inputs:
+            end = request.inputs['end'][0].data
+        else:
+            end = None
         (result, summary, facet_counts) = esgsearch.search(
             constraints=constraints,
             query=request.inputs['query'][0].data,
-            start=request.inputs['start'][0].data,
-            end=request.inputs['end'][0].data,
+            start=start, end=end,
             search_type=request.inputs['search_type'][0].data,
             limit=request.inputs['limit'][0].data,
-            offset=srequest.inputs['offset'][0].data,
+            offset=request.inputs['offset'][0].data,
             temporal=request.inputs['temporal'][0].data)
 
         with open('out.json', 'w') as fp:
