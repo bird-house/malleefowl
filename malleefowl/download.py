@@ -7,6 +7,7 @@ from Queue import Queue, Empty
 import subprocess
 
 from malleefowl import config
+from malleefowl.utils import esgf_archive_path
 from malleefowl.exceptions import ProcessFailed
 
 import logging
@@ -18,7 +19,6 @@ def download_with_archive(url, credentials=None):
     Downloads file. Checks before downloading if file is already in
     local esgf archive.
     """
-    from .utils import esgf_archive_path
     file_url = esgf_archive_path(url)
     if file_url is None:
         file_url = download(url, use_file_url=True, credentials=credentials)
