@@ -1,75 +1,76 @@
 import yaml
 
-from pywps.Process import WPSProcess
+from pywps import Process
+from pywps import ComplexInput
+from pywps import ComplexOutput
+from pywps import Format, FORMATS
+from pywps.app.Common import Metadata
+
 from malleefowl import config
 from malleefowl.workflow import run
 
-import logging
 
-
-class DispelWorkflow(WPSProcess):
+class DispelWorkflow(Process):
     def __init__(self):
-        WPSProcess.__init__(
-            self,
+        inputs = [
+            ComplexInput('workflow', 'Workflow description',
+                         abstract='Workflow description in YAML.',
+                         metadata=[Metadata('Info')],
+                         min_occurs=1,
+                         max_occurs=1,
+                         supported_formats=[Format('text/yaml')]),
+        ]
+        outputs = [
+            ComplexOutput('output', 'Workflow result',
+                          abstract="Workflow result document in YAML.",
+                          as_reference=True,
+                          supported_formats=[Format('text/yaml')]),
+            ComplexOutput('logfile', 'Workflow log file',
+                          abstract="Workflow log file.",
+                          as_reference=True,
+                          supported_formats=[Format('text/plain')]),
+        ]
+
+        super(DispelWorkflow, self).__init__(
+            self._handler,
             identifier="workflow",
             title="Workflow",
-            version="0.6",
+            version="0.7",
             abstract="Runs Workflow with dispel4py.",
-            statusSupported=True,
-            storeSupported=True)
-
-        self.workflow = self.addComplexInput(
-            identifier="workflow",
-            title="Workflow description",
-            abstract="Workflow description in YAML",
-            metadata=[],
-            minOccurs=1,
-            maxOccurs=1,
-            formats=[{"mimeType": "text/yaml"}],
-            maxmegabites=20
+            metadata=[
+                Metadata('Birdhouse', 'http://bird-house.github.io/'),
+                Metadata('User Guide', 'http://malleefowl.readthedocs.io/en/latest/'),
+            ],
+            inputs=inputs,
+            outputs=outputs,
+            status_supported=True,
+            store_supported=True,
         )
 
-        self.output = self.addComplexOutput(
-            identifier="output",
-            title="Workflow result",
-            formats=[{"mimeType": "text/yaml"}],
-            asReference=True,
-        )
-
-        self.logfile = self.addComplexOutput(
-            identifier="logfile",
-            title="Workflow log file",
-            formats=[{"mimeType": "text/plain"}],
-            asReference=True,
-        )
-
-    def execute(self):
+    def _handler(self, request, response):
         def monitor(message, progress):
-            self.status.set(message, progress)
+            response.update_status(message, progress)
 
-        self.status.set("starting workflow ...", 0)
+        response.update_status("starting workflow ...", 0)
 
-        fp = open(self.workflow.getValue())
-        workflow = yaml.load(fp)
+        workflow = yaml.load(request.inputs['workflow'][0].stream)
 
         workflow_name = workflow.get('name', 'unknown')
 
-        self.status.set("workflow {0} prepared.".format(workflow_name), 0)
+        response.update_status("workflow {0} prepared.".format(workflow_name), 0)
 
         result = run(workflow, monitor=monitor)
 
-        outfile = 'output.txt'
-        with open(outfile, 'w') as fp:
+        with open('output.txt', 'w') as fp:
             yaml.dump(result, stream=fp)
-            self.output.setValue(outfile)
-        outfile = 'logfile.txt'
-        with open(outfile, 'w') as fp:
+            request.outputs['output'].file = fp.name
+        with open('logfile.txt', 'w') as fp:
             fp.write("workflow log file")
-            self.logfile.setValue(outfile)
-        self.status.set("workflow {0} done.".format(workflow_name), 100)
+            request.outputs['logfile'].file = fp.name
+        response.update_status("workflow {0} done.".format(workflow_name), 100)
 
 
-class DummyProcess(WPSProcess):
+class DummyProcess(Process):
     def __init__(self):
         WPSProcess.__init__(
             self,
