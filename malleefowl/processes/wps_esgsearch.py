@@ -12,6 +12,9 @@ from pywps.app.Common import Metadata
 
 from malleefowl.esgf.search import ESGSearch
 
+import logging
+LOGGER = logging.getLogger(__name__)
+
 
 class ESGSearchProcess(Process):
     """
@@ -102,7 +105,7 @@ class ESGSearchProcess(Process):
             LiteralInput('offset', 'Offset',
                          data_type='integer',
                          abstract="Start search of datasets at offset.",
-                         min_occurs=1,
+                         min_occurs=0,
                          max_occurs=1,
                          default='0',
                          ),
@@ -161,13 +164,26 @@ class ESGSearchProcess(Process):
             end = request.inputs['end'][0].data
         else:
             end = None
+        if 'offset' in request.inputs:
+            offset = request.inputs['offset'][0].data
+        else:
+            offset = 0
+        if 'limit' in request.inputs:
+            limit = request.inputs['limit'][0].data
+        else:
+            limit = 10
+        if 'query' in request.inputs:
+            query = request.inputs['query'][0].data
+        else:
+            query = '*'
+
         (result, summary, facet_counts) = esgsearch.search(
             constraints=constraints,
-            query=request.inputs['query'][0].data,
+            query=query,
             start=start, end=end,
             search_type=request.inputs['search_type'][0].data,
-            limit=request.inputs['limit'][0].data,
-            offset=request.inputs['offset'][0].data,
+            limit=limit,
+            offset=offset,
             temporal=request.inputs['temporal'][0].data)
 
         with open('out.json', 'w') as fp:
