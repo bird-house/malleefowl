@@ -9,6 +9,9 @@ from pywps.app.Common import Metadata
 from malleefowl import config
 from malleefowl.workflow import run
 
+import logging
+LOGGER = logging.getLogger(__name__)
+
 
 class DispelWorkflow(Process):
     def __init__(self):
@@ -54,7 +57,6 @@ class DispelWorkflow(Process):
         response.update_status("starting workflow ...", 0)
 
         workflow = yaml.load(request.inputs['workflow'][0].stream)
-
         workflow_name = workflow.get('name', 'unknown')
 
         response.update_status("workflow {0} prepared.".format(workflow_name), 0)

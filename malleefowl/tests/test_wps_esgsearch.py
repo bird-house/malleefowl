@@ -7,16 +7,19 @@ from .common import TESTDATA, client_for
 from malleefowl.processes.wps_esgsearch import ESGSearchProcess
 
 
+@pytest.mark.skip(reason="no way of currently testing this")
 @pytest.mark.online
-def test_dataset(self):
-    client = client_for(Service(processes=[Download()]))
-    datainputs = "search_type={};limit={};offset={};constraints={}".format(
+def test_dataset():
+    client = client_for(Service(processes=[ESGSearchProcess()]))
+    datainputs = "url={};search_type={};limit={};offset={};constraints={}".format(
+        'http://esgf-data.dkrz.de/esg-search',
         'Dataset', '10', '10',
         'project:CORDEX,time_frequency:mon,variable:tas,experiment:historical')
     resp = client.get(
         service='WPS', request='Execute', version='1.0.0',
         identifier='esgsearch',
         datainputs=datainputs)
+    print resp.get_data()
     assert_response_success(resp)
 
 """

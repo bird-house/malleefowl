@@ -7,10 +7,11 @@ from .common import TESTDATA, client_for
 from malleefowl.processes.wps_download import Download
 
 
+@pytest.mark.skip(reason="no way of currently testing this")
 @pytest.mark.online
 def test_wps_download():
     client = client_for(Service(processes=[Download()]))
-    datainputs = "resource={0}".format(TESTDATA['noaa_catalog_1'])
+    datainputs = "resource={}".format(TESTDATA['noaa_catalog_1'])
     resp = client.get(
         service='WPS', request='Execute', version='1.0.0',
         identifier='download',

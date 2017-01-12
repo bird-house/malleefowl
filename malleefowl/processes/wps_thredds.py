@@ -47,10 +47,10 @@ class ThreddsDownload(Process):
         def monitor(message, progress):
             response.update_status(message, progress)
         files = download.download_files_from_thredds(
-            url=request.inputs['url'].data,
+            url=request.inputs['url'][0].data,
             monitor=monitor)
 
         with open('out.json', 'w') as fp:
             json.dump(obj=files, fp=fp, indent=4, sort_keys=True)
-            response.outputs['outputs'].file = fp.name
+            response.outputs['output'].file = fp.name
         return response
