@@ -2,8 +2,6 @@ import pytest
 
 from unittest import TestCase
 
-from malleefowl.tests.common import SERVICE
-
 
 class EsgDistribSearchTestCase(TestCase):
 

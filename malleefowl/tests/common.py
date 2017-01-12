@@ -1,55 +1,20 @@
-import os
-import pywps
-import lxml
-
-NAMESPACES = {
-    'xlink': "http://www.w3.org/1999/xlink",
-    'wps': "http://www.opengis.net/wps/1.0.0",
-    'ows': "http://www.opengis.net/ows/1.1",
-    'gml': "http://www.opengis.net/gml",
-    'xsi': "http://www.w3.org/2001/XMLSchema-instance"
-}
-
-SERVICE = "http://localhost:8091/wps"
-SWIFT_STORAGE_URL = os.environ.get('OS_STORAGE_URL')
-SWIFT_AUTH_TOKEN = os.environ.get('OS_AUTH_TOKEN')
+from pywps.tests import WpsClient, WpsTestResponse
 
 TESTDATA = {
-    'noaa_nc_1': "http://www.esrl.noaa.gov/psd/thredds/fileServer/Datasets/ncep.reanalysis.dailyavgs/surface/slp.1955.nc",  # noqa
-    'noaa_catalog_1': "http://www.esrl.noaa.gov/psd/thredds/catalog/Datasets/ncep.reanalysis.dailyavgs/surface/catalog.xml?dataset=Datasets/ncep.reanalysis.dailyavgs/surface/air.sig995.1948.nc"  # noqa
+    'noaa_dap_1': "http://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/ncep.reanalysis2.dailyavgs/surface/mslp.2016.nc",  # NOPEP8
+    'noaa_nc_1': "http://www.esrl.noaa.gov/psd/thredds/fileServer/Datasets/ncep.reanalysis.dailyavgs/surface/slp.1955.nc",  # NOPEP8
+    'noaa_catalog_1': "http://www.esrl.noaa.gov/psd/thredds/catalog/Datasets/ncep.reanalysis.dailyavgs/surface/catalog.xml?dataset=Datasets/ncep.reanalysis.dailyavgs/surface/air.sig995.1948.nc"  # NOPEP8
 }
 
 
-class WpsTestClient(object):
-    def __init__(self):
-        # pywps_path = os.path.dirname(pywps.__file__)
-        os.environ['PYWPS_CFG'] = os.path.abspath(
-            os.path.join(os.environ['HOME'], 'birdhouse', 'etc', 'pywps', 'malleefowl.cfg'))
-        os.environ['REQUEST_METHOD'] = pywps.METHOD_GET
-        self.wps = pywps.Pywps(os.environ["REQUEST_METHOD"], os.environ.get("PYWPS_CFG"))
+class WpsTestClient(WpsClient):
 
     def get(self, *args, **kwargs):
-        query = ""
+        query = "?"
         for key, value in kwargs.iteritems():
             query += "{0}={1}&".format(key, value)
-        inputs = self.wps.parseRequest(query)
-        self.wps.performRequest(inputs)
-        return WpsTestResponse(self.wps.response)
+        return super(WpsTestClient, self).get(query)
 
 
-class WpsTestResponse(object):
-
-    def __init__(self, data):
-        self.data = data
-        self.xml = lxml.etree.fromstring(data)
-
-    def xpath(self, path):
-        return self.xml.xpath(path, namespaces=NAMESPACES)
-
-    def xpath_text(self, path):
-        return ' '.join(e.text for e in self.xpath(path))
-
-
-def assert_response_success(resp):
-    success = resp.xpath('/wps:ExecuteResponse/wps:Status/wps:ProcessSucceeded')
-    assert len(success) == 1
+def client_for(service):
+    return WpsTestClient(service, WpsTestResponse)

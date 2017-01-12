@@ -1,11 +1,24 @@
-from malleefowl.tests.common import WpsTestClient
+import pytest
+
+from pywps import Service
+from pywps.tests import assert_response_success
+
+from .common import client_for
+from malleefowl.processes import processes
 
 
-def test_caps():
-    wps = WpsTestClient()
-    resp = wps.get(service='wps', request='getcapabilities')
+def test_wps_caps():
+    client = client_for(Service(processes=processes))
+    resp = client.get(service='wps', request='getcapabilities', version='1.0.0')
     names = resp.xpath_text('/wps:Capabilities'
                             '/wps:ProcessOfferings'
                             '/wps:Process'
                             '/ows:Identifier')
-    assert sorted(names.split()) == ['download', 'dummy', 'esgf_logon', 'esgsearch', 'thredds_download', 'workflow']
+    assert sorted(names.split()) == [
+        'download',
+        'dummy',
+        'esgf_logon',
+        'esgsearch',
+        'thredds_download',
+        'workflow'
+    ]

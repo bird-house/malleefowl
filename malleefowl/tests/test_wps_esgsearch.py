@@ -1,39 +1,25 @@
 import pytest
-from unittest import TestCase
+from pywps import Service
+from pywps.tests import assert_response_success
 
-from owslib.wps import monitorExecution
+from .common import TESTDATA, client_for
 
-from malleefowl.tests.common import SERVICE
-
-
-class WpsTestCase(TestCase):
-    """
-    Base TestCase class, sets up a wps
-    """
-
-    @classmethod
-    def setUpClass(cls):
-        from owslib.wps import WebProcessingService
-        cls.wps = WebProcessingService(SERVICE, verbose=False, skip_caps=False)
+from malleefowl.processes.wps_esgsearch import ESGSearchProcess
 
 
-class EsgSearchTestCase(WpsTestCase):
+@pytest.mark.online
+def test_dataset(self):
+    client = client_for(Service(processes=[Download()]))
+    datainputs = "search_type={};limit={};offset={};constraints={}".format(
+        'Dataset', '10', '10',
+        'project:CORDEX,time_frequency:mon,variable:tas,experiment:historical')
+    resp = client.get(
+        service='WPS', request='Execute', version='1.0.0',
+        identifier='esgsearch',
+        datainputs=datainputs)
+    assert_response_success(resp)
 
-    @pytest.mark.online
-    def test_dataset(self):
-        inputs = []
-        inputs.append(('search_type', 'Dataset'))
-        inputs.append(('limit', '10'))
-        inputs.append(('offset', '10'))
-        inputs.append(
-            ('constraints', 'project:CORDEX,time_frequency:mon,variable:tas,experiment:historical'))
-
-        output = [('output', True), ('summary', True)]
-        execution = self.wps.execute(identifier="esgsearch", inputs=inputs, output=output)
-        monitorExecution(execution, sleepSecs=1)
-
-        assert execution.status == 'ProcessSucceeded'
-
+"""
     @pytest.mark.online
     def test_dataset_with_spaces(self):
         inputs = []
@@ -154,3 +140,4 @@ class EsgSearchTestCase(WpsTestCase):
         monitorExecution(execution, sleepSecs=1)
 
         assert execution.status == 'ProcessSucceeded'
+"""

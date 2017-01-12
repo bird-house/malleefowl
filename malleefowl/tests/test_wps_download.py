@@ -1,12 +1,18 @@
 import pytest
+from pywps import Service
+from pywps.tests import assert_response_success
 
-from malleefowl.tests.common import WpsTestClient, TESTDATA, assert_response_success
+from .common import TESTDATA, client_for
+
+from malleefowl.processes.wps_download import Download
 
 
 @pytest.mark.online
 def test_wps_download():
-    wps = WpsTestClient()
-    datainputs = "[resource={0}]".format(TESTDATA['noaa_catalog_1'])
-    resp = wps.get(service='wps', request='execute', version='1.0.0', identifier='download',
-                   datainputs=datainputs)
+    client = client_for(Service(processes=[Download()]))
+    datainputs = "resource={0}".format(TESTDATA['noaa_catalog_1'])
+    resp = client.get(
+        service='WPS', request='Execute', version='1.0.0',
+        identifier='download',
+        datainputs=datainputs)
     assert_response_success(resp)

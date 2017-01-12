@@ -1,17 +1,22 @@
-import pytest
-
-from malleefowl.tests.common import WpsTestClient, TESTDATA, assert_response_success
-
 import tempfile
 import yaml
+
+import pytest
+from pywps import Service
+from pywps.tests import assert_response_success
+
+from .common import TESTDATA, client_for
+
+from malleefowl.processes.wps_workflow import DispelWorkflow, DummyProcess
 
 
 @pytest.mark.online
 def test_wps_dummy():
-    wps = WpsTestClient()
-    datainputs = "[dataset={0}]".format(TESTDATA['noaa_nc_1'])
-    resp = wps.get(service='wps', request='execute', version='1.0.0', identifier='dummy',
-                   datainputs=datainputs)
+    client = client_for(Service(processes=[DummyProcess()]))
+    datainputs = "dataset={0}".format(TESTDATA['noaa_nc_1'])
+    resp = client.get(
+        service='wps', request='execute', version='1.0.0', identifier='dummy',
+        datainputs=datainputs)
     assert_response_success(resp)
 
 
@@ -32,8 +37,9 @@ def test_wps_thredds_workflow():
     fp = tempfile.NamedTemporaryFile(suffix=".txt")
     yaml.dump(yaml.load(doc), fp)
 
-    wps = WpsTestClient()
-    datainputs = "[workflow=file://{0}]".format(fp.name)
-    resp = wps.get(service='wps', request='execute', version='1.0.0', identifier='workflow',
-                   datainputs=datainputs)
+    client = client_for(Service(processes=[DispelWorkflow()]))
+    datainputs = "workflow=file://{0}".format(fp.name)
+    resp = client.get(
+        service='wps', request='execute', version='1.0.0', identifier='workflow',
+        datainputs=datainputs)
     assert_response_success(resp)
