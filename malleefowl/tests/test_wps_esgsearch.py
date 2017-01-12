@@ -78,64 +78,45 @@ def test_dataset_latest():
         datainputs=datainputs)
     assert_response_success(resp)
 
-"""
-    @pytest.mark.online
-    def test_dataset_facet_counts(self):
-        inputs = []
-        inputs.append(('search_type', 'Dataset'))
-        inputs.append(('limit', '1'))
-        inputs.append(('offset', '0'))
-        inputs.append(('latest', 'True'))
-        inputs.append(
-            ('constraints', 'project:CORDEX,time_frequency:mon'))
 
-        output = [('facet_counts', True)]
-        execution = self.wps.execute(identifier="esgsearch", inputs=inputs, output=output)
-        monitorExecution(execution, sleepSecs=1)
+@pytest.mark.online
+def test_dataset_query():
+    client = client_for(Service(processes=[ESGSearchProcess()]))
+    datainputs = "url={};search_type={};limit={};offset={};constraints={};query={}".format(
+        'http://esgf-data.dkrz.de/esg-search',
+        'Dataset', '1', '0',
+        'project:CORDEX',
+        'geopotential')
+    resp = client.get(
+        service='WPS', request='Execute', version='1.0.0',
+        identifier='esgsearch',
+        datainputs=datainputs)
+    assert_response_success(resp)
 
-        assert execution.status == 'ProcessSucceeded'
 
-    @pytest.mark.online
-    def test_dataset_query(self):
-        inputs = []
-        inputs.append(('search_type', 'Dataset'))
-        inputs.append(('limit', '1'))
-        inputs.append(('offset', '0'))
-        inputs.append(('latest', 'True'))
-        inputs.append(('constraints', 'project:CORDEX'))
-        inputs.append(('query', 'geopotential'))
+@pytest.mark.online
+def test_aggregation():
+    client = client_for(Service(processes=[ESGSearchProcess()]))
+    datainputs = "url={};search_type={};limit={};offset={};constraints={}".format(
+        'http://esgf-data.dkrz.de/esg-search',
+        'Aggregation', '5', '20',
+        'project:CORDEX,time_frequency:mon,variable:tas,experiment:historical')
+    resp = client.get(
+        service='WPS', request='Execute', version='1.0.0',
+        identifier='esgsearch',
+        datainputs=datainputs)
+    assert_response_success(resp)
 
-        output = [('facet_counts', True)]
-        execution = self.wps.execute(identifier="esgsearch", inputs=inputs, output=output)
-        monitorExecution(execution, sleepSecs=1)
 
-        assert execution.status == 'ProcessSucceeded'
-
-    @pytest.mark.online
-    def test_aggregation(self):
-        inputs = []
-        inputs.append(('search_type', 'Aggregation'))
-        inputs.append(('limit', '5'))
-        inputs.append(('offset', '20'))
-        inputs.append(
-            ('constraints', 'project:CORDEX,time_frequency:mon,variable:tas,experiment:historical'))
-        output = [('output', True), ('summary', True)]
-        execution = self.wps.execute(identifier="esgsearch", inputs=inputs, output=output)
-        monitorExecution(execution, sleepSecs=1)
-
-        assert execution.status == 'ProcessSucceeded'
-
-    @pytest.mark.online
-    def test_file(self):
-        inputs = []
-        inputs.append(('search_type', 'File'))
-        inputs.append(('limit', '1'))
-        inputs.append(('offset', '30'))
-        inputs.append(
-            ('constraints', 'project:CORDEX,time_frequency:mon,variable:tas,experiment:historical'))
-        output = [('output', True), ('summary', True)]
-        execution = self.wps.execute(identifier="esgsearch", inputs=inputs, output=output)
-        monitorExecution(execution, sleepSecs=1)
-
-        assert execution.status == 'ProcessSucceeded'
-"""
+@pytest.mark.online
+def test_file():
+    client = client_for(Service(processes=[ESGSearchProcess()]))
+    datainputs = "url={};search_type={};limit={};offset={};constraints={}".format(
+        'http://esgf-data.dkrz.de/esg-search',
+        'File', '1', '30',
+        'project:CORDEX,time_frequency:mon,variable:tas,experiment:historical')
+    resp = client.get(
+        service='WPS', request='Execute', version='1.0.0',
+        identifier='esgsearch',
+        datainputs=datainputs)
+    assert_response_success(resp)
