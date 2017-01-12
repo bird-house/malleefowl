@@ -7,7 +7,7 @@ from .common import TESTDATA, client_for
 from malleefowl.processes.wps_esgsearch import ESGSearchProcess
 
 
-@pytest.mark.skip(reason="no way of currently testing this")
+#@pytest.mark.skip(reason="no way of currently testing this")
 @pytest.mark.online
 def test_dataset():
     client = client_for(Service(processes=[ESGSearchProcess()]))
