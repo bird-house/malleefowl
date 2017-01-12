@@ -33,12 +33,3 @@ def archive_root():
     else:
         archive_root = [path.strip() for path in archive_root.split(':')]
     return archive_root
-
-
-def timeout():
-    try:
-        t = int(getConfigValue("malleefowl", "timeout"))
-    except Exception:
-        t = 3600
-        pass
-    return t
