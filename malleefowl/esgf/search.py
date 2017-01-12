@@ -1,5 +1,4 @@
 from datetime import datetime
-from dateutil import parser as date_parser
 
 import threading
 from Queue import Queue
@@ -137,21 +136,25 @@ class ESGSearch(object):
         # TODO: check type of start, end
         logger.debug('start=%s, end=%s', start, end)
 
-        start_date = end_date = None
-        # TODO: maybe only use start/end if temporal=True
-        if start is not None and end is not None:
-            start_date = date_parser.parse(start)
-            end_date = date_parser.parse(end)
-
         ctx = None
         if temporal is True:
             logger.debug("using dataset search with time constraints")
+            # TODO: handle timestamps in a better way
+            timestamp_format = '%Y-%m-%dT%H:%M:%SZ'
+            if start:
+                from_timestamp = start.strftime(timestamp_format)
+            else:
+                from_timestamp = None
+            if end:
+                to_timestamp = end.strftime(timestamp_format)
+            else:
+                to_timestamp = None
             ctx = self.conn.new_context(fields=self.fields,
                                         replica=self.replica,
                                         latest=self.latest,
                                         query=query,
-                                        from_timestamp=start,
-                                        to_timestamp=end)
+                                        from_timestamp=from_timestamp,
+                                        to_timestamp=to_timestamp)
         else:
             ctx = self.conn.new_context(fields=self.fields,
                                         replica=self.replica,
@@ -201,7 +204,7 @@ class ESGSearch(object):
             pass
         # search files (optional)
         elif search_type == 'File':
-            self._file_search(datasets, my_constraints, start_date, end_date)
+            self._file_search(datasets, my_constraints, start, end)
         # search aggregations (optional)
         elif search_type == 'Aggregation':
             self._aggregation_search(datasets, my_constraints)

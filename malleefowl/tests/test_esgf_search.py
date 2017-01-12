@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pytest
 
 from unittest import TestCase
@@ -152,8 +154,8 @@ class EsgSearchTestCase(TestCase):
             limit=10,
             offset=0,
             temporal=True,
-            start='2001-01-01T12:00:00Z',
-            end='2005-12-31T12:00:00Z',
+            start=datetime(2001, 1, 1, 12),
+            end=datetime(2005, 12, 31, 12),
             constraints=constraints)
 
         assert len(result) > 1
@@ -213,8 +215,8 @@ class EsgSearchTestCase(TestCase):
             limit=100,
             offset=0,
             temporal=True,
-            start='1960-01-01T12:00:00Z',
-            end='1970-12-31T12:00:00Z',
+            start=datetime(1960, 1, 1, 12),
+            end=datetime(1970, 12, 31, 12),
             constraints=constraints)
 
         assert len(result) >= 1
@@ -251,8 +253,8 @@ class EsgSearchTestCase(TestCase):
             offset=0,
             constraints=constraints,
             temporal=False,
-            start='1960-01-01T12:00:00Z',
-            end='1995-12-31T12:00:00Z')
+            start=datetime(1960, 1, 1, 12),
+            end=datetime(1995, 12, 31, 12),)
 
         assert len(result) > 1
         assert summary['number_of_selected_files'] > 1
