@@ -63,10 +63,10 @@ class DispelWorkflow(Process):
 
         with open('output.txt', 'w') as fp:
             yaml.dump(result, stream=fp)
-            request.outputs['output'].file = fp.name
+            response.outputs['output'].file = fp.name
         with open('logfile.txt', 'w') as fp:
             fp.write("workflow log file")
-            request.outputs['logfile'].file = fp.name
+            response.outputs['logfile'].file = fp.name
         response.update_status("workflow {0} done.".format(workflow_name), 100)
         return response
 
@@ -108,6 +108,6 @@ class DummyProcess(Process):
         response.update_status("starting ...", 0)
         with open('out.txt', 'w') as fp:
             fp.write('we got {} files.'.format(len(request.inputs['datasets'])))
-            request.outputs['output'].file = fp.name
+            response.outputs['output'].file = fp.name
         response.update_status("done", 100)
         return response

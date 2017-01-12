@@ -52,5 +52,5 @@ class ThreddsDownload(Process):
 
         with open('out.json', 'w') as fp:
             json.dump(obj=files, fp=fp, indent=4, sort_keys=True)
-            request.outputs['outputs'].file = fp.name
+            response.outputs['outputs'].file = fp.name
         return response
