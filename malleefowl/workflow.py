@@ -118,11 +118,14 @@ class GenericWPS(MonitorPE):
                                     format(ex) for ex in execution.errors])
             raise Exception(failure_msg)
 
-    def process(self, inputs):
+    def _set_inputs(self, inputs, complextype=False):
         if self.INPUT_NAME in inputs:
             for value in inputs[self.INPUT_NAME]:
-                self.wps_inputs.append(
-                    (self.wps_resource, ComplexDataInput(value)))
+                if complextype is True:
+                    value = ComplexDataInput(value)
+                self.wps_inputs.append((self.wps_resource, value))
+
+    def process(self, inputs):
         try:
             result = self._process(inputs)
             if result is not None:
@@ -132,6 +135,7 @@ class GenericWPS(MonitorPE):
             raise
 
     def _process(self, inputs):
+        self._set_inputs(inputs, complextype=True)
         return self.execute()
 
 
@@ -220,8 +224,9 @@ class Download(GenericWPS):
         self.credentials = credentials
 
     def _process(self, inputs):
+        self._set_inputs(inputs, complextype=False)
         if self.credentials:
-            self.wps_inputs.append(('credentials', self.credentials))
+            self.wps_inputs.append(('credentials', ComplexDataInput(self.credentials)))
         result = self.execute()
 
         # read json document with list of urls
