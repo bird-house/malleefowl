@@ -10,6 +10,9 @@ from pywps.app.Common import Metadata
 
 from malleefowl.download import download_files
 
+import logging
+LOGGER = logging.getLogger(__name__)
+
 
 class Download(Process):
 
@@ -52,9 +55,14 @@ class Download(Process):
         )
 
     def _handler(self, request, response):
+        response.update_status("starting download ...", 0)
+
         urls = [resource.data for resource in request.inputs['resource']]
+        LOGGER.debug("downloading urls: %s", len(urls))
+
         if 'credentials' in request.inputs:
-            credentials = request.inputs['credentials'][0].data
+            credentials = request.inputs['credentials'][0].file
+            LOGGER.debug('Using credentials.')
         else:
             credentials = None
 
@@ -69,4 +77,6 @@ class Download(Process):
         with open('out.json', 'w') as fp:
             json.dump(obj=files, fp=fp, indent=4, sort_keys=True)
             response.outputs['output'].file = fp.name
+
+        response.update_status("download done", 100)
         return response
