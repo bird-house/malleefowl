@@ -8,7 +8,7 @@ from dispel4py.base import BasePE
 from malleefowl.config import wps_url
 
 import logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("PYWPS")
 
 
 class MonitorPE(BasePE):

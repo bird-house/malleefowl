@@ -10,7 +10,7 @@ from malleefowl import config
 from malleefowl.workflow import run
 
 import logging
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger("PYWPS")
 
 
 class DispelWorkflow(Process):

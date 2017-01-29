@@ -11,7 +11,7 @@ from malleefowl.utils import esgf_archive_path
 from malleefowl.exceptions import ProcessFailed
 
 import logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("PYWPS")
 
 
 def download_with_archive(url, credentials=None):

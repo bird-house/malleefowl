@@ -11,7 +11,7 @@ from pywps.app.Common import Metadata
 from malleefowl.download import download_files
 
 import logging
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger("PYWPS")
 
 
 class Download(Process):
