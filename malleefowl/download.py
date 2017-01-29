@@ -11,7 +11,7 @@ from malleefowl.utils import esgf_archive_path
 from malleefowl.exceptions import ProcessFailed
 
 import logging
-logger = logging.getLogger("PYWPS")
+LOGGER = logging.getLogger("PYWPS")
 
 
 def download_with_archive(url, credentials=None):
@@ -52,17 +52,17 @@ def wget(url, use_file_url=False, credentials=None):
     :param credentials: path to credentials if security is needed to download file
     :returns: downloaded file with either file:// or system path
     """
-    logger.debug('downloading %s', url)
+    LOGGER.debug('downloading %s', url)
 
     try:
         cmd = ["wget"]
         if credentials is not None:
-            logger.debug('using credentials')
+            LOGGER.debug('using credentials')
             cmd.extend(["--certificate", credentials])
             cmd.extend(["--private-key", credentials])
             cmd.extend(["--ca-certificate", credentials])
         cmd.append("--no-check-certificate")
-        if not logger.isEnabledFor(logging.DEBUG):
+        if not LOGGER.isEnabledFor(logging.DEBUG):
             cmd.append("--quiet")
         cmd.append("--tries=2")                  # max 2 retries
         cmd.append("-N")                         # turn on timestamping
@@ -70,16 +70,16 @@ def wget(url, use_file_url=False, credentials=None):
         cmd.append("-x")                         # force creation of directories
         cmd.extend(["-P", config.cache_path()])  # directory prefix
         cmd.append(url)                          # download url
-        logger.debug("cmd: %s", ' '.join(cmd))
+        LOGGER.debug("cmd: %s", ' '.join(cmd))
         output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
-        logger.debug("output: %s", output)
+        LOGGER.debug("output: %s", output)
     except subprocess.CalledProcessError as e:
         msg = "wget failed on {0}: {1.output}".format(url, e)
-        logger.error(msg)
+        LOGGER.error(msg)
         raise ProcessFailed(msg)
     except:
         msg = "wget failed on {0}.".format(url)
-        logger.exception(msg)
+        LOGGER.exception(msg)
         raise ProcessFailed(msg)
 
     import urlparse
@@ -111,7 +111,7 @@ class DownloadManager(object):
 
     def show_status(self, message, progress):
         if self.monitor is None:
-            logger.info("%s, progress=%d/100", message, progress)
+            LOGGER.info("%s, progress=%d/100", message, progress)
         else:
             self.monitor(message, progress)
 
@@ -128,7 +128,7 @@ class DownloadManager(object):
             except Empty:
                 queue_full = False
             except Exception:
-                logger.exception('download failed!')
+                LOGGER.exception('download failed!')
                 queue_full = False
             finally:
                 # completed with the job
@@ -157,7 +157,7 @@ class DownloadManager(object):
         self.job_queue = Queue()
         # using max 4 thredds
         num_threads = min(4, len(urls))
-        logger.info('starting %d download threads', num_threads)
+        LOGGER.info('starting %d download threads', num_threads)
         for x in range(num_threads):
             t = threading.Thread(target=self.threader)
             # classifying as a daemon, so they will die when the main dies
