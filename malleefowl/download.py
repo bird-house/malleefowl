@@ -2,6 +2,8 @@
 TODO: handle parallel download process
 """
 
+import os
+import urlparse
 import threading
 from Queue import Queue, Empty
 import subprocess
@@ -47,12 +49,28 @@ def wget(url, use_file_url=False, credentials=None):
     """
     Downloads url and returns local filename.
 
+    TODO: refactor cache handling.
+
     :param url: url of file
     :param use_file_url: True if result should be a file url "file://", otherwise use system path.
     :param credentials: path to credentials if security is needed to download file
     :returns: downloaded file with either file:// or system path
     """
     LOGGER.debug('downloading %s', url)
+
+    parsed_url = urlparse.urlparse(url)
+    cache_filename = os.path.join(
+        config.cache_path(),
+        parsed_url.netloc,
+        parsed_url.path.strip('/'))
+    # check if in cache
+    if os.path.isfile(cache_filename):
+        LOGGER.debug("using cached file.")
+        if use_file_url is True:
+            filename = "file://" + cache_filename
+        return filename
+
+    local_cache_path = os.path.abspath(os.curdir)
 
     try:
         cmd = ["wget"]
@@ -64,11 +82,11 @@ def wget(url, use_file_url=False, credentials=None):
         cmd.append("--no-check-certificate")
         if not LOGGER.isEnabledFor(logging.DEBUG):
             cmd.append("--quiet")
-        cmd.append("--tries=2")                  # max 2 retries
+        cmd.append("--tries=3")                  # max 2 retries
         cmd.append("-N")                         # turn on timestamping
         cmd.append("--continue")                 # continue partial downloads
         cmd.append("-x")                         # force creation of directories
-        cmd.extend(["-P", config.cache_path()])  # directory prefix
+        cmd.extend(["-P", local_cache_path])  # directory prefix
         cmd.append(url)                          # download url
         LOGGER.debug("cmd: %s", ' '.join(cmd))
         output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
@@ -82,14 +100,18 @@ def wget(url, use_file_url=False, credentials=None):
         LOGGER.exception(msg)
         raise ProcessFailed(msg)
 
-    import urlparse
-    parsed_url = urlparse.urlparse(url)
-    from os.path import join
-    filename = join(config.cache_path(),
-                    parsed_url.netloc,
-                    parsed_url.path.strip('/'))
+    dn_filename = os.path.join(
+        local_cache_path,
+        parsed_url.netloc,
+        parsed_url.path.strip('/'))
+    if not os.path.exists(cache_filename):
+        LOGGER.debug("linking downloaded file to cache.")
+        if not os.path.isdir(os.path.dirname(cache_filename)):
+            LOGGER.debug("Creating cache directories.")
+            os.makedirs(os.path.dirname(cache_filename), 0700)
+        os.link(dn_filename, cache_filename)
     if use_file_url is True:
-        filename = "file://" + filename
+        filename = "file://" + cache_filename
     return filename
 
 
