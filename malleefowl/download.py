@@ -59,15 +59,15 @@ def wget(url, use_file_url=False, credentials=None):
     LOGGER.debug('downloading %s', url)
 
     parsed_url = urlparse.urlparse(url)
-    cache_filename = os.path.join(
+    filename = os.path.join(
         config.cache_path(),
         parsed_url.netloc,
         parsed_url.path.strip('/'))
     # check if in cache
-    if os.path.isfile(cache_filename):
+    if os.path.isfile(filename):
         LOGGER.debug("using cached file.")
-        if use_file_url is True:
-            filename = "file://" + cache_filename
+        if use_file_url:
+            filename = "file://" + filename
         return filename
 
     local_cache_path = os.path.abspath(os.curdir)
@@ -104,14 +104,14 @@ def wget(url, use_file_url=False, credentials=None):
         local_cache_path,
         parsed_url.netloc,
         parsed_url.path.strip('/'))
-    if not os.path.exists(cache_filename):
+    if not os.path.exists(filename):
         LOGGER.debug("linking downloaded file to cache.")
-        if not os.path.isdir(os.path.dirname(cache_filename)):
+        if not os.path.isdir(os.path.dirname(filename)):
             LOGGER.debug("Creating cache directories.")
-            os.makedirs(os.path.dirname(cache_filename), 0700)
-        os.link(dn_filename, cache_filename)
-    if use_file_url is True:
-        filename = "file://" + cache_filename
+            os.makedirs(os.path.dirname(filename), 0700)
+        os.link(dn_filename, filename)
+    if use_file_url:
+        filename = "file://" + filename
     return filename
 
 
