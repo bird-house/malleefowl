@@ -25,7 +25,8 @@ class Download(Process):
                          max_occurs=1024,
                          ),
             ComplexInput('credentials', 'X509 Certificate',
-                         abstract='Optional X509 proxy certificate to access ESGF data.',
+                         abstract='Optional X509 proxy certificate to access ESGF data.'
+                         'This parameter is deprecated. Use X-X509-User-Proxy header variable.',
                          metadata=[Metadata('Info')],
                          min_occurs=0,
                          max_occurs=1,
@@ -60,9 +61,11 @@ class Download(Process):
         urls = [resource.data for resource in request.inputs['resource']]
         LOGGER.debug("downloading urls: %s", len(urls))
 
-        if 'credentials' in request.inputs:
+        if 'X-X509-User-Proxy' in request.http_request.headers:
+            credentials = request.http_request.headers['X-X509-User-Proxy']
+        elif 'credentials' in request.inputs:
             credentials = request.inputs['credentials'][0].file
-            LOGGER.debug('Using credentials.')
+            LOGGER.warn('Using deprecated input parameter credentials.')
         else:
             credentials = None
 
