@@ -84,8 +84,9 @@ def parse_openid(openid, ssl_verify=False):
 
 
 def cert_infos(filename):
+    expires = None
     with open(filename) as fh:
         data = fh.read()
         cert = OpenSSL.crypto.load_certificate(OpenSSL.SSL.FILETYPE_PEM, data)
-    expires = date_parser.parse(cert.get_notAfter())
+        expires = date_parser.parse(cert.get_notAfter())
     return dict(expires=expires)
