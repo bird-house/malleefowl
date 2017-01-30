@@ -40,7 +40,7 @@ class MyProxyLogon(Process):
             self._handler,
             identifier="esgf_logon",
             title="ESGF MyProxy Logon",
-            version="0.4",
+            version="0.5",
             abstract="Run MyProxy Logon to retrieve an ESGF certificate.",
             metadata=[
                 Metadata('Birdhouse', 'http://bird-house.github.io/'),
