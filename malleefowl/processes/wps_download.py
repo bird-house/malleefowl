@@ -63,11 +63,13 @@ class Download(Process):
 
         if 'X-X509-User-Proxy' in request.http_request.headers:
             credentials = request.http_request.headers['X-X509-User-Proxy']
+            LOGGER.debug('Using X509_USER_PROXY.')
         elif 'credentials' in request.inputs:
             credentials = request.inputs['credentials'][0].file
             LOGGER.warn('Using deprecated input parameter credentials.')
         else:
             credentials = None
+            LOGGER.debug('Using no credentials')
 
         def monitor(msg, progress):
             response.update_status(msg, progress)
