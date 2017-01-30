@@ -51,8 +51,7 @@ def parse_openid(openid, ssl_verify=False):
     ESGF_OPENID_REXP = r'https://.*/esgf-idp/openid/(.*)'
     MYPROXY_URI_REXP = r'socket://([^:]*):?(\d+)?'
 
-    kwargs = {'verify': ssl_verify}
-    response = requests.get(openid, **kwargs)
+    response = requests.get(openid, verify=ssl_verify)
     xml = etree.parse(BytesIO(response.content))
 
     hostname = None
