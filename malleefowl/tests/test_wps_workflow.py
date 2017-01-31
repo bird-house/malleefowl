@@ -7,17 +7,7 @@ from pywps.tests import assert_response_success
 
 from .common import TESTDATA, client_for
 
-from malleefowl.processes.wps_workflow import DispelWorkflow, DummyProcess
-
-
-@pytest.mark.online
-def test_wps_dummy():
-    client = client_for(Service(processes=[DummyProcess()]))
-    datainputs = "dataset={}".format(TESTDATA['noaa_nc_1'])
-    resp = client.get(
-        service='wps', request='execute', version='1.0.0', identifier='dummy',
-        datainputs=datainputs)
-    assert_response_success(resp)
+from malleefowl.processes.wps_workflow import DispelWorkflow
 
 
 @pytest.mark.skip(reason="no way of currently testing this")

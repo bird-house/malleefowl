@@ -1,6 +1,13 @@
 Change History
 **************
 
+0.6.1 (2017-01-31)
+==================
+
+* using pyesgf.logon.
+* using ``X509_USER_PROXY`` variable in download.
+* link downloaded files to download cache.
+
 0.6.0 (2017-01-27)
 ==================
 

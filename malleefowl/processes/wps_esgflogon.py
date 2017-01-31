@@ -40,8 +40,9 @@ class MyProxyLogon(Process):
             self._handler,
             identifier="esgf_logon",
             title="ESGF MyProxy Logon",
-            version="0.4",
-            abstract="Run MyProxy Logon to retrieve an ESGF certificate.",
+            version="0.5",
+            abstract="Run MyProxy Logon to retrieve an ESGF certificate."
+            " This process is deprecated and will be replaced by the ESGF SLCS service using OAuth2.",
             metadata=[
                 Metadata('Birdhouse', 'http://bird-house.github.io/'),
                 Metadata('User Guide', 'http://malleefowl.readthedocs.io/en/latest/'),

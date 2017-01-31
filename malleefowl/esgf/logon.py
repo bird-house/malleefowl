@@ -15,114 +15,31 @@ See also:
 
 import os
 import requests
-from requests.auth import HTTPBasicAuth
-from cookielib import MozillaCookieJar
 import re
 from lxml import etree
 from io import BytesIO
 import OpenSSL
 from dateutil import parser as date_parser
 
+from pyesgf.logon import LogonManager, ESGF_CREDENTIALS
+
 import logging
 logger = logging.getLogger(__name__)
 
 
-def _consumer(provider, url):
-    consumer = provider
-    if url:
-        from urlparse import urlparse
-        consumer = urlparse(url).netloc
-    return consumer
-
-
-def _password(interactive, password):
-    if interactive:
-        if password is None:
-            from getpass import getpass
-            password = getpass('Enter password: ')
-    return password
-
-
-def openid_logon(openid, password=None, interactive=False, outdir=None, url=None):
-    """
-    Uses the OpenID logon at an ESGF identity provider to get the credentials (cookies)
-
-    TODO: move this code to esgf pyclient
-
-    :return: cookies file
-    """
-    (username, provider, port) = parse_openid(openid)
-    consumer = _consumer(provider, url)
-    password = _password(interactive, password)
-    outdir = outdir or os.path.curdir
-
-    url = 'https://{0}/esg-orp/j_spring_openid_security_check.htm'.format(consumer)
-    data = dict(openid_identifier='https://{0}/esgf-idp/openid/'.format(provider), rememberOpenid='on')
-    auth = HTTPBasicAuth(username, password)
-    headers = {'esgf-idea-agent-type': 'basic_auth'}
-
-    session = requests.Session()
-    cookies = os.path.join(outdir, 'cookies.txt')
-    session.cookies = MozillaCookieJar(cookies)
-    if not os.path.exists(cookies):
-        # Create a new cookies file and set our Session's cookies
-        logger.debug("setting cookies")
-        session.cookies.save()
-    else:
-        # Load saved cookies from the file and use them in a request
-        logger.debug("loading saved cookies")
-        session.cookies.load(ignore_discard=True)
-    response = session.post(url, auth=auth, data=data, headers=headers, verify=True)
-    logger.debug("openid logon: status=%s", response.status_code)
-    response.raise_for_status()
-    session.cookies.save(ignore_discard=True)
-
-    return cookies
-
-
 def myproxy_logon_with_openid(openid, password=None, interactive=False, outdir=None):
     """
-    Trys to get MyProxy parameters from OpenID and calls :meth:`logon`.
+    Tries to get MyProxy parameters from OpenID and calls :meth:`logon`.
 
     :param openid: OpenID used to login at ESGF node.
     """
-    (username, hostname, port) = parse_openid(openid)
-    return myproxy_logon(username, hostname, port, password, interactive, outdir)
-
-
-def myproxy_logon(username, hostname, port=7512, password=None, interactive=False, outdir=None):
-    """
-    Runs myproxy logon with username and password.
-
-    :param outdir: path used for retrieved files (certificates, ...).
-    :param interactive: if true user is prompted for parameters.
-
-    :return: certfile, proxy certificate.
-    """
-    if interactive:
-        if hostname is None:
-            print 'Enter myproxy hostname:',
-            hostname = raw_input()
-        if username is None:
-            print 'Enter myproxy username:',
-            username = raw_input()
-        if password is None:
-            from getpass import getpass
-            password = getpass('Enter password for %s: ' % username)
-
-    if outdir is None:
-        outdir = os.curdir
-
-    from myproxy.client import MyProxyClient
-    myproxy_clnt = MyProxyClient(hostname=hostname, port=port, caCertDir=outdir, proxyCertLifetime=43200)
-    creds = myproxy_clnt.logon(username, password, bootstrap=True)
-
-    outfile = os.path.join(outdir, 'cert.pem')
-    with open('cert.pem', 'w') as fout:
-        for cred in creds:
-            fout.write(cred)
-
-    return outfile
+    outdir = outdir or os.curdir
+    username, hostname, port = parse_openid(openid)
+    lm = LogonManager(esgf_dir=outdir, dap_config=os.path.join(outdir, 'dodsrc'))
+    lm.logoff()
+    lm.logon(username=username, password=password, hostname=hostname,
+             bootstrap=True, update_trustroots=False, interactive=interactive)
+    return os.path.join(outdir, ESGF_CREDENTIALS)
 
 
 def parse_openid(openid, ssl_verify=False):
@@ -134,8 +51,7 @@ def parse_openid(openid, ssl_verify=False):
     ESGF_OPENID_REXP = r'https://.*/esgf-idp/openid/(.*)'
     MYPROXY_URI_REXP = r'socket://([^:]*):?(\d+)?'
 
-    kwargs = {'verify': ssl_verify}
-    response = requests.get(openid, **kwargs)
+    response = requests.get(openid, verify=ssl_verify)
     xml = etree.parse(BytesIO(response.content))
 
     hostname = None
@@ -162,15 +78,15 @@ def parse_openid(openid, ssl_verify=False):
     if mo:
         username = mo.group(1)
 
-    if port is None:
-        port = "7512"
+    port = port or "7512"
 
     return username, hostname, port
 
 
 def cert_infos(filename):
+    expires = None
     with open(filename) as fh:
         data = fh.read()
         cert = OpenSSL.crypto.load_certificate(OpenSSL.SSL.FILETYPE_PEM, data)
-    expires = date_parser.parse(cert.get_notAfter())
+        expires = date_parser.parse(cert.get_notAfter())
     return dict(expires=expires)

@@ -8,7 +8,7 @@ from dispel4py.base import BasePE
 from malleefowl.config import wps_url
 
 import logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("PYWPS")
 
 
 class MonitorPE(BasePE):
@@ -44,12 +44,12 @@ class GenericWPS(MonitorPE):
     STATUS_LOCATION_NAME = 'status_location'
 
     def __init__(self, url, identifier, resource='resource',
-                 inputs=[], output=None):
+                 inputs=[], output=None, headers=None):
         MonitorPE.__init__(self)
         self._add_output(self.STATUS_NAME)
         self._add_output(self.STATUS_LOCATION_NAME)
 
-        self.wps = WebProcessingService(url=url, skip_caps=True, verify=False)
+        self.wps = WebProcessingService(url=url, skip_caps=True, verify=False, headers=headers)
         self.identifier = identifier
         self.wps_resource = resource
         self.wps_inputs = inputs
@@ -219,13 +219,14 @@ class SolrSearch(MonitorPE):
 
 
 class Download(GenericWPS):
-    def __init__(self, url, credentials=None):
-        GenericWPS.__init__(self, url, 'download', output='output')
+    def __init__(self, url, credentials=None, headers=None):
+        GenericWPS.__init__(self, url, 'download', output='output', headers=headers)
         self.credentials = credentials
 
     def _process(self, inputs):
         self._set_inputs(inputs, complextype=False)
         if self.credentials:
+            # TODO: credentials parameter is deprecated!
             self.wps_inputs.append(('credentials', ComplexDataInput(self.credentials)))
         result = self.execute()
 
@@ -258,7 +259,7 @@ class ThreddsDownload(GenericWPS):
         return result
 
 
-def esgf_workflow(source, worker, monitor=None):
+def esgf_workflow(source, worker, monitor=None, headers=None):
     graph = WorkflowGraph()
 
     # TODO: configure limit
@@ -275,7 +276,7 @@ def esgf_workflow(source, worker, monitor=None):
         start=source.get('start'),
         end=source.get('end'))
     esgsearch.set_monitor(monitor, 0, 10)
-    download = Download(url=wps_url(), credentials=source.get('credentials'))
+    download = Download(url=wps_url(), credentials=source.get('credentials'), headers=headers)
     download.set_monitor(monitor, 10, 50)
     doit = GenericWPS(**worker)
     doit.set_monitor(monitor, 50, 100)
@@ -332,13 +333,13 @@ def solr_workflow(source, worker, monitor=None):
     return dict(worker=dict(status_location=status_location, status=status))
 
 
-def run(workflow, monitor=None):
+def run(workflow, monitor=None, headers=None):
     if 'thredds' in workflow['source']:
         return thredds_workflow(source=workflow['source']['thredds'],
                                 worker=workflow['worker'], monitor=monitor)
     elif 'esgf' in workflow['source']:
         return esgf_workflow(source=workflow['source']['esgf'],
-                             worker=workflow['worker'], monitor=monitor)
+                             worker=workflow['worker'], monitor=monitor, headers=headers)
     elif 'solr' in workflow['source']:
         return solr_workflow(source=workflow['source']['solr'],
                              worker=workflow['worker'], monitor=monitor)
