@@ -19,7 +19,7 @@ def cache_path():
 
 
 def archive_root():
-    value = configuration.get_config_value("cache", "archive_root")
+    value = configuration.get_config_value("extra", "archive_root")
     if value:
         path_list = [path.strip() for path in value.split(':')]
         LOGGER.debug("using archive root %s", path_list)
