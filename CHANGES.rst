@@ -1,6 +1,11 @@
 Change History
 **************
 
+0.6.2 (2017-02-14)
+==================
+
+* update pywps recipe and archive-root config.
+
 0.6.1 (2017-01-31)
 ==================
 
