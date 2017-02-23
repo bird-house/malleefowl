@@ -97,7 +97,7 @@ class ESGSearchProcess(Process):
             LiteralInput('limit', 'Limit',
                          data_type='integer',
                          abstract="Maximum number of datasets in search result",
-                         min_occurs=1,
+                         min_occurs=0,
                          max_occurs=1,
                          default='10',
                          allowed_values=[0, 1, 2, 5, 10, 20, 50, 100, 200]
