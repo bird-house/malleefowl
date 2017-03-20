@@ -24,13 +24,6 @@ class Download(Process):
                          min_occurs=1,
                          max_occurs=1024,
                          ),
-            ComplexInput('credentials', 'X509 Certificate',
-                         abstract='Optional X509 proxy certificate to access ESGF data.'
-                         'This parameter is deprecated. Use X-X509-User-Proxy header variable.',
-                         metadata=[Metadata('Info')],
-                         min_occurs=0,
-                         max_occurs=1,
-                         supported_formats=[Format('application/x-pkcs7-mime')]),
         ]
         outputs = [
             ComplexOutput('output', 'Downloaded files',
@@ -43,7 +36,7 @@ class Download(Process):
             self._handler,
             identifier="download",
             title="Download files",
-            version="0.7",
+            version="0.8",
             abstract="Downloads files and provides file list as json document.",
             metadata=[
                 Metadata('Birdhouse', 'http://bird-house.github.io/'),
@@ -64,9 +57,6 @@ class Download(Process):
         if 'X-X509-User-Proxy' in request.http_request.headers:
             credentials = request.http_request.headers['X-X509-User-Proxy']
             LOGGER.debug('Using X509_USER_PROXY.')
-        elif 'credentials' in request.inputs:
-            credentials = request.inputs['credentials'][0].file
-            LOGGER.warn('Using deprecated input parameter credentials.')
         else:
             credentials = None
             LOGGER.debug('Using no credentials')

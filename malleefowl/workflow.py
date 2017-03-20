@@ -219,15 +219,12 @@ class SolrSearch(MonitorPE):
 
 
 class Download(GenericWPS):
-    def __init__(self, url, credentials=None, headers=None):
+    def __init__(self, url, headers=None):
         GenericWPS.__init__(self, url, 'download', output='output', headers=headers)
         self.credentials = credentials
 
     def _process(self, inputs):
         self._set_inputs(inputs, complextype=False)
-        if self.credentials:
-            # TODO: credentials parameter is deprecated!
-            self.wps_inputs.append(('credentials', ComplexDataInput(self.credentials)))
         result = self.execute()
 
         # read json document with list of urls
@@ -276,9 +273,9 @@ def esgf_workflow(source, worker, monitor=None, headers=None):
         start=source.get('start'),
         end=source.get('end'))
     esgsearch.set_monitor(monitor, 0, 10)
-    download = Download(url=wps_url(), credentials=source.get('credentials'), headers=headers)
+    download = Download(url=wps_url(), headers=headers)
     download.set_monitor(monitor, 10, 50)
-    doit = GenericWPS(**worker)
+    doit = GenericWPS(headers=headers, **worker)
     doit.set_monitor(monitor, 50, 100)
 
     graph.connect(esgsearch, esgsearch.OUTPUT_NAME,
