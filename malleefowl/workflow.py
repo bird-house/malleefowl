@@ -221,7 +221,6 @@ class SolrSearch(MonitorPE):
 class Download(GenericWPS):
     def __init__(self, url, headers=None):
         GenericWPS.__init__(self, url, 'download', output='output', headers=headers)
-        self.credentials = credentials
 
     def _process(self, inputs):
         self._set_inputs(inputs, complextype=False)
