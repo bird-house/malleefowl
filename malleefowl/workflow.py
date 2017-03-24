@@ -143,6 +143,7 @@ class EsgSearch(GenericWPS):
     def __init__(self, url,
                  search_url='https://esgf-data.dkrz.de/esg-search',
                  constraints='project:CORDEX',
+                 query=None,
                  limit=100,
                  search_type='File',
                  distrib=False,
@@ -154,6 +155,7 @@ class EsgSearch(GenericWPS):
         GenericWPS.__init__(self, url, 'esgsearch', output='output')
         self.search_url = search_url
         self.constraints = constraints
+        self.query = query
         self.distrib = distrib
         self.replica = replica
         self.latest = latest
@@ -166,6 +168,7 @@ class EsgSearch(GenericWPS):
     def _process(self, inputs):
         self.wps_inputs.append(('url', self.search_url))
         self.wps_inputs.append(('constraints', self.constraints))
+        self.wps_inputs.append(('query', self.query))
         self.wps_inputs.append(('limit', str(self.limit)))
         self.wps_inputs.append(('search_type', self.search_type))
         self.wps_inputs.append(('distrib', str(self.distrib)))
@@ -262,7 +265,8 @@ def esgf_workflow(source, worker, monitor=None, headers=None):
     esgsearch = EsgSearch(
         url=wps_url(),
         search_url=source.get('url', 'https://esgf-data.dkrz.de/esg-search'),
-        constraints=source.get('facets'),
+        constraints=source.get('constraints', source.get('facets')),  # facets for backward compatibility
+        query=source.get('query'),
         limit=source.get('limit', 100),
         search_type='File',
         distrib=source.get('distrib'),
