@@ -4,20 +4,20 @@ import threading
 from Queue import Queue
 
 import logging
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger("PYWPS")
 
 
 def date_from_filename(filename):
     """Example cordex:
     tas_EUR-44i_ECMWF-ERAINT_evaluation_r1i1p1_HMS-ALADIN52_v1_mon_200101-200812.nc
     """
-    logger.debug('filename=%s', filename)
+    LOGGER.debug('filename=%s', filename)
     result = None
     value = filename.split('.')
     value.pop()  # remove .nc
     value = value[-1]  # part with date
     value = value.split('_')[-1]  # only date part
-    logger.debug('date part = %s', value)
+    LOGGER.debug('date part = %s', value)
     if value != 'fx':
         value = value.split('-')  # split start-end
         start_year = int(value[0][:4])  # keep only the year
@@ -58,7 +58,7 @@ def temporal_filter(filename, start_date=None, end_date=None):
     }
     """
 
-    logger.debug('filename=%s, start_date=%s, end_date=%s', filename, start_date, end_date)
+    LOGGER.debug('filename=%s, start_date=%s, end_date=%s', filename, start_date, end_date)
 
     if start_date is None or end_date is None:
         return True
@@ -68,10 +68,10 @@ def temporal_filter(filename, start_date=None, end_date=None):
     start_year = start_end[0]
     end_year = start_end[1]
     if start_year > end_date.year:
-        logger.debug('skip: %s > %s', start_year, end_date.year)
+        LOGGER.debug('skip: %s > %s', start_year, end_date.year)
         return False
     if end_year < start_date.year:
-        logger.debug('skip: %s < %s', end_year, start_date.year)
+        LOGGER.debug('skip: %s < %s', end_year, start_date.year)
         return False
     return True
 
@@ -112,7 +112,7 @@ class ESGSearch(object):
 
     def show_status(self, message, progress):
         if self.monitor is None:
-            logger.info("%s, progress=%d/100", message, progress)
+            LOGGER.info("%s, progress=%d/100", message, progress)
         else:
             self.monitor(message, progress)
 
@@ -127,18 +127,18 @@ class ESGSearch(object):
         for key, value in constraints:
             my_constraints.add(key, value)
 
-        logger.debug('constraints=%s', my_constraints)
+        LOGGER.debug('constraints=%s', my_constraints)
 
         if query is None or len(query.strip()) == 0:
             query = '*:*'
-        logger.debug('query: %s', query)
+        LOGGER.debug('query: %s', query)
 
         # TODO: check type of start, end
-        logger.debug('start=%s, end=%s', start, end)
+        LOGGER.debug('start=%s, end=%s', start, end)
 
         ctx = None
         if temporal is True:
-            logger.debug("using dataset search with time constraints")
+            LOGGER.debug("using dataset search with time constraints")
             # TODO: handle timestamps in a better way
             timestamp_format = '%Y-%m-%dT%H:%M:%SZ'
             if start:
@@ -163,7 +163,7 @@ class ESGSearch(object):
         if len(my_constraints) > 0:
             ctx = ctx.constrain(**my_constraints.mixed())
 
-        logger.debug('ctx: facet_constraints=%s, replica=%s, latests=%s',
+        LOGGER.debug('ctx: facet_constraints=%s, replica=%s, latests=%s',
                      ctx.facet_constraints, ctx.replica, ctx.latest)
 
         self.show_status("Datasets found=%d" % ctx.hit_count, 0)
@@ -191,14 +191,14 @@ class ESGSearch(object):
             self.count = self.count + 1
             self.result.append(ds.json)
             for key in ['number_of_files', 'number_of_aggregations', 'size']:
-                # logger.debug(ds.json)
+                # LOGGER.debug(ds.json)
                 self.summary[key] = self.summary[key] + ds.json.get(key, 0)
 
         self.summary['ds_search_duration_secs'] = (datetime.now() - t0).seconds
         self.summary['size_mb'] = self.summary.get('size', 0) / 1024 / 1024
         self.summary['size_gb'] = self.summary.get('size_mb', 0) / 1024
 
-        logger.debug('search_type = %s ', search_type)
+        LOGGER.debug('search_type = %s ', search_type)
 
         if search_type == 'Dataset':
             pass
@@ -211,7 +211,7 @@ class ESGSearch(object):
         else:
             raise Exception('unknown search type: %s', search_type)
 
-        logger.debug('summary=%s', self.summary)
+        LOGGER.debug('summary=%s', self.summary)
         self.show_status('Done', 100)
 
         return (self.result, self.summary, ctx.facet_counts)
@@ -224,31 +224,31 @@ class ESGSearch(object):
         return (start_index, stop_index, max_count)
 
     def _file_context(self, dataset):
-        logger.debug('file_context: checking for local replica')
+        LOGGER.debug('file_context: checking for local replica')
         f_ctx = dataset.file_context()
         # if distrib search check if we have a replica locally
         if self.conn.distrib:
             ctx = self.local_ctx.constrain(instance_id=dataset.json.get('instance_id'))
             if ctx.hit_count == 1:
-                logger.info('found local replica')
+                LOGGER.info('found local replica')
                 datasets = ctx.search(ignore_facet_check=True)
                 f_ctx = datasets[0].file_context()
             else:
-                logger.info('no local replica found')
+                LOGGER.info('no local replica found')
         return f_ctx
 
     def _aggregation_context(self, dataset):
-        logger.debug('aggregation_context: checking for local replica')
+        LOGGER.debug('aggregation_context: checking for local replica')
         agg_ctx = dataset.aggregation_context()
         # if distrib search check if we have a replica locally
         if self.conn.distrib:
             ctx = self.local_ctx.constrain(instance_id=dataset.json.get('instance_id'))
             if ctx.hit_count == 1:
-                logger.info('found local replica')
+                LOGGER.info('found local replica')
                 datasets = ctx.search(ignore_facet_check=True)
                 agg_ctx = datasets[0].aggregation_context()
             else:
-                logger.info('no local replica found')
+                LOGGER.info('no local replica found')
         return agg_ctx
 
     # The threader thread pulls an worker from the queue and processes it
@@ -261,18 +261,18 @@ class ESGSearch(object):
             try:
                 self._file_search_job(**worker)
             except Exception:
-                logger.exception('Search job failed! Could not retrieve files/aggregations.')
+                LOGGER.exception('Search job failed! Could not retrieve files/aggregations.')
             # completed with the job
             self.job_queue.task_done()
 
     def _file_search_job(self, f_ctx, start_date, end_date):
-        # logger.debug('num files: %d', f_ctx.hit_count)
-        logger.debug('facet constraints=%s', f_ctx.facet_constraints)
+        # LOGGER.debug('num files: %d', f_ctx.hit_count)
+        LOGGER.debug('facet constraints=%s', f_ctx.facet_constraints)
         for f in f_ctx.search(ignore_facet_check=True):
             if not temporal_filter(f.filename, start_date, end_date):
                 continue
             with self.result_lock:
-                logger.debug('add file %s', f.filename)
+                LOGGER.debug('add file %s', f.filename)
                 if f.download_url == 'null':
                     self.summary['number_of_invalid_files'] = self.summary['number_of_invalid_files'] + 1
                 else:
@@ -338,10 +338,10 @@ class ESGSearch(object):
             agg_ctx = self._aggregation_context(ds)
             agg_ctx = agg_ctx.constrain(**constraints.mixed())
             agg_ctx.freetext_constrain = "*:*"
-            # logger.debug('num aggregations: %d', agg_ctx.hit_count)
-            logger.debug('facet constraints=%s', agg_ctx.facet_constraints)
+            # LOGGER.debug('num aggregations: %d', agg_ctx.hit_count)
+            LOGGER.debug('facet constraints=%s', agg_ctx.facet_constraints)
             if agg_ctx.hit_count == 0:
-                logger.warn('dataset %s has no aggregations!', ds.dataset_id)
+                LOGGER.warn('dataset %s has no aggregations!', ds.dataset_id)
                 continue
             for agg in agg_ctx.search(ignore_facet_check=True):
                 self.summary['number_of_selected_aggregations'] = self.summary['number_of_selected_aggregations'] + 1
