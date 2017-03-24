@@ -92,15 +92,18 @@ class ESGSearch(object):
             monitor=None):
         # replica is  boolean defining whether to return master records
         # or replicas, or None to return both.
-        self.replica = False
         if replica is True:
-            self.replica = True
+            self.replica = None  # master + replica
+        else:
+            self.replica = False  # only master
 
         # latest: A boolean defining whether to return only latest versions
         #    or only non-latest versions, or None to return both.
-        self.latest = True
-        if latest is False:
-            self.latest = None
+        if latest is True:
+            self.latest = True  # only latest versions
+        else:
+            self.latest = None  # all versions
+
         self.monitor = monitor
 
         from pyesgf.search import SearchConnection
@@ -116,7 +119,7 @@ class ESGSearch(object):
         else:
             self.monitor(message, progress)
 
-    def search(self, constraints=[('project', 'CORDEX')], query='*',
+    def search(self, constraints=[('project', 'CORDEX')], query=None,
                start=None, end=None, limit=1, offset=0,
                search_type='Dataset',
                temporal=False):
@@ -129,8 +132,8 @@ class ESGSearch(object):
 
         LOGGER.debug('constraints=%s', my_constraints)
 
-        if query is None or len(query.strip()) == 0:
-            query = '*:*'
+        if not query or query == '*':
+            query = None
         LOGGER.debug('query: %s', query)
 
         # TODO: check type of start, end
@@ -149,6 +152,7 @@ class ESGSearch(object):
                 to_timestamp = end.strftime(timestamp_format)
             else:
                 to_timestamp = None
+            LOGGER.debug("from=%s, to=%s", from_timestamp, to_timestamp)
             ctx = self.conn.new_context(fields=self.fields,
                                         replica=self.replica,
                                         latest=self.latest,

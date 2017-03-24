@@ -168,7 +168,8 @@ class EsgSearch(GenericWPS):
     def _process(self, inputs):
         self.wps_inputs.append(('url', self.search_url))
         self.wps_inputs.append(('constraints', self.constraints))
-        self.wps_inputs.append(('query', self.query))
+        if self.query:
+            self.wps_inputs.append(('query', self.query))
         self.wps_inputs.append(('limit', str(self.limit)))
         self.wps_inputs.append(('search_type', self.search_type))
         self.wps_inputs.append(('distrib', str(self.distrib)))
