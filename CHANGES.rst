@@ -1,6 +1,12 @@
 Change History
 **************
 
+0.6.4 (2017-03-xx)
+==================
+
+* fixed query search parameter.
+* added backward compatibility for constraints search parameter.
+
 0.6.3 (2017-03-21)
 ==================
 
