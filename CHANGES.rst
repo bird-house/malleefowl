@@ -5,6 +5,7 @@ Change History
 ==================
 
 * fixed query search parameter.
+* fixed replica search parameter.
 * added backward compatibility for constraints search parameter.
 
 0.6.3 (2017-03-21)
