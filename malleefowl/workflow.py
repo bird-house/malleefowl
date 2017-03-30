@@ -1,5 +1,6 @@
 from owslib.wps import WebProcessingService
 from owslib.wps import ComplexDataInput
+from owslib.wps import BoundingBoxDataInput
 
 from dispel4py.workflow_graph import WorkflowGraph
 from dispel4py import simple_process
@@ -76,29 +77,39 @@ class GenericWPS(MonitorPE):
 
         if execution.isSucceded():
             for output in execution.processOutputs:
-                if output.reference is not None:
-                    self.monitor(
-                        '{0.identifier}={0.reference} ({0.mimeType})'.
-                        format(output),
-                        progress)
-                else:
-                    self.monitor(
-                        '{0}={1}'.
-                        format(output.identifier, ", ".join(output.data)),
-                        progress)
+                self.monitor('ouput={0.identifier}'.format(output), progress)
         else:
             self.monitor('\n'.join(
                 ['ERROR: {0.text} code={0.code} locator={0.locator})'.
                     format(ex) for ex in execution.errors]), progress)
 
     def execute(self):
+        # build wps inputs
+        process = self.wps.describeprocess(self.identifier)
+        complex_inpts = []
+        bbox_inpts = []
+        for inpt in process.dataInputs:
+            if 'ComplexData' in inpt.dataType:
+                complex_inpts.append(inpt.identifier)
+            elif 'BoundingBoxData' in inpt.dataType:
+                bbox_inpts.append(inpt.identifier)
+        inputs = []
+        for inpt in self.wps_inputs:
+            logger.debug("input=%s", inpt)
+            if inpt[0] in complex_inpts:
+                inputs.append((inpt[0], ComplexDataInput(inpt[1])))
+            elif inpt[0] in bbox_inpts:
+                inputs.append((inpt[0], BoundingBoxDataInput(inpt[1])))
+            else:
+                inputs.append(inpt)
+        # build wps outputs
         output = []
         if self.wps_output is not None:
             output = [(self.wps_output, True)]
         logger.debug("execute inputs=%s", self.wps_inputs)
         execution = self.wps.execute(
             identifier=self.identifier,
-            inputs=self.wps_inputs,
+            inputs=inputs,
             output=output,
             lineage=True)
         self.monitor_execution(execution)
@@ -118,11 +129,9 @@ class GenericWPS(MonitorPE):
                                     format(ex) for ex in execution.errors])
             raise Exception(failure_msg)
 
-    def _set_inputs(self, inputs, complextype=False):
+    def _set_inputs(self, inputs):
         if self.INPUT_NAME in inputs:
             for value in inputs[self.INPUT_NAME]:
-                if complextype is True:
-                    value = ComplexDataInput(value)
                 self.wps_inputs.append((self.wps_resource, value))
 
     def process(self, inputs):
@@ -135,7 +144,7 @@ class GenericWPS(MonitorPE):
             raise
 
     def _process(self, inputs):
-        self._set_inputs(inputs, complextype=True)
+        self._set_inputs(inputs)
         return self.execute()
 
 
@@ -227,7 +236,7 @@ class Download(GenericWPS):
         GenericWPS.__init__(self, url, 'download', output='output', headers=headers)
 
     def _process(self, inputs):
-        self._set_inputs(inputs, complextype=False)
+        self._set_inputs(inputs)
         result = self.execute()
 
         # read json document with list of urls
