@@ -83,8 +83,7 @@ class GenericWPS(MonitorPE):
                 ['ERROR: {0.text} code={0.code} locator={0.locator})'.
                     format(ex) for ex in execution.errors]), progress)
 
-    def execute(self):
-        # build wps inputs
+    def _build_wps_inputs(self):
         process = self.wps.describeprocess(self.identifier)
         complex_inpts = []
         bbox_inpts = []
@@ -102,15 +101,20 @@ class GenericWPS(MonitorPE):
                 inputs.append((inpt[0], BoundingBoxDataInput(inpt[1])))
             else:
                 inputs.append(inpt)
-        # build wps outputs
-        output = []
+        return inputs
+
+    def _build_wps_outputs(self):
+        outputs = []
         if self.wps_output is not None:
-            output = [(self.wps_output, True)]
+            outputs = [(self.wps_output, True)]
+        return outputs
+
+    def execute(self):
         logger.debug("execute inputs=%s", self.wps_inputs)
         execution = self.wps.execute(
             identifier=self.identifier,
-            inputs=inputs,
-            output=output,
+            inputs=self._build_wps_inputs(),
+            output=self._build_wps_outputs(),
             lineage=True)
         self.monitor_execution(execution)
 
