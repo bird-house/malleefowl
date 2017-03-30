@@ -9,7 +9,7 @@ from dispel4py.base import BasePE
 from malleefowl.config import wps_url
 
 import logging
-logger = logging.getLogger("PYWPS")
+LOGGER = logging.getLogger("PYWPS")
 
 
 class MonitorPE(BasePE):
@@ -27,7 +27,7 @@ class MonitorPE(BasePE):
                     self.identifier, message),
                     progress)
             else:
-                logger.info('STATUS ({0}: {2}/100) - {1}'.format(
+                LOGGER.info('STATUS ({0}: {2}/100) - {1}'.format(
                     self.identifier, message, progress))
         self.monitor = log
         self._monitor = None
@@ -70,7 +70,7 @@ class GenericWPS(MonitorPE):
             try:
                 execution.checkStatus(sleepSecs=3)
             except:
-                logger.exception("Could not read status xml document.")
+                LOGGER.exception("Could not read status xml document.")
             else:
                 progress = self.progress(execution)
                 self.monitor(execution.statusMessage, progress)
@@ -94,7 +94,7 @@ class GenericWPS(MonitorPE):
                 bbox_inpts.append(inpt.identifier)
         inputs = []
         for inpt in self.wps_inputs:
-            logger.debug("input=%s", inpt)
+            LOGGER.debug("input=%s", inpt)
             if inpt[0] in complex_inpts:
                 inputs.append((inpt[0], ComplexDataInput(inpt[1])))
             elif inpt[0] in bbox_inpts:
@@ -110,7 +110,7 @@ class GenericWPS(MonitorPE):
         return outputs
 
     def execute(self):
-        logger.debug("execute inputs=%s", self.wps_inputs)
+        LOGGER.debug("execute inputs=%s", self.wps_inputs)
         execution = self.wps.execute(
             identifier=self.identifier,
             inputs=self._build_wps_inputs(),
@@ -144,7 +144,7 @@ class GenericWPS(MonitorPE):
             if result is not None:
                 return result
         except Exception:
-            logger.exception("process failed!")
+            LOGGER.exception("process failed!")
             raise
 
     def _process(self, inputs):
@@ -228,7 +228,7 @@ class SolrSearch(MonitorPE):
         if len(urls) == 0:
             raise Exception('Could not find any files.')
         elif len(urls) != search_result.hits:
-            logger.warn(
+            LOGGER.warn(
                 'Not all found items from solr search have a download url.')
         result = {}
         result[self.OUTPUT_NAME] = urls
