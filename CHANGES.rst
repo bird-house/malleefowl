@@ -1,6 +1,12 @@
 Change History
 **************
 
+current
+=======
+
+handle boundingbox in workflow.
+
+
 0.6.4 (2017-03-27)
 ==================
 
