@@ -4,8 +4,8 @@ Change History
 current
 =======
 
-handle boundingbox in workflow.
-
+* handle boundingbox in workflow.
+* updated pywps recipe 0.8.8.
 
 0.6.4 (2017-03-27)
 ==================
