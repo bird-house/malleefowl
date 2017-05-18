@@ -1,11 +1,12 @@
 Change History
 **************
 
-current
-=======
+0.6.5 (2017-05-18)
+==================
 
 * handle boundingbox in workflow.
-* updated pywps recipe 0.8.8.
+* updated pywps recipe 0.9.0.
+* added wsgi application.
 
 0.6.4 (2017-03-27)
 ==================
