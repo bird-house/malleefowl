@@ -2,7 +2,7 @@
 FROM birdhouse/bird-base:latest
 MAINTAINER https://github.com/bird-house/malleefowl
 
-LABEL Description="malleefowl application" Vendor="Birdhouse" Version="0.4.2"
+LABEL Description="malleefowl application" Vendor="Birdhouse" Version="0.6"
 
 # Configure hostname and ports for services
 ENV HTTP_PORT 8080
