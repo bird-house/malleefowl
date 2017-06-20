@@ -62,7 +62,8 @@ class Download(Process):
             LOGGER.debug('Using no credentials')
 
         def monitor(msg, progress):
-            response.update_status(msg, progress)
+            LOGGER.info("%s - (%d/100)", msg, progress)
+            # response.update_status(msg, progress)
 
         files = download_files(
             urls=urls,
