@@ -40,7 +40,7 @@ dependencies:
 - dispel4py=1.0.1
 - threddsclient=0.3.4
 - pysolr=3.3.2
-- wget=2.2
+- wget
 - pip:
   - genshi==0.7
   - sphinx-autoapi==0.4.0
