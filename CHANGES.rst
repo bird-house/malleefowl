@@ -1,6 +1,13 @@
 Change History
 **************
 
+current
+==================
+
+* fixed headers in solr and thredds workflow.
+* updated pywps recipe 0.9.1.
+
+
 0.6.5 (2017-05-18)
 ==================
 
