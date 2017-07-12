@@ -254,8 +254,8 @@ class Download(GenericWPS):
 
 
 class ThreddsDownload(GenericWPS):
-    def __init__(self, url, catalog_url):
-        GenericWPS.__init__(self, url, 'thredds_download', output='output')
+    def __init__(self, url, catalog_url, headers=None):
+        GenericWPS.__init__(self, url, 'thredds_download', output='output', headers=headers)
         self.catalog_url = catalog_url
 
     def _process(self, inputs):
@@ -306,12 +306,12 @@ def esgf_workflow(source, worker, monitor=None, headers=None):
     return dict(worker=dict(status_location=status_location, status=status))
 
 
-def thredds_workflow(source, worker, monitor=None):
+def thredds_workflow(source, worker, monitor=None, headers=None):
     graph = WorkflowGraph()
 
-    download = ThreddsDownload(url=wps_url(), **source)
+    download = ThreddsDownload(url=wps_url(), headers=headers, **source)
     download.set_monitor(monitor, 10, 50)
-    doit = GenericWPS(**worker)
+    doit = GenericWPS(headers=headers, **worker)
     doit.set_monitor(monitor, 50, 100)
 
     graph.connect(download, download.OUTPUT_NAME, doit, doit.INPUT_NAME)
@@ -350,7 +350,7 @@ def solr_workflow(source, worker, monitor=None, headers=None):
 def run(workflow, monitor=None, headers=None):
     if 'thredds' in workflow['source']:
         return thredds_workflow(source=workflow['source']['thredds'],
-                                worker=workflow['worker'], monitor=monitor)
+                                worker=workflow['worker'], monitor=monitor, headers=headers)
     elif 'esgf' in workflow['source']:
         return esgf_workflow(source=workflow['source']['esgf'],
                              worker=workflow['worker'], monitor=monitor, headers=headers)
