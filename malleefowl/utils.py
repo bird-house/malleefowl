@@ -9,7 +9,7 @@ import os
 from malleefowl import config
 
 import logging
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger("PYWPS")
 
 
 def esgf_archive_path(url):
@@ -19,18 +19,18 @@ def esgf_archive_path(url):
 
     if 'thredds/fileServer/' in url:
         url_path = url.split('thredds/fileServer/')[1]
-        logger.debug('check thredds archive: url_path=%s', url_path)
+        LOGGER.debug('check thredds archive: url_path=%s', url_path)
         # TODO: workaround for dkrz archive path
         rel_path = '/'.join(url_path.split('/')[1:])
         for root_path in config.archive_root():
             file_path = join(root_path, rel_path)
-            logger.debug('file_path = %s', file_path)
+            LOGGER.debug('file_path = %s', file_path)
             if isfile(file_path):
-                logger.info('found in archive: %s', url)
+                LOGGER.info('found in archive: %s', url)
                 archive_path = 'file://' + file_path
                 break
         if archive_path is None:
-            logger.info('not found in archive: %s', url)
+            LOGGER.info('not found in archive: %s', url)
     return archive_path
 
 
@@ -86,7 +86,7 @@ def within_date_range(timesteps, start=None, end=None):
 
 def filter_timesteps(timesteps, aggregation="monthly", start=None, end=None):
     from dateutil.parser import parse as date_parser
-    logger.debug("aggregation: %s", aggregation)
+    LOGGER.debug("aggregation: %s", aggregation)
 
     if (timesteps is None or len(timesteps) == 0):
         return []
@@ -157,9 +157,9 @@ def nc_copy(source, target, overwrite=True, time_dimname='time', nchunk=10, ista
     unlimdim = None
 
     # create global attributes.
-    logger.info('copying global attributes ...')
+    LOGGER.info('copying global attributes ...')
     nc_out.setncatts(nc_in.__dict__)
-    logger.info('copying dimensions ...')
+    LOGGER.info('copying dimensions ...')
     for dimname, dim in nc_in.dimensions.items():
         if dim.isunlimited() or dimname == time_dimname:
             unlimdimname = dimname
@@ -167,13 +167,13 @@ def nc_copy(source, target, overwrite=True, time_dimname='time', nchunk=10, ista
             if istop == -1:
                 istop = len(unlimdim)
             nc_out.createDimension(dimname, istop - istart)
-            logger.debug('unlimited dimension = %s, length = %d', unlimdimname, len(unlimdim))
+            LOGGER.debug('unlimited dimension = %s, length = %d', unlimdimname, len(unlimdim))
         else:
             nc_out.createDimension(dimname, len(dim))
 
     # create variables.
     for varname, ncvar in nc_in.variables.items():
-        logger.info('copying variable %s', varname)
+        LOGGER.info('copying variable %s', varname)
         # is there an unlimited dimension?
         if unlimdimname and unlimdimname in ncvar.dimensions:
             hasunlimdim = True
@@ -201,7 +201,7 @@ def nc_copy(source, target, overwrite=True, time_dimname='time', nchunk=10, ista
                     nmax = n + nchunk
                     if nmax > istop:
                         nmax = istop
-                    logger.debug('copy chunk [%d:%d]', n, nmax)
+                    LOGGER.debug('copy chunk [%d:%d]', n, nmax)
                     try:
                         var[n - istart:nmax - istart] = ncvar[n:nmax]
                     except:
