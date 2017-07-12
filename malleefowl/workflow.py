@@ -323,7 +323,7 @@ def thredds_workflow(source, worker, monitor=None):
     return dict(worker=dict(status_location=status_location, status=status))
 
 
-def solr_workflow(source, worker, monitor=None):
+def solr_workflow(source, worker, monitor=None, headers=None):
     graph = WorkflowGraph()
 
     solrsearch = SolrSearch(
@@ -331,9 +331,9 @@ def solr_workflow(source, worker, monitor=None):
         query=source.get('query'),
         filter_query=source.get('filter_query'))
     solrsearch.set_monitor(monitor, 0, 10)
-    download = Download(url=wps_url())
+    download = Download(url=wps_url(), headers=headers)
     download.set_monitor(monitor, 10, 50)
-    doit = GenericWPS(**worker)
+    doit = GenericWPS(headers=headers, **worker)
     doit.set_monitor(monitor, 50, 100)
 
     graph.connect(solrsearch, solrsearch.OUTPUT_NAME,
@@ -356,6 +356,6 @@ def run(workflow, monitor=None, headers=None):
                              worker=workflow['worker'], monitor=monitor, headers=headers)
     elif 'solr' in workflow['source']:
         return solr_workflow(source=workflow['source']['solr'],
-                             worker=workflow['worker'], monitor=monitor)
+                             worker=workflow['worker'], monitor=monitor, headers=headers)
     else:
         raise Exception("Unknown workflow type")
