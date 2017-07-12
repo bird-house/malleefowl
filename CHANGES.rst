@@ -6,6 +6,7 @@ current
 
 * fixed headers in solr and thredds workflow.
 * updated pywps recipe 0.9.1.
+* added config option archive_node to handle different archive root paths.
 
 
 0.6.5 (2017-05-18)
