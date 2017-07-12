@@ -3,7 +3,11 @@ import tempfile
 from pywps import configuration
 
 import logging
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger("PYWPS")
+
+DEFAULT_NODE = 'default'
+DKRZ_NODE = 'dkrz'
+IPSL_NODE = 'ipsl'
 
 
 def wps_url():
@@ -26,3 +30,10 @@ def archive_root():
     else:
         path_list = []
     return path_list
+
+
+def archive_node():
+    node = configuration.get_config_value("extra", "archive_node")
+    node = node or 'default'
+    node = node.lower()
+    return node

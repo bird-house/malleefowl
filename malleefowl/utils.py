@@ -20,8 +20,16 @@ def esgf_archive_path(url):
     if 'thredds/fileServer/' in url:
         url_path = url.split('thredds/fileServer/')[1]
         LOGGER.debug('check thredds archive: url_path=%s', url_path)
-        # TODO: workaround for dkrz archive path
-        rel_path = '/'.join(url_path.split('/')[1:])
+        # TODO: workaround for different archive paths at esgf data nodes
+        if config.archive_node() == config.IPSL_NODE:
+            # cmip5/output1 -> CMIP5/output1
+            rel_path = url_path.split('/')[0].upper() + '/' + '/'.join(url_path.split('/')[1:])
+        elif config.archive_node() == config.DKRZ_NODE:
+            # cmip5/cmip5/output1 -> cmip5/output1
+            rel_path = '/'.join(url_path.split('/')[1:])
+        else:
+            # like dkrz
+            rel_path = '/'.join(url_path.split('/')[1:])
         for root_path in config.archive_root():
             file_path = join(root_path, rel_path)
             LOGGER.debug('file_path = %s', file_path)
