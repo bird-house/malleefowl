@@ -15,22 +15,26 @@ dependencies:
 - mako
 # tests
 - pytest
+# pep8
 - flake8
+- pycodestyle
 # ipython
 - ipython
 # docs
 - sphinx
 - sphinx_rtd_theme
+- doc8
 # wps
 - pywps=4.0.0
 - owslib
 - nginx=1.10.3
-- supervisor=3.3.1
-- gunicorn=19.1.0
+- supervisor=3.3
+- gunicorn=19.7
 - gevent=1.2
-- eventlet=0.19.0
+- eventlet
 - lxml=3.7
 - libxslt=1.1.29
+- genshi
 # malleefowl
 - python-dateutil=2.6
 - netcdf4=1.2.4
@@ -42,6 +46,4 @@ dependencies:
 - pysolr=3.3.2
 - wget
 - pip:
-  - genshi==0.7
   - sphinx-autoapi==0.4.0
-#  - eventlet==0.19.0
