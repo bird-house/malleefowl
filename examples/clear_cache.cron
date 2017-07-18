@@ -1,4 +1,0 @@
-33 22 * * * su - nobody -c 'find /opt/birdhouse/var/lib/pywps/cache -type f -name "*.nc" -atime +3 -print0 | xargs -0r rm'
-43 22 * * * su - nobody -c 'find /opt/birdhouse/var/lib/pywps/outputs -type f -ctime +14 -print0 | xargs -0r rm'
-53 22 * * * su - nobody -c 'find /opt/birdhouse/var/lib/pywps/tmp -name "pywps_process_*" -type d -ctime +2 -print0 | xargs -0r rm -rf'
-
