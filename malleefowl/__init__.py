@@ -1,4 +1,4 @@
 from .wsgi import application
 from .demo import main
 
-__version__ = "0.6.5"
+__version__ = "0.7_dev"
