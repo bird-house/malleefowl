@@ -1,12 +1,14 @@
 Change History
 **************
 
-current
+0.6.6 (2017-08-10)
 ==================
 
 * fixed headers in solr and thredds workflow.
-* updated pywps recipe 0.9.1.
+* updated pywps recipe 0.9.2.
+* postgres db can be configured.
 * added config option archive_node to handle different archive root paths.
+* removed unused files (todo, examples, ...)
 
 
 0.6.5 (2017-05-18)
