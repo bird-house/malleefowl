@@ -21,7 +21,7 @@ Contents:
 
    installation
    configuration
-   testing
+   dev_guide
    docker
    tutorials/index
    processes/index
