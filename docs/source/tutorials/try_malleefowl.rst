@@ -8,8 +8,8 @@ Go through this tutorial step by step.
     :depth: 1
 
 
-Install malleefowl with defaults
---------------------------------
+Step 0: Install malleefowl with defaults
+----------------------------------------
 
 .. code-block:: sh
 
@@ -26,8 +26,8 @@ Install malleefowl with defaults
     # open the capabilities document
     $ firefox http://localhost:8091/wps
 
-Install birdy
--------------
+Step 1: Install birdy
+---------------------
 
 We are using birdy in the examples, a WPS command line client.
 
@@ -36,8 +36,8 @@ We are using birdy in the examples, a WPS command line client.
     # install it via conda
     $ conda install -c birdhouse birdhouse-birdy
 
-Check if birdy works
---------------------
+Step 2: Check if birdy works
+----------------------------
 
 .. code-block:: sh
 
@@ -46,8 +46,8 @@ Check if birdy works
     # show a list of available command (wps processes)
     $ birdy -h
 
-Run the download process
-------------------------
+Step 3: Run the download process
+--------------------------------
 
 Make sure birdy works and is pointing to malleefowl ... see above.
 
@@ -61,8 +61,8 @@ Make sure birdy works and is pointing to malleefowl ... see above.
         https://www.esrl.noaa.gov/psd/thredds/fileServer/Datasets/ncep.reanalysis2/surface/mslp.1979.nc
 
 
-Install Phoenix
----------------
+Step 4: Install Phoenix
+-----------------------
 
 Phoenix is a web client for WPS and comes by default with an WPS security proxy (twitcher).
 
@@ -73,23 +73,23 @@ Phoenix is a web client for WPS and comes by default with an WPS security proxy 
     $ make clean install
     $ make restart
 
-Login to Phoenix and get twitcher access token
------------------------------------------------
+Step 5: Login to Phoenix and get twitcher access token
+------------------------------------------------------
 
 .. code-block:: sh
 
     # login ... by default admin password is "querty"
     $ firefox https://localhost:8443/account/login
 
-Copy the twitcher access token in Phoenix
------------------------------------------
+Step 6: Copy the twitcher access token in Phoenix
+-------------------------------------------------
 
 #. Go to your profile.
 #. Choose the ``Twitcher access token`` tab.
 #. Copy the access token.
 
-Access malleefowl behind the OWS proxy with access token
---------------------------------------------------------
+Step 7: Access malleefowl behind the OWS proxy with access token
+-----------------------------------------------------------------
 
 .. code-block:: sh
 
@@ -103,8 +103,8 @@ Access malleefowl behind the OWS proxy with access token
     $ birdy download --token 3d8c24eeebb143b3a199ba8a0e045f93 --resource \
         https://www.esrl.noaa.gov/psd/thredds/fileServer/Datasets/ncep.reanalysis2/surface/mslp.1979.nc
 
-Get a ESGF certificate using Phoenix
-------------------------------------
+Step 8: Get a ESGF certificate using Phoenix
+--------------------------------------------
 
 #. Go to your profile.
 #. Choose the ``ESGF credentials`` tab.
@@ -112,8 +112,8 @@ Get a ESGF certificate using Phoenix
 #. Choose your ESGF provider, enter your account details and press ``Submit``.
 
 
-Download a file from ESGF
--------------------------
+Step 9: Download a file from ESGF
+---------------------------------
 
 Make sure birdy works and points to the proxy url of malleefowl ... see above.
 
