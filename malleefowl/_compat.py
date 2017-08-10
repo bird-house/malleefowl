@@ -1,1 +1,1 @@
-from pywps._compat import *
+from pywps._compat import urlparse
