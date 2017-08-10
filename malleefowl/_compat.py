@@ -1,1 +1,1 @@
-from pywps._compat import urlparse
+from pywps._compat import PY2, urlparse
