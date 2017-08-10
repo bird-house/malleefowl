@@ -6,7 +6,7 @@ from . import wsgi
 from ._compat import urlparse
 
 import logging
-LOGGER = logging.getLogger('demo')
+LOGGER = logging.getLogger('PYWPS')
 
 
 def get_host():
@@ -61,13 +61,13 @@ def main():
     parser.add_argument('-d', '--daemon',
                         action='store_true', help="run in daemon mode")
     args = parser.parse_args()
-    cfg_files = []
+    cfgfiles = []
     if args.config:
-        cfg_files.append(args.config)
+        cfgfiles.append(args.config)
         LOGGER.warn('using pywps configuration: %s', args.config)
     if args.debug:
-        cfg_files.append(os.path.join(os.path.dirname(__file__), 'debug.cfg'))
-    app = wsgi.create_app(cfg_files)
+        cfgfiles.append(os.path.join(os.path.dirname(__file__), 'debug.cfg'))
+    app = wsgi.create_app(cfgfiles)
     # let's start the service ...
     if args.daemon:
         # daemon (fork) mode
