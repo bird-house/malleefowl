@@ -84,9 +84,9 @@ Login to Phoenix and get twitcher access token
 Copy the twitcher access token in Phoenix
 -----------------------------------------
 
-1. Go to your profile.
-1. Choose the ``Twitcher access token`` tab.
-1. Copy the access token.
+#. Go to your profile.
+#. Choose the ``Twitcher access token`` tab.
+#. Copy the access token.
 
 Access malleefowl behind the OWS proxy with access token
 --------------------------------------------------------
@@ -106,10 +106,10 @@ Access malleefowl behind the OWS proxy with access token
 Get a ESGF certificate using Phoenix
 ------------------------------------
 
-1. Go to your profile.
-1. Choose the ``ESGF credentials`` tab.
-1. Use the green button ``Update credentials``.
-1. Choose your ESGF provider, enter your account details and press ``Submit``.
+#. Go to your profile.
+#. Choose the ``ESGF credentials`` tab.
+#. Use the green button ``Update credentials``.
+#. Choose your ESGF provider, enter your account details and press ``Submit``.
 
 
 Download a file from ESGF
