@@ -1,6 +1,13 @@
 Change History
 **************
 
+0.7_dev
+==================
+
+* added demo service for testing.
+* cleaned up documentation.
+* added tutorial.
+
 0.6.6 (2017-08-10)
 ==================
 
