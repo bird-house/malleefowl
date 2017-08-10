@@ -59,3 +59,72 @@ Make sure birdy works and is pointing to malleefowl ... see above.
     # download a netcdf file from a public thredds service
     $ birdy download --resource \
         https://www.esrl.noaa.gov/psd/thredds/fileServer/Datasets/ncep.reanalysis2/surface/mslp.1979.nc
+
+
+Install Phoenix
+---------------
+
+Phoenix is a web client for WPS and comes by default with an WPS security proxy (twitcher).
+
+.. code-block:: sh
+
+    $ git clone https://github.com/bird-house/pyramid-phoenix.git
+    $ cd pyramid-phoenix
+    $ make clean install
+    $ make restart
+
+Login to Phoenix and get twitcher access token
+-----------------------------------------------
+
+.. code-block:: sh
+
+    # login ... by default admin password is "querty"
+    $ firefox https://localhost:8443/account/login
+
+Copy the twitcher access token in Phoenix
+-----------------------------------------
+
+1. Go to your profile.
+1. Choose the ``Twitcher access token`` tab.
+1. Copy the access token.
+
+Access malleefowl behind the OWS proxy with access token
+--------------------------------------------------------
+
+.. code-block:: sh
+
+    # configure wps service
+    $ export WPS_SERVICE=https://localhost:8443/ows/proxy/malleefowl
+
+    # check if it works
+    $ birdy -h
+
+    # run the download again ... you need the access token
+    $ birdy download --token 3d8c24eeebb143b3a199ba8a0e045f93 --resource \
+        https://www.esrl.noaa.gov/psd/thredds/fileServer/Datasets/ncep.reanalysis2/surface/mslp.1979.nc
+
+Get a ESGF certificate using Phoenix
+------------------------------------
+
+1. Go to your profile.
+1. Choose the ``ESGF credentials`` tab.
+1. Use the green button ``Update credentials``.
+1. Choose your ESGF provider, enter your account details and press ``Submit``.
+
+
+Download a file from ESGF
+-------------------------
+
+Make sure birdy works and points to the proxy url of malleefowl ... see above.
+
+Choose a file from the ESGF archive you would like to download and make sure you have dowload permissions.
+
+You can choose the ESGF `search browser <https://localhost:8443/esgfsearch>`_ in Phoenix
+or an `ESGF portal <https://esgf-data.dkrz.de/>`_.
+
+.. code-block:: sh
+
+    # try the download ... in this example with a CORDEX file.
+    # make sure your twitcher token and your ESGF cert are still valid.
+    $ birdy download --token 3d8c24eeebb143b3a199ba8a0e045f93 --resource \
+        http://esgf1.dkrz.de/thredds/fileServer/cordex/cordex/output/EUR-44/MPI-CSC/MPI-M-MPI-ESM-LR/historical/r1i1p1/MPI-CSC-REMO2009/v1/mon/tas/v20150609/tas_EUR-44_MPI-M-MPI-ESM-LR_historical_r1i1p1_MPI-CSC-REMO2009_v1_mon_200101-200512.nc
