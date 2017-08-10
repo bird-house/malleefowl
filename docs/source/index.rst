@@ -10,7 +10,8 @@ Introduction
 Malleefowl (the bird)
    *Malleefowl are shy, wary, solitary birds that usually fly only to escape danger or reach a tree to roost in. Although very active, they are seldom seen [..]* (`Wikipedia <https://en.wikipedia.org/wiki/Malleefowl>`_).
 
-Malleefowl is a Web Processing Service with a collection of processes to access climate data (ESGF, Thredds Catalogs, ...).
+Malleefowl is a `Web Processing Service <http://pywps.org>`_ with a collection
+of processes to access climate data (ESGF, Thredds Catalogs, ...).
 
 Malleefowl is part of the `Birdhouse`_ project.
 
