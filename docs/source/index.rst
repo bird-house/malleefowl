@@ -17,12 +17,13 @@ Malleefowl is part of the `Birdhouse`_ project.
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    installation
    configuration
    testing
    docker
+   tutorials/index
    processes/index
 
 Indices and tables
