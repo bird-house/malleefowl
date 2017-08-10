@@ -6,7 +6,8 @@ from . import wsgi
 from ._compat import urlparse
 
 import logging
-LOGGER = logging.getLogger('PYWPS')
+logging.basicConfig(format='%(message)s', level=logging.INFO)
+LOGGER = logging.getLogger('DEMO')
 
 
 def get_host():
