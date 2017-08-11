@@ -7,7 +7,6 @@ from .common import TESTDATA, client_for
 from malleefowl.processes.wps_download import Download
 
 
-# @pytest.mark.skip(reason="no way of currently testing this")
 @pytest.mark.online
 def test_wps_download():
     client = client_for(Service(processes=[Download()]))
