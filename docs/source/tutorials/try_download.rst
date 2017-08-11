@@ -73,12 +73,12 @@ Phoenix is a web client for WPS and comes by default with an WPS security proxy 
     $ make clean install
     $ make restart
 
-Step 5: Login to Phoenix and get twitcher access token
-------------------------------------------------------
+Step 5: Login to Phoenix
+------------------------
 
 .. code-block:: sh
 
-    # login ... by default admin password is "querty"
+    # login ... by default admin password is "qwerty"
     $ firefox https://localhost:8443/account/login
 
 Step 6: Copy the twitcher access token in Phoenix
@@ -100,7 +100,9 @@ Step 7: Access malleefowl behind the OWS proxy with access token
     $ birdy -h
 
     # run the download again ... you need the access token
-    $ birdy --token 3d8c24eeebb143b3a199ba8a0e045f93 download --resource \
+    $ birdy \
+        --token 3d8c24eeebb143b3a199ba8a0e045f93 \
+        download --resource \
         https://www.esrl.noaa.gov/psd/thredds/fileServer/Datasets/ncep.reanalysis2/surface/mslp.1979.nc
 
 Step 8: Get a ESGF certificate using Phoenix
@@ -126,5 +128,7 @@ or an `ESGF portal <https://esgf-data.dkrz.de/>`_.
 
     # try the download ... in this example with a CORDEX file.
     # make sure your twitcher token and your ESGF cert are still valid.
-    $ birdy --token 3d8c24eeebb143b3a199ba8a0e045f93 download --resource \
+    $ birdy \
+        --token 3d8c24eeebb143b3a199ba8a0e045f93 \
+        download --resource \
         http://esgf1.dkrz.de/thredds/fileServer/cordex/cordex/output/EUR-44/MPI-CSC/MPI-M-MPI-ESM-LR/historical/r1i1p1/MPI-CSC-REMO2009/v1/mon/tas/v20150609/tas_EUR-44_MPI-M-MPI-ESM-LR_historical_r1i1p1_MPI-CSC-REMO2009_v1_mon_200101-200512.nc
