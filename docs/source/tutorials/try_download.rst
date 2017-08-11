@@ -24,7 +24,7 @@ Step 0: Install malleefowl with defaults
     $ make start
 
     # open the capabilities document
-    $ firefox http://localhost:8091/wps
+    $ firefox http://localhost:8091/wps?service=WPS&request=GetCapabilities
 
 Step 1: Install birdy
 ---------------------
