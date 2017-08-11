@@ -1,5 +1,5 @@
-Using Docker image
-==================
+Using Docker
+============
 
 To run Malleefowl Web Processing Service you can also use the `Docker <https://hub.docker.com/r/birdhouse/malleefowl/>`_ image::
 
@@ -20,7 +20,6 @@ Open your browser and enter the url of the supervisor service:
 Run a GetCapabilites WPS request:
 
   http://localhost:8080/wps?service=WPS&version=1.0.0&request=getcapabilities
-
 
 
 Using docker-compose
