@@ -56,7 +56,7 @@ def wget(url, use_file_url=False, credentials=None):
     :param credentials: path to credentials if security is needed to download file
     :returns: downloaded file with either file:// or system path
     """
-    LOGGER.debug('downloading %s', url)
+    LOGGER.info('downloading %s', url)
 
     parsed_url = urlparse.urlparse(url)
     filename = os.path.join(
@@ -80,8 +80,8 @@ def wget(url, use_file_url=False, credentials=None):
             cmd.extend(["--private-key", credentials])
             cmd.extend(["--ca-certificate", credentials])
         cmd.append("--no-check-certificate")
-        if not LOGGER.isEnabledFor(logging.DEBUG):
-            cmd.append("--quiet")
+        # if not LOGGER.isEnabledFor(logging.DEBUG):
+        #    cmd.append("--quiet")
         cmd.append("--tries=3")                  # max 2 retries
         cmd.append("-N")                         # turn on timestamping
         cmd.append("--continue")                 # continue partial downloads
