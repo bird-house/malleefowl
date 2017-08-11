@@ -15,12 +15,23 @@ LOGGER = logging.getLogger("PYWPS")
 
 
 class Download(Process):
+    """
+    The download process gets as input a list of URLs pointing to NetCDF files
+    which should be downloaded.
+
+    The downloader first checks if the file is available in the local ESGF archive or cache.
+    If not then the file will be downloaded and stored in a local cache.
+    As a result it provides a list of local ``file://`` paths to the requested files.
+
+    The downloader does not download files if they are already in the
+    ESGF archive or in the local cache.
+    """
 
     def __init__(self):
         inputs = [
             LiteralInput('resource', 'Resource',
                          data_type='string',
-                         abstract="URL of your resource.",
+                         abstract="URL pointing to your resource which should be downloaded.",
                          min_occurs=1,
                          max_occurs=1024,
                          ),

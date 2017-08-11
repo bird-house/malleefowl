@@ -18,7 +18,15 @@ LOGGER = logging.getLogger(__name__)
 
 class ESGSearchProcess(Process):
     """
-    wps wrapper for esg search.
+    The ESGF search process runs a ESGF search request with constraints (project, experiment, ...)
+    to get a list of matching files on ESGF data nodes.
+    It is using `esgf-pyclient <https://github.com/ESGF/esgf-pyclient>`_ Python client
+    for the ESGF search API.
+
+    In addition to the esgf-pyclient the process checks if local replicas are available
+    and would return the replica files instead of the original one.
+
+    The result is a JSON document with a list of ``http://`` URLs to files on ESGF data nodes.
 
     TODO: bbox constraint for datasets
     """
@@ -26,7 +34,8 @@ class ESGSearchProcess(Process):
         inputs = [
             LiteralInput('url', 'URL',
                          data_type='string',
-                         abstract="URL of ESGF Search Index. Example: http://esgf-data.dkrz.de/esg-search",
+                         abstract="URL of ESGF Search Index which is used for search queries."
+                                  " Example: http://esgf-data.dkrz.de/esg-search",
                          min_occurs=1,
                          max_occurs=1,
                          default="http://esgf-data.dkrz.de/esg-search",
@@ -112,7 +121,8 @@ class ESGSearchProcess(Process):
         ]
         outputs = [
             ComplexOutput('output', 'Search Result',
-                          abstract="JSON document with search result",
+                          abstract="JSON document with search result,"
+                                   " a list of URLs to files on ESGF archive nodes.",
                           as_reference=True,
                           supported_formats=[Format('application/json')]),
             ComplexOutput('summary', 'Search Result Summary',

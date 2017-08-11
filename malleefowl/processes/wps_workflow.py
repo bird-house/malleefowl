@@ -14,6 +14,17 @@ LOGGER = logging.getLogger("PYWPS")
 
 
 class DispelWorkflow(Process):
+    """
+    The workflow process is usually called by the `Phoenix`_ WPS web client to
+    run WPS process for climate data (like cfchecker, climate indices with ocgis, ...)
+    with a given selection of input data (currently NetCDF files from ESGF data nodes).
+
+    Currently the `Dispel4Py <https://github.com/dispel4py/dispel4py>`_ workflow engine is used.
+
+    The Workflow for ESGF input data is as follows::
+
+    Search ESGF files -> Download ESGF files -> Run choosen process on local (downloaded) ESGF files.
+    """
     def __init__(self):
         inputs = [
             ComplexInput('workflow', 'Workflow description',
