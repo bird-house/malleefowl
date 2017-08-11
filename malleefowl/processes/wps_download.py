@@ -47,7 +47,7 @@ class Download(Process):
             self._handler,
             identifier="download",
             title="Download files",
-            version="0.8",
+            version="0.9",
             abstract="Downloads files and provides file list as json document.",
             metadata=[
                 Metadata('Birdhouse', 'http://bird-house.github.io/'),
