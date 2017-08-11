@@ -8,7 +8,7 @@ Go through this tutorial step by step.
     :depth: 1
 
 
-Step 0: Install malleefowl for debugging
+Step 0: Install malleefowl in debug mode
 ----------------------------------------
 
 .. code-block:: sh
@@ -66,7 +66,7 @@ Step 3: Check if birdy works
 .. code-block:: sh
 
     # point birdy to the malleefowl service url
-    $ export WPS_SERVICE=http://localhost:8091/wps
+    $ export WPS_SERVICE=http://localhost:5000/wps
     # show a list of available command (wps processes)
     $ birdy -h
 
