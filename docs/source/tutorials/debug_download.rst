@@ -111,6 +111,7 @@ Go to the registration page:
 https://localhost:8443/services/register
 
 Register your service with the following parameters:
+
 * Service URL: http://localhost:5000/wps
 * Service Name: demo
 
@@ -138,8 +139,8 @@ Step 9: Access demo service behind the OWS proxy with access token
         download --resource \
         https://www.esrl.noaa.gov/psd/thredds/fileServer/Datasets/ncep.reanalysis2/surface/mslp.1979.nc
 
-Step 10: Get a ESGF certificate using Phoenix
----------------------------------------------
+Step 10: Get an ESGF certificate using Phoenix
+----------------------------------------------
 
 #. Go to your profile.
 #. Choose the ``ESGF credentials`` tab.
