@@ -7,6 +7,7 @@ Change History
 * added demo service for testing.
 * cleaned up documentation.
 * added tutorial.
+* removed esgf_logon process.
 
 0.6.6 (2017-08-10)
 ==================

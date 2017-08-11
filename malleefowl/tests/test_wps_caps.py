@@ -16,7 +16,6 @@ def test_wps_caps():
                             '/ows:Identifier')
     assert sorted(names.split()) == [
         'download',
-        'esgf_logon',
         'esgsearch',
         'thredds_download',
         'workflow'
