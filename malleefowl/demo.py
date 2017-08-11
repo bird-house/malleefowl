@@ -1,3 +1,10 @@
+###########################################################
+# Demo WPS service for testing and debugging.
+#
+# See the werkzeug documentation on how to use the debugger:
+# http://werkzeug.pocoo.org/docs/0.12/debug/
+###########################################################
+
 import os
 
 from pywps import configuration
