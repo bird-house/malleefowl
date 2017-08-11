@@ -25,7 +25,6 @@ Contents:
    dev_guide
    docker
    tutorials/index
-   processes/index
 
 Indices and tables
 ==================
