@@ -4,7 +4,7 @@ Change History
 0.7_dev
 ==================
 
-* added demo service for testing.
+* added demo service using werkzeug for testing.
 * cleaned up documentation.
 * added tutorial.
 * removed esgf_logon process.
