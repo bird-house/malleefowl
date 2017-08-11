@@ -8,6 +8,7 @@ Change History
 * cleaned up documentation.
 * added tutorial.
 * removed esgf_logon process.
+* fixed os.link error in download module.
 
 0.6.6 (2017-08-10)
 ==================
