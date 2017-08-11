@@ -1,7 +1,5 @@
-.. _docker:
-
 Using Docker image
-******************
+==================
 
 To run Malleefowl Web Processing Service you can also use the `Docker <https://hub.docker.com/r/birdhouse/malleefowl/>`_ image::
 
@@ -26,7 +24,7 @@ Run a GetCapabilites WPS request:
 
 
 Using docker-compose
-====================
+--------------------
 
 Start malleefowl with docker-compose (docker-compose version > 1.7):
 
