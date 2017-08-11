@@ -1,5 +1,5 @@
-Try Download Process
-====================
+Using the *download* Process
+============================
 
 Go through this tutorial step by step.
 

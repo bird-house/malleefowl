@@ -1,5 +1,5 @@
-Debug Download Process
-======================
+Debugging the *download* Process
+================================
 
 Go through this tutorial step by step.
 

@@ -4,5 +4,5 @@ Tutorials
 .. toctree::
    :maxdepth: 1
 
-   try_download
+   using_download
    debug_download
