@@ -175,3 +175,15 @@ You can also try this in WPS synchronous mode when your process is not long runn
         --token 3d8c24eeebb143b3a199ba8a0e045f93 \
         download --resource \
         http://esgf1.dkrz.de/thredds/fileServer/cordex/cordex/output/EUR-44/MPI-CSC/MPI-M-MPI-ESM-LR/historical/r1i1p1/MPI-CSC-REMO2009/v1/mon/tas/v20150609/tas_EUR-44_MPI-M-MPI-ESM-LR_historical_r1i1p1_MPI-CSC-REMO2009_v1_mon_200101-200512.nc
+
+
+... and with ``debug`` option to see more log message:
+
+.. code-block:: sh
+
+    $ birdy \
+        --sync \
+        --debug \
+        --token 3d8c24eeebb143b3a199ba8a0e045f93 \
+        download --resource \
+        http://esgf1.dkrz.de/thredds/fileServer/cordex/cordex/output/EUR-44/MPI-CSC/MPI-M-MPI-ESM-LR/historical/r1i1p1/MPI-CSC-REMO2009/v1/mon/tas/v20150609/tas_EUR-44_MPI-M-MPI-ESM-LR_historical_r1i1p1_MPI-CSC-REMO2009_v1_mon_200101-200512.nc
