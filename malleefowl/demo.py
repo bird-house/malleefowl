@@ -26,7 +26,7 @@ def get_host():
     return bind_host, port
 
 
-def _run(application):
+def _run(application, daemon=False):
     from werkzeug.serving import run_simple
     # call this *after* app is initialized ... needs pywps config.
     bind_host, port = get_host()
@@ -40,6 +40,7 @@ def _run(application):
         application=application,
         use_debugger=True,
         use_reloader=True,
+        use_evalex=not daemon,
         static_files=static_files)
 
 
@@ -82,7 +83,7 @@ def main():
 
         if (pid == 0):
             os.setsid()
-            _run(app)
+            _run(app, daemon=True)
         else:
             os._exit(0)
     else:
