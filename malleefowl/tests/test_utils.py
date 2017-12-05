@@ -50,7 +50,7 @@ def test_user_id():
     try:
         user_id = utils.user_id("https://esgf-data.dkrz.de/bla/blu/jule")
         assert False
-    except:
+    except Exception:
         assert True
 
 

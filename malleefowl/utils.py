@@ -67,7 +67,7 @@ def user_id(openid):
         hostname = mo.group(1)
         username = mo.group(2)
         user_id = "%s_%s" % (username, hostname)
-    except:
+    except Exception:
         raise Exception("unsupported openid")
     return user_id
 
@@ -212,7 +212,7 @@ def nc_copy(source, target, overwrite=True, time_dimname='time', nchunk=10, ista
                     LOGGER.debug('copy chunk [%d:%d]', n, nmax)
                     try:
                         var[n - istart:nmax - istart] = ncvar[n:nmax]
-                    except:
+                    except Exception:
                         msg = "n=%d nmax=%d istart=%d istop=%d" % (n, nmax, istart, istop)
                         raise Exception(msg)
             else:

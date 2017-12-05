@@ -69,7 +69,7 @@ class GenericWPS(MonitorPE):
         while execution.isNotComplete():
             try:
                 execution.checkStatus(sleepSecs=3)
-            except:
+            except Exception:
                 LOGGER.exception("Could not read status xml document.")
             else:
                 progress = self.progress(execution)
