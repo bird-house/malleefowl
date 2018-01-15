@@ -1,16 +1,17 @@
 name: malleefowl
 channels:
-- defaults
 - birdhouse
 - conda-forge
+- defaults
 dependencies:
 - python=2.7
+- setuptools=36.5.0
 - pyopenssl
 - cryptography
 - libffi
 - pyyaml
 - curl
-- icu=56
+- icu=58
 # buildout
 - mako
 # tests
