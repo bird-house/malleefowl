@@ -1,14 +1,6 @@
 language: python
-branches:
-  only:
-    - master
-    - develop
-    - pingudev
 python:
   - "2.7"
-matrix:
-  - allow_failures:
-    - python: 3.5
 sudo: false
 install:
   - make install
