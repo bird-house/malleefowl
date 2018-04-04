@@ -1,7 +1,7 @@
 Change History
 **************
 
-0.7_dev
+0.6.7 (2018-04-04)
 ==================
 
 * added demo service using werkzeug for testing.
@@ -18,7 +18,6 @@ Change History
 * postgres db can be configured.
 * added config option archive_node to handle different archive root paths.
 * removed unused files (todo, examples, ...)
-
 
 0.6.5 (2017-05-18)
 ==================
@@ -64,7 +63,7 @@ Change History
 * moved old swift code to examples.
 * removed esgf download with openid.
 * pep8 checks on tests.
-* using ``ignore_facet_check=True`` option in esgf.search. 
+* using ``ignore_facet_check=True`` option in esgf.search.
 
 0.4.4 (2017-01-04)
 ==================
@@ -87,7 +86,7 @@ Change History
 0.4.1 (2016-09-28)
 ==================
 
-* pep8 
+* pep8
 * using owslib.wps.ComplexDataInput in workflow
 * update conda env: owslib=0.13.0, removed gdal
 
@@ -164,7 +163,7 @@ Change History
 ==================
 
 * added thredds workflow
-* download with `wget -x` to create directories in cache. 
+* download with `wget -x` to create directories in cache.
 * fixed workflow process output parameter.
 
 0.3.0 (2015-05-22)
