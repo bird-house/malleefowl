@@ -14,7 +14,7 @@ def test_date_format():
 
 
 def test_date_format_1900():
-    # test date > 1900
+    # test date < 1900
     start_date = datetime(1899, 1, 1, 12)
     from_timestamp = '{0}Z'.format(start_date.isoformat().strip())
     assert from_timestamp == '1899-01-01T12:00:00Z'
