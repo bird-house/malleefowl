@@ -143,7 +143,7 @@ class ESGSearch(object):
         if temporal is True:
             LOGGER.debug("using dataset search with time constraints")
             # TODO: handle timestamps in a better way
-            timestamp_format = '%Y-%m-%dT%H:%M:%SZ'
+            # timestamp_format = '%Y-%m-%dT%H:%M:%SZ'
             if start:
                 # from_timestamp = start.strftime(timestamp_format)
                 from_timestamp = '{0}Z'.format(start.isoformat().strip())

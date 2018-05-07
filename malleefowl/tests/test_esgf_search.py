@@ -4,6 +4,13 @@ import pytest
 
 from unittest import TestCase
 
+def test_date_format():
+    start_date = datetime(2001, 1, 1, 12)
+    timestamp_format = '%Y-%m-%dT%H:%M:%SZ'
+    from_timestamp = '{0}Z'.format(start_date.isoformat().strip())
+    assert from_timestamp == '2001-01-01T12:00:00Z'
+    assert from_timestamp == start_date.strftime(timestamp_format)
+
 
 class EsgDistribSearchTestCase(TestCase):
 
