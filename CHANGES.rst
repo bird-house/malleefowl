@@ -1,6 +1,15 @@
 Change History
 **************
 
+0.6.8 (2018-09-06)
+==================
+
+Bugfixes:
+
+* Updated Buildout 2.12.1 (#33, #37).
+* Fix pluggy dependency (#34, #35).
+* Other fixes: #24, #31.
+
 0.6.7 (2018-04-04)
 ==================
 
