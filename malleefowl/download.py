@@ -3,9 +3,9 @@ TODO: handle parallel downloads
 """
 
 import os
-import urlparse
+from six.moves.urllib import parse as urlparse
 import threading
-from Queue import Queue, Empty
+from six.moves.queue import Queue, Empty
 import subprocess
 
 from malleefowl import config
@@ -108,7 +108,7 @@ def wget(url, use_file_url=False, credentials=None):
         LOGGER.debug("linking downloaded file to cache.")
         if not os.path.isdir(os.path.dirname(filename)):
             LOGGER.debug("Creating cache directories.")
-            os.makedirs(os.path.dirname(filename), 0700)
+            os.makedirs(os.path.dirname(filename), mode=0o700)
         try:
             os.link(dn_filename, filename)
         except Exception:
