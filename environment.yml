@@ -8,3 +8,16 @@ dependencies:
 - jinja2
 - click
 - psutil
+- six
+- requests
+- owslib>=0.17
+#- python-dateutil
+- pyyaml
+- netcdf4 #=1.2.4
+- dispel4py=1.0.1
+#- threddsclient=0.3.4
+#- pysolr=3.3.2
+#- wget
+- pip:
+  - myproxyclient==2.1.0
+  - esgf-pyclient==0.2.1
