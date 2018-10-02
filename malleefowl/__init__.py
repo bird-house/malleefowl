@@ -1,4 +1,9 @@
-from .wsgi import application
-from .demo import main
+# -*- coding: utf-8 -*-
 
-__version__ = "0.6.8"
+"""Top-level package for Malleefowl."""
+
+from .wsgi import application
+
+__author__ = """Carsten Ehbrecht"""
+__email__ = 'ehbrecht@dkrz.de'
+__version__ = '0.7.0'

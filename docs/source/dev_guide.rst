@@ -7,79 +7,73 @@ Developer Guide
     :local:
     :depth: 1
 
+Building the docs
+-----------------
+
+First install dependencies for the documentation:
+
+.. code-block:: sh
+
+  $ make bootstrap_dev
+  $ make docs
+
 .. _testing:
 
-Running unit tests
----------------------------------------
+Running tests
+-------------
 
-Run quick tests::
+Run tests using `pytest`_.
+
+First activate the ``malleefowl`` Conda environment and install ``pytest``.
+
+.. code-block:: sh
+
+   $ source activate malleefowl
+   $ conda install pytest flake8  # if not already installed
+
+Run quick tests (skip slow and online):
+
+.. code-block:: sh
+
+    $ pytest -m 'not slow and not online'"
+
+Run all tests:
+
+.. code-block:: sh
+
+    $ pytest
+
+Check pep8:
+
+.. code-block:: sh
+
+    $ flake8
+
+Run tests the lazy way
+----------------------
+
+Do the same as above using the ``Makefile``.
+
+.. code-block:: sh
 
     $ make test
-
-Run all tests (slow, online)::
-
     $ make testall
-
-Check pep8::
-
     $ make pep8
 
-.. _wps_test_env:
+Bump a new version
+------------------
 
-Running WPS service in test environment
----------------------------------------
+Make a new version of Malleefowl in the following steps:
 
-For development purposes you can run the WPS service without nginx and supervisor.
-Use the following instructions:
+* Make sure everything is commit to GitHub.
+* Update ``CHANGES.rst`` with the next version.
+* Dry Run: ``bumpversion --dry-run --verbose --new-version 0.8.1 patch``
+* Do it: ``bumpversion --new-version 0.8.1 patch``
+* ... or: ``bumpversion --new-version 0.9.0 minor``
+* Push it: ``git push``
+* Push tag: ``git push --tags``
 
-.. code-block:: sh
+See the bumpversion_ documentation for details.
 
-    # get the source code
-    $ git clone https://github.com/bird-house/malleefowl.git
-    $ cd malleefowl
-
-    # create conda environment
-    $ conda env create -f environment.yml
-
-    # activate conda environment
-    $ source activate malleefowl
-
-    # install malleefowl code into conda environment
-    $ python setup.py develop
-
-    # start the WPS service
-    $ malleefowl
-
-    # open your browser on the default service url
-    $ firefox http://localhost:5000/wps
-
-    # ... and service capabilities url
-    $ firefox http://localhost:5000/wps?service=WPS&request=GetCapabilities
-
-The ``malleefowl`` service command-line has more options:
-
-.. code-block:: sh
-
-    $ malleefowl -h
-
-For example you can start the WPS with enabled debug logging mode:
-
-.. code-block:: sh
-
-    $ malleefowl --debug
-
-Or you can overwrite the default `PyWPS`_ configuration by providing your own
-PyWPS configuration file (just modifiy the options you want to change):
-
-.. code-block:: sh
-
-    # edit your local pywps configuration file
-    $ cat mydev.cfg
-    [logging]
-    level = WARN
-    file = /tmp/mydev.log
-
-    # start the service with this configuration
-    $ malleefowl -c mydev.cfg
-
-.. _PyWPS: http://pywps.org/
+.. _bumpversion: https://pypi.org/project/bumpversion/
+.. _pytest: https://docs.pytest.org/en/latest/
