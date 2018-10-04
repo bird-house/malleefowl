@@ -1,3 +1,4 @@
+import os
 import yaml
 
 from pywps import Process
@@ -29,7 +30,6 @@ class DispelWorkflow(Process):
         inputs = [
             ComplexInput('workflow', 'Workflow description',
                          abstract='Workflow description in YAML.',
-                         metadata=[Metadata('Info')],
                          min_occurs=1,
                          max_occurs=1,
                          supported_formats=[Format('text/yaml')]),
@@ -42,7 +42,7 @@ class DispelWorkflow(Process):
             ComplexOutput('logfile', 'Workflow log file',
                           abstract="Workflow log file.",
                           as_reference=True,
-                          supported_formats=[Format('text/plain')]),
+                          supported_formats=[FORMATS.TEXT]),
         ]
 
         super(DispelWorkflow, self).__init__(
@@ -81,10 +81,10 @@ class DispelWorkflow(Process):
 
         result = run(workflow, monitor=monitor, headers=headers)
 
-        with open('output.txt', 'w') as fp:
+        with open(os.path.join(self.workdir, 'output.txt'), 'w') as fp:
             yaml.dump(result, stream=fp)
             response.outputs['output'].file = fp.name
-        with open('logfile.txt', 'w') as fp:
+        with open(os.path.join(self.workdir, 'logfile.txt'), 'w') as fp:
             fp.write("workflow log file")
             response.outputs['logfile'].file = fp.name
         response.update_status("workflow {0} done.".format(workflow_name), 100)
