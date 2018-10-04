@@ -15,7 +15,7 @@ dependencies:
 - pyyaml
 - netcdf4 #=1.2.4
 - dispel4py=1.0.1
-#- threddsclient=0.3.4
+- threddsclient
 #- pysolr=3.3.2
 #- wget
 - pip:
