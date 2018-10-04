@@ -97,12 +97,14 @@ class ESGSearchProcess(Process):
                          abstract="Startime: 2000-01-11T12:00:00Z",
                          min_occurs=0,
                          max_occurs=1,
+                         default=datetime(2000, 1, 1)
                          ),
             LiteralInput('end', 'End',
                          data_type='dateTime',
                          abstract="Endtime: 2005-12-31T12:00:00Z",
                          min_occurs=0,
                          max_occurs=1,
+                         default=datetime(2001, 12, 31)
                          ),
             LiteralInput('limit', 'Limit',
                          data_type='integer',
