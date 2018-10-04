@@ -11,12 +11,12 @@ dependencies:
 - six
 - requests
 - owslib>=0.17
-#- python-dateutil
+- python-dateutil
 - pyyaml
-- netcdf4 #=1.2.4
+- netcdf4
 - dispel4py=1.0.1
 - threddsclient
-#- pysolr=3.3.2
+- pysolr
 #- wget
 - pip:
   - myproxyclient==2.1.0
