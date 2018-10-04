@@ -1,3 +1,4 @@
+import os
 import json
 
 from pywps import Process
@@ -5,7 +6,7 @@ from pywps import LiteralInput
 from pywps import ComplexInput
 from pywps import LiteralOutput
 from pywps import ComplexOutput
-from pywps import Format, FORMATS
+from pywps import FORMATS
 from pywps.app.Common import Metadata
 
 from malleefowl.download import download_files
@@ -40,7 +41,7 @@ class Download(Process):
             ComplexOutput('output', 'Downloaded files',
                           abstract="Json document with list of downloaded files with file url.",
                           as_reference=True,
-                          supported_formats=[Format('application/json')]),
+                          supported_formats=[FORMATS.JSON]),
         ]
 
         super(Download, self).__init__(
@@ -81,7 +82,7 @@ class Download(Process):
             credentials=credentials,
             monitor=monitor)
 
-        with open('out.json', 'w') as fp:
+        with open(os.path.join(self.workdir, 'out.json'), 'w') as fp:
             json.dump(obj=files, fp=fp, indent=4, sort_keys=True)
             response.outputs['output'].file = fp.name
 
