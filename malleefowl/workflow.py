@@ -3,7 +3,7 @@ from owslib.wps import ComplexDataInput
 from owslib.wps import BoundingBoxDataInput
 
 from dispel4py.workflow_graph import WorkflowGraph
-from dispel4py import simple_process
+from dispel4py.new import simple_process
 from dispel4py.base import BasePE
 
 from malleefowl.config import wps_url

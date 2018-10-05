@@ -14,7 +14,7 @@ dependencies:
 - python-dateutil
 - pyyaml
 - netcdf4
-- dispel4py=1.0.1
+- dispel4py=1.2
 - threddsclient
 - pysolr
 #- wget
