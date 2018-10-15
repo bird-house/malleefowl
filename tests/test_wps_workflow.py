@@ -33,5 +33,4 @@ def test_wps_thredds_workflow():
     resp = client.get(
         service='wps', request='execute', version='1.0.0', identifier='workflow',
         datainputs=datainputs)
-    print resp.get_data()
     assert_response_success(resp)
