@@ -18,7 +18,6 @@ def test_dataset():
         service='WPS', request='Execute', version='1.0.0',
         identifier='esgsearch',
         datainputs=datainputs)
-    print resp.get_data()
     assert_response_success(resp)
 
 
