@@ -82,6 +82,7 @@ class Download(Process):
         files = download_files(
             urls=urls,
             credentials=credentials,
+            tempdir=self.workdir,
             monitor=monitor)
 
         with open(os.path.join(self.workdir, 'out.json'), 'w') as fp:

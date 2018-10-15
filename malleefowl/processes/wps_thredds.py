@@ -49,6 +49,7 @@ class ThreddsDownload(Process):
             response.update_status(message, progress)
         files = download.download_files_from_thredds(
             url=request.inputs['url'][0].data,
+            tempdir=self.workdir,
             monitor=monitor)
 
         with open(os.path.join(self.workdir, 'out.json'), 'w') as fp:
