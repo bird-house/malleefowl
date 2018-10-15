@@ -57,9 +57,7 @@ class GenericWPS(MonitorPE):
         self.wps_output = output
 
     def progress(self, execution):
-        return int(self._pstart +
-                   ((self._pend - self._pstart) /
-                    100.0 * execution.percentCompleted))
+        return int(self._pstart + ((self._pend - self._pstart) / 100.0 * execution.percentCompleted))
 
     def monitor_execution(self, execution):
         progress = self.progress(execution)
