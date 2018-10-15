@@ -36,7 +36,6 @@ def download(url, use_file_url=False, credentials=None):
     :param credentials: path to credentials if security is needed to download file
     :returns: downloaded file with either file:// or system path
     """
-    import urlparse
     parsed_url = urlparse.urlparse(url)
     if parsed_url.scheme == 'file':
         result = url
