@@ -15,7 +15,7 @@ def wps_url():
 
 
 def cache_path():
-    cache_path = configuration.get_config_value("cache", "cache_path")
+    cache_path = configuration.get_config_value("data", "cache_path")
     if not cache_path:
         LOGGER.warn("No cache path configured. Using default value.")
         cache_path = os.path.join(configuration.get_config_value("server", "outputpath"), "cache")
@@ -23,7 +23,7 @@ def cache_path():
 
 
 def archive_root():
-    value = configuration.get_config_value("extra", "archive_root")
+    value = configuration.get_config_value("data", "archive_root")
     if value:
         path_list = [path.strip() for path in value.split(':')]
         LOGGER.debug("using archive root %s", path_list)
@@ -33,7 +33,7 @@ def archive_root():
 
 
 def archive_node():
-    node = configuration.get_config_value("extra", "archive_node")
+    node = configuration.get_config_value("data", "archive_node")
     node = node or 'default'
     node = node.lower()
     return node
