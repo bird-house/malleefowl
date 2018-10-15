@@ -66,9 +66,11 @@ class Download(Process):
         urls = [resource.data for resource in request.inputs['resource']]
         LOGGER.debug("downloading urls: %s", len(urls))
 
-        if 'X-X509-User-Proxy' in request.http_request.headers:
-            credentials = request.http_request.headers['X-X509-User-Proxy']
+        if 'X-X509-User-Proxy' in request.http_request.environ:
+            credentials = request.http_request.environ['X-X509-User-Proxy']
             LOGGER.debug('Using X509_USER_PROXY.')
+        elif 'HTTP_X_SSL_CLIENT_CERT' in request.http_request.environ:
+            credentials = os.path.join(self.workdir, 'cert.pem')
         else:
             credentials = None
             LOGGER.debug('Using no credentials')
