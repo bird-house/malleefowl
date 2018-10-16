@@ -17,7 +17,7 @@ dependencies:
 - dispel4py>=1.2.1
 - threddsclient>=0.3.5
 - pysolr
-#- wget
+- wget
 - pip:
   - myproxyclient==2.1.0
   - esgf-pyclient==0.2.1
