@@ -64,16 +64,12 @@ class Download(Process):
         response.update_status("starting download ...", 0)
 
         urls = [resource.data for resource in request.inputs['resource']]
-        LOGGER.debug("downloading urls: %s", len(urls))
 
-        if 'X-X509-User-Proxy' in request.http_request.environ:
-            credentials = request.http_request.environ['X-X509-User-Proxy']
-            LOGGER.debug('Using X509_USER_PROXY.')
-        elif 'HTTP_X_SSL_CLIENT_CERT' in request.http_request.environ:
+        if 'HTTP_X_SSL_CLIENT_CERT' in request.http_request.environ:
             credentials = os.path.join(self.workdir, 'cert.pem')
+            LOGGER.info('using SSL client certificate.')
         else:
             credentials = None
-            LOGGER.debug('Using no credentials')
 
         def monitor(msg, progress):
             LOGGER.info("%s - (%d/100)", msg, progress)
