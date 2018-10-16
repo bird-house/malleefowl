@@ -64,11 +64,8 @@ class Download(Process):
         response.update_status("starting download ...", 0)
 
         urls = [resource.data for resource in request.inputs['resource']]
-
-        if 'HTTP_X_SSL_CLIENT_CERT' in request.http_request.environ:
-            credentials = os.path.join(self.workdir, 'cert.pem')
-            LOGGER.info('using SSL client certificate.')
-        else:
+        credentials = os.path.join(self.workdir, 'cert.pem')
+        if not os.path.isfile(credentials):
             credentials = None
 
         def monitor(msg, progress):
