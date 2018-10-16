@@ -65,7 +65,8 @@ class Download(Process):
 
         urls = [resource.data for resource in request.inputs['resource']]
 
-        if 'HTTP_X_SSL_CLIENT_CERT' in request.http_request.environ:
+        if 'X_SSL_CLIENT_CERT' in request.http_request.environ or \
+           'HTTP_X_SSL_CLIENT_CERT' in request.http_request.environ:
             credentials = os.path.join(self.workdir, 'cert.pem')
             LOGGER.info('using SSL client certificate.')
         else:
