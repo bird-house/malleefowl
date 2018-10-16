@@ -72,14 +72,7 @@ class DispelWorkflow(Process):
 
         response.update_status("workflow {0} prepared.".format(workflow_name), 0)
 
-        # prepare headers
-        headers = {}
-        if 'X-X509-User-Proxy' in request.http_request.headers:
-            headers['X-X509-User-Proxy'] = request.http_request.headers['X-X509-User-Proxy']
-        if 'Access-Token' in request.http_request.headers:
-            headers['Access-Token'] = request.http_request.headers['Access-Token']
-
-        result = run(workflow, monitor=monitor, headers=headers)
+        result = run(workflow, monitor=monitor, headers=request.http_request.headers)
 
         with open(os.path.join(self.workdir, 'output.txt'), 'w') as fp:
             yaml.dump(result, stream=fp)
