@@ -21,7 +21,7 @@ def test_wps_thredds_workflow():
         catalog_url: {0}
     worker:
       identifier: dummy
-      url: http://localhost:8091/wps
+      url: http://localhost:5000/wps
       resource: dataset
       inputs: []
     """.format(TESTDATA['noaa_catalog_1'])
