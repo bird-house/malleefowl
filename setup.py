@@ -6,9 +6,7 @@ from setuptools import setup
 version = __import__('malleefowl').__version__
 description = 'Malleefowl has WPS processes for climate data access and workflows.'
 long_description = (
-    open('README.rst').read() + '\n' +
-    open('AUTHORS.rst').read() + '\n' +
-    open('CHANGES.rst').read()
+    open('README.rst').read() + '\n' + open('AUTHORS.rst').read() + '\n' + open('CHANGES.rst').read()
 )
 
 reqs = [line.strip() for line in open('requirements/deploy.txt')]
