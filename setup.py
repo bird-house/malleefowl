@@ -7,10 +7,13 @@ import os
 
 from setuptools import setup, find_packages
 
-version = __import__('malleefowl').__version__
 here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.rst')).read()
 CHANGES = open(os.path.join(here, 'CHANGES.rst')).read()
+
+about = {}
+with open(os.path.join(here, 'malleefowl', '__version__.py'), 'r') as f:
+    exec(f.read(), about)
 
 reqs = [line.strip() for line in open('requirements.txt')]
 
@@ -31,11 +34,11 @@ classifiers = [
 ]
 
 setup(name='malleefowl',
-      version=version,
+      version=about['__version__'],
       description="A Web Processing Service for Climate Data Access and Workflows.",
       long_description=README + '\n\n' + CHANGES,
-      author="Carsten Ehbrecht",
-      author_email='ehbrecht@dkrz.de',
+      author=about['__author__'],
+      author_email=about['__email__'],
       url='https://github.com/bird-house/malleefowl',
       classifiers=classifiers,
       license="Apache Software License 2.0",
