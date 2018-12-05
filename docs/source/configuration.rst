@@ -45,5 +45,43 @@ Start the service with your custom configuration:
    # start the service with this configuration
    $ malleefowl start -c etc/custom.cfg
 
+Read the PyWPS documentation_ for futher options and details.
+
+Configure path to data archive
+------------------------------
+
+Malleefowl extends the configuration of PyWPS with a *data* section.
+
+[data]
+~~~~~~
+
+:archive_root:
+    path to a *read-only* ESGF data archive which is used by the download process to make use of a local ESGF archive.
+    You can configure several archives paths by using a colon ``:`` as seperator. Default: `/tmp/archive`.
+
+:cache_path:
+    path to a *writeable* cache folder which is used by the download process to store files.
+    Default: `PYWPS_OUTPUTPATH/cache`.
+
+:archive_node:
+    an option to specify an ESGF data provider for site specfic settings.
+    Possible values: `default`, `dkrz`, `ipsl`.
+    Default: `default`.
+
+Example
+~~~~~~~
+
+.. code-block:: ini
+
+  [server]
+  url = http://demo.org:5000/wps
+  outputurl = http://demo.org:5000/outputs
+  outputpath = /data/pywps/outputs
+
+  [data]
+  archive_root = /data/archive/cmip5:/data/archive/cordex
+  cache_path = /data/cache
+  archive_node = default
 
 .. _PyWPS: http://pywps.org/
+.. _documenetation: https://pywps.readthedocs.io/en/master/configuration.html
