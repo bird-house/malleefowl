@@ -7,23 +7,30 @@ Processes
     :local:
     :depth: 1
 
-Sleep
------
+Download
+--------
 
-.. autoprocess:: malleefowl.processes.wps_sleep.Sleep
+.. autoprocess:: malleefowl.processes.wps_download.Download
    :docstring:
    :skiplines: 1
 
-Wordcounter
------------
+ESGSearch
+---------
 
-.. autoprocess:: malleefowl.processes.wps_wordcounter.WordCounter
+.. autoprocess:: malleefowl.processes.wps_esgsearch.ESGSearchProcess
    :docstring:
    :skiplines: 1
 
-InOut
------
+ThreddsDownload
+---------------
 
-.. autoprocess:: malleefowl.processes.wps_inout.InOut
+.. autoprocess:: malleefowl.processes.wps_thredds.ThreddsDownload
+   :docstring:
+   :skiplines: 1
+
+Workflow
+--------
+
+.. autoprocess:: malleefowl.processes.wps_workflow.DispelWorkflow
    :docstring:
    :skiplines: 1
