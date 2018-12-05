@@ -1,3 +1,4 @@
+import os
 import yaml
 
 from pywps import Process
@@ -29,7 +30,6 @@ class DispelWorkflow(Process):
         inputs = [
             ComplexInput('workflow', 'Workflow description',
                          abstract='Workflow description in YAML.',
-                         metadata=[Metadata('Info')],
                          min_occurs=1,
                          max_occurs=1,
                          supported_formats=[Format('text/yaml')]),
@@ -42,7 +42,7 @@ class DispelWorkflow(Process):
             ComplexOutput('logfile', 'Workflow log file',
                           abstract="Workflow log file.",
                           as_reference=True,
-                          supported_formats=[Format('text/plain')]),
+                          supported_formats=[FORMATS.TEXT]),
         ]
 
         super(DispelWorkflow, self).__init__(
@@ -72,19 +72,12 @@ class DispelWorkflow(Process):
 
         response.update_status("workflow {0} prepared.".format(workflow_name), 0)
 
-        # prepare headers
-        headers = {}
-        if 'X-X509-User-Proxy' in request.http_request.headers:
-            headers['X-X509-User-Proxy'] = request.http_request.headers['X-X509-User-Proxy']
-        if 'Access-Token' in request.http_request.headers:
-            headers['Access-Token'] = request.http_request.headers['Access-Token']
+        result = run(workflow, monitor=monitor, headers=request.http_request.headers)
 
-        result = run(workflow, monitor=monitor, headers=headers)
-
-        with open('output.txt', 'w') as fp:
+        with open(os.path.join(self.workdir, 'output.txt'), 'w') as fp:
             yaml.dump(result, stream=fp)
             response.outputs['output'].file = fp.name
-        with open('logfile.txt', 'w') as fp:
+        with open(os.path.join(self.workdir, 'logfile.txt'), 'w') as fp:
             fp.write("workflow log file")
             response.outputs['logfile'].file = fp.name
         response.update_status("workflow {0} done.".format(workflow_name), 100)

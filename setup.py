@@ -1,42 +1,52 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from setuptools import find_packages
-from setuptools import setup
+"""The setup script."""
 
-version = __import__('malleefowl').__version__
-description = 'Malleefowl has WPS processes for climate data access and workflows.'
-long_description = (
-    open('README.rst').read() + '\n' + open('AUTHORS.rst').read() + '\n' + open('CHANGES.rst').read()
-)
+import os
 
-reqs = [line.strip() for line in open('requirements/deploy.txt')]
+from setuptools import setup, find_packages
+
+here = os.path.abspath(os.path.dirname(__file__))
+README = open(os.path.join(here, 'README.rst')).read()
+CHANGES = open(os.path.join(here, 'CHANGES.rst')).read()
+
+about = {}
+with open(os.path.join(here, 'malleefowl', '__version__.py'), 'r') as f:
+    exec(f.read(), about)
+
+reqs = [line.strip() for line in open('requirements.txt')]
 
 classifiers = [
     'Development Status :: 3 - Alpha',
+    'Intended Audience :: Developers',
     'Intended Audience :: Science/Research',
     'Operating System :: MacOS :: MacOS X',
-    'Operating System :: Microsoft :: Windows',
     'Operating System :: POSIX',
     'Programming Language :: Python',
+    'Natural Language :: English',
+    "Programming Language :: Python :: 2",
+    'Programming Language :: Python :: 2.7',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.6',
     'Topic :: Scientific/Engineering :: Atmospheric Science',
+    'License :: OSI Approved :: Apache Software License',
 ]
 
 setup(name='malleefowl',
-      version=version,
-      description=description,
-      long_description=long_description,
-      classifiers=classifiers,
-      keywords='wps pywps python malleefowl netcdf esgf',
-      author='Birdhouse',
+      version=about['__version__'],
+      description="A Web Processing Service for Climate Data Access and Workflows.",
+      long_description=README + '\n\n' + CHANGES,
+      author=about['__author__'],
+      author_email=about['__email__'],
       url='https://github.com/bird-house/malleefowl',
-      license="Apache License v2.0",
+      classifiers=classifiers,
+      license="Apache Software License 2.0",
+      keywords='wps pywps birdhouse malleefowl',
       packages=find_packages(),
       include_package_data=True,
-      zip_safe=False,
-      test_suite='malleefowl',
       install_requires=reqs,
       entry_points={
           'console_scripts': [
-             'malleefowl=malleefowl:main',
-          ]},
-      )
+              'malleefowl=malleefowl.cli:cli',
+          ]},)

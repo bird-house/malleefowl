@@ -1,3 +1,4 @@
+import os
 import json
 from datetime import datetime
 from dateutil import parser as date_parser
@@ -36,7 +37,7 @@ class ESGSearchProcess(Process):
                          data_type='string',
                          abstract="URL of ESGF Search Index which is used for search queries."
                                   " Example: http://esgf-data.dkrz.de/esg-search",
-                         min_occurs=1,
+                         min_occurs=0,
                          max_occurs=1,
                          default="http://esgf-data.dkrz.de/esg-search",
                          ),
@@ -80,7 +81,7 @@ class ESGSearchProcess(Process):
                          data_type='string',
                          abstract="Constraints as list of key/value pairs."
                                   "Example: project:CORDEX, time_frequency:mon, variable:tas",
-                         min_occurs=1,
+                         min_occurs=0,
                          max_occurs=1,
                          default="project:CORDEX, time_frequency:mon, variable:tas",
                          ),
@@ -96,12 +97,14 @@ class ESGSearchProcess(Process):
                          abstract="Startime: 2000-01-11T12:00:00Z",
                          min_occurs=0,
                          max_occurs=1,
+                         default=datetime(2000, 1, 1)
                          ),
             LiteralInput('end', 'End',
                          data_type='dateTime',
                          abstract="Endtime: 2005-12-31T12:00:00Z",
                          min_occurs=0,
                          max_occurs=1,
+                         default=datetime(2001, 12, 31)
                          ),
             LiteralInput('limit', 'Limit',
                          data_type='integer',
@@ -124,15 +127,15 @@ class ESGSearchProcess(Process):
                           abstract="JSON document with search result,"
                                    " a list of URLs to files on ESGF archive nodes.",
                           as_reference=True,
-                          supported_formats=[Format('application/json')]),
+                          supported_formats=[FORMATS.JSON]),
             ComplexOutput('summary', 'Search Result Summary',
                           abstract="JSON document with search result summary",
                           as_reference=True,
-                          supported_formats=[Format('application/json')]),
+                          supported_formats=[FORMATS.JSON]),
             ComplexOutput('facet_counts', 'Facet Counts',
                           abstract="JSON document with facet counts for constraints.",
                           as_reference=True,
-                          supported_formats=[Format('application/json')]),
+                          supported_formats=[FORMATS.JSON]),
 
         ]
 
@@ -212,15 +215,15 @@ class ESGSearchProcess(Process):
             offset=offset,
             temporal=temporal)
 
-        with open('out.json', 'w') as fp:
+        with open(os.path.join(self.workdir, 'out.json'), 'w') as fp:
             json.dump(obj=result, fp=fp, indent=4, sort_keys=True)
             response.outputs['output'].file = fp.name
 
-        with open('summary.json', 'w') as fp:
+        with open(os.path.join(self.workdir, 'summary.json'), 'w') as fp:
             json.dump(obj=summary, fp=fp, indent=4, sort_keys=True)
             response.outputs['summary'].file = fp.name
 
-        with open('counts.json', 'w') as fp:
+        with open(os.path.join(self.workdir, 'counts.json'), 'w') as fp:
             json.dump(obj=facet_counts, fp=fp, indent=4, sort_keys=True)
             response.outputs['facet_counts'].file = fp.name
         return response

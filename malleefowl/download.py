@@ -3,9 +3,9 @@ TODO: handle parallel downloads
 """
 
 import os
-import urlparse
+from six.moves.urllib import parse as urlparse
 import threading
-from Queue import Queue, Empty
+from six.moves.queue import Queue, Empty
 import subprocess
 
 from malleefowl import config
@@ -16,18 +16,18 @@ import logging
 LOGGER = logging.getLogger("PYWPS")
 
 
-def download_with_archive(url, credentials=None):
+def download_with_archive(url, credentials=None, tempdir=None):
     """
     Downloads file. Checks before downloading if file is already in
     local esgf archive.
     """
     file_url = esgf_archive_path(url)
     if file_url is None:
-        file_url = download(url, use_file_url=True, credentials=credentials)
+        file_url = download(url, use_file_url=True, credentials=credentials, tempdir=tempdir)
     return file_url
 
 
-def download(url, use_file_url=False, credentials=None):
+def download(url, use_file_url=False, credentials=None, tempdir=None):
     """
     Downloads url and returns local filename.
 
@@ -36,16 +36,15 @@ def download(url, use_file_url=False, credentials=None):
     :param credentials: path to credentials if security is needed to download file
     :returns: downloaded file with either file:// or system path
     """
-    import urlparse
     parsed_url = urlparse.urlparse(url)
     if parsed_url.scheme == 'file':
         result = url
     else:
-        result = wget(url=url, use_file_url=use_file_url, credentials=credentials)
+        result = wget(url=url, use_file_url=use_file_url, credentials=credentials, tempdir=tempdir)
     return result
 
 
-def wget(url, use_file_url=False, credentials=None):
+def wget(url, use_file_url=False, credentials=None, tempdir=None):
     """
     Downloads url and returns local filename.
 
@@ -70,7 +69,7 @@ def wget(url, use_file_url=False, credentials=None):
             filename = "file://" + filename
         return filename
 
-    local_cache_path = os.path.abspath(os.curdir)
+    tempdir = tempdir or os.path.abspath(os.curdir)
 
     try:
         cmd = ["wget"]
@@ -86,7 +85,7 @@ def wget(url, use_file_url=False, credentials=None):
         cmd.append("-N")                         # turn on timestamping
         cmd.append("--continue")                 # continue partial downloads
         cmd.append("-x")                         # force creation of directories
-        cmd.extend(["-P", local_cache_path])  # directory prefix
+        cmd.extend(["-P", tempdir])  # directory prefix
         cmd.append(url)                          # download url
         LOGGER.debug("cmd: %s", ' '.join(cmd))
         output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
@@ -101,14 +100,14 @@ def wget(url, use_file_url=False, credentials=None):
         raise ProcessFailed(msg)
 
     dn_filename = os.path.join(
-        local_cache_path,
+        tempdir,
         parsed_url.netloc,
         parsed_url.path.strip('/'))
     if not os.path.exists(filename):
         LOGGER.debug("linking downloaded file to cache.")
         if not os.path.isdir(os.path.dirname(filename)):
             LOGGER.debug("Creating cache directories.")
-            os.makedirs(os.path.dirname(filename), 0700)
+            os.makedirs(os.path.dirname(filename), mode=0o700)
         try:
             os.link(dn_filename, filename)
         except Exception:
@@ -120,14 +119,14 @@ def wget(url, use_file_url=False, credentials=None):
     return filename
 
 
-def download_files(urls=[], credentials=None, monitor=None):
+def download_files(urls=[], credentials=None, tempdir=None, monitor=None):
     dm = DownloadManager(monitor)
-    return dm.download(urls, credentials)
+    return dm.download(urls, credentials, tempdir)
 
 
-def download_files_from_thredds(url, recursive=False, monitor=None):
+def download_files_from_thredds(url, recursive=False, tempdir=None, monitor=None):
     import threddsclient
-    return download_files(urls=threddsclient.download_urls(url), monitor=monitor)
+    return download_files(urls=threddsclient.download_urls(url), tempdir=tempdir, monitor=monitor)
 
 
 class DownloadManager(object):
@@ -161,8 +160,8 @@ class DownloadManager(object):
                 # completed with the job
                 self.job_queue.task_done()
 
-    def download_job(self, url, credentials):
-        file_url = download_with_archive(url, credentials)
+    def download_job(self, url, credentials, tempdir):
+        file_url = download_with_archive(url, credentials, tempdir)
         with self.result_lock:
             self.files.append(file_url)
             self.count = self.count + 1
@@ -170,7 +169,7 @@ class DownloadManager(object):
         self.show_status('Downloaded %d/%d' % (self.count, self.max_count),
                          progress)
 
-    def download(self, urls, credentials=None):
+    def download(self, urls, credentials=None, tempdir=None):
         # start ...
         from datetime import datetime
         t0 = datetime.now()
@@ -193,7 +192,7 @@ class DownloadManager(object):
             t.start()
         for url in urls:
             # fill job queue
-            self.job_queue.put(dict(url=url, credentials=credentials))
+            self.job_queue.put(dict(url=url, credentials=credentials, tempdir=tempdir))
 
         # wait until the thread terminates.
         self.job_queue.join()

@@ -1,7 +1,7 @@
 from datetime import datetime
 
 import threading
-from Queue import Queue
+from six.moves.queue import Queue
 
 import logging
 LOGGER = logging.getLogger("PYWPS")

@@ -1,3 +1,6 @@
+include Makefile
+include *.txt
 include *.rst
-graft malleefowl
-global-exclude *.pyc *.*~
+recursive-include malleefowl *
+global-exclude __pycache__
+global-exclude *.py[co]

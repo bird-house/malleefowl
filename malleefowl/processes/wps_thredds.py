@@ -1,3 +1,4 @@
+import os
 import json
 
 from pywps import Process
@@ -24,7 +25,7 @@ class ThreddsDownload(Process):
             ComplexOutput('output', 'Downloaded files',
                           abstract="JSON document with list of downloaded files with file url.",
                           as_reference=True,
-                          supported_formats=[Format('application/json')]),
+                          supported_formats=[FORMATS.JSON]),
         ]
 
         super(ThreddsDownload, self).__init__(
@@ -48,9 +49,10 @@ class ThreddsDownload(Process):
             response.update_status(message, progress)
         files = download.download_files_from_thredds(
             url=request.inputs['url'][0].data,
+            tempdir=self.workdir,
             monitor=monitor)
 
-        with open('out.json', 'w') as fp:
+        with open(os.path.join(self.workdir, 'out.json'), 'w') as fp:
             json.dump(obj=files, fp=fp, indent=4, sort_keys=True)
             response.outputs['output'].file = fp.name
         return response

@@ -1,4 +1,13 @@
-Authors
-*******
+=======
+Credits
+=======
 
-Carsten Ehbrecht ehbrecht at dkrz.de
+Development Lead
+----------------
+
+* Carsten Ehbrecht <ehbrecht@dkrz.de>
+
+Contributors
+------------
+
+None yet. Why not be the first?

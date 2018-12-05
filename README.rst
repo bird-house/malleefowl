@@ -1,16 +1,35 @@
-**********
 Malleefowl
-**********
+===============================
+
+.. image:: https://img.shields.io/badge/docs-latest-brightgreen.svg
+   :target: http://malleefowl.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
 
 .. image:: https://travis-ci.org/bird-house/malleefowl.svg?branch=master
    :target: https://travis-ci.org/bird-house/malleefowl
    :alt: Travis Build
 
+.. image:: https://img.shields.io/github/license/bird-house/malleefowl.svg
+    :target: https://github.com/bird-house/malleefowl/blob/master/LICENSE.txt
+    :alt: GitHub license
+
+.. image:: https://badges.gitter.im/bird-house/birdhouse.svg
+    :target: https://gitter.im/bird-house/birdhouse?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+    :alt: Join the chat at https://gitter.im/bird-house/birdhouse
+
 
 Malleefowl (the bird)
-   *Malleefowl are shy, wary, solitary birds that usually fly only to escape danger or reach a tree to roost in. Although very active, they are seldom seen [..]* (`Wikipedia <https://en.wikipedia.org/wiki/Malleefowl>`_).
+  *Malleefowl is a bird ...*
 
-Malleefowl is a Python package to simplify the usage of Web Processing Services (WPS). Currently it is using the `PyWPS 3.x <http://pywps.org>`_ server. It provides access to climate data (ESGF, ...) as WPS service and as a Python library.
-For installation and configuration read the `documentation <http://malleefowl.readthedocs.io>`_.
+A Web Processing Service for Climate Data Access and Workflows.
 
-Malleefowl is part of the `Birdhouse <http://bird-house.github.io>`_ project.
+* Free software: Apache Software License 2.0
+* Documentation: https://malleefowl.readthedocs.io.
+
+Credits
+-------
+
+This package was created with Cookiecutter_ and the `bird-house/cookiecutter-birdhouse`_ project template.
+
+.. _Cookiecutter: https://github.com/audreyr/cookiecutter
+.. _`bird-house/cookiecutter-birdhouse`: https://github.com/bird-house/cookiecutter-birdhouse

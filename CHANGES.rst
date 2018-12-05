@@ -1,5 +1,17 @@
-Change History
-**************
+Changes
+*******
+
+0.7.0 (2018-12-05)
+==================
+
+Converted malleefowl to the new deployment without buildout (#36).
+
+Changes:
+
+* regenerated using cookiecutter.
+* updated dependencies (pywps, dispel4py, ...).
+* works on Python 2.7 and 3.6.
+* integrated previous processes.
 
 0.6.8 (2018-09-06)
 ==================
@@ -255,4 +267,4 @@ Bugfixes:
 0.1.0 (2014-08-18)
 ==================
 
-* Initial Release.
+* First Release.
