@@ -48,5 +48,5 @@ setup(name='malleefowl',
       install_requires=reqs,
       entry_points={
           'console_scripts': [
-             'malleefowl=malleefowl.cli:cli',
+              'malleefowl=malleefowl.cli:cli',
           ]},)
