@@ -3,6 +3,10 @@
 Configuration
 =============
 
+.. warning::
+
+  Please read the PyWPS documentation_ to find details about possible configuration options.
+
 Command-line options
 --------------------
 
@@ -84,4 +88,4 @@ Example
   archive_node = default
 
 .. _PyWPS: http://pywps.org/
-.. _documenetation: https://pywps.readthedocs.io/en/master/configuration.html
+.. _documentation: https://pywps.readthedocs.io/en/master/configuration.html
