@@ -146,12 +146,12 @@ class ESGSearch(object):
             # timestamp_format = '%Y-%m-%dT%H:%M:%SZ'
             if start:
                 # from_timestamp = start.strftime(timestamp_format)
-                from_timestamp = '{0}Z'.format(start.isoformat().strip())
+                from_timestamp = '{0}T12:00:00Z'.format(start.isoformat().strip())
             else:
                 from_timestamp = None
             if end:
                 # to_timestamp = end.strftime(timestamp_format)
-                to_timestamp = '{0}Z'.format(end.isoformat().strip())
+                to_timestamp = '{0}T12:00:00Z'.format(end.isoformat().strip())
             else:
                 to_timestamp = None
             LOGGER.debug("from=%s, to=%s", from_timestamp, to_timestamp)
