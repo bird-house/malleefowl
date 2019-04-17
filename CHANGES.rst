@@ -1,6 +1,16 @@
 Changes
 *******
 
+0.8.0 (2019-04-17)
+==================
+
+San Francisco release.
+
+Changes:
+
+* Updated to latest cookiecutter and skipped python 2.7 support (#41).
+* Using `date` for start/end parameters (#40).
+
 0.7.0 (2018-12-05)
 ==================
 
