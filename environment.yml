@@ -10,7 +10,6 @@ dependencies:
 - jinja2
 - click
 - psutil
-- six
 - requests
 - owslib>=0.17
 - python-dateutil

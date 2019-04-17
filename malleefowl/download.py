@@ -3,9 +3,9 @@ TODO: handle parallel downloads
 """
 
 import os
-from six.moves.urllib import parse as urlparse
+from urllib import parse as urlparse
 import threading
-from six.moves.queue import Queue, Empty
+from queue import Queue, Empty
 import subprocess
 
 from malleefowl import config
