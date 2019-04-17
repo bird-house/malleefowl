@@ -1,7 +1,7 @@
 name: malleefowl
 channels:
 - birdhouse
-- conda-forge
+#- conda-forge
 - defaults
 dependencies:
 - python>=3.6
@@ -14,7 +14,7 @@ dependencies:
 - requests
 - owslib>=0.17
 - python-dateutil
-- pyyaml
+#- pyyaml
 - netcdf4
 - dispel4py>=1.2.1
 - threddsclient>=0.3.5
@@ -24,3 +24,4 @@ dependencies:
   - myproxyclient==2.1.0
   - esgf-pyclient==0.2.1
   - pysolr==3.8.1
+  - pyyaml==5.1
