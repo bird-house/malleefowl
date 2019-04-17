@@ -1,7 +1,7 @@
 from datetime import datetime
 
 import threading
-from six.moves.queue import Queue
+from queue import Queue
 
 import logging
 LOGGER = logging.getLogger("PYWPS")
@@ -347,7 +347,7 @@ class ESGSearch(object):
             # LOGGER.debug('num aggregations: %d', agg_ctx.hit_count)
             LOGGER.debug('facet constraints=%s', agg_ctx.facet_constraints)
             if agg_ctx.hit_count == 0:
-                LOGGER.warn('dataset %s has no aggregations!', ds.dataset_id)
+                LOGGER.warning('dataset %s has no aggregations!', ds.dataset_id)
                 continue
             for agg in agg_ctx.search(ignore_facet_check=True):
                 self.summary['number_of_selected_aggregations'] = self.summary['number_of_selected_aggregations'] + 1

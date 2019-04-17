@@ -1,5 +1,4 @@
 import os
-import tempfile
 from pywps import configuration
 
 import logging
@@ -17,7 +16,7 @@ def wps_url():
 def cache_path():
     cache_path = configuration.get_config_value("data", "cache_path")
     if not cache_path:
-        LOGGER.warn("No cache path configured. Using default value.")
+        LOGGER.warning("No cache path configured. Using default value.")
         cache_path = os.path.join(configuration.get_config_value("server", "outputpath"), "cache")
     return cache_path
 
