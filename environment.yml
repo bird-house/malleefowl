@@ -4,7 +4,8 @@ channels:
 - conda-forge
 - defaults
 dependencies:
-- pywps>=4.1
+- pip
+#- pywps>=4.1
 - jinja2
 - click
 - psutil
@@ -19,5 +20,6 @@ dependencies:
 - pysolr
 - wget
 - pip:
+  - -e git+https://github.com/geopython/pywps@master#egg=pywps
   - myproxyclient==2.1.0
   - esgf-pyclient==0.2.1
