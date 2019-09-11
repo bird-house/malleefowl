@@ -2,7 +2,6 @@
 Utility functions for WPS processes.
 """
 
-import json
 from netCDF4 import Dataset
 import os
 
