@@ -7,7 +7,6 @@ from pywps import ComplexOutput
 from pywps import Format, FORMATS
 from pywps.app.Common import Metadata
 
-from malleefowl import config
 from malleefowl.workflow import run
 
 import logging

@@ -3,8 +3,6 @@ import json
 
 from pywps import Process
 from pywps import LiteralInput
-from pywps import ComplexInput
-from pywps import LiteralOutput
 from pywps import ComplexOutput
 from pywps import FORMATS
 from pywps.app.Common import Metadata

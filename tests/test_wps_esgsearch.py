@@ -2,7 +2,7 @@ import pytest
 from pywps import Service
 from pywps.tests import assert_response_success
 
-from .common import TESTDATA, client_for
+from .common import client_for
 
 from malleefowl.processes.wps_esgsearch import ESGSearchProcess
 

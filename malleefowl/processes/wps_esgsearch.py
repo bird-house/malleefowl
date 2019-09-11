@@ -1,14 +1,10 @@
 import os
 import json
-from datetime import datetime
-from dateutil import parser as date_parser
 
 from pywps import Process
 from pywps import LiteralInput
-from pywps import ComplexInput
-from pywps import LiteralOutput
 from pywps import ComplexOutput
-from pywps import Format, FORMATS
+from pywps import FORMATS
 from pywps.app.Common import Metadata
 
 from malleefowl.esgf.search import ESGSearch
