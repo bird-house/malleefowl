@@ -1,6 +1,15 @@
 Changes
 *******
 
+0.9.0 (2019-09-27)
+==================
+
+Bucharest release.
+
+Changes:
+
+* Skipped conda handling in Makefile (#42).
+
 0.8.0 (2019-04-17)
 ==================
 
